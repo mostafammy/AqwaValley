@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 
-import { env } from "~/env";
+const DEFAULT_ANOMALY_RATE = Number.parseFloat(
+  process.env.SIM_DEFAULT_ANOMALY_RATE ?? "0.05",
+);
 
 const BASELINES: Record<
   string,
@@ -52,7 +54,7 @@ export function generateSimulatorValue(params: {
     gaussianFromUniformPair(u1, u2) * baseline.stddev * 0.35;
   const drift = cycle * baseline.stddev * 0.4;
 
-  const anomalyRate = params.anomalyRate ?? env.SIM_DEFAULT_ANOMALY_RATE;
+  const anomalyRate = params.anomalyRate ?? DEFAULT_ANOMALY_RATE;
   const anomalySignal = hashToUnitFloat(`${seedBase}:anomaly`);
   const anomalyDirection = hashToUnitFloat(`${seedBase}:dir`) > 0.5 ? 1 : -1;
 

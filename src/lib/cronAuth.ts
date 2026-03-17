@@ -1,7 +1,5 @@
 import { createHash, timingSafeEqual } from "crypto";
 
-import { env } from "~/env";
-
 function digest(value: string): Buffer {
   return createHash("sha256").update(value).digest();
 }
@@ -20,7 +18,9 @@ export function validateCronRequest(headers: Headers): {
   ok: boolean;
   reason?: string;
 } {
-  if (!env.CRON_SECRET) {
+  const configuredSecret = process.env.CRON_SECRET;
+
+  if (!configuredSecret) {
     return { ok: false, reason: "CRON_SECRET is not configured" };
   }
 
@@ -29,7 +29,7 @@ export function validateCronRequest(headers: Headers): {
     return { ok: false, reason: "Missing cron secret" };
   }
 
-  const expectedDigest = digest(env.CRON_SECRET);
+  const expectedDigest = digest(configuredSecret);
   const incomingDigest = digest(incoming);
 
   const valid = timingSafeEqual(expectedDigest, incomingDigest);
