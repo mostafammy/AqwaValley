@@ -19,12 +19,19 @@ export const env = createEnv({
     LOG_LEVEL: z
       .enum(["trace", "debug", "info", "warn", "error", "fatal"])
       .default("info"),
+    CRON_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(16)
+        : z.string().min(1).optional(),
     TIMESCALE_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
     INGEST_RATE_LIMIT_PER_MINUTE: z.coerce
       .number()
       .int()
       .positive()
       .default(300),
+    SIM_CRON_MAX_WELLS: z.coerce.number().int().positive().default(100),
+    SIM_CRON_MAX_SENSORS: z.coerce.number().int().positive().default(1000),
+    SIM_DEFAULT_ANOMALY_RATE: z.coerce.number().min(0).max(1).default(0.05),
   },
 
   /**
@@ -46,8 +53,12 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     LOG_LEVEL: process.env.LOG_LEVEL,
+    CRON_SECRET: process.env.CRON_SECRET,
     TIMESCALE_RETENTION_DAYS: process.env.TIMESCALE_RETENTION_DAYS,
     INGEST_RATE_LIMIT_PER_MINUTE: process.env.INGEST_RATE_LIMIT_PER_MINUTE,
+    SIM_CRON_MAX_WELLS: process.env.SIM_CRON_MAX_WELLS,
+    SIM_CRON_MAX_SENSORS: process.env.SIM_CRON_MAX_SENSORS,
+    SIM_DEFAULT_ANOMALY_RATE: process.env.SIM_DEFAULT_ANOMALY_RATE,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
