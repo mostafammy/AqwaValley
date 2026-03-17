@@ -11,7 +11,11 @@ interface NavItemProps {
 
 export function NavItem({ href, icon, label, active = false, badge }: NavItemProps) {
   return (
-    <Link href={href} className={`nav-item ${active ? "active" : ""}`}>
+    <Link 
+      href={href} 
+      className={`nav-item ${active ? "active" : ""}`}
+      aria-current={active ? "page" : undefined}
+    >
       <span className="nav-item-icon">{icon}</span>
       <span className="nav-item-label">{label}</span>
       {badge}

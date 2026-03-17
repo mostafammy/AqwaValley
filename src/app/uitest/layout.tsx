@@ -1,5 +1,4 @@
 import { Topbar } from "../_components/layouts/Topbar";
-import { FarmSidebar } from "../_components/layouts/FarmSidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { GovSidebar } from "../_components/layouts/Govsidebar";
 

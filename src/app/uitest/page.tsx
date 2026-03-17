@@ -42,7 +42,7 @@ function page() {
 
         <Card>
         <CardHeader>
-          <CardTitle> سجل الآبار</CardTitle>
+          <CardTitle>سجل الآبار</CardTitle>
           <Badge variant="ok">نشط</Badge>
         </CardHeader>
         <CardBody>
@@ -55,7 +55,7 @@ function page() {
       {/* With footer */}
       <Card>
         <CardHeader>
-          <CardTitle> التنبيهات</CardTitle>
+          <CardTitle>التنبيهات</CardTitle>
           <Badge variant="danger">3 حرجة</Badge>
         </CardHeader>
         <CardBody size="sm">

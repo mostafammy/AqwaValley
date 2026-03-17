@@ -11,88 +11,93 @@ interface GovSidebarProps {
 
 export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
   const pathname = usePathname();
-  const is = (path: string) => pathname === path;
+  const is = (path: string) =>
+    path === "/"
+      ? pathname === path
+      : pathname === path || pathname.startsWith(`${path}/`);
   const { isMobileOpen, closeMobile } = useSidebar();
 
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
-        className={`sidebar-overlay ${isMobileOpen ? "open" : ""}`} 
+      <div
+        className={`sidebar-overlay ${isMobileOpen ? "open" : ""}`}
         onClick={closeMobile}
       />
 
       <aside className={`sidebar ${isMobileOpen ? "sidebar-open" : ""}`}>
-
         <NavSectionTitle>لوحة التحكم</NavSectionTitle>
 
-      <NavItem
-        href="/dashboard"
-        icon="🏠"
-        label="الرئيسية"
-        active={is("/dashboard")}
-      />
-      <NavItem
-        href="/map"
-        icon="🗺️"
-        label="خريطة الآبار"
-        active={is("/map")}
-      />
-      <NavItem
-        href="/alerts"
-        icon="🚨"
-        label="التنبيهات"
-        active={is("/alerts")}
-        badge={alertCount > 0 ? <Badge variant="danger">{alertCount}</Badge> : undefined}
-      />
+        <NavItem
+          href="/dashboard"
+          icon="🏠"
+          label="الرئيسية"
+          active={is("/dashboard")}
+        />
+        <NavItem
+          href="/map"
+          icon="🗺️"
+          label="خريطة الآبار"
+          active={is("/map")}
+        />
+        <NavItem
+          href="/alerts"
+          icon="🚨"
+          label="التنبيهات"
+          active={is("/alerts")}
+          badge={
+            alertCount > 0 ? (
+              <Badge variant="danger">{alertCount}</Badge>
+            ) : undefined
+          }
+        />
 
-      <NavDivider />
+        <NavDivider />
 
-      <NavSectionTitle>إدارة المياه</NavSectionTitle>
+        <NavSectionTitle>إدارة المياه</NavSectionTitle>
 
-      <NavItem
-        href="/wells"
-        icon="🔬"
-        label="سجل الآبار"
-        active={is("/wells")}
-      />
-      <NavItem
-        href="/distribution"
-        icon="📊"
-        label="توزيع المياه"
-        active={is("/distribution")}
-      />
-      <NavItem
-        href="/forecast"
-        icon="📈"
-        label="توقعات الخزان"
-        active={is("/forecast")}
-      />
+        <NavItem
+          href="/wells"
+          icon="🔬"
+          label="سجل الآبار"
+          active={is("/wells")}
+        />
+        <NavItem
+          href="/distribution"
+          icon="📊"
+          label="توزيع المياه"
+          active={is("/distribution")}
+        />
+        <NavItem
+          href="/forecast"
+          icon="📈"
+          label="توقعات الخزان"
+          active={is("/forecast")}
+        />
 
-      <NavDivider />
+        <NavDivider />
 
-      <NavSectionTitle>الإدارة</NavSectionTitle>
+        <NavSectionTitle>الإدارة</NavSectionTitle>
 
-      <NavItem
-        href="/reports"
-        icon="📄"
-        label="التقارير"
-        active={is("/reports")}
-      />
-      <NavItem
-        href="/users"
-        icon="👥"
-        label="المستخدمون"
-        active={is("/users")}
-      />
-      <NavItem
-        href="/settings"
-        icon="⚙️"
-        label="الإعدادات"
-        active={is("/settings")}
-      />
-
-    </aside>
+        <NavItem
+          href="/reports"
+          icon="📄"
+          label="التقارير"
+          active={is("/reports")}
+        />
+        <NavItem
+          href="/users"
+          icon="👥"
+          label="المستخدمون"
+          active={is("/users")}
+        />
+        <NavItem
+          href="/settings"
+          icon="⚙️"
+          label="الإعدادات"
+          active={is("/settings")}
+        />
+      </aside>
     </>
   );
 }

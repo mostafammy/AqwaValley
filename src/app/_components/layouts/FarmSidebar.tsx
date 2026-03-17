@@ -6,7 +6,8 @@ import { useSidebar } from "./SidebarProvider";
 
 export function FarmSidebar() {
   const pathname = usePathname();
-  const is = (path: string) => pathname === path;
+  const is = (path: string) => 
+    path === "/" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`);
   const { isMobileOpen, closeMobile } = useSidebar();
 
   return (
