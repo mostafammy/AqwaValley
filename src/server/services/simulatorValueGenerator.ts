@@ -2,7 +2,10 @@ import { createHash } from "crypto";
 
 import { env } from "~/env";
 
-const BASELINES: Record<string, { mean: number; stddev: number; min: number; max: number }> = {
+const BASELINES: Record<
+  string,
+  { mean: number; stddev: number; min: number; max: number }
+> = {
   water_level: { mean: 12.5, stddev: 0.8, min: 1, max: 250 },
   flow_rate: { mean: 4.2, stddev: 0.5, min: 0, max: 200 },
   pressure: { mean: 2.1, stddev: 0.15, min: 0, max: 40 },
@@ -45,7 +48,8 @@ export function generateSimulatorValue(params: {
   const u2 = hashToUnitFloat(`${seedBase}:u2`);
   const cycle = Math.sin((2 * Math.PI * params.timestamp.getUTCHours()) / 24);
 
-  const gaussianNoise = gaussianFromUniformPair(u1, u2) * baseline.stddev * 0.35;
+  const gaussianNoise =
+    gaussianFromUniformPair(u1, u2) * baseline.stddev * 0.35;
   const drift = cycle * baseline.stddev * 0.4;
 
   const anomalyRate = params.anomalyRate ?? env.SIM_DEFAULT_ANOMALY_RATE;

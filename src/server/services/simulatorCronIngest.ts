@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto";
 
-import { type IngestReading, ingestReadings } from "~/server/services/ingestService";
+import {
+  type IngestReading,
+  ingestReadings,
+} from "~/server/services/ingestService";
 import { discoverSimulatorSensors } from "~/server/services/simulatorSensorDiscovery";
 import { generateSimulatorValue } from "~/server/services/simulatorValueGenerator";
 import { logger } from "~/lib/logger";
@@ -51,7 +54,9 @@ export async function runSimulatorCron(
   const started = Date.now();
   const baseTimestamp = options.timestamp ?? new Date();
 
-  const allSensors = await discoverSimulatorSensors({ wellIds: options.wellIds });
+  const allSensors = await discoverSimulatorSensors({
+    wellIds: options.wellIds,
+  });
   const limitedSensors = allSensors.slice(0, env.SIM_CRON_MAX_SENSORS);
 
   const grouped = new Map<string, typeof limitedSensors>();

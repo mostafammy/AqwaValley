@@ -45,7 +45,11 @@ export async function POST(request: NextRequest) {
     const text = await request.text();
     rawBody = text.trim() ? (JSON.parse(text) as unknown) : {};
   } catch {
-    return errorResponse(400, "INVALID_JSON", "Request body must be valid JSON");
+    return errorResponse(
+      400,
+      "INVALID_JSON",
+      "Request body must be valid JSON",
+    );
   }
 
   const parsed = bodySchema.safeParse(rawBody);
@@ -58,7 +62,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (parsed.data.wellIds && parsed.data.wellIds.length > env.SIM_CRON_MAX_WELLS) {
+  if (
+    parsed.data.wellIds &&
+    parsed.data.wellIds.length > env.SIM_CRON_MAX_WELLS
+  ) {
     return errorResponse(
       400,
       "WELL_LIMIT_EXCEEDED",
@@ -77,6 +84,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("[cron_simulate_ingest_error]", error);
-    return errorResponse(500, "CRON_RUN_FAILED", "Failed to execute cron simulation");
+    return errorResponse(
+      500,
+      "CRON_RUN_FAILED",
+      "Failed to execute cron simulation",
+    );
   }
 }
