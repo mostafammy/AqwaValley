@@ -323,7 +323,7 @@
     padding: 8px 40px 8px 16px;
     font-size: 12px;
     color: var(--color-white);
-    transition: colors 0.15s;
+    transition: color 0.15s, border-color 0.15s;
   }
 
   .topbar-search-input::placeholder {
