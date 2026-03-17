@@ -2,10 +2,7 @@ import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, viewerProcedure } from "~/server/api/trpc";
-import {
-  getAccessibleDistrictIds,
-  requireWellAccess,
-} from "~/server/lib/abac";
+import { getAccessibleDistrictIds, requireWellAccess } from "~/server/lib/abac";
 import {
   alerts,
   district,
@@ -28,7 +25,13 @@ export const analyticsRouter = createTRPCRouter({
       z.object({
         wellId: z.string().uuid(),
         sensorType: z
-          .enum(["water_level", "pressure", "flow_rate", "temperature", "humidity"])
+          .enum([
+            "water_level",
+            "pressure",
+            "flow_rate",
+            "temperature",
+            "humidity",
+          ])
           .optional(),
         range: z.enum(rangeValues).default("24h"),
         bucket: z.enum(bucketValues).default("1h"),
@@ -53,7 +56,8 @@ export const analyticsRouter = createTRPCRouter({
 
       // Resolve sensor IDs for this well
       const sensorConditions = [eq(sensors.wellId, input.wellId)];
-      if (input.sensorType) sensorConditions.push(eq(sensors.type, input.sensorType));
+      if (input.sensorType)
+        sensorConditions.push(eq(sensors.type, input.sensorType));
 
       const wellSensors = await ctx.db
         .select({ id: sensors.id, type: sensors.type, unit: sensors.unit })

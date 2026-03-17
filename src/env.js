@@ -20,7 +20,11 @@ export const env = createEnv({
       .enum(["trace", "debug", "info", "warn", "error", "fatal"])
       .default("info"),
     TIMESCALE_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
-    INGEST_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(300),
+    INGEST_RATE_LIMIT_PER_MINUTE: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(300),
   },
 
   /**

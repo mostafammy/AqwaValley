@@ -163,7 +163,9 @@ export const wellsRouter = createTRPCRouter({
         ctx.db
           .select()
           .from(sensors)
-          .where(and(eq(sensors.wellId, input.wellId), eq(sensors.isActive, true))),
+          .where(
+            and(eq(sensors.wellId, input.wellId), eq(sensors.isActive, true)),
+          ),
         ctx.db
           .select()
           .from(latestSensorState)
@@ -220,8 +222,7 @@ export const wellsRouter = createTRPCRouter({
       };
       if (rest.name !== undefined) updateValues.name = rest.name;
       if (rest.depthM !== undefined)
-        updateValues.depthM =
-          rest.depthM !== null ? String(rest.depthM) : null;
+        updateValues.depthM = rest.depthM !== null ? String(rest.depthM) : null;
       if (rest.baselineFlowRateM3Hr !== undefined)
         updateValues.baselineFlowRateM3Hr =
           rest.baselineFlowRateM3Hr !== null
@@ -229,9 +230,7 @@ export const wellsRouter = createTRPCRouter({
             : null;
       if (rest.maxFlowRateM3Hr !== undefined)
         updateValues.maxFlowRateM3Hr =
-          rest.maxFlowRateM3Hr !== null
-            ? String(rest.maxFlowRateM3Hr)
-            : null;
+          rest.maxFlowRateM3Hr !== null ? String(rest.maxFlowRateM3Hr) : null;
       if (status !== undefined) updateValues.status = status;
 
       const [updated] = await ctx.db
@@ -288,7 +287,9 @@ export const wellsRouter = createTRPCRouter({
    * Soft-delete a well (admin only). Sets status to inactive — data is preserved.
    */
   delete: adminProcedure
-    .input(z.object({ wellId: z.string().uuid(), reason: z.string().optional() }))
+    .input(
+      z.object({ wellId: z.string().uuid(), reason: z.string().optional() }),
+    )
     .mutation(async ({ ctx, input }) => {
       await requireWellAccess(ctx, input.wellId);
 

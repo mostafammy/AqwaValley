@@ -11,7 +11,11 @@ import { requireWellAccess, buildWellDistrictFilter } from "~/server/lib/abac";
 import { alertRule, alerts, sensors, well } from "~/server/db/schema";
 
 const alertSeverityValues = ["critical", "warning", "info"] as const;
-const alertTypeValues = ["threshold_breach", "anomaly", "sensor_offline"] as const;
+const alertTypeValues = [
+  "threshold_breach",
+  "anomaly",
+  "sensor_offline",
+] as const;
 const operatorValues = ["gt", "lt", "gte", "lte", "eq"] as const;
 const sensorTypeValues = [
   "water_level",
@@ -47,8 +51,12 @@ export const alertsRouter = createTRPCRouter({
         input.wellId ? eq(alerts.wellId, input.wellId) : districtFilter,
         input.severity ? eq(alerts.severity, input.severity) : undefined,
         input.type ? eq(alerts.type, input.type) : undefined,
-        input.acknowledged === true ? isNotNull(alerts.acknowledgedAt) : undefined,
-        input.acknowledged === false ? isNull(alerts.acknowledgedAt) : undefined,
+        input.acknowledged === true
+          ? isNotNull(alerts.acknowledgedAt)
+          : undefined,
+        input.acknowledged === false
+          ? isNull(alerts.acknowledgedAt)
+          : undefined,
         input.from ? gte(alerts.createdAt, input.from) : undefined,
         input.to ? lte(alerts.createdAt, input.to) : undefined,
       ].filter(Boolean);
@@ -124,7 +132,8 @@ export const alertsRouter = createTRPCRouter({
         await requireWellAccess(ctx, input.wellId);
 
         const conditions = [eq(alertRule.wellId, input.wellId)];
-        if (!input.includeInactive) conditions.push(eq(alertRule.isActive, true));
+        if (!input.includeInactive)
+          conditions.push(eq(alertRule.isActive, true));
 
         return ctx.db
           .select()
@@ -144,7 +153,12 @@ export const alertsRouter = createTRPCRouter({
           operator: z.enum(operatorValues),
           threshold: z.number(),
           severity: z.enum(alertSeverityValues),
-          suppressionWindowMinutes: z.number().int().min(1).max(1440).default(15),
+          suppressionWindowMinutes: z
+            .number()
+            .int()
+            .min(1)
+            .max(1440)
+            .default(15),
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -176,7 +190,12 @@ export const alertsRouter = createTRPCRouter({
           ruleId: z.string().uuid(),
           threshold: z.number().optional(),
           severity: z.enum(alertSeverityValues).optional(),
-          suppressionWindowMinutes: z.number().int().min(1).max(1440).optional(),
+          suppressionWindowMinutes: z
+            .number()
+            .int()
+            .min(1)
+            .max(1440)
+            .optional(),
           isActive: z.boolean().optional(),
         }),
       )

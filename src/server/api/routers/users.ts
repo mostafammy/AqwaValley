@@ -7,7 +7,12 @@ import {
   createTRPCRouter,
   viewerProcedure,
 } from "~/server/api/trpc";
-import { role, user, userProfile, userRoleAssignment } from "~/server/db/schema";
+import {
+  role,
+  user,
+  userProfile,
+  userRoleAssignment,
+} from "~/server/db/schema";
 
 const roleTypeValues = [
   "admin",

@@ -23,7 +23,8 @@ export async function GET() {
         FROM timescaledb_information.hypertables
         WHERE hypertable_name = 'sensor_data'
       `);
-      timescaleOk = Number((result[0] as { count: string } | undefined)?.count ?? 0) > 0;
+      timescaleOk =
+        Number((result[0] as { count: string } | undefined)?.count ?? 0) > 0;
     } catch {
       // timescaledb extension not available
     }

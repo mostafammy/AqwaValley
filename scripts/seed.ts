@@ -86,7 +86,7 @@ const DISTRICTS: DistrictSeed[] = [
   {
     name: "El Kharga",
     centerLat: 25.4474,
-    centerLng: 30.5460,
+    centerLng: 30.546,
     baselineDepthM: "92.00",
     annualDepletionRateM: "0.1200",
     safeYieldM3Yr: "38000000.00",
@@ -106,7 +106,7 @@ const DISTRICTS: DistrictSeed[] = [
   {
     name: "El Farafra",
     centerLat: 27.0568,
-    centerLng: 27.9700,
+    centerLng: 27.97,
     baselineDepthM: "98.00",
     annualDepletionRateM: "0.1400",
     safeYieldM3Yr: "26000000.00",
@@ -115,8 +115,8 @@ const DISTRICTS: DistrictSeed[] = [
   },
   {
     name: "Paris",
-    centerLat: 24.7000,
-    centerLng: 30.6000,
+    centerLat: 24.7,
+    centerLng: 30.6,
     baselineDepthM: "95.00",
     annualDepletionRateM: "0.1300",
     safeYieldM3Yr: "22000000.00",
@@ -125,8 +125,8 @@ const DISTRICTS: DistrictSeed[] = [
   },
   {
     name: "Balat",
-    centerLat: 25.5600,
-    centerLng: 29.2900,
+    centerLat: 25.56,
+    centerLng: 29.29,
     baselineDepthM: "88.00",
     annualDepletionRateM: "0.1100",
     safeYieldM3Yr: "24000000.00",
@@ -139,18 +139,65 @@ const READING_INTERVAL_MINUTES = 10; // one reading every 10 min
 const HISTORY_HOURS = 48;
 
 const SENSOR_SPECS = [
-  { type: "water_level" as const, unit: "meters" as const, name: "Water Level Sensor", mean: 12.5, stddev: 0.8 },
-  { type: "flow_rate" as const, unit: "m3_per_hour" as const, name: "Flow Rate Sensor", mean: 4.2, stddev: 0.5 },
-  { type: "pressure" as const, unit: "bar" as const, name: "Pressure Sensor", mean: 2.1, stddev: 0.15 },
+  {
+    type: "water_level" as const,
+    unit: "meters" as const,
+    name: "Water Level Sensor",
+    mean: 12.5,
+    stddev: 0.8,
+  },
+  {
+    type: "flow_rate" as const,
+    unit: "m3_per_hour" as const,
+    name: "Flow Rate Sensor",
+    mean: 4.2,
+    stddev: 0.5,
+  },
+  {
+    type: "pressure" as const,
+    unit: "bar" as const,
+    name: "Pressure Sensor",
+    mean: 2.1,
+    stddev: 0.15,
+  },
 ];
 
-type RoleType = "admin" | "district_manager" | "farm_owner" | "farmer" | "auditor";
-const ROLE_CATALOG: { type: RoleType; displayName: string; description: string }[] = [
-  { type: "admin", displayName: "System Administrator", description: "Full system access and user management" },
-  { type: "district_manager", displayName: "District Manager", description: "Manage wells and farms within assigned district" },
-  { type: "farm_owner", displayName: "Farm Owner", description: "View and manage owned farms and wells" },
-  { type: "farmer", displayName: "Farmer", description: "View farm data and usage reports" },
-  { type: "auditor", displayName: "Auditor", description: "Read-only access across all districts" },
+type RoleType =
+  | "admin"
+  | "district_manager"
+  | "farm_owner"
+  | "farmer"
+  | "auditor";
+const ROLE_CATALOG: {
+  type: RoleType;
+  displayName: string;
+  description: string;
+}[] = [
+  {
+    type: "admin",
+    displayName: "System Administrator",
+    description: "Full system access and user management",
+  },
+  {
+    type: "district_manager",
+    displayName: "District Manager",
+    description: "Manage wells and farms within assigned district",
+  },
+  {
+    type: "farm_owner",
+    displayName: "Farm Owner",
+    description: "View and manage owned farms and wells",
+  },
+  {
+    type: "farmer",
+    displayName: "Farmer",
+    description: "View farm data and usage reports",
+  },
+  {
+    type: "auditor",
+    displayName: "Auditor",
+    description: "Read-only access across all districts",
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -223,7 +270,9 @@ async function seedRoles() {
 // ---------------------------------------------------------------------------
 // Seed districts
 // ---------------------------------------------------------------------------
-async function seedDistricts(): Promise<Array<{ id: string; seed: DistrictSeed }>> {
+async function seedDistricts(): Promise<
+  Array<{ id: string; seed: DistrictSeed }>
+> {
   console.log("  Seeding districts...");
   const records: Array<{ id: string; seed: DistrictSeed }> = [];
 
@@ -265,7 +314,11 @@ async function seedWells(
   districtRecords: Array<{ id: string; seed: DistrictSeed }>,
 ): Promise<{ wellId: string; sensorIds: string[]; districtId: string }[]> {
   console.log("  Seeding wells, sensors, and sensor data...");
-  const allWells: { wellId: string; sensorIds: string[]; districtId: string }[] = [];
+  const allWells: {
+    wellId: string;
+    sensorIds: string[];
+    districtId: string;
+  }[] = [];
 
   for (const districtRecord of districtRecords) {
     const districtId = districtRecord.id;
@@ -330,7 +383,8 @@ async function seedWells(
 
       // Seed 48h of historical readings (batch per sensor)
       const now = new Date();
-      const readings: { sensorId: string; value: number; timestamp: Date }[] = [];
+      const readings: { sensorId: string; value: number; timestamp: Date }[] =
+        [];
 
       for (let s = 0; s < sensorIds.length; s++) {
         const spec = SENSOR_SPECS[s]!;
@@ -338,7 +392,9 @@ async function seedWells(
         const totalReadings = (HISTORY_HOURS * 60) / READING_INTERVAL_MINUTES;
 
         for (let i = totalReadings; i >= 0; i--) {
-          const timestamp = new Date(now.getTime() - i * READING_INTERVAL_MINUTES * 60_000);
+          const timestamp = new Date(
+            now.getTime() - i * READING_INTERVAL_MINUTES * 60_000,
+          );
 
           // 5% anomaly injection
           const isAnomaly = Math.random() < 0.05;
@@ -353,7 +409,9 @@ async function seedWells(
       // Bulk insert in chunks of 1000
       const chunkSize = 1000;
       for (let c = 0; c < readings.length; c += chunkSize) {
-        await db.insert(schema.sensorData).values(readings.slice(c, c + chunkSize));
+        await db
+          .insert(schema.sensorData)
+          .values(readings.slice(c, c + chunkSize));
       }
 
       // Seed latest_sensor_state (most recent reading per sensor)
@@ -411,7 +469,9 @@ async function seedWells(
     }
   }
 
-  console.log(`  Created ${allWells.length} wells with sensors and historical data.`);
+  console.log(
+    `  Created ${allWells.length} wells with sensors and historical data.`,
+  );
   return allWells;
 }
 
@@ -465,7 +525,12 @@ async function main() {
   const districtRecords = await seedDistricts();
 
   if (districtRecords.length !== DISTRICTS.length) {
-    console.error("Expected districts:", DISTRICTS.length, "got:", districtRecords.length);
+    console.error(
+      "Expected districts:",
+      DISTRICTS.length,
+      "got:",
+      districtRecords.length,
+    );
     process.exit(1);
   }
 
@@ -476,7 +541,9 @@ async function main() {
   console.log(`   Districts: ${districtRecords.length}`);
   console.log(`   Wells: ${wells.length}`);
   console.log(`   Sensors: ${wells.length * SENSOR_SPECS.length}`);
-  console.log(`   Readings: ~${wells.length * SENSOR_SPECS.length * ((HISTORY_HOURS * 60) / READING_INTERVAL_MINUTES)}`);
+  console.log(
+    `   Readings: ~${wells.length * SENSOR_SPECS.length * ((HISTORY_HOURS * 60) / READING_INTERVAL_MINUTES)}`,
+  );
 }
 
 main()

@@ -41,7 +41,9 @@ const BASE_URL = process.env.MOCK_BASE_URL ?? "http://localhost:3000";
 const INTERVAL_MS = parseInt(process.env.MOCK_INTERVAL_MS ?? "5000", 10);
 const ANOMALY_RATE = parseFloat(process.env.MOCK_ANOMALY_RATE ?? "0.05");
 
-const rawApiKeys = (process.env.MOCK_API_KEYS ?? process.env.MOCK_API_KEY ?? "").split(",").filter(Boolean);
+const rawApiKeys = (process.env.MOCK_API_KEYS ?? process.env.MOCK_API_KEY ?? "")
+  .split(",")
+  .filter(Boolean);
 
 if (rawApiKeys.length === 0) {
   console.error(
@@ -51,7 +53,10 @@ if (rawApiKeys.length === 0) {
 }
 
 // Per-key mock state (tracks sensorId → current simulated value)
-const sensorState = new Map<string, { mean: number; stddev: number; value: number }>();
+const sensorState = new Map<
+  string,
+  { mean: number; stddev: number; value: number }
+>();
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -73,7 +78,10 @@ function nextValue(sensorId: string, type: string): number {
       humidity: { mean: 55.0, stddev: 5.0 },
     };
     const spec = defaults[type] ?? { mean: 10, stddev: 1 };
-    sensorState.set(sensorId, { ...spec, value: gaussianRandom(spec.mean, spec.stddev) });
+    sensorState.set(sensorId, {
+      ...spec,
+      value: gaussianRandom(spec.mean, spec.stddev),
+    });
   }
 
   const state = sensorState.get(sensorId)!;
@@ -98,7 +106,7 @@ function nextValue(sensorId: string, type: string): number {
 type SensorInfo = { sensorId: string; type: string };
 
 async function discoverSensors(apiKey: string): Promise<SensorInfo[]> {
-  // The simulator posts to a discovery endpoint. If one doesn't exist, 
+  // The simulator posts to a discovery endpoint. If one doesn't exist,
   // it falls back to a pre-configured sensor list via env.
   const preconfig = process.env.MOCK_SENSOR_IDS;
   if (preconfig) {
@@ -125,7 +133,10 @@ async function discoverSensors(apiKey: string): Promise<SensorInfo[]> {
 // ---------------------------------------------------------------------------
 // Send a batch of readings for one API key's sensors
 // ---------------------------------------------------------------------------
-async function sendReadings(apiKey: string, sensors: SensorInfo[]): Promise<void> {
+async function sendReadings(
+  apiKey: string,
+  sensors: SensorInfo[],
+): Promise<void> {
   if (sensors.length === 0) return;
 
   const now = new Date().toISOString();
@@ -145,10 +156,16 @@ async function sendReadings(apiKey: string, sensors: SensorInfo[]): Promise<void
       body: JSON.stringify({ readings }),
     });
 
-    const body = (await res.json()) as { accepted?: number; rejected?: number; error?: string };
+    const body = (await res.json()) as {
+      accepted?: number;
+      rejected?: number;
+      error?: string;
+    };
 
     if (!res.ok) {
-      console.error(`[${apiKey.slice(0, 8)}...] HTTP ${res.status}: ${body.error ?? "unknown error"}`);
+      console.error(
+        `[${apiKey.slice(0, 8)}...] HTTP ${res.status}: ${body.error ?? "unknown error"}`,
+      );
       return;
     }
 
@@ -156,7 +173,10 @@ async function sendReadings(apiKey: string, sensors: SensorInfo[]): Promise<void
       `[${new Date().toISOString()}] key:${apiKey.slice(0, 8)}... accepted:${body.accepted ?? 0} rejected:${body.rejected ?? 0}`,
     );
   } catch (err) {
-    console.error(`[${apiKey.slice(0, 8)}...] Network error:`, (err as Error).message);
+    console.error(
+      `[${apiKey.slice(0, 8)}...] Network error:`,
+      (err as Error).message,
+    );
   }
 }
 
@@ -179,7 +199,9 @@ async function main() {
   );
 
   for (const { key, sensors } of keySensors) {
-    console.log(`  Key ${key.slice(0, 8)}...: ${sensors.length} sensor(s) configured`);
+    console.log(
+      `  Key ${key.slice(0, 8)}...: ${sensors.length} sensor(s) configured`,
+    );
   }
   console.log();
 

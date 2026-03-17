@@ -9,12 +9,7 @@ import {
   viewerProcedure,
 } from "~/server/api/trpc";
 import { requireWellAccess } from "~/server/lib/abac";
-import {
-  apiKey,
-  latestSensorState,
-  sensors,
-  well,
-} from "~/server/db/schema";
+import { apiKey, latestSensorState, sensors, well } from "~/server/db/schema";
 import { generateApiKey, hashApiKey } from "~/lib/apiKeyAuth";
 
 const sensorTypeValues = [
@@ -76,7 +71,12 @@ export const sensorsRouter = createTRPCRouter({
    * List all active sensors for a well, with latest state merged in.
    */
   listByWell: viewerProcedure
-    .input(z.object({ wellId: z.string().uuid(), includeInactive: z.boolean().default(false) }))
+    .input(
+      z.object({
+        wellId: z.string().uuid(),
+        includeInactive: z.boolean().default(false),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       await requireWellAccess(ctx, input.wellId);
 
@@ -127,7 +127,9 @@ export const sensorsRouter = createTRPCRouter({
         .update(sensors)
         .set({
           ...(input.name !== undefined && { name: input.name }),
-          ...(input.description !== undefined && { description: input.description }),
+          ...(input.description !== undefined && {
+            description: input.description,
+          }),
           updatedAt: new Date(),
         })
         .where(eq(sensors.id, input.sensorId))
@@ -199,7 +201,11 @@ export const sensorsRouter = createTRPCRouter({
           expiresAt,
           isActive: true,
         })
-        .returning({ id: apiKey.id, name: apiKey.name, expiresAt: apiKey.expiresAt });
+        .returning({
+          id: apiKey.id,
+          name: apiKey.name,
+          expiresAt: apiKey.expiresAt,
+        });
 
       return {
         id: record!.id,

@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
   const rawKey = extractApiKey(request.headers);
   if (!rawKey) {
     return NextResponse.json(
-      { error: "Missing API key. Use X-API-Key header or Authorization: Bearer <key>" },
+      {
+        error:
+          "Missing API key. Use X-API-Key header or Authorization: Bearer <key>",
+      },
       { status: 401 },
     );
   }
@@ -57,7 +60,10 @@ export async function POST(request: NextRequest) {
   const apiKeyCtx = await validateApiKey(rawKey);
   if (!apiKeyCtx) {
     logger.warn({ path: "/api/sensors/ingest" }, "auth.invalid_api_key");
-    return NextResponse.json({ error: "Invalid or expired API key" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired API key" },
+      { status: 401 },
+    );
   }
 
   // 2. Rate limiting

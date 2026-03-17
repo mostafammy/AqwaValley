@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
 
   const adminCheck = await isAdmin(session.user.id);
   if (!adminCheck) {
-    return NextResponse.json({ error: "Forbidden: admin only" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Forbidden: admin only" },
+      { status: 403 },
+    );
   }
 
   let body: unknown;
@@ -73,10 +76,7 @@ export async function POST(request: NextRequest) {
     .select({ id: sensors.id })
     .from(sensors)
     .where(
-      and(
-        eq(sensors.wellId, wellId),
-        eq(sensors.type, sensorType as never),
-      ),
+      and(eq(sensors.wellId, wellId), eq(sensors.type, sensorType as never)),
     )
     .limit(1);
 

@@ -41,9 +41,7 @@ async function fetchMetrics(
 }
 
 // Build a CSV string from rows
-function toCsv(
-  rows: Awaited<ReturnType<typeof fetchMetrics>>,
-): string {
+function toCsv(rows: Awaited<ReturnType<typeof fetchMetrics>>): string {
   const header = "bucket,type,unit,avg_value,min_value,max_value,count";
   const lines = rows.map(
     (r) =>

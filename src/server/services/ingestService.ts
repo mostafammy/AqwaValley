@@ -9,7 +9,10 @@ import {
   sensors,
 } from "~/server/db/schema";
 import { type ApiKeyContext } from "~/lib/apiKeyAuth";
-import { evaluateRules, type TriggeredAlert } from "~/server/services/alertEvalService";
+import {
+  evaluateRules,
+  type TriggeredAlert,
+} from "~/server/services/alertEvalService";
 import { logger } from "~/lib/logger";
 
 export type IngestReading = {
@@ -34,7 +37,11 @@ async function resolveAndValidateSensors(
   apiKeyCtx: ApiKeyContext,
   readings: IngestReading[],
 ): Promise<{
-  validReadings: (IngestReading & { resolvedUnit: string; resolvedType: string; wellId: string })[];
+  validReadings: (IngestReading & {
+    resolvedUnit: string;
+    resolvedType: string;
+    wellId: string;
+  })[];
   errors: IngestResult["errors"];
 }> {
   const sensorIds = [...new Set(readings.map((r) => r.sensorId))];
@@ -96,7 +103,9 @@ async function resolveAndValidateSensors(
  * Check alert suppression — returns the rule IDs that are currently suppressed
  * (i.e., have an unacknowledged alert within the suppression window).
  */
-async function getSuppressedRuleIds(triggeredAlerts: TriggeredAlert[]): Promise<Set<string>> {
+async function getSuppressedRuleIds(
+  triggeredAlerts: TriggeredAlert[],
+): Promise<Set<string>> {
   if (triggeredAlerts.length === 0) return new Set();
 
   const ruleIds = [...new Set(triggeredAlerts.map((a) => a.alertRuleId))];
@@ -104,7 +113,10 @@ async function getSuppressedRuleIds(triggeredAlerts: TriggeredAlert[]): Promise<
 
   // For each rule, check if there's an unacknowledged alert within the suppression window
   const ruleRecords = await db
-    .select({ id: alertRule.id, suppressionWindowMinutes: alertRule.suppressionWindowMinutes })
+    .select({
+      id: alertRule.id,
+      suppressionWindowMinutes: alertRule.suppressionWindowMinutes,
+    })
     .from(alertRule)
     .where(
       sql`${alertRule.id} = ANY(ARRAY[${sql.join(
@@ -150,7 +162,10 @@ export async function ingestReadings(
   apiKeyCtx: ApiKeyContext,
   readings: IngestReading[],
 ): Promise<IngestResult> {
-  const { validReadings, errors } = await resolveAndValidateSensors(apiKeyCtx, readings);
+  const { validReadings, errors } = await resolveAndValidateSensors(
+    apiKeyCtx,
+    readings,
+  );
 
   if (validReadings.length === 0) {
     return { accepted: 0, rejected: readings.length, errors };
@@ -233,10 +248,7 @@ export async function ingestReadings(
         })),
       );
 
-      logger.info(
-        { count: alertsToInsert.length, wellIds },
-        "alerts.inserted",
-      );
+      logger.info({ count: alertsToInsert.length, wellIds }, "alerts.inserted");
     }
   }
 
