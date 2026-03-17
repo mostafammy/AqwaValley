@@ -7,7 +7,10 @@ import {
 import { discoverSimulatorSensors } from "~/server/services/simulatorSensorDiscovery";
 import { generateSimulatorValue } from "~/server/services/simulatorValueGenerator";
 import { logger } from "~/lib/logger";
-import { env } from "~/env";
+const MAX_SENSORS_PER_RUN = Number.parseInt(
+  process.env.SIM_CRON_MAX_SENSORS ?? "1000",
+  10,
+);
 
 export type SimulatorCronOptions = {
   wellIds?: string[];
@@ -57,7 +60,7 @@ export async function runSimulatorCron(
   const allSensors = await discoverSimulatorSensors({
     wellIds: options.wellIds,
   });
-  const limitedSensors = allSensors.slice(0, env.SIM_CRON_MAX_SENSORS);
+  const limitedSensors = allSensors.slice(0, MAX_SENSORS_PER_RUN);
 
   const grouped = new Map<string, typeof limitedSensors>();
   for (const sensor of limitedSensors) {
