@@ -1,6 +1,264 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* ── Fonts ── */
+  --font-cairo: "Cairo", sans-serif;
+  --font-family-cairo: var(--font-cairo);
+
+  /* ── Brand Colors ── */
+  --color-navy:          #0A1628;
+  --color-navy-2:        #122240;
+  --color-navy-3:        #1A3050;
+
+  --color-blue:          #1D6FA8;
+  --color-blue-2:        #2590D0;
+  --color-blue-light:    #EBF4FB;
+
+  --color-teal:          #0D9E7E;
+  --color-teal-light:    #E6F7F2;
+
+  --color-sand:          #C8A96A;
+  --color-sand-2:        #E8D4A0;
+  --color-sand-light:    #FBF5E8;
+
+  /* ── Semantic / Status ── */
+  --color-danger:        #D94040;
+  --color-danger-bg:     #FEE8E8;
+  --color-danger-text:   #A83030;
+
+  --color-warn:          #D97706;
+  --color-warn-bg:       #FEF3E0;
+  --color-warn-text:     #92500A;
+
+  --color-ok:            #0D9E7E;
+  --color-ok-bg:         #E6F7F2;
+  --color-ok-text:       #065F46;
+
+  --color-info:          #1D6FA8;
+  --color-info-bg:       #EBF4FB;
+  --color-info-text:     #135A8A;
+
+  /* ── Neutrals ── */
+  --color-bg:            #F0F4F8;
+  --color-bg-2:          #E8EDF2;
+  --color-white:         #FFFFFF;
+  --color-text:          #1A2940;
+  --color-muted:         #5A7090;
+  --color-light-text:    #8AA0B8;
+  --color-border:        rgba(26, 48, 80, 0.10);
+  --color-border-2:      rgba(26, 48, 80, 0.18);
+
+  /* ── Button Vars ── */
+  --color-btn-primary-bg:      #1D6FA8;
+  --color-btn-primary-hover:   #1A5F92;
+  --color-btn-primary-text:    #FFFFFF;
+
+  --color-btn-secondary-bg:    #E8EDF2;
+  --color-btn-secondary-hover: #DCE3EB;
+  --color-btn-secondary-text:  #5A7090;
+
+  --color-btn-ghost-bg:        transparent;
+  --color-btn-ghost-hover:     #EBF4FB;
+  --color-btn-ghost-text:      #1D6FA8;
+
+  --color-btn-danger-bg:       #D94040;
+  --color-btn-danger-hover:    #C13333;
+  --color-btn-danger-text:     #FFFFFF;
+
+  --color-btn-success-bg:      #0D9E7E;
+  --color-btn-success-hover:   #0A8268;
+  --color-btn-success-text:    #FFFFFF;
+
+  --color-btn-gold-bg:         #C8A96A;
+  --color-btn-gold-hover:      #B89550;
+  --color-btn-gold-text:       #0A1628;
+
+  /* ── Badge Vars ── */
+  --color-badge-ok-bg:         #E6F7F2;
+  --color-badge-ok-text:       #065F46;
+  --color-badge-ok-dot:        #0D9E7E;
+
+  --color-badge-warn-bg:       #FEF3E0;
+  --color-badge-warn-text:     #92500A;
+  --color-badge-warn-dot:      #D97706;
+
+  --color-badge-danger-bg:     #FEE8E8;
+  --color-badge-danger-text:   #A83030;
+  --color-badge-danger-dot:    #D94040;
+
+  --color-badge-info-bg:       #EBF4FB;
+  --color-badge-info-text:     #135A8A;
+  --color-badge-info-dot:      #1D6FA8;
+
+  --color-badge-gray-bg:       #E8EDF2;
+  --color-badge-gray-text:     #5A7090;
+  --color-badge-gray-dot:      #5A7090;
+
+  --color-badge-navy-bg:       #1A3050;
+  --color-badge-navy-text:     #FFFFFF;
+  --color-badge-navy-dot:      #C8A96A;
+
+  --color-badge-gold-bg:       #FBF5E8;
+  --color-badge-gold-text:     #7A5A1A;
+  --color-badge-gold-dot:      #C8A96A;
+
+
+  /* ── Spacing / Radius ── */
+  --radius-sm:           6px;
+  --radius-md:           10px;
+  --radius-lg:           14px;
+
+  /* ── Shadows ── */
+  --shadow-card:         0 1px 3px rgba(10, 22, 40, 0.08);
+  --shadow-modal:        0 20px 60px rgba(0, 0, 0, 0.20);
+
+  /* ── Layout ── */
+  --sidebar-width:       220px;
+  --topbar-height:       54px;
+}
+
+/* ── Base Styles ── */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-cairo), sans-serif;
+    direction: rtl;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-bg-2); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+}
+
+@layer components {
+
+  /* ── Badge Base ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Badge Variants ── */
+  .badge-ok     { background: var(--color-badge-ok-bg);     color: var(--color-badge-ok-text); }
+  .badge-warn   { background: var(--color-badge-warn-bg);   color: var(--color-badge-warn-text); }
+  .badge-danger { background: var(--color-badge-danger-bg); color: var(--color-badge-danger-text); }
+  .badge-info   { background: var(--color-badge-info-bg);   color: var(--color-badge-info-text); }
+  .badge-gray   { background: var(--color-badge-gray-bg);   color: var(--color-badge-gray-text); }
+  .badge-navy   { background: var(--color-badge-navy-bg);   color: var(--color-badge-navy-text); }
+  .badge-gold   { background: var(--color-badge-gold-bg);   color: var(--color-badge-gold-text); }
+
+  /* ── Button Base ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-family: var(--font-cairo), sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Sizes */
+  .btn-sm { padding: 4px 11px;  font-size: 11px; gap: 4px; }
+  .btn-md { padding: 7px 16px;  font-size: 12px; gap: 6px; }
+  .btn-lg { padding: 10px 22px; font-size: 14px; gap: 7px; }
+
+  /* Variants */
+  .btn-primary   { background: var(--color-btn-primary-bg);   color: var(--color-btn-primary-text); }
+  .btn-primary:hover:not(:disabled)   { background: var(--color-btn-primary-hover); }
+
+  .btn-secondary { background: var(--color-btn-secondary-bg); color: var(--color-btn-secondary-text); border: 1px solid var(--color-border-2); }
+  .btn-secondary:hover:not(:disabled) { background: var(--color-btn-secondary-hover); }
+
+  .btn-ghost     { background: var(--color-btn-ghost-bg);     color: var(--color-btn-ghost-text); border: 1px solid var(--color-btn-ghost-text); }
+  .btn-ghost:hover:not(:disabled)     { background: var(--color-btn-ghost-hover); }
+
+  .btn-danger    { background: var(--color-btn-danger-bg);    color: var(--color-btn-danger-text); }
+  .btn-danger:hover:not(:disabled)    { background: var(--color-btn-danger-hover); }
+
+  .btn-success   { background: var(--color-btn-success-bg);   color: var(--color-btn-success-text); }
+  .btn-success:hover:not(:disabled)   { background: var(--color-btn-success-hover); }
+
+  .btn-gold      { background: var(--color-btn-gold-bg);      color: var(--color-btn-gold-text); font-weight: 700; }
+  .btn-gold:hover:not(:disabled)      { background: var(--color-btn-gold-hover); }
+
+
+   /* ── Card ── */
+  .card {
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-header {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .card-body {
+    padding: 18px;
+  }
+
+  .card-body-sm {
+    padding: 12px 18px;
+  }
+
+  .card-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* accent border variant — للـ KPI cards */
+  .card-accent-blue   { border-right: 4px solid var(--color-blue); }
+  .card-accent-teal   { border-right: 4px solid var(--color-teal); }
+  .card-accent-danger { border-right: 4px solid var(--color-danger); }
+  .card-accent-warn   { border-right: 4px solid var(--color-warn); }
+  .card-accent-sand   { border-right: 4px solid var(--color-sand); }
+  .card-accent-navy   { border-right: 4px solid var(--color-navy); }
 }
