@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   decimal,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -69,6 +70,28 @@ export const growthStageEnum = pgEnum("growth_stage", [
   "fruiting",
   "maturity",
   "harvest",
+]);
+
+export const sensorTypeEnum = pgEnum("sensor_type", [
+  "water_level",
+  "pressure",
+  "flow_rate",
+  "temperature",
+  "humidity",
+]);
+
+export const sensorUnitEnum = pgEnum("sensor_unit", [
+  "meters",
+  "bar",
+  "celsius",
+  "m3_per_hour",
+  "percent",
+]);
+
+export const alertTypeEnum = pgEnum("alert_type", [
+  "threshold_breach",
+  "anomaly",
+  "sensor_offline",
 ]);
 
 // ============================================================================
@@ -513,6 +536,72 @@ export const cropHistory = pgTable(
   ],
 );
 
+/**
+ * sensors: Device registry per well.
+ * Defines physical sensor type and unit for future real-time ingestion.
+ */
+export const sensors = pgTable(
+  "sensors",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "restrict" }),
+    type: sensorTypeEnum("type").notNull(),
+    unit: sensorUnitEnum("unit").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("sensors_well_id_idx").on(t.wellId),
+    index("sensors_type_idx").on(t.type),
+  ],
+);
+
+/**
+ * sensor_data: Time-series ingestion table for sensor readings.
+ * Converted to a TimescaleDB hypertable through SQL migration.
+ */
+export const sensorData = pgTable(
+  "sensor_data",
+  {
+    sensorId: uuid("sensor_id")
+      .notNull()
+      .references(() => sensors.id, { onDelete: "cascade" }),
+    value: doublePrecision("value").notNull(),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index("sensor_data_sensor_id_idx").on(t.sensorId),
+    index("sensor_data_timestamp_idx").on(t.timestamp),
+    index("sensor_data_sensor_timestamp_idx").on(t.sensorId, t.timestamp),
+  ],
+);
+
+/**
+ * alerts: Sensor-originated operational alerts.
+ */
+export const alerts = pgTable(
+  "alerts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sensorId: uuid("sensor_id")
+      .notNull()
+      .references(() => sensors.id, { onDelete: "cascade" }),
+    type: alertTypeEnum("type").notNull(),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("alerts_sensor_id_idx").on(t.sensorId),
+    index("alerts_type_idx").on(t.type),
+    index("alerts_created_at_idx").on(t.createdAt),
+  ],
+);
+
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -589,6 +678,30 @@ export const wellRelations = relations(well, ({ one, many }) => ({
   }),
   statusHistory: many(wellStatusHistory),
   farmWells: many(farmWell),
+  sensors: many(sensors),
+}));
+
+export const sensorsRelations = relations(sensors, ({ one, many }) => ({
+  well: one(well, {
+    fields: [sensors.wellId],
+    references: [well.id],
+  }),
+  sensorData: many(sensorData),
+  alerts: many(alerts),
+}));
+
+export const sensorDataRelations = relations(sensorData, ({ one }) => ({
+  sensor: one(sensors, {
+    fields: [sensorData.sensorId],
+    references: [sensors.id],
+  }),
+}));
+
+export const alertsRelations = relations(alerts, ({ one }) => ({
+  sensor: one(sensors, {
+    fields: [alerts.sensorId],
+    references: [sensors.id],
+  }),
 }));
 
 export const wellStatusHistoryRelations = relations(
