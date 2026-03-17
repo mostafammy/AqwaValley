@@ -355,6 +355,13 @@
     color: var(--color-white);
   }
 
+  .topbar-icon-btn:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-white);
+  }
+
   .topbar-profile-avatar {
     height: 36px;
     width: 36px;
@@ -400,6 +407,13 @@
   }
 
   .nav-item:hover {
+    background: #f5f7fa;
+    color: var(--color-text);
+  }
+
+  .nav-item:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: -2px;
     background: #f5f7fa;
     color: var(--color-text);
   }
@@ -477,6 +491,13 @@
   .sidebar-overlay.open {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .sidebar-overlay {
+      transition: none !important;
+    }
   }
 
   /* ── Structural Layouts ── */
