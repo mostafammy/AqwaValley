@@ -16,6 +16,11 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    LOG_LEVEL: z
+      .enum(["trace", "debug", "info", "warn", "error", "fatal"])
+      .default("info"),
+    TIMESCALE_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
+    INGEST_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(300),
   },
 
   /**
@@ -36,6 +41,9 @@ export const env = createEnv({
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    LOG_LEVEL: process.env.LOG_LEVEL,
+    TIMESCALE_RETENTION_DAYS: process.env.TIMESCALE_RETENTION_DAYS,
+    INGEST_RATE_LIMIT_PER_MINUTE: process.env.INGEST_RATE_LIMIT_PER_MINUTE,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
