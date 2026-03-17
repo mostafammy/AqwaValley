@@ -2,9 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "~/server/db";
-import { sensorData } from "~/server/db/schema";
+import { well } from "~/server/db/schema";
 import { auth } from "~/server/better-auth";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 // Query for metrics from TimescaleDB using time_bucket
 async function fetchMetrics(
@@ -55,48 +55,109 @@ const querySchema = z.object({
     .string()
     .regex(/^\d+h$/)
     .optional()
-    .transform((v) => parseInt(v ?? "24", 10)),
+    .transform((v) => parseInt(v ?? "24h", 10))
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30),
+    ),
   bucket: z
     .string()
     .regex(/^\d+m$/)
     .optional()
-    .transform((v) => parseInt(v ?? "60", 10)),
+    .transform((v) => parseInt(v ?? "60m", 10))
+    .pipe(
+      z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 60),
+    ),
   format: z.enum(["json", "csv"]).optional().default("json"),
 });
+
+const paramsSchema = z.object({
+  id: z.string().uuid(),
+});
+
+function errorResponse(
+  status: number,
+  code: string,
+  message: string,
+  details?: unknown,
+) {
+  return NextResponse.json(
+    {
+      error: {
+        code,
+        message,
+        ...(details ? { details } : {}),
+      },
+    },
+    { status },
+  );
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  // Auth check
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    // Auth check
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session) {
+      return errorResponse(401, "UNAUTHORIZED", "Authentication required");
+    }
+
+    const rawParams = await params;
+    const parsedParams = paramsSchema.safeParse(rawParams);
+    if (!parsedParams.success) {
+      return errorResponse(400, "INVALID_WELL_ID", "Well id must be a UUID", {
+        fieldErrors: parsedParams.error.flatten().fieldErrors,
+      });
+    }
+
+    const wellId = parsedParams.data.id;
+
+    const searchParams = Object.fromEntries(request.nextUrl.searchParams);
+    const parsedQuery = querySchema.safeParse(searchParams);
+    if (!parsedQuery.success) {
+      return errorResponse(
+        400,
+        "INVALID_QUERY_PARAMETERS",
+        "Query parameters are invalid",
+        parsedQuery.error.flatten(),
+      );
+    }
+
+    const { range, bucket, format } = parsedQuery.data;
+
+    const [existingWell] = await db
+      .select({ id: well.id })
+      .from(well)
+      .where(eq(well.id, wellId))
+      .limit(1);
+
+    if (!existingWell) {
+      return errorResponse(404, "WELL_NOT_FOUND", "Well not found", { wellId });
+    }
+
+    const rows = await fetchMetrics(wellId, range, bucket);
+
+    if (format === "csv") {
+      return new NextResponse(toCsv(rows), {
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="well-${wellId}-metrics.csv"`,
+        },
+      });
+    }
+
+    return NextResponse.json({ wellId, range, bucket, rows });
+  } catch (error) {
+    console.error("[metrics_route_error]", error);
+    return errorResponse(500, "INTERNAL_ERROR", "Failed to fetch well metrics");
   }
-
-  const { id: wellId } = await params;
-
-  const searchParams = Object.fromEntries(request.nextUrl.searchParams);
-  const parsed = querySchema.safeParse(searchParams);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Invalid query parameters", details: parsed.error.flatten() },
-      { status: 400 },
-    );
-  }
-
-  const { range, bucket, format } = parsed.data;
-
-  const rows = await fetchMetrics(wellId, range, bucket);
-
-  if (format === "csv") {
-    return new NextResponse(toCsv(rows), {
-      headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="well-${wellId}-metrics.csv"`,
-      },
-    });
-  }
-
-  return NextResponse.json({ wellId, range, bucket, rows });
 }
