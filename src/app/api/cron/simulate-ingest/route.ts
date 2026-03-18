@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
   const runKey = extractRunKey(request.headers, parsed.data.runKey);
 
   if (runKey) {
-    const existing = await beginRun(runKey);
+    const existing = await beginRun(runKey, env.SIM_RUN_STALE_TIMEOUT_SECONDS);
 
     if (existing.status === "completed") {
       const replayPayload =

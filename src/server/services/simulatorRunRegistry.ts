@@ -253,7 +253,9 @@ export async function getRun(
   return toRunRecord(row);
 }
 
-export async function listRuns(filters: ListRunsFilters): Promise<ListRunsResult> {
+export async function listRuns(
+  filters: ListRunsFilters,
+): Promise<ListRunsResult> {
   await ensureRunRegistryTable();
 
   const offset = (filters.page - 1) * filters.pageSize;
