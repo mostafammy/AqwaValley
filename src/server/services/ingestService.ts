@@ -104,6 +104,7 @@ async function resolveAndValidateSensors(
  * (i.e., have an unacknowledged alert within the suppression window).
  */
 async function getSuppressedRuleIds(
+  dbClient: { select: typeof db.select },
   triggeredAlerts: TriggeredAlert[],
 ): Promise<Set<string>> {
   if (triggeredAlerts.length === 0) return new Set();
@@ -112,7 +113,7 @@ async function getSuppressedRuleIds(
   const now = new Date();
 
   // For each rule, check if there's an unacknowledged alert within the suppression window
-  const ruleRecords = await db
+  const ruleRecords = await dbClient
     .select({
       id: alertRule.id,
       suppressionWindowMinutes: alertRule.suppressionWindowMinutes,
@@ -132,7 +133,7 @@ async function getSuppressedRuleIds(
       const windowStart = new Date(
         now.getTime() - rule.suppressionWindowMinutes * 60_000,
       );
-      const [existing] = await db
+      const [existing] = await dbClient
         .select({ id: alerts.id })
         .from(alerts)
         .where(
@@ -171,91 +172,97 @@ export async function ingestReadings(
     return { accepted: 0, rejected: readings.length, errors };
   }
 
-  // 1. Bulk insert into hypertable
-  await db
-    .insert(sensorData)
-    .values(
-      validReadings.map((r) => ({
-        sensorId: r.sensorId,
-        value: r.value,
-        timestamp: r.timestamp,
-      })),
-    )
-    .onConflictDoNothing({
-      target: [sensorData.sensorId, sensorData.timestamp],
-    });
+  const wellIds = [...new Set(validReadings.map((r) => r.wellId))];
 
-  // 2. UPSERT latest_sensor_state (only advance if newer)
-  await db
-    .insert(latestSensorState)
-    .values(
-      validReadings.map((r) => ({
+  await db.transaction(async (tx) => {
+    // 1. Bulk insert into hypertable
+    await tx
+      .insert(sensorData)
+      .values(
+        validReadings.map((r) => ({
+          sensorId: r.sensorId,
+          value: r.value,
+          timestamp: r.timestamp,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [sensorData.sensorId, sensorData.timestamp],
+      });
+
+    // 2. UPSERT latest_sensor_state (only advance if newer)
+    await tx
+      .insert(latestSensorState)
+      .values(
+        validReadings.map((r) => ({
+          sensorId: r.sensorId,
+          wellId: r.wellId,
+          value: r.value,
+          unit: r.resolvedUnit as never,
+          type: r.resolvedType as never,
+          lastUpdatedAt: r.timestamp,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: latestSensorState.sensorId,
+        set: {
+          value: sql`EXCLUDED.value`,
+          lastUpdatedAt: sql`EXCLUDED.last_updated_at`,
+          wellId: sql`EXCLUDED.well_id`,
+          unit: sql`EXCLUDED.unit`,
+          type: sql`EXCLUDED.type`,
+        },
+        // Only update if the incoming reading is newer
+        setWhere: sql`EXCLUDED.last_updated_at > latest_sensor_state.last_updated_at`,
+      });
+
+    // 3. Evaluate alert rules
+    const applicableRules = await tx
+      .select()
+      .from(alertRule)
+      .where(
+        and(
+          sql`${alertRule.wellId} = ANY(ARRAY[${sql.join(
+            wellIds.map((id) => sql`${id}::uuid`),
+            sql`, `,
+          )}])`,
+          eq(alertRule.isActive, true),
+        ),
+      );
+
+    const allTriggered: TriggeredAlert[] = validReadings.flatMap((r) =>
+      evaluateRules(applicableRules, {
         sensorId: r.sensorId,
         wellId: r.wellId,
         value: r.value,
-        unit: r.resolvedUnit as never,
-        type: r.resolvedType as never,
-        lastUpdatedAt: r.timestamp,
-      })),
-    )
-    .onConflictDoUpdate({
-      target: latestSensorState.sensorId,
-      set: {
-        value: sql`EXCLUDED.value`,
-        lastUpdatedAt: sql`EXCLUDED.last_updated_at`,
-        wellId: sql`EXCLUDED.well_id`,
-        unit: sql`EXCLUDED.unit`,
-        type: sql`EXCLUDED.type`,
-      },
-      // Only update if the incoming reading is newer
-      setWhere: sql`EXCLUDED.last_updated_at > latest_sensor_state.last_updated_at`,
-    });
-
-  // 3. Evaluate alert rules
-  const wellIds = [...new Set(validReadings.map((r) => r.wellId))];
-  const applicableRules = await db
-    .select()
-    .from(alertRule)
-    .where(
-      and(
-        sql`${alertRule.wellId} = ANY(ARRAY[${sql.join(
-          wellIds.map((id) => sql`${id}::uuid`),
-          sql`, `,
-        )}])`,
-        eq(alertRule.isActive, true),
-      ),
+        type: r.resolvedType,
+      }),
     );
 
-  const allTriggered: TriggeredAlert[] = validReadings.flatMap((r) =>
-    evaluateRules(applicableRules, {
-      sensorId: r.sensorId,
-      wellId: r.wellId,
-      value: r.value,
-      type: r.resolvedType,
-    }),
-  );
-
-  if (allTriggered.length > 0) {
-    const suppressedRuleIds = await getSuppressedRuleIds(allTriggered);
-    const alertsToInsert = allTriggered.filter(
-      (a) => !suppressedRuleIds.has(a.alertRuleId),
-    );
-
-    if (alertsToInsert.length > 0) {
-      await db.insert(alerts).values(
-        alertsToInsert.map((a) => ({
-          wellId: a.wellId,
-          sensorId: a.sensorId,
-          type: a.type as never,
-          severity: a.severity,
-          message: a.message,
-          alertRuleId: a.alertRuleId,
-        })),
+    if (allTriggered.length > 0) {
+      const suppressedRuleIds = await getSuppressedRuleIds(tx, allTriggered);
+      const alertsToInsert = allTriggered.filter(
+        (a) => !suppressedRuleIds.has(a.alertRuleId),
       );
 
-      logger.info({ count: alertsToInsert.length, wellIds }, "alerts.inserted");
+      if (alertsToInsert.length > 0) {
+        await tx.insert(alerts).values(
+          alertsToInsert.map((a) => ({
+            wellId: a.wellId,
+            sensorId: a.sensorId,
+            type: a.type as never,
+            severity: a.severity,
+            message: a.message,
+            alertRuleId: a.alertRuleId,
+          })),
+        );
+
+        logger.info(
+          { count: alertsToInsert.length, wellIds },
+          "alerts.inserted",
+        );
+      }
     }
-  }
+  });
 
   logger.info(
     { accepted: validReadings.length, rejected: errors.length },
