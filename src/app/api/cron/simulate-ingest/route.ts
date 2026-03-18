@@ -22,6 +22,31 @@ const bodySchema = z.object({
     .transform((value) => (value ? new Date(value) : undefined)),
 });
 
+const querySchema = z.object({
+  runKey: z.string().min(8).max(128).optional(),
+  wellIds: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value
+        ? value
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : undefined,
+    )
+    .pipe(z.array(z.string().uuid()).min(1).optional()),
+  readingsPerSensor: z.coerce.number().int().min(1).max(10).optional(),
+  anomalyRate: z.coerce.number().min(0).max(1).optional(),
+  timestamp: z
+    .string()
+    .datetime({ offset: true })
+    .optional()
+    .transform((value) => (value ? new Date(value) : undefined)),
+});
+
+type CronRequestData = z.infer<typeof bodySchema>;
+
 function errorResponse(
   status: number,
   code: string,
@@ -52,38 +77,16 @@ function extractRunKey(
   );
 }
 
-export async function POST(request: NextRequest) {
+async function runCronSimulation(
+  request: NextRequest,
+  data: CronRequestData,
+): Promise<NextResponse> {
   const authResult = validateCronRequest(request.headers);
   if (!authResult.ok) {
     return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
   }
 
-  let rawBody: unknown = {};
-  try {
-    const text = await request.text();
-    rawBody = text.trim() ? (JSON.parse(text) as unknown) : {};
-  } catch {
-    return errorResponse(
-      400,
-      "INVALID_JSON",
-      "Request body must be valid JSON",
-    );
-  }
-
-  const parsed = bodySchema.safeParse(rawBody);
-  if (!parsed.success) {
-    return errorResponse(
-      400,
-      "INVALID_REQUEST",
-      "Invalid cron simulation request",
-      parsed.error.flatten(),
-    );
-  }
-
-  if (
-    parsed.data.wellIds &&
-    parsed.data.wellIds.length > env.SIM_CRON_MAX_WELLS
-  ) {
+  if (data.wellIds && data.wellIds.length > env.SIM_CRON_MAX_WELLS) {
     return errorResponse(
       400,
       "WELL_LIMIT_EXCEEDED",
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const runKey = extractRunKey(request.headers, parsed.data.runKey);
+  const runKey = extractRunKey(request.headers, data.runKey);
 
   if (runKey) {
     const existing = await beginRun(runKey, env.SIM_RUN_STALE_TIMEOUT_SECONDS);
@@ -132,10 +135,10 @@ export async function POST(request: NextRequest) {
   try {
     const result = await runSimulatorCron({
       runId: runKey,
-      wellIds: parsed.data.wellIds,
-      readingsPerSensor: parsed.data.readingsPerSensor,
-      anomalyRate: parsed.data.anomalyRate,
-      timestamp: parsed.data.timestamp,
+      wellIds: data.wellIds,
+      readingsPerSensor: data.readingsPerSensor,
+      anomalyRate: data.anomalyRate,
+      timestamp: data.timestamp,
     });
 
     if (runKey) {
@@ -158,4 +161,54 @@ export async function POST(request: NextRequest) {
       "Failed to execute cron simulation",
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  let rawBody: unknown = {};
+  try {
+    const text = await request.text();
+    rawBody = text.trim() ? (JSON.parse(text) as unknown) : {};
+  } catch {
+    return errorResponse(
+      400,
+      "INVALID_JSON",
+      "Request body must be valid JSON",
+    );
+  }
+
+  const parsed = bodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return errorResponse(
+      400,
+      "INVALID_REQUEST",
+      "Invalid cron simulation request",
+      parsed.error.flatten(),
+    );
+  }
+
+  return runCronSimulation(request, parsed.data);
+}
+
+export async function GET(request: NextRequest) {
+  const rawQuery = Object.fromEntries(request.nextUrl.searchParams);
+  const parsed = querySchema.safeParse(rawQuery);
+
+  if (!parsed.success) {
+    return errorResponse(
+      400,
+      "INVALID_QUERY",
+      "Invalid query parameters",
+      parsed.error.flatten(),
+    );
+  }
+
+  const data: CronRequestData = {
+    runKey: parsed.data.runKey,
+    wellIds: parsed.data.wellIds,
+    readingsPerSensor: parsed.data.readingsPerSensor ?? 1,
+    anomalyRate: parsed.data.anomalyRate,
+    timestamp: parsed.data.timestamp,
+  };
+
+  return runCronSimulation(request, data);
 }
