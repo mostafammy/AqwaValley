@@ -38,14 +38,16 @@ export async function getAccessibleDistrictIds(
   if (hasRole(ctx, "admin", "auditor")) return null;
 
   // district_manager gets their one assigned district from userProfile
-  const profile = await ctx.db
-    .select({ districtId: userProfile.districtId })
-    .from(userProfile)
-    .where(eq(userProfile.userId, ctx.session.user.id))
-    .limit(1);
+  if (hasRole(ctx, "district_manager")) {
+    const profile = await ctx.db
+      .select({ districtId: userProfile.districtId })
+      .from(userProfile)
+      .where(eq(userProfile.userId, ctx.session.user.id))
+      .limit(1);
 
-  const profileDistrictId = profile[0]?.districtId;
-  if (profileDistrictId) return [profileDistrictId];
+    const profileDistrictId = profile[0]?.districtId;
+    if (profileDistrictId) return [profileDistrictId];
+  }
 
   // farm_owner / farmer get all districts their farms belong to
   if (hasRole(ctx, "farm_owner", "farmer")) {
