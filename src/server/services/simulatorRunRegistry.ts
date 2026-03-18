@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { sql } from "drizzle-orm";
 
 import { db } from "~/server/db";
@@ -14,7 +15,7 @@ export type CronSimulationRunRecord = {
 };
 
 export type RunBeginResult =
-  | { status: "started" }
+  | { status: "started"; attemptToken: string }
   | { status: "running" }
   | { status: "failed"; error: string | null }
   | { status: "completed"; response: unknown };
@@ -100,6 +101,10 @@ function isStale(startedAt: Date, staleTimeoutSeconds: number): boolean {
   return Date.now() - startedAt.getTime() > staleTimeoutSeconds * 1000;
 }
 
+function createAttemptToken(): string {
+  return randomUUID();
+}
+
 async function ensureRunRegistryTable(): Promise<void> {
   ensureTablePromise ??= db
     .execute(
@@ -107,6 +112,7 @@ async function ensureRunRegistryTable(): Promise<void> {
       CREATE TABLE IF NOT EXISTS cron_simulation_run (
         run_key text PRIMARY KEY,
         status text NOT NULL,
+        attempt_token text NULL,
         started_at timestamptz NOT NULL DEFAULT NOW(),
         completed_at timestamptz NULL,
         response jsonb NULL,
@@ -115,6 +121,10 @@ async function ensureRunRegistryTable(): Promise<void> {
     `,
     )
     .then(async () => {
+      await db.execute(sql`
+        ALTER TABLE cron_simulation_run
+        ADD COLUMN IF NOT EXISTS attempt_token text NULL
+      `);
       await db.execute(sql`
         CREATE INDEX IF NOT EXISTS cron_simulation_run_status_started_idx
         ON cron_simulation_run (status, started_at DESC)
@@ -155,15 +165,23 @@ export async function beginRun(
 ): Promise<RunBeginResult> {
   await ensureRunRegistryTable();
 
+  const attemptToken = createAttemptToken();
+
   const inserted = await db.execute(sql`
-    INSERT INTO cron_simulation_run (run_key, status)
-    VALUES (${runKey}, 'running')
+    INSERT INTO cron_simulation_run (run_key, status, attempt_token)
+    VALUES (${runKey}, 'running', ${attemptToken})
     ON CONFLICT (run_key) DO NOTHING
-    RETURNING run_key
+    RETURNING run_key, attempt_token
   `);
 
-  if (rowsOf<{ run_key: string }>(inserted).length > 0) {
-    return { status: "started" };
+  const insertedRow = rowsOf<{ run_key: string; attempt_token: string | null }>(
+    inserted,
+  )[0];
+  if (insertedRow) {
+    return {
+      status: "started",
+      attemptToken: insertedRow.attempt_token ?? attemptToken,
+    };
   }
 
   const currentResult = await db.execute(sql`
@@ -207,21 +225,29 @@ export async function beginRun(
     }
 
     const restarted = await db.execute(sql`
-      INSERT INTO cron_simulation_run (run_key, status)
-      VALUES (${runKey}, 'running')
+      INSERT INTO cron_simulation_run (run_key, status, attempt_token)
+      VALUES (${runKey}, 'running', ${attemptToken})
       ON CONFLICT (run_key)
       DO UPDATE SET
         status = 'running',
+        attempt_token = ${attemptToken},
         started_at = NOW(),
         completed_at = NULL,
         response = NULL,
         error = NULL
       WHERE cron_simulation_run.status = 'failed'
-      RETURNING run_key
+      RETURNING run_key, attempt_token
     `);
 
-    if (rowsOf<{ run_key: string }>(restarted).length > 0) {
-      return { status: "started" };
+    const restartedRow = rowsOf<{
+      run_key: string;
+      attempt_token: string | null;
+    }>(restarted)[0];
+    if (restartedRow) {
+      return {
+        status: "started",
+        attemptToken: restartedRow.attempt_token ?? attemptToken,
+      };
     }
   }
 
@@ -230,11 +256,12 @@ export async function beginRun(
 
 export async function completeRun(
   runKey: string,
+  attemptToken: string,
   response: unknown,
-): Promise<void> {
+): Promise<boolean> {
   await ensureRunRegistryTable();
 
-  await db.execute(sql`
+  const result = await db.execute(sql`
     UPDATE cron_simulation_run
     SET
       status = 'completed',
@@ -242,23 +269,32 @@ export async function completeRun(
       response = ${JSON.stringify(response)}::jsonb,
       error = NULL
     WHERE run_key = ${runKey}
+      AND attempt_token = ${attemptToken}
+    RETURNING run_key
   `);
+
+  return rowsOf<{ run_key: string }>(result).length > 0;
 }
 
 export async function failRun(
   runKey: string,
+  attemptToken: string,
   errorMessage: string,
-): Promise<void> {
+): Promise<boolean> {
   await ensureRunRegistryTable();
 
-  await db.execute(sql`
+  const result = await db.execute(sql`
     UPDATE cron_simulation_run
     SET
       status = 'failed',
       completed_at = NOW(),
       error = ${errorMessage}
     WHERE run_key = ${runKey}
+      AND attempt_token = ${attemptToken}
+    RETURNING run_key
   `);
+
+  return rowsOf<{ run_key: string }>(result).length > 0;
 }
 
 export async function getRun(

@@ -95,9 +95,14 @@ async function runCronSimulation(
   }
 
   const runKey = extractRunKey(request.headers, data.runKey);
+  let attemptToken: string | undefined;
 
   if (runKey) {
     const existing = await beginRun(runKey, env.SIM_RUN_STALE_TIMEOUT_SECONDS);
+
+    if (existing.status === "started") {
+      attemptToken = existing.attemptToken;
+    }
 
     if (existing.status === "completed") {
       const replayPayload =
@@ -141,18 +146,18 @@ async function runCronSimulation(
       timestamp: data.timestamp,
     });
 
-    if (runKey) {
-      await completeRun(runKey, result);
+    if (runKey && attemptToken) {
+      await completeRun(runKey, attemptToken, result);
     }
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("[cron_simulate_ingest_error]", error);
 
-    if (runKey) {
+    if (runKey && attemptToken) {
       const message =
         error instanceof Error ? error.message : "Unknown cron execution error";
-      await failRun(runKey, message);
+      await failRun(runKey, attemptToken, message);
     }
 
     return errorResponse(

@@ -673,6 +673,7 @@ export const cronSimulationRun = pgTable(
   {
     runKey: text("run_key").primaryKey(),
     status: text("status").notNull(),
+    attemptToken: text("attempt_token"),
     startedAt: timestamp("started_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
