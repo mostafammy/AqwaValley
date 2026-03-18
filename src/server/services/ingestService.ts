@@ -172,6 +172,18 @@ export async function ingestReadings(
     return { accepted: 0, rejected: readings.length, errors };
   }
 
+  const newestPerSensorMap = new Map<string, (typeof validReadings)[number]>();
+  for (const reading of validReadings) {
+    const existing = newestPerSensorMap.get(reading.sensorId);
+    if (
+      !existing ||
+      reading.timestamp.getTime() > existing.timestamp.getTime()
+    ) {
+      newestPerSensorMap.set(reading.sensorId, reading);
+    }
+  }
+  const newestPerSensor = [...newestPerSensorMap.values()];
+
   const wellIds = [...new Set(validReadings.map((r) => r.wellId))];
 
   await db.transaction(async (tx) => {
@@ -193,7 +205,7 @@ export async function ingestReadings(
     await tx
       .insert(latestSensorState)
       .values(
-        validReadings.map((r) => ({
+        newestPerSensor.map((r) => ({
           sensorId: r.sensorId,
           wellId: r.wellId,
           value: r.value,
