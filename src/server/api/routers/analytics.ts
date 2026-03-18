@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, viewerProcedure } from "~/server/api/trpc";
@@ -231,6 +231,31 @@ export const analyticsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      const accessibleDistricts = await getAccessibleDistrictIds(ctx);
+
+      let scopedWellIds = input.wellIds;
+      if (accessibleDistricts !== null) {
+        if (accessibleDistricts.length === 0) {
+          return [];
+        }
+
+        const accessibleWells = await ctx.db
+          .select({ id: well.id })
+          .from(well)
+          .where(
+            and(
+              inArray(well.id, input.wellIds),
+              inArray(well.districtId, accessibleDistricts),
+            ),
+          );
+
+        scopedWellIds = accessibleWells.map((w) => w.id);
+      }
+
+      if (scopedWellIds.length === 0) {
+        return [];
+      }
+
       const rows = await ctx.db
         .select({
           sensorId: latestSensorState.sensorId,
@@ -241,11 +266,7 @@ export const analyticsRouter = createTRPCRouter({
           lastUpdatedAt: latestSensorState.lastUpdatedAt,
         })
         .from(latestSensorState)
-        .where(
-          sql`${latestSensorState.wellId} = ANY(${sql.raw(
-            `ARRAY['${input.wellIds.join("','")}']::uuid[]`,
-          )})`,
-        );
+        .where(inArray(latestSensorState.wellId, scopedWellIds));
 
       return rows;
     }),
