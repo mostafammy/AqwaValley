@@ -47,19 +47,50 @@ function rowsOf<T>(result: unknown): T[] {
   return maybeRows.rows ?? [];
 }
 
+function normalizeDate(value: unknown): Date {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) {
+    // Fall back to epoch for unexpected DB coercions to keep API stable.
+    return new Date(0);
+  }
+
+  return parsed;
+}
+
+function normalizeNullableDate(value: unknown): Date | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return normalizeDate(value);
+}
+
+function normalizeInt(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function toRunRecord(row: {
   run_key: string;
   status: string;
-  started_at: Date;
-  completed_at: Date | null;
+  started_at: unknown;
+  completed_at: unknown;
   response: unknown;
   error: string | null;
 }): CronSimulationRunRecord {
   return {
     runKey: row.run_key,
     status: row.status as CronSimulationRunStatus,
-    startedAt: row.started_at,
-    completedAt: row.completed_at,
+    startedAt: normalizeDate(row.started_at),
+    completedAt: normalizeNullableDate(row.completed_at),
     response: row.response,
     error: row.error,
   };
@@ -145,8 +176,8 @@ export async function beginRun(
   const current = rowsOf<{
     run_key: string;
     status: string;
-    started_at: Date;
-    completed_at: Date | null;
+    started_at: unknown;
+    completed_at: unknown;
     response: unknown;
     error: string | null;
   }>(currentResult)[0];
@@ -164,11 +195,13 @@ export async function beginRun(
   }
 
   if (current.status === "running") {
-    if (!isStale(current.started_at, staleTimeoutSeconds)) {
+    const currentStartedAt = normalizeDate(current.started_at);
+
+    if (!isStale(currentStartedAt, staleTimeoutSeconds)) {
       return { status: "running" };
     }
 
-    const reclaimed = await reclaimStaleRun(runKey, current.started_at);
+    const reclaimed = await reclaimStaleRun(runKey, currentStartedAt);
     if (!reclaimed) {
       return { status: "running" };
     }
@@ -243,8 +276,8 @@ export async function getRun(
   const row = rowsOf<{
     run_key: string;
     status: string;
-    started_at: Date;
-    completed_at: Date | null;
+    started_at: unknown;
+    completed_at: unknown;
     response: unknown;
     error: string | null;
   }>(result)[0];
@@ -286,13 +319,15 @@ export async function listRuns(
   const rows = rowsOf<{
     run_key: string;
     status: string;
-    started_at: Date;
-    completed_at: Date | null;
+    started_at: unknown;
+    completed_at: unknown;
     response: unknown;
     error: string | null;
   }>(rowsResult).map(toRunRecord);
 
-  const total = rowsOf<{ total: number }>(countResult)[0]?.total ?? 0;
+  const total = normalizeInt(
+    rowsOf<{ total: unknown }>(countResult)[0]?.total ?? 0,
+  );
 
   return {
     rows,

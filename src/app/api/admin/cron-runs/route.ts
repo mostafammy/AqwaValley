@@ -28,6 +28,15 @@ const querySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+function toDate(value: unknown): Date | null {
+  if (value === null || value === undefined) return null;
+  if (value instanceof Date) return value;
+  if (typeof value !== "string" && typeof value !== "number") return null;
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function errorResponse(
   status: number,
   code: string,
@@ -99,21 +108,26 @@ export async function GET(request: NextRequest) {
   const staleTimeoutMs = env.SIM_RUN_STALE_TIMEOUT_SECONDS * 1000;
 
   return NextResponse.json({
-    rows: result.rows.map((row) => ({
-      runKey: row.runKey,
-      status: row.status,
-      startedAt: row.startedAt,
-      completedAt: row.completedAt,
-      durationMs:
-        row.completedAt && row.startedAt
-          ? row.completedAt.getTime() - row.startedAt.getTime()
-          : null,
-      error: row.error,
-      isStale:
-        row.status === "running"
-          ? Date.now() - row.startedAt.getTime() > staleTimeoutMs
-          : false,
-    })),
+    rows: result.rows.map((row) => {
+      const startedAt = toDate(row.startedAt);
+      const completedAt = toDate(row.completedAt);
+
+      return {
+        runKey: row.runKey,
+        status: row.status,
+        startedAt,
+        completedAt,
+        durationMs:
+          completedAt && startedAt
+            ? completedAt.getTime() - startedAt.getTime()
+            : null,
+        error: row.error,
+        isStale:
+          row.status === "running" && startedAt
+            ? Date.now() - startedAt.getTime() > staleTimeoutMs
+            : false,
+      };
+    }),
     meta: {
       page: result.page,
       pageSize: result.pageSize,
