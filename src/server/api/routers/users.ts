@@ -169,27 +169,33 @@ export const usersRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [profile] = await ctx.db
-        .insert(userProfile)
-        .values({
-          userId: input.userId,
-          nationalId: input.nationalId,
-          fullName: input.fullName,
-          phoneNumber: input.phoneNumber ?? null,
-          districtId: input.districtId ?? null,
-          isActive: true,
-        })
-        .returning();
-
-      // Resolve and assign initial role
       const [roleRecord] = await ctx.db
         .select({ id: role.id })
         .from(role)
         .where(eq(role.type, input.initialRole))
         .limit(1);
 
-      if (roleRecord) {
-        await ctx.db
+      if (!roleRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Role type '${input.initialRole}' not found in role catalog`,
+        });
+      }
+
+      return ctx.db.transaction(async (tx) => {
+        const [profile] = await tx
+          .insert(userProfile)
+          .values({
+            userId: input.userId,
+            nationalId: input.nationalId,
+            fullName: input.fullName,
+            phoneNumber: input.phoneNumber ?? null,
+            districtId: input.districtId ?? null,
+            isActive: true,
+          })
+          .returning();
+
+        await tx
           .insert(userRoleAssignment)
           .values({
             userId: input.userId,
@@ -197,9 +203,9 @@ export const usersRouter = createTRPCRouter({
             assignedBy: ctx.session.user.id,
           })
           .onConflictDoNothing();
-      }
 
-      return profile;
+        return profile;
+      });
     }),
 
   /**
