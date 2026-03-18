@@ -6,6 +6,15 @@ import { Droplets, Loader2, User, Lock } from "lucide-react";
 import { authClient } from "~/server/better-auth/client";
 import { getUserRolePath } from "~/app/_actions/auth";
 
+/**
+ * Renders the login form UI and handles user authentication and role-based redirect.
+ *
+ * The component presents inputs for national ID and password, shows validation and
+ * authentication errors, displays a loading state during submission, and navigates
+ * the user to an appropriate post-login path when authentication and role lookup succeed.
+ *
+ * @returns A React element that renders the login form and its associated behavior.
+ */
 export function LoginForm() {
   const [nationalId, setNationalId] = useState("");
   const [password, setPassword] = useState("");

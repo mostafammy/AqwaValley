@@ -21,6 +21,17 @@ interface TopbarProps {
   weatherChip?: string; // للـ farm portal فقط
 }
 
+/**
+ * Renders the portal's top navigation bar including branding, search, notifications, settings, and a user profile dropdown.
+ *
+ * @param userName - Display name shown in the profile area (default: "محمد أحمد")
+ * @param userRole - User role key; controls role label and branding variant (e.g., GOV_ADMIN, SUPER_ADMIN, FARMER)
+ * @param userInitials - Initials shown inside the avatar circle
+ * @param portalLabel - Subtitle shown under the portal title
+ * @param notifCount - Number of unread notifications; a small indicator is shown when greater than zero
+ * @param weatherChip - Optional small badge (e.g., current weather) rendered next to icons when provided
+ * @returns The top-level JSX element for the portal topbar UI
+ */
 export function Topbar({
   userName = "محمد أحمد",
   userRole = "GOV_ADMIN",

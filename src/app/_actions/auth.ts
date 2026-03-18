@@ -6,8 +6,14 @@ import { userRoleAssignment, role } from "../../server/db/schema";
 import { getSession } from "../../server/better-auth/server";
 
 /**
- * Checks the active Better Auth session and returns 
- * the appropriate redirect path depending on user role.
+ * Determine the post-login redirect path for the current authenticated user based on their assigned roles.
+ *
+ * Checks the active session and maps the user's role types to a portal route:
+ * - `"admin"`, `"district_manager"`, `"auditor"` → `/dashboard`
+ * - `"farm_owner"`, `"farmer"` → `/farm/dashboard`
+ * If there is no authenticated user or no matching role, returns `null`.
+ *
+ * @returns `/dashboard` for admin/district_manager/auditor, `/farm/dashboard` for farm_owner/farmer, `null` if no authenticated user or no mapped role
  */
 export async function getUserRolePath(): Promise<string | null> {
   const session = await getSession();

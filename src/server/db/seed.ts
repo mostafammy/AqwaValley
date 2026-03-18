@@ -3,6 +3,13 @@ import { db } from "./index";
 import * as schema from "./schema";
 import { auth } from "../better-auth/config";
 
+/**
+ * Seeds initial role records and two test user accounts, then assigns the appropriate roles.
+ *
+ * Inserts a predefined set of roles, creates two test users via the internal auth API (or ensures they exist), and attaches role assignments; the function terminates the process with exit code 0 on successful completion.
+ *
+ * @throws Error - If the required "admin" or "farmer" roles are not present after seeding.
+ */
 async function main() {
   console.log("🌱 Starting database seed for testing...");
 

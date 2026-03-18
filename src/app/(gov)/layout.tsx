@@ -5,6 +5,14 @@ import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
 
+/**
+ * Layout component that enforces government-portal access and renders the portal chrome around its children.
+ *
+ * If there is no authenticated user or the user's role path is not "/dashboard", the component redirects to the root path ("/").
+ *
+ * @param children - Content to render inside the layout's main area
+ * @returns A React element containing the Topbar, GovSidebar, and the provided children wrapped by SidebarProvider
+ */
 export default async function GovLayout({ children }: { children: React.ReactNode }) {
   // Validate session is present
   const session = await getSession();
