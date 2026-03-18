@@ -250,9 +250,20 @@ export async function ingestReadings(
       }),
     );
 
-    if (allTriggered.length > 0) {
-      const suppressedRuleIds = await getSuppressedRuleIds(tx, allTriggered);
-      const alertsToInsert = allTriggered.filter(
+    const dedupedTriggeredMap = new Map<string, TriggeredAlert>();
+    for (const alert of allTriggered) {
+      if (!dedupedTriggeredMap.has(alert.alertRuleId)) {
+        dedupedTriggeredMap.set(alert.alertRuleId, alert);
+      }
+    }
+    const dedupedTriggered = [...dedupedTriggeredMap.values()];
+
+    if (dedupedTriggered.length > 0) {
+      const suppressedRuleIds = await getSuppressedRuleIds(
+        tx,
+        dedupedTriggered,
+      );
+      const alertsToInsert = dedupedTriggered.filter(
         (a) => !suppressedRuleIds.has(a.alertRuleId),
       );
 
