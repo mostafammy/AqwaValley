@@ -96,43 +96,55 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const result = await listRuns({
-    status: parsed.data.status as CronSimulationRunStatus | undefined,
-    runKey: parsed.data.runKey,
-    from: parsed.data.from,
-    to: parsed.data.to,
-    page: parsed.data.page,
-    pageSize: parsed.data.pageSize,
-  });
+  try {
+    const result = await listRuns({
+      status: parsed.data.status as CronSimulationRunStatus | undefined,
+      runKey: parsed.data.runKey,
+      from: parsed.data.from,
+      to: parsed.data.to,
+      page: parsed.data.page,
+      pageSize: parsed.data.pageSize,
+    });
 
-  const staleTimeoutMs = env.SIM_RUN_STALE_TIMEOUT_SECONDS * 1000;
+    const staleTimeoutMs = env.SIM_RUN_STALE_TIMEOUT_SECONDS * 1000;
 
-  return NextResponse.json({
-    rows: result.rows.map((row) => {
-      const startedAt = toDate(row.startedAt);
-      const completedAt = toDate(row.completedAt);
+    return NextResponse.json({
+      rows: result.rows.map((row) => {
+        const startedAt = toDate(row.startedAt);
+        const completedAt = toDate(row.completedAt);
 
-      return {
-        runKey: row.runKey,
-        status: row.status,
-        startedAt,
-        completedAt,
-        durationMs:
-          completedAt && startedAt
-            ? completedAt.getTime() - startedAt.getTime()
-            : null,
-        error: row.error,
-        isStale:
-          row.status === "running" && startedAt
-            ? Date.now() - startedAt.getTime() > staleTimeoutMs
-            : false,
-      };
-    }),
-    meta: {
-      page: result.page,
-      pageSize: result.pageSize,
-      total: result.total,
-      hasNext: result.hasNext,
-    },
-  });
+        return {
+          runKey: row.runKey,
+          status: row.status,
+          startedAt,
+          completedAt,
+          durationMs:
+            completedAt && startedAt
+              ? completedAt.getTime() - startedAt.getTime()
+              : null,
+          error: row.error,
+          isStale:
+            row.status === "running" && startedAt
+              ? Date.now() - startedAt.getTime() > staleTimeoutMs
+              : false,
+        };
+      }),
+      meta: {
+        page: result.page,
+        pageSize: result.pageSize,
+        total: result.total,
+        hasNext: result.hasNext,
+      },
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to list cron runs";
+
+    return errorResponse(
+      500,
+      "CRON_RUNS_FETCH_FAILED",
+      message,
+      error instanceof Error ? { name: error.name } : undefined,
+    );
+  }
 }
