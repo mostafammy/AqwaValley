@@ -295,6 +295,7 @@ ALTER TABLE "user_role_assignment" ADD CONSTRAINT "user_role_assignment_user_id_
 ALTER TABLE "user_role_assignment" ADD CONSTRAINT "user_role_assignment_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_role_assignment" ADD CONSTRAINT "user_role_assignment_assigned_by_user_id_fk" FOREIGN KEY ("assigned_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "well" ADD CONSTRAINT "well_district_id_district_id_fk" FOREIGN KEY ("district_id") REFERENCES "public"."district"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_profile" ADD CONSTRAINT "user_profile_district_id_district_id_fk" FOREIGN KEY ("district_id") REFERENCES "public"."district"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "well_status_history" ADD CONSTRAINT "well_status_history_well_id_well_id_fk" FOREIGN KEY ("well_id") REFERENCES "public"."well"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "well_status_history" ADD CONSTRAINT "well_status_history_changed_by_user_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_user_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
