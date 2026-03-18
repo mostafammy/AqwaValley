@@ -34,6 +34,16 @@ export const env = createEnv({
     SIM_CRON_WELL_CONCURRENCY: z.coerce.number().int().positive().default(8),
     SIM_CRON_READING_CHUNK_SIZE: z.coerce.number().int().positive().default(50),
     SIM_DEFAULT_ANOMALY_RATE: z.coerce.number().min(0).max(1).default(0.05),
+    SIM_RUN_STALE_TIMEOUT_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(900),
+    SIM_RUN_HISTORY_RETENTION_DAYS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(30),
   },
 
   /**
@@ -63,6 +73,8 @@ export const env = createEnv({
     SIM_CRON_WELL_CONCURRENCY: process.env.SIM_CRON_WELL_CONCURRENCY,
     SIM_CRON_READING_CHUNK_SIZE: process.env.SIM_CRON_READING_CHUNK_SIZE,
     SIM_DEFAULT_ANOMALY_RATE: process.env.SIM_DEFAULT_ANOMALY_RATE,
+    SIM_RUN_STALE_TIMEOUT_SECONDS: process.env.SIM_RUN_STALE_TIMEOUT_SECONDS,
+    SIM_RUN_HISTORY_RETENTION_DAYS: process.env.SIM_RUN_HISTORY_RETENTION_DAYS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
