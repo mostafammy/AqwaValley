@@ -5,6 +5,7 @@ SELECT create_hypertable(
   'sensor_data',
   by_range('timestamp'),
   chunk_time_interval => INTERVAL '1 day',
+  migrate_data => TRUE,
   if_not_exists => TRUE
 );
 
