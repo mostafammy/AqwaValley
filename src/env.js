@@ -31,6 +31,8 @@ export const env = createEnv({
       .default(300),
     SIM_CRON_MAX_WELLS: z.coerce.number().int().positive().default(100),
     SIM_CRON_MAX_SENSORS: z.coerce.number().int().positive().default(1000),
+    SIM_CRON_WELL_CONCURRENCY: z.coerce.number().int().positive().default(8),
+    SIM_CRON_READING_CHUNK_SIZE: z.coerce.number().int().positive().default(50),
     SIM_DEFAULT_ANOMALY_RATE: z.coerce.number().min(0).max(1).default(0.05),
   },
 
@@ -58,6 +60,8 @@ export const env = createEnv({
     INGEST_RATE_LIMIT_PER_MINUTE: process.env.INGEST_RATE_LIMIT_PER_MINUTE,
     SIM_CRON_MAX_WELLS: process.env.SIM_CRON_MAX_WELLS,
     SIM_CRON_MAX_SENSORS: process.env.SIM_CRON_MAX_SENSORS,
+    SIM_CRON_WELL_CONCURRENCY: process.env.SIM_CRON_WELL_CONCURRENCY,
+    SIM_CRON_READING_CHUNK_SIZE: process.env.SIM_CRON_READING_CHUNK_SIZE,
     SIM_DEFAULT_ANOMALY_RATE: process.env.SIM_DEFAULT_ANOMALY_RATE,
   },
   /**
