@@ -598,7 +598,7 @@ export const sensorData = pgTable(
   (t) => [
     index("sensor_data_sensor_id_idx").on(t.sensorId),
     index("sensor_data_timestamp_idx").on(t.timestamp),
-    index("sensor_data_sensor_timestamp_idx").on(t.sensorId, t.timestamp),
+    unique("sensor_data_sensor_timestamp_key").on(t.sensorId, t.timestamp),
   ],
 );
 
@@ -661,6 +661,28 @@ export const latestSensorState = pgTable(
   (t) => [
     index("latest_sensor_state_well_id_idx").on(t.wellId),
     index("latest_sensor_state_type_idx").on(t.type),
+  ],
+);
+
+/**
+ * cron_simulation_run: Durable idempotency and observability registry for
+ * scheduled simulation runs.
+ */
+export const cronSimulationRun = pgTable(
+  "cron_simulation_run",
+  {
+    runKey: text("run_key").primaryKey(),
+    status: text("status").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    response: jsonb("response"),
+    error: text("error"),
+  },
+  (t) => [
+    index("cron_simulation_run_status_started_idx").on(t.status, t.startedAt),
+    index("cron_simulation_run_started_idx").on(t.startedAt),
   ],
 );
 

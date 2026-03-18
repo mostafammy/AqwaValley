@@ -1,6 +1,6 @@
 {
-  "id": "d2143995-5087-4d4f-81c3-9206c571acab",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "08d99508-0ff5-4a9d-90eb-74cc8c43a7d7",
+  "prevId": "d2143995-5087-4d4f-81c3-9206c571acab",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -109,8 +109,12 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -252,8 +256,12 @@
           "name": "alert_rule_well_id_well_id_fk",
           "tableFrom": "alert_rule",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -261,8 +269,12 @@
           "name": "alert_rule_created_by_user_id_user_id_fk",
           "tableFrom": "alert_rule",
           "tableTo": "user",
-          "columnsFrom": ["created_by_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -440,8 +452,12 @@
           "name": "alerts_sensor_id_sensors_id_fk",
           "tableFrom": "alerts",
           "tableTo": "sensors",
-          "columnsFrom": ["sensor_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "sensor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -449,8 +465,12 @@
           "name": "alerts_well_id_well_id_fk",
           "tableFrom": "alerts",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -458,8 +478,12 @@
           "name": "alerts_alert_rule_id_alert_rule_id_fk",
           "tableFrom": "alerts",
           "tableTo": "alert_rule",
-          "columnsFrom": ["alert_rule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "alert_rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -467,8 +491,12 @@
           "name": "alerts_acknowledged_by_user_id_user_id_fk",
           "tableFrom": "alerts",
           "tableTo": "user",
-          "columnsFrom": ["acknowledged_by_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "acknowledged_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -593,8 +621,12 @@
           "name": "api_key_well_id_well_id_fk",
           "tableFrom": "api_key",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -602,8 +634,12 @@
           "name": "api_key_created_by_user_id_user_id_fk",
           "tableFrom": "api_key",
           "tableTo": "user",
-          "columnsFrom": ["created_by_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -613,9 +649,98 @@
         "api_key_hashed_key_unique": {
           "name": "api_key_hashed_key_unique",
           "nullsNotDistinct": false,
-          "columns": ["hashed_key"]
+          "columns": [
+            "hashed_key"
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cron_simulation_run": {
+      "name": "cron_simulation_run",
+      "schema": "",
+      "columns": {
+        "run_key": {
+          "name": "run_key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "response": {
+          "name": "response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "cron_simulation_run_status_started_idx": {
+          "name": "cron_simulation_run_status_started_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "started_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cron_simulation_run_started_idx": {
+          "name": "cron_simulation_run_started_idx",
+          "columns": [
+            {
+              "expression": "started_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -727,8 +852,12 @@
           "name": "crop_history_farm_id_farm_id_fk",
           "tableFrom": "crop_history",
           "tableTo": "farm",
-          "columnsFrom": ["farm_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "farm_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -840,8 +969,12 @@
           "name": "crop_profile_farm_id_farm_id_fk",
           "tableFrom": "crop_profile",
           "tableTo": "farm",
-          "columnsFrom": ["farm_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "farm_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -851,7 +984,9 @@
         "crop_profile_farm_id_unique": {
           "name": "crop_profile_farm_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["farm_id"]
+          "columns": [
+            "farm_id"
+          ]
         }
       },
       "policies": {},
@@ -918,7 +1053,9 @@
         "crop_type_lookup_type_unique": {
           "name": "crop_type_lookup_type_unique",
           "nullsNotDistinct": false,
-          "columns": ["type"]
+          "columns": [
+            "type"
+          ]
         }
       },
       "policies": {},
@@ -1016,7 +1153,9 @@
         "district_name_unique": {
           "name": "district_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         }
       },
       "policies": {},
@@ -1172,8 +1311,12 @@
           "name": "farm_owner_id_user_id_fk",
           "tableFrom": "farm",
           "tableTo": "user",
-          "columnsFrom": ["owner_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1181,8 +1324,12 @@
           "name": "farm_farmer_user_id_user_id_fk",
           "tableFrom": "farm",
           "tableTo": "user",
-          "columnsFrom": ["farmer_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "farmer_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1190,8 +1337,12 @@
           "name": "farm_district_id_district_id_fk",
           "tableFrom": "farm",
           "tableTo": "district",
-          "columnsFrom": ["district_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "district_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1283,8 +1434,12 @@
           "name": "farm_well_farm_id_farm_id_fk",
           "tableFrom": "farm_well",
           "tableTo": "farm",
-          "columnsFrom": ["farm_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "farm_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1292,8 +1447,12 @@
           "name": "farm_well_well_id_well_id_fk",
           "tableFrom": "farm_well",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1303,7 +1462,10 @@
         "farm_well_unique": {
           "name": "farm_well_unique",
           "nullsNotDistinct": false,
-          "columns": ["farm_id", "well_id"]
+          "columns": [
+            "farm_id",
+            "well_id"
+          ]
         }
       },
       "policies": {},
@@ -1370,7 +1532,9 @@
         "growth_stage_lookup_stage_unique": {
           "name": "growth_stage_lookup_stage_unique",
           "nullsNotDistinct": false,
-          "columns": ["stage"]
+          "columns": [
+            "stage"
+          ]
         }
       },
       "policies": {},
@@ -1457,8 +1621,12 @@
           "name": "latest_sensor_state_sensor_id_sensors_id_fk",
           "tableFrom": "latest_sensor_state",
           "tableTo": "sensors",
-          "columnsFrom": ["sensor_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "sensor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1466,8 +1634,12 @@
           "name": "latest_sensor_state_well_id_well_id_fk",
           "tableFrom": "latest_sensor_state",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1539,7 +1711,9 @@
         "role_type_unique": {
           "name": "role_type_unique",
           "nullsNotDistinct": false,
-          "columns": ["type"]
+          "columns": [
+            "type"
+          ]
         }
       },
       "policies": {},
@@ -1606,8 +1780,12 @@
           "name": "sensor_data_sensor_id_sensors_id_fk",
           "tableFrom": "sensor_data",
           "tableTo": "sensors",
-          "columnsFrom": ["sensor_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "sensor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1617,7 +1795,10 @@
         "sensor_data_sensor_timestamp_key": {
           "name": "sensor_data_sensor_timestamp_key",
           "nullsNotDistinct": false,
-          "columns": ["sensor_id", "timestamp"]
+          "columns": [
+            "sensor_id",
+            "timestamp"
+          ]
         }
       },
       "policies": {},
@@ -1741,8 +1922,12 @@
           "name": "sensors_well_id_well_id_fk",
           "tableFrom": "sensors",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1828,8 +2013,12 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1839,7 +2028,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -1946,12 +2137,16 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         },
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ]
         }
       },
       "policies": {},
@@ -2073,8 +2268,12 @@
           "name": "user_profile_user_id_user_id_fk",
           "tableFrom": "user_profile",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2084,12 +2283,16 @@
         "user_profile_user_id_unique": {
           "name": "user_profile_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": [
+            "user_id"
+          ]
         },
         "user_profile_national_id_unique": {
           "name": "user_profile_national_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["national_id"]
+          "columns": [
+            "national_id"
+          ]
         }
       },
       "policies": {},
@@ -2170,8 +2373,12 @@
           "name": "user_role_assignment_user_id_user_id_fk",
           "tableFrom": "user_role_assignment",
           "tableTo": "user",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2179,8 +2386,12 @@
           "name": "user_role_assignment_role_id_role_id_fk",
           "tableFrom": "user_role_assignment",
           "tableTo": "role",
-          "columnsFrom": ["role_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2188,8 +2399,12 @@
           "name": "user_role_assignment_assigned_by_user_id_fk",
           "tableFrom": "user_role_assignment",
           "tableTo": "user",
-          "columnsFrom": ["assigned_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "assigned_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2199,7 +2414,10 @@
         "user_role_assignment_unique": {
           "name": "user_role_assignment_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "role_id"]
+          "columns": [
+            "user_id",
+            "role_id"
+          ]
         }
       },
       "policies": {},
@@ -2428,8 +2646,12 @@
           "name": "well_district_id_district_id_fk",
           "tableFrom": "well",
           "tableTo": "district",
-          "columnsFrom": ["district_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "district_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -2528,8 +2750,12 @@
           "name": "well_status_history_well_id_well_id_fk",
           "tableFrom": "well_status_history",
           "tableTo": "well",
-          "columnsFrom": ["well_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "well_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -2537,8 +2763,12 @@
           "name": "well_status_history_changed_by_user_id_fk",
           "tableFrom": "well_status_history",
           "tableTo": "user",
-          "columnsFrom": ["changed_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "changed_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -2554,17 +2784,31 @@
     "public.alert_rule_operator": {
       "name": "alert_rule_operator",
       "schema": "public",
-      "values": ["gt", "lt", "gte", "lte", "eq"]
+      "values": [
+        "gt",
+        "lt",
+        "gte",
+        "lte",
+        "eq"
+      ]
     },
     "public.alert_severity": {
       "name": "alert_severity",
       "schema": "public",
-      "values": ["critical", "warning", "info"]
+      "values": [
+        "critical",
+        "warning",
+        "info"
+      ]
     },
     "public.alert_type": {
       "name": "alert_type",
       "schema": "public",
-      "values": ["threshold_breach", "anomaly", "sensor_offline"]
+      "values": [
+        "threshold_breach",
+        "anomaly",
+        "sensor_offline"
+      ]
     },
     "public.crop_type": {
       "name": "crop_type",
@@ -2583,7 +2827,12 @@
     "public.farm_status": {
       "name": "farm_status",
       "schema": "public",
-      "values": ["active", "inactive", "suspended", "archived"]
+      "values": [
+        "active",
+        "inactive",
+        "suspended",
+        "archived"
+      ]
     },
     "public.growth_stage": {
       "name": "growth_stage",
@@ -2600,7 +2849,13 @@
     "public.role_type": {
       "name": "role_type",
       "schema": "public",
-      "values": ["admin", "district_manager", "farm_owner", "farmer", "auditor"]
+      "values": [
+        "admin",
+        "district_manager",
+        "farm_owner",
+        "farmer",
+        "auditor"
+      ]
     },
     "public.sensor_type": {
       "name": "sensor_type",
@@ -2616,17 +2871,34 @@
     "public.sensor_unit": {
       "name": "sensor_unit",
       "schema": "public",
-      "values": ["meters", "bar", "celsius", "m3_per_hour", "percent"]
+      "values": [
+        "meters",
+        "bar",
+        "celsius",
+        "m3_per_hour",
+        "percent"
+      ]
     },
     "public.valve_state": {
       "name": "valve_state",
       "schema": "public",
-      "values": ["open", "closed", "partially_open", "auto"]
+      "values": [
+        "open",
+        "closed",
+        "partially_open",
+        "auto"
+      ]
     },
     "public.well_status": {
       "name": "well_status",
       "schema": "public",
-      "values": ["active", "inactive", "maintenance", "offline", "restricted"]
+      "values": [
+        "active",
+        "inactive",
+        "maintenance",
+        "offline",
+        "restricted"
+      ]
     }
   },
   "schemas": {},

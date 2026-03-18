@@ -169,7 +169,8 @@ CREATE TABLE "role" (
 CREATE TABLE "sensor_data" (
 	"sensor_id" uuid NOT NULL,
 	"value" double precision NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+	"timestamp" timestamp with time zone NOT NULL,
+	CONSTRAINT "sensor_data_sensor_timestamp_key" UNIQUE("sensor_id","timestamp")
 );
 --> statement-breakpoint
 CREATE TABLE "sensors" (
@@ -329,7 +330,6 @@ CREATE INDEX "latest_sensor_state_type_idx" ON "latest_sensor_state" USING btree
 CREATE INDEX "role_type_idx" ON "role" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "sensor_data_sensor_id_idx" ON "sensor_data" USING btree ("sensor_id");--> statement-breakpoint
 CREATE INDEX "sensor_data_timestamp_idx" ON "sensor_data" USING btree ("timestamp");--> statement-breakpoint
-CREATE INDEX "sensor_data_sensor_timestamp_idx" ON "sensor_data" USING btree ("sensor_id","timestamp");--> statement-breakpoint
 CREATE INDEX "sensors_well_id_idx" ON "sensors" USING btree ("well_id");--> statement-breakpoint
 CREATE INDEX "sensors_type_idx" ON "sensors" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "sensors_is_active_idx" ON "sensors" USING btree ("is_active");--> statement-breakpoint

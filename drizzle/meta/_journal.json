@@ -8,6 +8,13 @@
       "when": 1773757047120,
       "tag": "0000_conscious_gravity",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773833070031,
+      "tag": "0001_lively_stardust",
+      "breakpoints": true
     }
   ]
 }

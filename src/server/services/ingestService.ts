@@ -172,13 +172,18 @@ export async function ingestReadings(
   }
 
   // 1. Bulk insert into hypertable
-  await db.insert(sensorData).values(
-    validReadings.map((r) => ({
-      sensorId: r.sensorId,
-      value: r.value,
-      timestamp: r.timestamp,
-    })),
-  );
+  await db
+    .insert(sensorData)
+    .values(
+      validReadings.map((r) => ({
+        sensorId: r.sensorId,
+        value: r.value,
+        timestamp: r.timestamp,
+      })),
+    )
+    .onConflictDoNothing({
+      target: [sensorData.sensorId, sensorData.timestamp],
+    });
 
   // 2. UPSERT latest_sensor_state (only advance if newer)
   await db
