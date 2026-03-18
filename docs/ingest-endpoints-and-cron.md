@@ -12,13 +12,13 @@ This document summarizes all current ingestion-related endpoints and clarifies w
 
 ## Current Endpoint Inventory
 
-| Endpoint                  | Method      | Auth Model                              | Primary Use                                            | Status |
-| ------------------------- | ----------- | --------------------------------------- | ------------------------------------------------------ | ------ |
-| /api/sensors/ingest       | POST        | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
-| /api/admin/mock-ingest    | POST        | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
-| /api/cron/simulate-ingest | GET or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
-| /api/wells/:id/metrics    | GET         | Logged-in session cookie                | Read aggregated well metrics                           | Active |
-| /api/health               | GET         | None                                    | Service and DB health verification                     | Active |
+| Endpoint                  | Method                  | Auth Model                              | Primary Use                                            | Status |
+| ------------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------ | ------ |
+| /api/sensors/ingest       | POST                    | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
+| /api/admin/mock-ingest    | POST                    | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
+| /api/cron/simulate-ingest | GET (preferred) or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
+| /api/wells/:id/metrics    | GET                     | Logged-in session cookie                | Read aggregated well metrics                           | Active |
+| /api/health               | GET                     | None                                    | Service and DB health verification                     | Active |
 
 ## Endpoint Details
 
@@ -111,7 +111,7 @@ Typical status codes:
 - 404: No matching sensor found.
 - 422: Body validation failure.
 
-### GET or POST /api/cron/simulate-ingest
+### GET (preferred) or POST /api/cron/simulate-ingest
 
 Purpose:
 
@@ -143,7 +143,7 @@ Behavior:
 
 Method behavior:
 
-- GET: primary method used by Vercel Cron scheduler.
+- GET: preferred method for Vercel Cron scheduler runs.
 - POST: useful for manual triggers and scripted operational runs.
 
 Typical status codes:
@@ -204,7 +204,7 @@ Security model:
 
 - Protect with CRON_SECRET header validation.
 - Do not require browser session cookies.
-- Restrict to POST and server-side execution.
+- Allow GET for Vercel Cron; restrict POST to server-side execution only.
 
 Execution model:
 
