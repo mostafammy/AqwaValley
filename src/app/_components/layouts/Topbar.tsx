@@ -78,6 +78,7 @@ export function Topbar({
       });
     } catch (err) {
       console.error("Unexpected error during sign out:", err);
+      alert("حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.");
     }
   };
 
