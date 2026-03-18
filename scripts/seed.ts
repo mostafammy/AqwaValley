@@ -16,6 +16,8 @@ import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 
 import * as schema from "../src/server/db/schema";
+// auth import moved to dynamic imports inside functions to avoid early env validation
+
 
 function loadLocalEnv() {
   const envFiles = [".env.local", ".env"];
@@ -740,25 +742,40 @@ async function seedLookupCatalogs() {
 async function seedAdminUser() {
   console.log("  Creating seed admin user...");
   const now = new Date();
+  const username = "admin_seed";
+  const email = `admin@${SEED_EMAIL_DOMAIN}`;
 
-  await db
-    .insert(schema.user)
-    .values({
-      id: SEED_ADMIN_ID,
-      name: "Seed Administrator",
-      email: `admin@${SEED_EMAIL_DOMAIN}`,
-      username: "admin_seed",
-      displayUsername: "Admin_Seed",
-      emailVerified: true,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoNothing();
+  const { auth } = await import("../src/server/better-auth/config");
+
+  if (!auth?.api) {
+    throw new Error("Better Auth API not initialized. Check environment variables.");
+  }
+
+  try {
+    // Create via Better Auth API
+    // @ts-ignore
+    const signUp = auth.api.signUpUsername || auth.api.signUp.username;
+    await signUp({
+      body: {
+        name: "Seed Administrator",
+        username,
+        email,
+        password: "password123",
+      },
+    });
+    console.log(`    Admin account created: ${username}`);
+  } catch (e: any) {
+    if (e.message?.includes("already exists") || e.code === "USER_ALREADY_EXISTS") {
+      console.log(`    Admin account ${username} already exists.`);
+    } else {
+      console.error(`    Error creating admin account:`, e.message);
+    }
+  }
 
   const [adminUser] = await db
     .select({ id: schema.user.id })
     .from(schema.user)
-    .where(eq(schema.user.email, `admin@${SEED_EMAIL_DOMAIN}`))
+    .where(eq(schema.user.username, username))
     .limit(1);
 
   if (!adminUser) {
@@ -983,30 +1000,62 @@ async function createRegionalUser(args: {
   nationalIdSeed: number;
   roleType: "farm_owner" | "farmer";
 }) {
-  const userId = randomUUID();
+  const nationalId = buildNationalId(args.nationalIdSeed);
   const slug = slugify(args.fullName);
   const identitySuffix = args.nationalIdSeed.toString().padStart(3, "0");
-  const now = new Date();
+  const email = `${slug}_${identitySuffix}@${SEED_EMAIL_DOMAIN}`;
 
-  await db.insert(schema.user).values({
-    id: userId,
-    name: args.fullName,
-    email: `${slug}_${identitySuffix}@${SEED_EMAIL_DOMAIN}`,
-    username: `${slug}_${identitySuffix}`.slice(0, 40),
-    displayUsername: args.fullName,
-    emailVerified: true,
-    createdAt: now,
-    updatedAt: now,
-  });
+  const { auth } = await import("../src/server/better-auth/config");
 
+  if (!auth?.api) {
+    throw new Error("Better Auth API not initialized.");
+  }
+
+  try {
+    // Create via Better Auth API
+    // @ts-ignore
+    const signUp = auth.api.signUpUsername || auth.api.signUp.username;
+    await signUp({
+      body: {
+        name: args.fullName,
+        username: nationalId, // Use National ID as username to match our login logic
+        email: email,
+        password: "password123",
+      },
+    });
+  } catch (e: any) {
+    if (!e.message?.includes("already exists") && e.code !== "USER_ALREADY_EXISTS") {
+      console.error(`    Error creating user ${nationalId}:`, e.message);
+    }
+  }
+
+  const [userRecord] = await db
+    .select({ id: schema.user.id })
+    .from(schema.user)
+    .where(eq(schema.user.username, nationalId))
+    .limit(1);
+
+  if (!userRecord) {
+    throw new Error(`User not found after creation: ${nationalId}`);
+  }
+
+  const userId = userRecord.id;
+
+  // Add/Update user profile
   await db.insert(schema.userProfile).values({
     userId,
-    nationalId: buildNationalId(args.nationalIdSeed),
+    nationalId,
     fullName: args.fullName,
-    phoneNumber:
-      `+2010${args.nationalIdSeed.toString().padStart(8, "0")}`.slice(0, 14),
+    phoneNumber: `+2010${args.nationalIdSeed.toString().padStart(8, "0")}`.slice(0, 14),
     districtId: args.districtId,
     isActive: true,
+  }).onConflictDoUpdate({
+    target: schema.userProfile.userId,
+    set: {
+      nationalId,
+      fullName: args.fullName,
+      districtId: args.districtId,
+    }
   });
 
   const [roleRecord] = await db
@@ -1014,13 +1063,14 @@ async function createRegionalUser(args: {
     .from(schema.role)
     .where(eq(schema.role.type, args.roleType))
     .limit(1);
+
   if (!roleRecord) throw new Error(`Role not found: ${args.roleType}`);
 
   await db.insert(schema.userRoleAssignment).values({
     userId,
     roleId: roleRecord.id,
     assignedBy: SEED_ADMIN_ID,
-  });
+  }).onConflictDoNothing();
 
   return { userId };
 }

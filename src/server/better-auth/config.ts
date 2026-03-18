@@ -6,9 +6,9 @@ import {
   NATIONAL_ID_MAX_LENGTH,
   NATIONAL_ID_MIN_LENGTH,
   nationalIdSchema,
-} from "~/lib/national-id";
-import { env } from "~/env";
-import { db } from "~/server/db";
+} from "../../lib/national-id";
+import { env } from "../../env";
+import { db } from "../db";
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
@@ -18,6 +18,13 @@ export const auth = betterAuth({
   disabledPaths: ["/is-username-available"],
   emailAndPassword: {
     enabled: true,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days (standard server duration)
+    updateAge: 60 * 60 * 24, // 1 day
+    cookieCache: {
+      enabled: false,
+    },
   },
   plugins: [
     username({
