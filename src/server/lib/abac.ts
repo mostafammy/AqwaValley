@@ -1,4 +1,4 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import type { db as DbInstance } from "~/server/db";
@@ -135,7 +135,7 @@ export async function requireWellAccess(
 export async function buildWellDistrictFilter(
   ctx: AuthContext,
   districtIds?: string[],
-): Promise<ReturnType<typeof inArray> | undefined> {
+): Promise<ReturnType<typeof inArray> | ReturnType<typeof sql> | undefined> {
   const accessible = await getAccessibleDistrictIds(ctx);
   if (accessible === null) {
     // admin/auditor: no filter, or apply the provided override
@@ -147,6 +147,6 @@ export async function buildWellDistrictFilter(
     ? districtIds.filter((id) => accessible.includes(id))
     : accessible;
 
-  if (ids.length === 0) return inArray(well.districtId, ["__no_access__"]);
+  if (ids.length === 0) return sql`1 = 0`;
   return inArray(well.districtId, ids);
 }
