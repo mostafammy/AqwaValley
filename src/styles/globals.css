@@ -422,8 +422,14 @@
     text-align: right;
   }
 
-  .topbar-dropdown-item:hover {
+  .topbar-dropdown-item:hover,
+  .topbar-dropdown-item:focus-visible {
     background: rgba(255, 255, 255, 0.08);
+    outline: none;
+  }
+
+  .topbar-dropdown-item:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-blue);
   }
 
   .topbar-dropdown-item.danger {

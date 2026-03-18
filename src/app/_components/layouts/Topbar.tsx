@@ -63,14 +63,29 @@ export function Topbar({
   };
 
   const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-          router.refresh();
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/");
+            router.refresh();
+          },
+          onError: (ctx) => {
+            console.error("Sign out failed:", ctx.error);
+            alert("حدث خطأ أثناء تسجيل الخروج. يرجى المحاولة مرة أخرى.");
+          },
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.error("Unexpected error during sign out:", err);
+    }
+  };
+
+  const handleSettingsClick = () => {
+    setIsProfileOpen(false);
+    // TODO: Implement actual settings navigation or modal
+    console.log("Navigating to settings...");
+    // router.push("/settings"); 
   };
 
   const roleLabel = ROLE_LABELS[userRole] || userRole;
@@ -152,6 +167,8 @@ export function Topbar({
           <button 
             className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80 border-none bg-transparent p-0 text-inherit"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
+            aria-haspopup="true"
+            aria-expanded={isProfileOpen}
           >
             <div className="hidden flex-col items-end sm:flex text-right">
               <span className="text-xs font-semibold text-white">{userName}</span>
@@ -167,7 +184,10 @@ export function Topbar({
                 <p className="text-xs font-bold text-white mb-0.5">{userName}</p>
                 <p className="text-[10px] text-light-text">{roleLabel}</p>
               </div>
-              <button className="topbar-dropdown-item">
+              <button 
+                className="topbar-dropdown-item"
+                onClick={handleSettingsClick}
+              >
                 <Settings className="h-4 w-4" />
                 <span>إعدادات الحساب</span>
               </button>
@@ -183,5 +203,6 @@ export function Topbar({
         </div>
       </div>
     </header>
+
   );
 }

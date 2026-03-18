@@ -11,6 +11,13 @@ import { auth } from "../better-auth/config";
  * @throws Error - If the required "admin" or "farmer" roles are not present after seeding.
  */
 async function main() {
+  // 0. Production Guard
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "true") {
+    console.error("❌ ERROR: Database seeding is disabled in production environments.");
+    console.error("To override, set ALLOW_SEED=true (NOT RECOMMENDED).");
+    process.exit(1);
+  }
+
   console.log("🌱 Starting database seed for testing...");
 
   // 1. Seed Roles
@@ -53,11 +60,13 @@ async function main() {
     }
   ];
 
+  let seedFailed = false;
+
   for (const acc of testAccounts) {
     try {
       // Use internal Better Auth API directly instead of fetch to avoid dev server dependency
       // @ts-ignore
-      const result = await auth.api.signUpUsername({
+      await auth.api.signUpUsername({
         body: {
             name: acc.name,
             username: acc.username,
@@ -94,8 +103,14 @@ async function main() {
          }
       } else {
          console.error(`Error processing ${acc.name}:`, e);
+         seedFailed = true;
       }
     }
+  }
+
+  if (seedFailed) {
+    console.error("❌ Seed completed with errors.");
+    process.exit(1);
   }
 
   console.log("✅ Seed completed successfully.");

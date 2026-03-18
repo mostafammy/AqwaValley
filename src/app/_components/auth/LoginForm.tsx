@@ -120,7 +120,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn btn-primary btn-lg w-full flex justify-center text-sm! font-bold!"
+              className="btn btn-primary btn-lg w-full flex justify-center !text-sm !font-bold"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "تسجيل الدخول"}
             </button>
