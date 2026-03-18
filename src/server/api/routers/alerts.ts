@@ -66,19 +66,39 @@ export const alertsRouter = createTRPCRouter({
 
       const offset = (input.page - 1) * input.pageSize;
 
-      const [items, countResult] = await Promise.all([
-        ctx.db
-          .select()
-          .from(alerts)
-          .where(conditions.length > 0 ? and(...conditions) : undefined)
-          .orderBy(desc(alerts.createdAt))
-          .limit(input.pageSize)
-          .offset(offset),
-        ctx.db
-          .select({ count: sql<number>`count(*)` })
-          .from(alerts)
-          .where(conditions.length > 0 ? and(...conditions) : undefined),
-      ]);
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [items, countResult] = districtFilter
+        ? await Promise.all([
+            ctx.db
+              .select({ alert: alerts })
+              .from(alerts)
+              .innerJoin(well, eq(well.id, alerts.wellId))
+              .where(whereClause)
+              .orderBy(desc(alerts.createdAt))
+              .limit(input.pageSize)
+              .offset(offset)
+              .then((rows) => rows.map((row) => row.alert)),
+            ctx.db
+              .select({ count: sql<number>`count(*)` })
+              .from(alerts)
+              .innerJoin(well, eq(well.id, alerts.wellId))
+              .where(whereClause),
+          ])
+        : await Promise.all([
+            ctx.db
+              .select()
+              .from(alerts)
+              .where(whereClause)
+              .orderBy(desc(alerts.createdAt))
+              .limit(input.pageSize)
+              .offset(offset),
+            ctx.db
+              .select({ count: sql<number>`count(*)` })
+              .from(alerts)
+              .where(whereClause),
+          ]);
 
       return {
         items,
