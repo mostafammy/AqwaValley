@@ -142,7 +142,7 @@ async function reclaimStaleRun(
     WHERE
       run_key = ${runKey}
       AND status = 'running'
-      AND started_at = ${expectedStartedAt}
+      AND started_at <= ${expectedStartedAt}
     RETURNING run_key
   `);
 
