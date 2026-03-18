@@ -4,8 +4,14 @@ import { z } from "zod";
 import { env } from "~/env";
 import { validateCronRequest } from "~/lib/cronAuth";
 import { runSimulatorCron } from "~/server/services/simulatorCronIngest";
+import {
+  beginRun,
+  completeRun,
+  failRun,
+} from "~/server/services/simulatorRunRegistry";
 
 const bodySchema = z.object({
+  runKey: z.string().min(8).max(128).optional(),
   wellIds: z.array(z.string().uuid()).min(1).optional(),
   readingsPerSensor: z.number().int().min(1).max(10).optional().default(1),
   anomalyRate: z.number().min(0).max(1).optional(),
@@ -31,6 +37,18 @@ function errorResponse(
       },
     },
     { status },
+  );
+}
+
+function extractRunKey(
+  headers: Headers,
+  bodyRunKey?: string,
+): string | undefined {
+  return (
+    bodyRunKey ??
+    headers.get("x-idempotency-key") ??
+    headers.get("x-run-key") ??
+    undefined
   );
 }
 
@@ -73,17 +91,67 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const runKey = extractRunKey(request.headers, parsed.data.runKey);
+
+  if (runKey) {
+    const existing = await beginRun(runKey);
+
+    if (existing.status === "completed") {
+      const replayPayload =
+        existing.response && typeof existing.response === "object"
+          ? {
+              ...(existing.response as Record<string, unknown>),
+              idempotentReplay: true,
+            }
+          : {
+              runId: runKey,
+              idempotentReplay: true,
+              response: existing.response,
+            };
+      return NextResponse.json(replayPayload, { status: 200 });
+    }
+
+    if (existing.status === "running") {
+      return errorResponse(
+        409,
+        "RUN_IN_PROGRESS",
+        "A cron simulation with this run key is already running",
+      );
+    }
+
+    if (existing.status === "failed") {
+      return errorResponse(
+        409,
+        "RUN_ALREADY_FAILED",
+        "A cron simulation with this run key has already failed",
+        { reason: existing.error },
+      );
+    }
+  }
+
   try {
     const result = await runSimulatorCron({
+      runId: runKey,
       wellIds: parsed.data.wellIds,
       readingsPerSensor: parsed.data.readingsPerSensor,
       anomalyRate: parsed.data.anomalyRate,
       timestamp: parsed.data.timestamp,
     });
 
+    if (runKey) {
+      await completeRun(runKey, result);
+    }
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("[cron_simulate_ingest_error]", error);
+
+    if (runKey) {
+      const message =
+        error instanceof Error ? error.message : "Unknown cron execution error";
+      await failRun(runKey, message);
+    }
+
     return errorResponse(
       500,
       "CRON_RUN_FAILED",

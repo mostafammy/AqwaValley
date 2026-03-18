@@ -7,12 +7,26 @@ import {
 import { discoverSimulatorSensors } from "~/server/services/simulatorSensorDiscovery";
 import { generateSimulatorValue } from "~/server/services/simulatorValueGenerator";
 import { logger } from "~/lib/logger";
+
 const MAX_SENSORS_PER_RUN = Number.parseInt(
   process.env.SIM_CRON_MAX_SENSORS ?? "1000",
   10,
 );
+const WELL_CONCURRENCY = Math.max(
+  1,
+  Number.parseInt(process.env.SIM_CRON_WELL_CONCURRENCY ?? "8", 10),
+);
+const READING_CHUNK_SIZE = Math.max(
+  1,
+  Number.parseInt(process.env.SIM_CRON_READING_CHUNK_SIZE ?? "50", 10),
+);
+
+type SimulatorSensor = Awaited<
+  ReturnType<typeof discoverSimulatorSensors>
+>[number];
 
 export type SimulatorCronOptions = {
+  runId?: string;
   wellIds?: string[];
   readingsPerSensor: number;
   anomalyRate?: number;
@@ -50,10 +64,122 @@ function repeat<T>(count: number, factory: (index: number) => T): T[] {
   return out;
 }
 
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+function buildReadingsForWell(params: {
+  sensors: SimulatorSensor[];
+  baseTimestamp: Date;
+  readingsPerSensor: number;
+  anomalyRate?: number;
+}): IngestReading[] {
+  return params.sensors.flatMap((sensor) =>
+    repeat(params.readingsPerSensor, (offset) => {
+      const timestamp = new Date(params.baseTimestamp);
+      timestamp.setSeconds(timestamp.getSeconds() - offset);
+
+      return {
+        sensorId: sensor.sensorId,
+        value: generateSimulatorValue({
+          sensorId: sensor.sensorId,
+          sensorType: sensor.sensorType,
+          timestamp,
+          anomalyRate: params.anomalyRate,
+        }),
+        timestamp,
+        type: sensor.sensorType,
+        unit: sensor.unit,
+      };
+    }),
+  );
+}
+
+type PerWellResult = {
+  wellId: string;
+  sensors: number;
+  generated: number;
+  accepted: number;
+  rejected: number;
+  errors: { sensorId: string; reason: string }[];
+};
+
+async function processWell(params: {
+  runId: string;
+  wellId: string;
+  sensors: SimulatorSensor[];
+  baseTimestamp: Date;
+  readingsPerSensor: number;
+  anomalyRate?: number;
+}): Promise<PerWellResult> {
+  const readings = buildReadingsForWell({
+    sensors: params.sensors,
+    baseTimestamp: params.baseTimestamp,
+    readingsPerSensor: params.readingsPerSensor,
+    anomalyRate: params.anomalyRate,
+  });
+
+  let accepted = 0;
+  let rejected = 0;
+  const errors: { sensorId: string; reason: string }[] = [];
+
+  const readingChunks = chunkArray(readings, READING_CHUNK_SIZE);
+  for (const chunk of readingChunks) {
+    try {
+      const result = await ingestReadings(
+        {
+          id: `cron-${params.runId}`,
+          name: "cron-simulator",
+          wellId: params.wellId,
+        },
+        chunk,
+      );
+
+      accepted += result.accepted;
+      rejected += result.rejected;
+      errors.push(...result.errors);
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : "Chunk ingest failed";
+
+      rejected += chunk.length;
+      errors.push(
+        ...chunk.map((reading) => ({
+          sensorId: reading.sensorId,
+          reason,
+        })),
+      );
+
+      logger.error(
+        {
+          runId: params.runId,
+          wellId: params.wellId,
+          chunkSize: chunk.length,
+          reason,
+        },
+        "simulator.cron.chunk_failed",
+      );
+    }
+  }
+
+  return {
+    wellId: params.wellId,
+    sensors: params.sensors.length,
+    generated: readings.length,
+    accepted,
+    rejected,
+    errors,
+  };
+}
+
 export async function runSimulatorCron(
   options: SimulatorCronOptions,
 ): Promise<SimulatorCronResult> {
-  const runId = randomUUID();
+  const runId = options.runId ?? randomUUID();
   const started = Date.now();
   const baseTimestamp = options.timestamp ?? new Date();
 
@@ -62,7 +188,7 @@ export async function runSimulatorCron(
   });
   const limitedSensors = allSensors.slice(0, MAX_SENSORS_PER_RUN);
 
-  const grouped = new Map<string, typeof limitedSensors>();
+  const grouped = new Map<string, SimulatorSensor[]>();
   for (const sensor of limitedSensors) {
     const list = grouped.get(sensor.wellId) ?? [];
     list.push(sensor);
@@ -84,44 +210,36 @@ export async function runSimulatorCron(
     "simulator.cron.start",
   );
 
-  for (const [wellId, sensors] of grouped.entries()) {
-    const readings: IngestReading[] = sensors.flatMap((sensor) =>
-      repeat(options.readingsPerSensor, (offset) => {
-        const timestamp = new Date(baseTimestamp);
-        timestamp.setSeconds(timestamp.getSeconds() - offset);
+  const entries = [...grouped.entries()];
+  for (let i = 0; i < entries.length; i += WELL_CONCURRENCY) {
+    const batch = entries.slice(i, i + WELL_CONCURRENCY);
 
-        return {
-          sensorId: sensor.sensorId,
-          value: generateSimulatorValue({
-            sensorId: sensor.sensorId,
-            sensorType: sensor.sensorType,
-            timestamp,
-            anomalyRate: options.anomalyRate,
-          }),
-          timestamp,
-          type: sensor.sensorType,
-          unit: sensor.unit,
-        };
-      }),
+    const results = await Promise.all(
+      batch.map(([wellId, sensors]) =>
+        processWell({
+          runId,
+          wellId,
+          sensors,
+          baseTimestamp,
+          readingsPerSensor: options.readingsPerSensor,
+          anomalyRate: options.anomalyRate,
+        }),
+      ),
     );
 
-    totalGenerated += readings.length;
+    for (const result of results) {
+      totalGenerated += result.generated;
+      totalAccepted += result.accepted;
+      totalRejected += result.rejected;
 
-    const result = await ingestReadings(
-      { id: `cron-${runId}`, name: "cron-simulator", wellId },
-      readings,
-    );
-
-    totalAccepted += result.accepted;
-    totalRejected += result.rejected;
-
-    perWell[wellId] = {
-      sensors: sensors.length,
-      generated: readings.length,
-      accepted: result.accepted,
-      rejected: result.rejected,
-      errors: result.errors,
-    };
+      perWell[result.wellId] = {
+        sensors: result.sensors,
+        generated: result.generated,
+        accepted: result.accepted,
+        rejected: result.rejected,
+        errors: result.errors,
+      };
+    }
   }
 
   const durationMs = Date.now() - started;

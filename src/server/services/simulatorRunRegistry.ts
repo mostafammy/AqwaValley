@@ -6,7 +6,7 @@ export type RunBeginResult =
   | { status: "started" }
   | { status: "running" }
   | { status: "failed"; error: string | null }
-  | { status: "completed"; response: unknown | null };
+  | { status: "completed"; response: unknown };
 
 async function ensureRunRegistryTable(): Promise<void> {
   await db.execute(sql`
