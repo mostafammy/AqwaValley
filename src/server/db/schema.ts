@@ -94,6 +94,20 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "sensor_offline",
 ]);
 
+export const alertSeverityEnum = pgEnum("alert_severity", [
+  "critical",
+  "warning",
+  "info",
+]);
+
+export const alertRuleOperatorEnum = pgEnum("alert_rule_operator", [
+  "gt",
+  "lt",
+  "gte",
+  "lte",
+  "eq",
+]);
+
 // ============================================================================
 // AUTHENTICATION TABLES (Better Auth managed)
 // ============================================================================
@@ -310,6 +324,8 @@ export const well = pgTable(
     districtId: uuid("district_id")
       .notNull()
       .references(() => district.id, { onDelete: "restrict" }),
+    name: text("name").notNull(),
+    depthM: numeric("depth_m", { precision: 10, scale: 2 }),
     status: wellStatusEnum("status").default("active").notNull(),
     hasSensor: boolean("has_sensor").default(false).notNull(),
     latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
@@ -538,7 +554,7 @@ export const cropHistory = pgTable(
 
 /**
  * sensors: Device registry per well.
- * Defines physical sensor type and unit for future real-time ingestion.
+ * Stores sensor identity, type, unit, and operational activation state.
  */
 export const sensors = pgTable(
   "sensors",
@@ -549,13 +565,20 @@ export const sensors = pgTable(
       .references(() => well.id, { onDelete: "restrict" }),
     type: sensorTypeEnum("type").notNull(),
     unit: sensorUnitEnum("unit").notNull(),
+    name: text("name"),
+    description: text("description"),
+    isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (t) => [
     index("sensors_well_id_idx").on(t.wellId),
     index("sensors_type_idx").on(t.type),
+    index("sensors_is_active_idx").on(t.isActive),
   ],
 );
 
@@ -575,12 +598,126 @@ export const sensorData = pgTable(
   (t) => [
     index("sensor_data_sensor_id_idx").on(t.sensorId),
     index("sensor_data_timestamp_idx").on(t.timestamp),
-    index("sensor_data_sensor_timestamp_idx").on(t.sensorId, t.timestamp),
+    unique("sensor_data_sensor_timestamp_key").on(t.sensorId, t.timestamp),
+  ],
+);
+
+/**
+ * alert_rules: DB-driven threshold rules for sensor-based alert triggering.
+ * Evaluated on every ingest — no hardcoded thresholds in application code.
+ */
+export const alertRule = pgTable(
+  "alert_rule",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    sensorType: sensorTypeEnum("sensor_type").notNull(),
+    operator: alertRuleOperatorEnum("operator").notNull(),
+    threshold: doublePrecision("threshold").notNull(),
+    severity: alertSeverityEnum("severity").notNull(),
+    suppressionWindowMinutes: integer("suppression_window_minutes")
+      .default(15)
+      .notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("alert_rule_well_id_idx").on(t.wellId),
+    index("alert_rule_sensor_type_idx").on(t.sensorType),
+    index("alert_rule_is_active_idx").on(t.isActive),
+  ],
+);
+
+/**
+ * latest_sensor_state: Denormalized current-state table for O(1) dashboard reads.
+ * Updated via UPSERT on every sensor ingest — eliminates full hypertable scans.
+ */
+export const latestSensorState = pgTable(
+  "latest_sensor_state",
+  {
+    sensorId: uuid("sensor_id")
+      .primaryKey()
+      .references(() => sensors.id, { onDelete: "cascade" }),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    value: doublePrecision("value").notNull(),
+    unit: sensorUnitEnum("unit").notNull(),
+    type: sensorTypeEnum("type").notNull(),
+    lastUpdatedAt: timestamp("last_updated_at", {
+      withTimezone: true,
+    }).notNull(),
+  },
+  (t) => [
+    index("latest_sensor_state_well_id_idx").on(t.wellId),
+    index("latest_sensor_state_type_idx").on(t.type),
+  ],
+);
+
+/**
+ * cron_simulation_run: Durable idempotency and observability registry for
+ * scheduled simulation runs.
+ */
+export const cronSimulationRun = pgTable(
+  "cron_simulation_run",
+  {
+    runKey: text("run_key").primaryKey(),
+    status: text("status").notNull(),
+    attemptToken: text("attempt_token"),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    response: jsonb("response"),
+    error: text("error"),
+  },
+  (t) => [
+    index("cron_simulation_run_status_started_idx").on(t.status, t.startedAt),
+    index("cron_simulation_run_started_idx").on(t.startedAt),
+  ],
+);
+
+/**
+ * api_keys: Hashed credentials for IoT sensor authentication.
+ * Raw keys are returned once at creation and never stored in plaintext.
+ */
+export const apiKey = pgTable(
+  "api_key",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    hashedKey: text("hashed_key").notNull().unique(),
+    name: text("name").notNull(),
+    wellId: uuid("well_id").references(() => well.id, { onDelete: "cascade" }),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("api_key_hashed_key_idx").on(t.hashedKey),
+    index("api_key_well_id_idx").on(t.wellId),
+    index("api_key_is_active_idx").on(t.isActive),
   ],
 );
 
 /**
  * alerts: Sensor-originated operational alerts.
+ * Enriched with well reference, severity, and acknowledgement tracking.
  */
 export const alerts = pgTable(
   "alerts",
@@ -589,16 +726,31 @@ export const alerts = pgTable(
     sensorId: uuid("sensor_id")
       .notNull()
       .references(() => sensors.id, { onDelete: "cascade" }),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    alertRuleId: uuid("alert_rule_id").references(() => alertRule.id, {
+      onDelete: "set null",
+    }),
     type: alertTypeEnum("type").notNull(),
+    severity: alertSeverityEnum("severity").default("warning").notNull(),
     message: text("message").notNull(),
+    acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+    acknowledgedByUserId: text("acknowledged_by_user_id").references(
+      () => user.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (t) => [
     index("alerts_sensor_id_idx").on(t.sensorId),
+    index("alerts_well_id_idx").on(t.wellId),
     index("alerts_type_idx").on(t.type),
+    index("alerts_severity_idx").on(t.severity),
     index("alerts_created_at_idx").on(t.createdAt),
+    index("alerts_acknowledged_at_idx").on(t.acknowledgedAt),
   ],
 );
 
@@ -679,6 +831,10 @@ export const wellRelations = relations(well, ({ one, many }) => ({
   statusHistory: many(wellStatusHistory),
   farmWells: many(farmWell),
   sensors: many(sensors),
+  alertRules: many(alertRule),
+  alerts: many(alerts),
+  latestSensorStates: many(latestSensorState),
+  apiKeys: many(apiKey),
 }));
 
 export const sensorsRelations = relations(sensors, ({ one, many }) => ({
@@ -688,6 +844,10 @@ export const sensorsRelations = relations(sensors, ({ one, many }) => ({
   }),
   sensorData: many(sensorData),
   alerts: many(alerts),
+  latestState: one(latestSensorState, {
+    fields: [sensors.id],
+    references: [latestSensorState.sensorId],
+  }),
 }));
 
 export const sensorDataRelations = relations(sensorData, ({ one }) => ({
@@ -701,6 +861,18 @@ export const alertsRelations = relations(alerts, ({ one }) => ({
   sensor: one(sensors, {
     fields: [alerts.sensorId],
     references: [sensors.id],
+  }),
+  well: one(well, {
+    fields: [alerts.wellId],
+    references: [well.id],
+  }),
+  alertRule: one(alertRule, {
+    fields: [alerts.alertRuleId],
+    references: [alertRule.id],
+  }),
+  acknowledgedByUser: one(user, {
+    fields: [alerts.acknowledgedByUserId],
+    references: [user.id],
   }),
 }));
 
@@ -767,5 +939,42 @@ export const cropHistoryRelations = relations(cropHistory, ({ one }) => ({
   farm: one(farm, {
     fields: [cropHistory.farmId],
     references: [farm.id],
+  }),
+}));
+
+export const alertRuleRelations = relations(alertRule, ({ one, many }) => ({
+  well: one(well, {
+    fields: [alertRule.wellId],
+    references: [well.id],
+  }),
+  createdByUser: one(user, {
+    fields: [alertRule.createdByUserId],
+    references: [user.id],
+  }),
+  alerts: many(alerts),
+}));
+
+export const latestSensorStateRelations = relations(
+  latestSensorState,
+  ({ one }) => ({
+    sensor: one(sensors, {
+      fields: [latestSensorState.sensorId],
+      references: [sensors.id],
+    }),
+    well: one(well, {
+      fields: [latestSensorState.wellId],
+      references: [well.id],
+    }),
+  }),
+);
+
+export const apiKeyRelations = relations(apiKey, ({ one }) => ({
+  well: one(well, {
+    fields: [apiKey.wellId],
+    references: [well.id],
+  }),
+  createdByUser: one(user, {
+    fields: [apiKey.createdByUserId],
+    references: [user.id],
   }),
 }));

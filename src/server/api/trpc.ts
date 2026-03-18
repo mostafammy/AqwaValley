@@ -8,11 +8,13 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+import { role, userRoleAssignment } from "~/server/db/schema";
 
 /**
  * 1. CONTEXT
@@ -30,9 +32,21 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await auth.api.getSession({
     headers: opts.headers,
   });
+
+  let userRoles: string[] = [];
+  if (session?.user?.id) {
+    const assignments = await db
+      .select({ type: role.type })
+      .from(userRoleAssignment)
+      .innerJoin(role, eq(userRoleAssignment.roleId, role.id))
+      .where(eq(userRoleAssignment.userId, session.user.id));
+    userRoles = assignments.map((a) => a.type);
+  }
+
   return {
     db,
     session,
+    userRoles,
     ...opts,
   };
 };
@@ -129,6 +143,69 @@ export const protectedProcedure = t.procedure
       ctx: {
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+
+/**
+ * Viewer procedure — any authenticated user (read-only access).
+ */
+export const viewerProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+        userRoles: ctx.userRoles,
+      },
+    });
+  });
+
+/**
+ * Operator procedure — requires admin or district_manager role.
+ */
+export const operatorProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    if (!ctx.userRoles.some((r) => ["admin", "district_manager"].includes(r))) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Operator or admin role required",
+      });
+    }
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+        userRoles: ctx.userRoles,
+      },
+    });
+  });
+
+/**
+ * Admin procedure — requires admin role.
+ */
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    if (!ctx.userRoles.includes("admin")) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Admin role required",
+      });
+    }
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+        userRoles: ctx.userRoles,
       },
     });
   });
