@@ -43,7 +43,7 @@ async function main() {
       name: string;
       well_id: string | null;
     }[]
-  >`select id, name, well_id from api_key where hashed_key = ${hash} and is_active = true`;
+  >`select id, name, well_id from api_key where hashed_key = ${hash} and is_active = true and (expires_at is null or expires_at > now())`;
 
   if (keys.length === 0) {
     console.log("No active API key found for this raw key.");
