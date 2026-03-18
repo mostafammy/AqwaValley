@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { db } from "~/server/db";
-import { well } from "~/server/db/schema";
+import { role, userRoleAssignment, well } from "~/server/db/schema";
 import { auth } from "~/server/better-auth";
 import { eq, sql } from "drizzle-orm";
+import { canAccessWell } from "~/server/lib/abac";
 
 // Query for metrics from TimescaleDB using time_bucket
 async function fetchMetrics(
@@ -100,6 +101,16 @@ function errorResponse(
   );
 }
 
+async function getUserRoles(userId: string): Promise<string[]> {
+  const rows = await db
+    .select({ type: role.type })
+    .from(userRoleAssignment)
+    .innerJoin(role, eq(userRoleAssignment.roleId, role.id))
+    .where(eq(userRoleAssignment.userId, userId));
+
+  return rows.map((r) => r.type);
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -120,6 +131,22 @@ export async function GET(
     }
 
     const wellId = parsedParams.data.id;
+
+    const userRoles = await getUserRoles(session.user.id);
+    const canReadWell = await canAccessWell(
+      {
+        db,
+        session: { user: { id: session.user.id } },
+        userRoles,
+      },
+      wellId,
+    );
+
+    if (!canReadWell) {
+      return errorResponse(403, "FORBIDDEN", "Access to this well is denied", {
+        wellId,
+      });
+    }
 
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);
     const parsedQuery = querySchema.safeParse(searchParams);
