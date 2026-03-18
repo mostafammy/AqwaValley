@@ -8,9 +8,17 @@ import { and, eq } from "drizzle-orm";
 import { ingestReadings } from "~/server/services/ingestService";
 import { type ApiKeyContext } from "~/lib/apiKeyAuth";
 
+const sensorTypeValues = [
+  "water_level",
+  "pressure",
+  "flow_rate",
+  "temperature",
+  "humidity",
+] as const;
+
 const bodySchema = z.object({
   wellId: z.string().uuid(),
-  sensorType: z.string(),
+  sensorType: z.enum(sensorTypeValues),
   value: z.number().finite(),
   timestamp: z
     .string()
@@ -75,9 +83,7 @@ export async function POST(request: NextRequest) {
   const [sensor] = await db
     .select({ id: sensors.id })
     .from(sensors)
-    .where(
-      and(eq(sensors.wellId, wellId), eq(sensors.type, sensorType as never)),
-    )
+    .where(and(eq(sensors.wellId, wellId), eq(sensors.type, sensorType)))
     .limit(1);
 
   if (!sensor) {
