@@ -8,50 +8,68 @@ export type RunBeginResult =
   | { status: "failed"; error: string | null }
   | { status: "completed"; response: unknown };
 
+let ensureTablePromise: Promise<void> | null = null;
+
 async function ensureRunRegistryTable(): Promise<void> {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS cron_simulation_run (
-      run_key text PRIMARY KEY,
-      status text NOT NULL,
-      started_at timestamptz NOT NULL DEFAULT NOW(),
-      completed_at timestamptz NULL,
-      response jsonb NULL,
-      error text NULL
+  ensureTablePromise ??= db
+    .execute(
+      sql`
+      CREATE TABLE IF NOT EXISTS cron_simulation_run (
+        run_key text PRIMARY KEY,
+        status text NOT NULL,
+        started_at timestamptz NOT NULL DEFAULT NOW(),
+        completed_at timestamptz NULL,
+        response jsonb NULL,
+        error text NULL
+      )
+    `,
     )
-  `);
+    .then(() => undefined);
+
+  await ensureTablePromise;
 }
 
 export async function beginRun(runKey: string): Promise<RunBeginResult> {
   await ensureRunRegistryTable();
 
-  const inserted = await db.execute(sql`
-    INSERT INTO cron_simulation_run (run_key, status)
-    VALUES (${runKey}, 'running')
-    ON CONFLICT (run_key) DO NOTHING
-    RETURNING run_key
-  `);
-
-  const insertedRows = (inserted as { rows?: Array<{ run_key: string }> }).rows;
-  if (insertedRows && insertedRows.length > 0) {
-    return { status: "started" };
-  }
-
-  const existing = await db.execute(sql`
-    SELECT status, response, error
-    FROM cron_simulation_run
-    WHERE run_key = ${runKey}
+  const result = await db.execute(sql`
+    WITH inserted AS (
+      INSERT INTO cron_simulation_run (run_key, status)
+      VALUES (${runKey}, 'running')
+      ON CONFLICT (run_key) DO NOTHING
+      RETURNING status, response, error
+    )
+    SELECT
+      true AS inserted,
+      status,
+      response,
+      error
+    FROM inserted
+    UNION ALL
+    SELECT
+      false AS inserted,
+      r.status,
+      r.response,
+      r.error
+    FROM cron_simulation_run r
+    WHERE r.run_key = ${runKey}
     LIMIT 1
   `);
 
-  const rows = (
-    existing as {
-      rows?: Array<{ status: string; response: unknown; error: string | null }>;
-    }
-  ).rows;
+  const rows = result as unknown as Array<{
+    inserted: boolean;
+    status: string;
+    response: unknown;
+    error: string | null;
+  }>;
 
-  const record = rows?.[0];
+  const record = rows[0];
   if (!record) {
     return { status: "running" };
+  }
+
+  if (record.inserted) {
+    return { status: "started" };
   }
 
   if (record.status === "completed") {
