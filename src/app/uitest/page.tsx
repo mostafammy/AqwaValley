@@ -1,10 +1,13 @@
 import { Button } from "../_components/UI/Button";
 import {Badge} from "../_components/UI/Badge";
 import {Card, CardBody, CardFooter, CardHeader, CardTitle} from "../_components/UI/Card";
+import { NavSectionTitle, NavDivider, NavItem } from "../_components/layouts/Navitem";
 
 function page() {
   return (
-        <div className="p-10 flex flex-col gap-6">
+    <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
+      <div className="p-10 flex flex-col gap-6">
+
 
       <div className="flex flex-wrap gap-3">
         <Badge variant="ok">نشط</Badge>
@@ -39,7 +42,7 @@ function page() {
 
         <Card>
         <CardHeader>
-          <CardTitle>🔬 سجل الآبار</CardTitle>
+          <CardTitle>سجل الآبار</CardTitle>
           <Badge variant="ok">نشط</Badge>
         </CardHeader>
         <CardBody>
@@ -52,7 +55,7 @@ function page() {
       {/* With footer */}
       <Card>
         <CardHeader>
-          <CardTitle>🚨 التنبيهات</CardTitle>
+          <CardTitle>التنبيهات</CardTitle>
           <Badge variant="danger">3 حرجة</Badge>
         </CardHeader>
         <CardBody size="sm">
@@ -96,6 +99,7 @@ function page() {
             <Badge variant="warn">↓ انخفاض</Badge>
           </CardBody>
         </Card>
+      </div>
       </div>
     </div>
   )
