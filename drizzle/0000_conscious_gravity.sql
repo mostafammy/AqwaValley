@@ -136,6 +136,7 @@ CREATE TABLE "farm_well" (
 	"allocation_pct" numeric(5, 2) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "farm_well_allocation_pct_check" CHECK ("allocation_pct" >= 0 AND "allocation_pct" <= 100),
 	CONSTRAINT "farm_well_unique" UNIQUE("farm_id","well_id")
 );
 --> statement-breakpoint
