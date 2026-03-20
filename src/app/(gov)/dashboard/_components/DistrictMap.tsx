@@ -30,11 +30,11 @@ async function getWellMarkers(): Promise<WellMarker[]> {
 }
 
 const OASIS_CENTERS: OasisMarker[] = [
-  { id: "kharga",   name: "الخارجة",   lat: 25.4474, lng: 30.546 },
-  { id: "dakhla",   name: "الداخلة",   lat: 25.4951, lng: 28.9802 },
-  { id: "farafra",  name: "الفرافرة",  lat: 27.0568, lng: 27.97 },
-  { id: "paris",    name: "باريس",     lat: 24.7,    lng: 30.6 },
-  { id: "balat",    name: "بلاط",      lat: 25.56,   lng: 29.29 },
+  { id: "kharga",   name: "الخارجة",   lat: 25.4474, lng: 30.746 },
+  { id: "dakhla",   name: "الداخلة",   lat: 25.4951, lng: 29.202 },
+  { id: "farafra",  name: "الفرافرة",  lat: 27.0568, lng: 28.210 },
+  { id: "paris",    name: "باريس",     lat: 24.7,    lng: 30.820 },
+  { id: "balat",    name: "بلاط",      lat: 25.56,   lng: 29.49 },
 ];
 
 export async function DistrictMap() {

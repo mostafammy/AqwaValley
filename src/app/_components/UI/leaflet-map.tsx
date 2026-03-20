@@ -43,37 +43,19 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
       mapRef.current = null;
     }
 
-    // ── Inject pulse keyframe once ──────────────────────────────────────────
-    if (!document.getElementById("well-ping-style")) {
-      const style = document.createElement("style");
-      style.id = "well-ping-style";
-      style.textContent = `
-        @keyframes well-ping {
-          0%   { transform: scale(1);   opacity: 0.8; }
-          100% { transform: scale(2.8); opacity: 0;   }
-        }
-        .well-ping {
-          animation: well-ping 1.5s ease-out infinite;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
     void import("leaflet").then((L) => {
       if (!containerRef.current) return;
-
-      // @ts-expect-error leaflet internals
-      delete L.Icon.Default.prototype._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-        iconUrl:       "/leaflet/marker-icon.png",
-        shadowUrl:     "/leaflet/marker-shadow.png",
-      });
 
       const map = L.map(containerRef.current, {
         center:             [25.44, 29.5],
         zoom:               7,
+        minZoom:            6,
+        maxZoom:            9,
         attributionControl: false,
+        dragging:           true, 
+        scrollWheelZoom:    true,
+        doubleClickZoom:    true,
+        zoomControl:        true, 
       });
 
       L.tileLayer(
@@ -81,30 +63,41 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
         { maxZoom: 18 }
       ).addTo(map);
 
-      // ── Render Oasis Markers (Big Markers) ───────────────────────────────────
+      // ── Render Oasis Markers (Custom SVG + Label combined) ─────────────────
       oases.forEach((o) => {
-        const oasisIcon = L.icon({
-          iconUrl:       "/leaflet/marker-icon.png",
-          iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-          shadowUrl:     "/leaflet/marker-shadow.png",
-          iconSize:      [25, 41],
-          iconAnchor:    [12, 41],
-          popupAnchor:   [1, -34],
-          shadowSize:    [41, 41],
+        const oasisIcon = L.divIcon({
+          className: "",
+          html: `
+            <div style="display:flex; flex-direction:column; align-items:center; transform:translateY(-100%); width:max-content; cursor:pointer;">
+              <div style="
+                margin-bottom:2px;
+                color:#0A1628;
+                font-family:'Cairo',sans-serif;
+                font-weight:800;
+                font-size:12px;
+                text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
+                user-select:none;
+              ">
+                ${o.name}
+              </div>
+              <img src="/svg/oasis-marker.svg" style="width:30px; height:30px;" />
+            </div>
+          `,
+          iconSize:   [0, 0],   // We handle sizing via the inner div transform
+          iconAnchor: [0, 0],   // Center the anchor point
         });
 
         const marker = L.marker([o.lat, o.lng], { icon: oasisIcon })
           .addTo(map)
           .bindPopup(`
             <div style="font-family:Cairo,sans-serif;direction:rtl;text-align:center">
-              <strong style="color:var(--color-blue)">🏝️ واحة ${o.name}</strong><br/>
+              <strong style="color:#0A1628">🏝️ واحة ${o.name}</strong><br/>
               <span style="font-size:10px;color:gray">انقر لفتح تفاصيل الواحة</span>
             </div>
           `);
 
         if (onOasisClick) {
           marker.on("click", (e) => {
-             // Stop propagation if needed, but usually Leaflet popups handle this
              onOasisClick(o.id);
           });
         }
