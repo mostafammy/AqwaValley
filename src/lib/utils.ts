@@ -1,5 +1,8 @@
 import { type ComponentProps } from "react";
 import { type Badge } from "~/app/_components/UI/Badge";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 
 type BadgeVariant = ComponentProps<typeof Badge>["variant"];
 
@@ -12,6 +15,17 @@ export function wellStatusVariant(status: string): BadgeVariant {
     restricted: "navy",
   };
   return map[status] ?? "gray";
+}
+
+export function wellStatusColor(status: string): string {
+  const map: Record<string, string> = {
+    active: "var(--color-ok)",
+    inactive: "var(--color-muted)",
+    maintenance: "var(--color-warn)",
+    offline: "var(--color-danger)",
+    restricted: "var(--color-restricted)",
+  };
+  return map[status] ?? "var(--color-muted)";
 }
 
 export function wellStatusLabel(status: string): string {
@@ -46,4 +60,9 @@ export function alertTypeLabel(type: string): string {
 /** @deprecated use alertSeverityVariant instead */
 export function alertTypeVariant(type: string): BadgeVariant {
   return alertSeverityVariant(type);
+}
+
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

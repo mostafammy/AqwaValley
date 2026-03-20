@@ -740,49 +740,22 @@ async function seedLookupCatalogs() {
 }
 
 async function seedAdminUser() {
-  console.log("  Creating seed admin user...");
-  const now = new Date();
-  const username = "admin_seed";
-  const email = `admin@${SEED_EMAIL_DOMAIN}`;
-
-  const { auth } = await import("../src/server/better-auth/config");
-
-  if (!auth?.api) {
-    throw new Error("Better Auth API not initialized. Check environment variables.");
-  }
-
-  try {
-    // Create via Better Auth API
-    // @ts-ignore
-    const signUp = auth.api.signUpUsername || auth.api.signUp.username;
-    await signUp({
-      body: {
-        name: "Seed Administrator",
-        username,
-        email,
-        password: "password123",
-      },
-    });
-    console.log(`    Admin account created: ${username}`);
-  } catch (e: any) {
-    if (e.message?.includes("already exists") || e.code === "USER_ALREADY_EXISTS") {
-      console.log(`    Admin account ${username} already exists.`);
-    } else {
-      console.error(`    Error creating admin account:`, e.message);
-    }
-  }
+  console.log("  Finding existing admin user...");
+  // Use the nationalId/username from src/server/db/seed.ts or its variant
+  const adminUsername = "12345678901234"; 
 
   const [adminUser] = await db
     .select({ id: schema.user.id })
     .from(schema.user)
-    .where(eq(schema.user.username, username))
+    .where(eq(schema.user.username, adminUsername))
     .limit(1);
 
   if (!adminUser) {
-    throw new Error("Seed admin user was not found after insert.");
+    throw new Error(`CRITICAL: Admin user "${adminUsername}" not found. You must run "npx tsx src/server/db/seed.ts" first to create the primary system admin.`);
+  } else {
+    SEED_ADMIN_ID = adminUser.id;
+    console.log(`    Admin found: ${SEED_ADMIN_ID}`);
   }
-
-  SEED_ADMIN_ID = adminUser.id;
 
   const [adminRoleRecord] = await db
     .select({ id: schema.role.id })
@@ -1012,17 +985,29 @@ async function createRegionalUser(args: {
   }
 
   try {
-    // Create via Better Auth API
-    // @ts-ignore
-    const signUp = auth.api.signUpUsername || auth.api.signUp.username;
-    await signUp({
-      body: {
-        name: args.fullName,
-        username: nationalId, // Use National ID as username to match our login logic
-        email: email,
-        password: "password123",
-      },
+    // Check if user already exists first to avoid unnecessary auth calls
+    const existing = await db.query.user.findFirst({
+        where: (u, { eq }) => eq(u.username, nationalId)
     });
+
+    if (!existing) {
+        // Create via Better Auth API
+        // @ts-ignore
+        const signUp = auth.api.signUpUsername || (auth.api.signUp && auth.api.signUp.username) || auth.api.signUpEmail;
+        
+        if (signUp) {
+            await signUp({
+              body: {
+                name: args.fullName,
+                username: nationalId,
+                email: email,
+                password: "password123",
+              },
+            });
+        } else {
+            throw new Error(`CRITICAL: Could not find sign-up method on auth.api for ${nationalId}. Seeding aborted to prevent creating unauthenticated users.`);
+        }
+    }
   } catch (e: any) {
     if (!e.message?.includes("already exists") && e.code !== "USER_ALREADY_EXISTS") {
       console.error(`    Error creating user ${nationalId}:`, e.message);
