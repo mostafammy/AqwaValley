@@ -3,6 +3,7 @@ import { Skeleton } from "~/app/_components/UI/Skeleton";
 import { KpiCards }    from "./_components/KpiCards";
 import { DistrictMap } from "./_components/DistrictMap";
 import { AlertsFeed }  from "./_components/alerts";
+import { ChartsContainer } from "./_components/ChartsContainer";
 
 export const metadata = { title: "لوحة التحكم | AquaValley" };
 
@@ -55,6 +56,10 @@ export default function GovDashboardPage() {
           <AlertsFeed />
         </Suspense>
       </div>
+
+      <Suspense fallback={<Skeleton className="h-64 rounded-xl" />}>
+        <ChartsContainer />
+      </Suspense>
 
     </div>
   );

@@ -49,7 +49,7 @@ export async function DistrictMap() {
         <span className="text-xs text-gray-400">{markers.length} بئر</span>
       </div>
       {/* overflow-hidden هنا بالظبط على الـ wrapper المباشر */}
-      <div className="rounded-lg overflow-hidden" style={{ height: "280px" }}>
+      <div className="rounded-lg overflow-hidden" style={{ height: "420px" }}>
         <MapClient wells={markers} oases={OASIS_CENTERS} />
       </div>
     </div>
