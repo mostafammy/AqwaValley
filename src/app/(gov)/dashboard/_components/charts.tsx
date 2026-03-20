@@ -55,7 +55,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
   }, []);
 
   return (
-    <div ref={containerRef} className="grid grid-cols-2 gap-4">
+    <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
       {/* Line Chart — اتجاه الاستهلاك */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">

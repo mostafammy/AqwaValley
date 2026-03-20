@@ -106,7 +106,7 @@ export async function KpiCards() {
   const kpi = await getKpiData();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
       {cards(kpi).map((card) => (
         <div
           key={card.label}
