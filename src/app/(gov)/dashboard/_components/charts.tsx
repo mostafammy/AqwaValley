@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import {
   AreaChart,
   Area,
@@ -30,8 +31,29 @@ interface DashboardChartsProps {
 }
 
 export function DashboardCharts({ consumptionData, distributionData }: DashboardChartsProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Only animate once
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div ref={containerRef} className="grid grid-cols-2 gap-4">
 
       {/* Line Chart — اتجاه الاستهلاك */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -39,7 +61,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
           الاستهلاك الشهري للمياه
         </h3>
         <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={consumptionData}>
+          <AreaChart data={isVisible ? consumptionData : []}>
             <defs>
               <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#1D6FA8" stopOpacity={0.15} />
@@ -83,6 +105,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
               strokeWidth={2}
               fill="url(#actualGrad)"
               dot={{ r: 4, fill: "#1D6FA8" }}
+              isAnimationActive={isVisible}
             />
             <Area
               type="monotone"
@@ -93,6 +116,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
               strokeDasharray="5 5"
               fill="url(#quotaGrad)"
               dot={false}
+              isAnimationActive={isVisible}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -104,7 +128,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
           التوزيع حسب المنطقة
         </h3>
         <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={distributionData} barSize={36}>
+          <BarChart data={isVisible ? distributionData : []} barSize={36}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis
               dataKey="label"
@@ -132,6 +156,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
               dataKey="القيمة (متر مكعب)"
               fill="#0A1628"
               radius={[6, 6, 0, 0]}
+              isAnimationActive={isVisible}
             />
           </BarChart>
         </ResponsiveContainer>
