@@ -24,9 +24,19 @@ async function getKpiData() {
     .select({ avg: avg(well.currentLevelPct) })
     .from(well);
 
-  // Today's Consumption (sum of flow_rate readings since 00:00)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Today's Consumption (sum of flow_rate readings since 00:00 Cairo time)
+  // Derive midnight in Africa/Cairo timezone robustly
+  const now = new Date();
+  const cairoTimeParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+
+  const getPart = (type: string) => cairoTimeParts.find(p => p.type === type)?.value;
+  const todayStr = `${getPart("year")}-${getPart("month")}-${getPart("day")}T00:00:00+02:00`;
+  const today = new Date(todayStr);
 
   const [consumptionRes] = await db
     .select({ total: sum(sensorData.value) })
@@ -40,10 +50,14 @@ async function getKpiData() {
     );
 
   const consumptionVal = Number(consumptionRes?.total ?? 0);
-  // Format consumption: if > 1M show M, else just the number
-  const formattedConsumption = consumptionVal > 1000000 
-    ? (consumptionVal / 1000000).toFixed(1) + "M"
-    : consumptionVal.toLocaleString("ar-EG");
+  
+  // Format consumption: Standardized Arabic formatting with compact notation for >= 1M
+  const formatter = new Intl.NumberFormat("ar-EG", {
+    notation: consumptionVal >= 1000000 ? "compact" : "standard",
+    compactDisplay: "short",
+    maximumFractionDigits: 1,
+  });
+  const formattedConsumption = formatter.format(consumptionVal);
 
   return {
     totalWells:     totalWells?.count  ?? 0,

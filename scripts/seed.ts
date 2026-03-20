@@ -751,11 +751,7 @@ async function seedAdminUser() {
     .limit(1);
 
   if (!adminUser) {
-    console.warn(`    ⚠️ Admin user "${adminUsername}" not found. Please run src/server/db/seed.ts first.`);
-    // Fallback to finding ANY user if the specific one isn't there, just to allow seeding to continue
-    const [anyUser] = await db.select({ id: schema.user.id }).from(schema.user).limit(1);
-    if (!anyUser) throw new Error("No users found in database. Run basic seed first.");
-    SEED_ADMIN_ID = anyUser.id;
+    throw new Error(`CRITICAL: Admin user "${adminUsername}" not found. You must run "npx tsx src/server/db/seed.ts" first to create the primary system admin.`);
   } else {
     SEED_ADMIN_ID = adminUser.id;
     console.log(`    Admin found: ${SEED_ADMIN_ID}`);
@@ -1009,17 +1005,7 @@ async function createRegionalUser(args: {
               },
             });
         } else {
-            console.warn(`    ⚠️ Could not find sign-up method on auth.api for ${nationalId}. Creating user record directly as fallback...`);
-            await db.insert(schema.user).values({
-                id: randomUUID(),
-                name: args.fullName,
-                email: email,
-                username: nationalId,
-                displayUsername: nationalId,
-                emailVerified: true,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            });
+            throw new Error(`CRITICAL: Could not find sign-up method on auth.api for ${nationalId}. Seeding aborted to prevent creating unauthenticated users.`);
         }
     }
   } catch (e: any) {

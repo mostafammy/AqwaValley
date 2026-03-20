@@ -18,15 +18,28 @@ async function getWellMarkers(): Promise<WellMarker[]> {
     .from(well)
     .leftJoin(district, eq(district.id, well.districtId));
 
-  return rows.map((r) => ({
-    id:       r.id,
-    name:     r.name,
-    lat:      Number(r.lat),
-    lng:      Number(r.lng),
-    status:   r.status as WellMarker["status"],
-    levelPct: Number(r.levelPct ?? 0),
-    district: r.districtName ?? "",
-  }));
+  const validRows = rows.filter((r) => {
+    const lat = Number(r.lat);
+    const lng = Number(r.lng);
+    return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+  });
+
+  const ALLOWED_STATUSES: WellMarker["status"][] = ["active", "inactive", "maintenance", "offline", "restricted"];
+
+  return validRows.map((r) => {
+    const rawStatus = r.status as WellMarker["status"];
+    const status = ALLOWED_STATUSES.includes(rawStatus) ? rawStatus : "inactive";
+
+    return {
+      id:       r.id,
+      name:     r.name,
+      lat:      Number(r.lat),
+      lng:      Number(r.lng),
+      status:   status,
+      levelPct: Number(r.levelPct ?? 0),
+      district: r.districtName ?? "",
+    };
+  });
 }
 
 const OASIS_CENTERS: OasisMarker[] = [

@@ -4,6 +4,7 @@ import { KpiCards }    from "./_components/KpiCards";
 import { DistrictMap } from "./_components/DistrictMap";
 import { AlertsFeed }  from "./_components/alerts";
 import { ChartsContainer } from "./_components/ChartsContainer";
+import { CurrentDate } from "./_components/CurrentDate";
 
 export const metadata = { title: "لوحة التحكم | AquaValley" };
 
@@ -23,12 +24,7 @@ export default function GovDashboardPage() {
           </p>
         </div>
         <span className="text-xs text-gray-400">
-          {new Date().toLocaleDateString("ar-EG", {
-            weekday: "long",
-            year:    "numeric",
-            month:   "long",
-            day:     "numeric",
-          })}
+          <CurrentDate />
         </span>
       </div>
 
@@ -46,8 +42,8 @@ export default function GovDashboardPage() {
       </Suspense>
 
       {/* Map + Alerts */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <Suspense fallback={<Skeleton className="h-72 rounded-xl" />}>
             <DistrictMap />
           </Suspense>

@@ -63,7 +63,7 @@ export async function AlertsFeed() {
                   {alert.message}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  {alert.wellName} ·{" "}
+                  {alert.wellName ?? "—"} ·{" "}
                   {new Date(alert.createdAt).toLocaleTimeString("ar-EG")}
                 </p>
               </div>

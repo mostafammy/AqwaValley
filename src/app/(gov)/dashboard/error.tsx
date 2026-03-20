@@ -21,8 +21,9 @@ export default function DashboardError({
     >
       <span className="text-5xl">⚠️</span>
       <h2 className="text-xl font-semibold">فشل تحميل لوحة التحكم</h2>
-      <p className="text-sm text-gray-500">{error.message}</p>
-      <Button
+      <p className="text-sm text-secondary">
+        حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.
+      </p>      <Button
         onClick={reset}
         variant="primary"
         size="lg"

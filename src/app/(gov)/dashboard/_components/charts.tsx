@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import {
   AreaChart,
   Area,
@@ -33,6 +33,8 @@ interface DashboardChartsProps {
 export function DashboardCharts({ consumptionData, distributionData }: DashboardChartsProps) {
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const actualId = useId();
+  const quotaId  = useId();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -63,11 +65,11 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={isVisible ? consumptionData : []}>
             <defs>
-              <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={actualId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#1D6FA8" stopOpacity={0.15} />
                 <stop offset="95%" stopColor="#1D6FA8" stopOpacity={0}    />
               </linearGradient>
-              <linearGradient id="quotaGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={quotaId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#0D9E7E" stopOpacity={0.15} />
                 <stop offset="95%" stopColor="#0D9E7E" stopOpacity={0}    />
               </linearGradient>
@@ -103,7 +105,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
               name="الفعلي"
               stroke="#1D6FA8"
               strokeWidth={2}
-              fill="url(#actualGrad)"
+              fill={`url(#${actualId})`}
               dot={{ r: 4, fill: "#1D6FA8" }}
               isAnimationActive={isVisible}
             />
@@ -114,7 +116,7 @@ export function DashboardCharts({ consumptionData, distributionData }: Dashboard
               stroke="#0D9E7E"
               strokeWidth={2}
               strokeDasharray="5 5"
-              fill="url(#quotaGrad)"
+              fill={`url(#${quotaId})`}
               dot={false}
               isAnimationActive={isVisible}
             />
