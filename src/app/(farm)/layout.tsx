@@ -4,7 +4,7 @@ import { FarmSidebar } from "../_components/layouts/FarmSidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
-
+import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
 /**
  * Render the farm portal layout for authenticated users with the farmer role.
  *
@@ -32,6 +32,7 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
   return (
     <SidebarProvider>
       <div className="layout-root">
+        <ScrollReset />
         <Topbar
           userName={name}
           userRole="FARMER"
