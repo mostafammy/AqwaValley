@@ -22,6 +22,7 @@ type DistrictCardProps = {
 };
 
 export function DistrictCard({
+  id,
   name,
   totalWells,
   activeWells,
@@ -29,8 +30,7 @@ export function DistrictCard({
   alertCount,
   depletionRate,
   wells,
-}: DistrictCardProps) {
-  const riskColor =
+}: DistrictCardProps) {  const riskColor =
     avgLevelPct < 30 ? "text-red-600" :
     avgLevelPct < 60 ? "text-amber-600" :
     "text-teal-600";

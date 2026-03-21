@@ -123,9 +123,8 @@ export default async function WellDetailPage({
               { label: "عمق البئر",    value: `${data.depthM ?? "—"} متر`,                       icon: "📏" },
               { label: "معدل التدفق",  value: data.flowRate ? `${data.flowRate} م³/ساعة` : "—", icon: "💧" },
               { label: "حالة الصمام",  value: data.valveState === "open" ? "مفتوح" : data.valveState === "closed" ? "مغلق" : (data.valveState ?? "—"), icon: "🔧" },
-              { label: "خط العرض",     value: `${Number(data.lat).toFixed(4)}° شمالاً`,          icon: "📍" },
-              { label: "خط الطول",     value: `${Number(data.lng).toFixed(4)}° شرقاً`,           icon: "🗺️" },
-              { label: "المركز الإداري", value: data.districtName ?? "—",                        icon: "🏛️" },
+              { label: "خط العرض",     value: data.lat != null ? `${Number(data.lat).toFixed(4)}° شمالاً` : "—", icon: "📍" },
+              { label: "خط الطول",     value: data.lng != null ? `${Number(data.lng).toFixed(4)}° شرقاً` : "—",  icon: "🗺️" },              { label: "المركز الإداري", value: data.districtName ?? "—",                        icon: "🏛️" },
             ].map((item) => (
               <div key={item.label} className="bg-gray-50/80 rounded-xl p-3 border border-gray-100/50">
                 <div className="text-[11px] text-gray-400 mb-1 flex items-center gap-1.5">

@@ -48,13 +48,19 @@ export function WellStatusCard({
             <span>المنسوب</span>
             <span className="font-bold">{levelPct}%</span>
           </div>
-          <div className="h-1.5 bg-gray-200/50 rounded-full overflow-hidden">
+          <div 
+            className="h-1.5 bg-gray-200/50 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.min(100, Math.max(0, levelPct))}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="المنسوب"
+          >
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${levelPct}%`, backgroundColor: barColor }}
+              style={{ width: `${Math.min(100, Math.max(0, levelPct))}%`, backgroundColor: barColor }}
             />
-          </div>
-        </div>
+          </div>        </div>
 
         {/* Flow Rate */}
         <div className="flex items-center justify-between">

@@ -61,8 +61,7 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
           href="/districts"
           icon="🏛️"
           label="المراكز والآبار"
-          active={is("/districts") || pathname.startsWith("/wells")}
-        />
+          active={is("/districts") || is("/wells")}        />
         
         <NavItem
           href="/distribution"

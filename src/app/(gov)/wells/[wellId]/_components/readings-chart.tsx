@@ -114,11 +114,10 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
               tickFormatter={(val: string) =>
                 new Date(val).toLocaleDateString("ar-EG", {
                   month: "short",
-                  day:   activeRange === "1y" || activeRange === "3y" ? undefined : "numeric",
+                  day:   activeRange === "1y" ? undefined : "numeric",
                   hour:  activeRange === "1d" ? "2-digit" : undefined,
                 })
-              }
-            />
+              }            />
             <YAxis
               tick={{ fontSize: 11, fontFamily: "Cairo" }}
               axisLine={false}
