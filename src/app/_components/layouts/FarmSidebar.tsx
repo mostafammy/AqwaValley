@@ -23,7 +23,7 @@ export function FarmSidebar() {
 
       <NavItem
         href="/farm/dashboard"
-        icon="🏠"
+        icon=""
         label="الرئيسية"
         active={is("/farm/dashboard")}
       />
@@ -35,7 +35,7 @@ export function FarmSidebar() {
       />
       <NavItem
         href="/farm/soil"
-        icon="🌡️"
+        icon=""
         label="قراءات التربة"
         active={is("/farm/soil")}
       />
@@ -46,25 +46,25 @@ export function FarmSidebar() {
 
       <NavItem
         href="/farm/ai-plan"
-        icon="🤖"
+        icon=""
         label="خطة الري الذكي"
         active={is("/farm/ai-plan")}
       />
       <NavItem
         href="/farm/irrigate"
-        icon="💧"
+        icon=""
         label="تشغيل الري"
         active={is("/farm/irrigate")}
       />
       <NavItem
         href="/farm/history"
-        icon="📅"
+        icon=""
         label="سجل الري"
         active={is("/farm/history")}
       />
       <NavItem
         href="/farm/quota"
-        icon="🪣"
+        icon=""
         label="الحصة المائية"
         active={is("/farm/quota")}
       />

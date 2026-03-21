@@ -15,6 +15,7 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
     path === "/"
       ? pathname === path
       : pathname === path || pathname.startsWith(`${path}/`);
+      
   const { isMobileOpen, closeMobile } = useSidebar();
 
   return (
@@ -57,11 +58,12 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
         <NavSectionTitle>إدارة المياه</NavSectionTitle>
 
         <NavItem
-          href="/wells"
-          icon="🔬"
-          label="سجل الآبار"
-          active={is("/wells")}
+          href="/districts"
+          icon="🏛️"
+          label="المراكز والآبار"
+          active={is("/districts") || pathname.startsWith("/wells")}
         />
+        
         <NavItem
           href="/distribution"
           icon="📊"
