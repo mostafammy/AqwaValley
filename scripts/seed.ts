@@ -561,8 +561,8 @@ const SENSOR_SPECS = [
 ];
 
 const WELLS_PER_DISTRICT = 10;
-const READING_INTERVAL_MINUTES = 10;
-const HISTORY_HOURS = 48;
+const READING_INTERVAL_MINUTES = 60;
+const HISTORY_HOURS = 8760;
 
 function gaussianRandom(mean: number, stddev: number): number {
   const u1 = Math.random();

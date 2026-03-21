@@ -60,14 +60,14 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
 
       mapInstance = L.map(containerRef.current, {
         center:             [25.7, 29.5],
-        zoom:               1,
+        zoom:               7,
         minZoom:            7, // Lock zoom to 7
-        maxZoom:            7,
+        maxZoom:            10,
         attributionControl: true,
         dragging:           true, 
-        scrollWheelZoom:    false,
-        doubleClickZoom:    false,
-        zoomControl:        false , 
+        scrollWheelZoom:    true,
+        doubleClickZoom:    true,
+        zoomControl:        true , 
       });
 
       L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png", { maxZoom: 18 }).addTo(mapInstance);

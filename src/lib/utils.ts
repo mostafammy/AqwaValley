@@ -48,6 +48,15 @@ export function alertSeverityVariant(severity: string): BadgeVariant {
   return map[severity] ?? "info";
 }
 
+export function alertSeverityLabel(severity: string): string {
+  const map: Record<string, string> = {
+    critical: "حرج",
+    warning: "تحذير",
+    info: "تنبيه",
+  };
+  return map[severity] ?? severity;
+}
+
 export function alertTypeLabel(type: string): string {
   const map: Record<string, string> = {
     threshold_breach: "تجاوز حد",
