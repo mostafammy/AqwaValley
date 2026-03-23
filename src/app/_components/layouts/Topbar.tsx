@@ -108,9 +108,9 @@ export function Topbar({
         <div className="topbar-logo-bg">
           {isGov ? (
             <Droplets className="h-6 w-6 text-white" strokeWidth={1.8} />
-          ) : (
-            <span className="text-xl">🌾</span>
-          )}
+            ) : (
+              <Droplets className="h-5 w-5 text-white" />
+            )}
         </div>
         <div className="hidden flex-col pr-2 sm:flex">
           <h1 className="topbar-title">أكوا الوادي</h1>

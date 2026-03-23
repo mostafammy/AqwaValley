@@ -3,7 +3,7 @@ import { type ReactNode } from "react";
 
 interface NavItemProps {
   href: string;
-  icon: string;
+  icon: ReactNode;
   label: string;
   active?: boolean;
   badge?: ReactNode;

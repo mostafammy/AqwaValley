@@ -112,7 +112,7 @@ export function NotificationDropdown({
             </div>
           ) : data?.items.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
-              <span className="text-3xl">✅</span>
+              <CheckCircle className="h-10 w-10 mx-auto text-gray-300" />
               <p className="text-sm mt-2">لا توجد إشعارات جديدة</p>
             </div>
           ) : (

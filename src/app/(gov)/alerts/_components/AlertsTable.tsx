@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Filter, ChevronRight } from "lucide-react";
+import { Check, Filter, ChevronRight, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/UI/Button";
 import { Badge } from "~/app/_components/UI/Badge";
@@ -162,7 +162,7 @@ export function AlertsTable() {
               <tr>
                 <td colSpan={7} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center text-gray-400">
-                    <span className="text-4xl mb-3">✅</span>
+                    <CheckCircle className="h-10 w-10 text-gray-300 mb-3" />
                     <p className="text-sm">لا توجد تنبيهات</p>
                   </div>
                 </td>

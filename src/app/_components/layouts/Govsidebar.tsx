@@ -4,6 +4,17 @@ import { usePathname } from "next/navigation";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
+import {
+  LayoutDashboard,
+  Map,
+  Bell,
+  Building2,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  Users,
+  Settings,
+} from "lucide-react";
 
 interface GovSidebarProps {
   alertCount?: number;
@@ -31,19 +42,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/dashboard"
-          icon="🏠"
+          icon={<LayoutDashboard size={18} />}
           label="الرئيسية"
           active={is("/dashboard")}
         />
         <NavItem
           href="/map"
-          icon="🗺️"
+          icon={<Map size={18} />}
           label="خريطة الآبار"
           active={is("/map")}
         />
         <NavItem
           href="/alerts"
-          icon="🚨"
+          icon={<Bell size={18} />}
           label="التنبيهات"
           active={is("/alerts")}
           badge={
@@ -59,19 +70,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/districts"
-          icon="🏛️"
+          icon={<Building2 size={18} />}
           label="المراكز والآبار"
           active={is("/districts") || is("/wells")}        />
         
         <NavItem
           href="/distribution"
-          icon="📊"
+          icon={<BarChart3 size={18} />}
           label="توزيع المياه"
           active={is("/distribution")}
         />
         <NavItem
           href="/forecast"
-          icon="📈"
+          icon={<TrendingUp size={18} />}
           label="توقعات الخزان"
           active={is("/forecast")}
         />
@@ -82,19 +93,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/reports"
-          icon="📄"
+          icon={<FileText size={18} />}
           label="التقارير"
           active={is("/reports")}
         />
         <NavItem
           href="/users"
-          icon="👥"
+          icon={<Users size={18} />}
           label="المستخدمون"
           active={is("/users")}
         />
         <NavItem
           href="/settings"
-          icon="⚙️"
+          icon={<Settings size={18} />}
           label="الإعدادات"
           active={is("/settings")}
         />
