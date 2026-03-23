@@ -7,6 +7,7 @@
     "build": "next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
+    "db:baseline": "tsx --tsconfig tsconfig.json scripts/baseline-drizzle-migrations.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx --tsconfig tsconfig.json scripts/seed.ts",

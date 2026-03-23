@@ -44,6 +44,18 @@ export const env = createEnv({
       .int()
       .positive()
       .default(30),
+    QUOTA_BASELINE_MONTH_WINDOW: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24)
+      .default(3),
+    QUOTA_WARNING_THRESHOLD_PCT: z.coerce.number().min(1).max(100).default(80),
+    QUOTA_CRITICAL_THRESHOLD_PCT: z.coerce
+      .number()
+      .min(1)
+      .max(120)
+      .default(95),
   },
 
   /**
@@ -75,6 +87,9 @@ export const env = createEnv({
     SIM_DEFAULT_ANOMALY_RATE: process.env.SIM_DEFAULT_ANOMALY_RATE,
     SIM_RUN_STALE_TIMEOUT_SECONDS: process.env.SIM_RUN_STALE_TIMEOUT_SECONDS,
     SIM_RUN_HISTORY_RETENTION_DAYS: process.env.SIM_RUN_HISTORY_RETENTION_DAYS,
+    QUOTA_BASELINE_MONTH_WINDOW: process.env.QUOTA_BASELINE_MONTH_WINDOW,
+    QUOTA_WARNING_THRESHOLD_PCT: process.env.QUOTA_WARNING_THRESHOLD_PCT,
+    QUOTA_CRITICAL_THRESHOLD_PCT: process.env.QUOTA_CRITICAL_THRESHOLD_PCT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

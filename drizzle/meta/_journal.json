@@ -15,6 +15,13 @@
       "when": 1773833070031,
       "tag": "0001_lively_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774259900000,
+      "tag": "0002_quota_foundation",
+      "breakpoints": true
     }
   ]
 }
