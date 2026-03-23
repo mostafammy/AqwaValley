@@ -18,11 +18,13 @@ type AckStatus = "all" | "open" | "acknowledged";
 
 export function AlertsTable() {
   const router = useRouter();
+  const utils = api.useContext();
 
   // Filters
   const [severity, setSeverity] = useState<Severity>(undefined);
   const [ackStatus, setAckStatus] = useState<AckStatus>("all");
   const [page, setPage] = useState(1);
+  const [pendingAckId, setPendingAckId] = useState<string | null>(null);
   const pageSize = 15;
 
   // Build query params
@@ -40,11 +42,16 @@ export function AlertsTable() {
   // Acknowledge mutation
   const acknowledgeMutation = api.alerts.acknowledge.useMutation({
     onSuccess: () => {
-      router.refresh();
+      setPendingAckId(null);
+      void utils.alerts.list.invalidate();
+    },
+    onError: () => {
+      setPendingAckId(null);
     },
   });
 
   const handleAcknowledge = (alertId: string) => {
+    setPendingAckId(alertId);
     acknowledgeMutation.mutate({ alertId });
   };
 
@@ -238,7 +245,7 @@ export function AlertsTable() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleAcknowledge(alert.id)}
-                        loading={acknowledgeMutation.isPending}
+                        loading={pendingAckId === alert.id && acknowledgeMutation.isPending}
                         icon={<Check className="h-3 w-3" />}
                       >
                         استلام

@@ -84,7 +84,7 @@ export function formatAlertMessage(message: string): string {
     return message;
   }
 
-  const sensorType = match[1] ?? "";
+  const sensorType = match[1]?.toLowerCase() ?? "";
   const value = match[2] ?? "";
   const operator = (match[3] ?? "").toLowerCase();
   const threshold = match[4] ?? "";
@@ -112,7 +112,19 @@ export function formatAlertMessage(message: string): string {
 
   // Direction indicators
   const isHigh = operator === "gt" || operator === "gte";
-  const direction = isHigh ? "ارتفاع" : "انخفاض";
+  const isLow = operator === "lt" || operator === "lte";
+  const isEq = operator === "eq";
+  
+  let direction: string;
+  if (isHigh) {
+    direction = "ارتفاع";
+  } else if (isLow) {
+    direction = "انخفاض";
+  } else if (isEq) {
+    direction = "ثبات";
+  } else {
+    direction = "تغيير";
+  }
 
   // Build readable message
   return `${sensor.name}: ${direction} ${value}${sensor.unit} (${opLabel} الحد: ${threshold}${sensor.unit})`;

@@ -65,8 +65,8 @@ async function getDistrictsWithWells() {
     const totalAlerts = districtWells.reduce((sum, w) => sum + w.alertCount, 0);
 
     return {
-      id:           toSlug(d.name),
-      dbId:         d.id,
+      id:           toSlug(d.name), // slug for anchor
+      dbId:         d.id, // unique DB id for React key
       name:         d.name,
       totalWells,
       activeWells,
@@ -103,7 +103,7 @@ export default async function DistrictsPage() {
 
       <div className="space-y-6">
         {districts.map((d) => (
-          <DistrictCard key={d.id} {...d} />
+          <DistrictCard key={d.dbId} {...d} />
         ))}
       </div>
     </div>
