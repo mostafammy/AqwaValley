@@ -36,9 +36,12 @@ async function main() {
 
   const sql = postgres(url, { max: 1 });
 
-  const existing = await sql`select id, hash, created_at from drizzle.__drizzle_migrations order by id`;
+  const existing =
+    await sql`select id, hash, created_at from drizzle.__drizzle_migrations order by id`;
   if (existing.length > 0) {
-    console.log("Migration baseline skipped: __drizzle_migrations is not empty.");
+    console.log(
+      "Migration baseline skipped: __drizzle_migrations is not empty.",
+    );
     await sql.end();
     return;
   }

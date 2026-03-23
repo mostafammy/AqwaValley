@@ -30,12 +30,12 @@ It answers these operational questions:
 
 ## Runtime Architecture
 
-| Area | Current behavior |
-| ---- | ---------------- |
-| Ingestion | Validates auth and payload, writes readings, updates latest state, evaluates alert rules |
-| Quota computation | Runs when quota endpoints are called |
-| Quota persistence | Upserts period snapshots and creates breach events |
-| Hard enforcement | Not active in ingest path |
+| Area              | Current behavior                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Ingestion         | Validates auth and payload, writes readings, updates latest state, evaluates alert rules |
+| Quota computation | Runs when quota endpoints are called                                                     |
+| Quota persistence | Upserts period snapshots and creates breach events                                       |
+| Hard enforcement  | Not active in ingest path                                                                |
 
 ## What Happens During Ingest
 

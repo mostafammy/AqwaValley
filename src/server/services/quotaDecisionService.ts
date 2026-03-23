@@ -53,7 +53,10 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function getPeriodBounds(periodType: PeriodType, anchor?: Date): {
+function getPeriodBounds(
+  periodType: PeriodType,
+  anchor?: Date,
+): {
   periodStart: Date;
   periodEnd: Date;
 } {
@@ -227,7 +230,9 @@ async function getFarmConsumptionM3(
       AND sd.timestamp < ${periodEnd.toISOString()}::timestamptz
   `);
 
-  return Number((rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  return Number(
+    (rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0,
+  );
 }
 
 async function getDistrictConsumptionM3(
@@ -247,7 +252,9 @@ async function getDistrictConsumptionM3(
       AND sd.timestamp < ${periodEnd.toISOString()}::timestamptz
   `);
 
-  return Number((rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  return Number(
+    (rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0,
+  );
 }
 
 async function getFarmBaselineM3(
@@ -272,7 +279,10 @@ async function getFarmBaselineM3(
 
   if (!rows.length) return null;
 
-  const sum = rows.reduce((acc, row) => acc + Number(row.consumptionM3 ?? 0), 0);
+  const sum = rows.reduce(
+    (acc, row) => acc + Number(row.consumptionM3 ?? 0),
+    0,
+  );
   return round2(sum / rows.length);
 }
 
@@ -298,13 +308,21 @@ async function getDistrictBaselineM3(
 
   if (!rows.length) return null;
 
-  const sum = rows.reduce((acc, row) => acc + Number(row.consumptionM3 ?? 0), 0);
+  const sum = rows.reduce(
+    (acc, row) => acc + Number(row.consumptionM3 ?? 0),
+    0,
+  );
   return round2(sum / rows.length);
 }
 
-async function isFarmAllocationOutOfRange(db: Db, farmId: string): Promise<boolean> {
+async function isFarmAllocationOutOfRange(
+  db: Db,
+  farmId: string,
+): Promise<boolean> {
   const allocation = await db
-    .select({ total: sql<number>`COALESCE(SUM(${farmWell.allocationPct}::numeric), 0)` })
+    .select({
+      total: sql<number>`COALESCE(SUM(${farmWell.allocationPct}::numeric), 0)`,
+    })
     .from(farmWell)
     .where(eq(farmWell.farmId, farmId));
 
@@ -312,13 +330,20 @@ async function isFarmAllocationOutOfRange(db: Db, farmId: string): Promise<boole
   return total > 0 && Math.abs(total - 100) > 0.5;
 }
 
-function resolveFarmQuota(periodType: PeriodType, monthlyQuota: number, annualQuota: number): number {
+function resolveFarmQuota(
+  periodType: PeriodType,
+  monthlyQuota: number,
+  annualQuota: number,
+): number {
   if (periodType === "monthly") return monthlyQuota;
   if (monthlyQuota > 0) return round2(monthlyQuota / 30);
   return round2(annualQuota / 365);
 }
 
-function resolveDistrictQuota(periodType: PeriodType, safeYieldM3Yr: number): number {
+function resolveDistrictQuota(
+  periodType: PeriodType,
+  safeYieldM3Yr: number,
+): number {
   if (periodType === "monthly") return round2(safeYieldM3Yr / 12);
   return round2(safeYieldM3Yr / 365);
 }
@@ -348,11 +373,12 @@ export async function computeFarmQuotaDecision(params: {
   }
 
   const { periodStart, periodEnd } = getPeriodBounds(periodType, anchor);
-  const [consumptionM3, baselineConsumptionM3, hasQualityIssue] = await Promise.all([
-    getFarmConsumptionM3(db, farmId, periodStart, periodEnd),
-    getFarmBaselineM3(db, farmId, periodType, periodStart, baselineWindow),
-    isFarmAllocationOutOfRange(db, farmId),
-  ]);
+  const [consumptionM3, baselineConsumptionM3, hasQualityIssue] =
+    await Promise.all([
+      getFarmConsumptionM3(db, farmId, periodStart, periodEnd),
+      getFarmBaselineM3(db, farmId, periodType, periodStart, baselineWindow),
+      isFarmAllocationOutOfRange(db, farmId),
+    ]);
 
   const monthlyQuota = Number(targetFarm.monthlyQuotaM3 ?? 0);
   const annualQuota = Number(targetFarm.annualQuotaM3 ?? 0);
@@ -434,7 +460,9 @@ export async function computeFarmQuotaDecision(params: {
             : null,
         trendDirection: decision.trendDirection,
         trendDeltaPct:
-          decision.trendDeltaPct != null ? String(decision.trendDeltaPct) : null,
+          decision.trendDeltaPct != null
+            ? String(decision.trendDeltaPct)
+            : null,
         rawState: decision.rawState,
         effectiveState: decision.effectiveState,
         dataQualityFlag: decision.dataQualityFlag,
@@ -471,7 +499,13 @@ export async function computeDistrictQuotaDecision(params: {
   const { periodStart, periodEnd } = getPeriodBounds(periodType, anchor);
   const [consumptionM3, baselineConsumptionM3] = await Promise.all([
     getDistrictConsumptionM3(db, districtId, periodStart, periodEnd),
-    getDistrictBaselineM3(db, districtId, periodType, periodStart, baselineWindow),
+    getDistrictBaselineM3(
+      db,
+      districtId,
+      periodType,
+      periodStart,
+      baselineWindow,
+    ),
   ]);
 
   const quotaM3 = resolveDistrictQuota(
@@ -553,7 +587,9 @@ export async function computeDistrictQuotaDecision(params: {
             : null,
         trendDirection: decision.trendDirection,
         trendDeltaPct:
-          decision.trendDeltaPct != null ? String(decision.trendDeltaPct) : null,
+          decision.trendDeltaPct != null
+            ? String(decision.trendDeltaPct)
+            : null,
         rawState: decision.rawState,
         effectiveState: decision.effectiveState,
         dataQualityFlag: decision.dataQualityFlag,

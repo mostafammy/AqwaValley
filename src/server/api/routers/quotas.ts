@@ -167,10 +167,7 @@ export const quotasRouter = createTRPCRouter({
         .from(districtPeriodConsumptionSnapshot)
         .where(
           and(
-            eq(
-              districtPeriodConsumptionSnapshot.districtId,
-              input.districtId,
-            ),
+            eq(districtPeriodConsumptionSnapshot.districtId, input.districtId),
             eq(districtPeriodConsumptionSnapshot.periodType, input.periodType),
             gte(districtPeriodConsumptionSnapshot.periodStart, input.from),
             lte(districtPeriodConsumptionSnapshot.periodStart, input.to),
@@ -208,7 +205,9 @@ export const quotasRouter = createTRPCRouter({
 
       const conditions = [
         scopedDistrictCondition,
-        input.scopeType ? eq(quotaBreachEvent.scopeType, input.scopeType) : undefined,
+        input.scopeType
+          ? eq(quotaBreachEvent.scopeType, input.scopeType)
+          : undefined,
         input.farmId ? eq(quotaBreachEvent.farmId, input.farmId) : undefined,
         input.districtId
           ? eq(quotaBreachEvent.districtId, input.districtId)
@@ -265,7 +264,9 @@ export const quotasRouter = createTRPCRouter({
       const conditions = [
         scopedDistrictCondition,
         eq(quotaBreachEvent.status, "open"),
-        input.scopeType ? eq(quotaBreachEvent.scopeType, input.scopeType) : undefined,
+        input.scopeType
+          ? eq(quotaBreachEvent.scopeType, input.scopeType)
+          : undefined,
         input.districtId
           ? eq(quotaBreachEvent.districtId, input.districtId)
           : undefined,
@@ -337,7 +338,9 @@ export const quotasRouter = createTRPCRouter({
 
       const conditions = [
         scopedDistrictCondition,
-        input.scopeType ? eq(quotaOverride.scopeType, input.scopeType) : undefined,
+        input.scopeType
+          ? eq(quotaOverride.scopeType, input.scopeType)
+          : undefined,
         input.farmId ? eq(quotaOverride.farmId, input.farmId) : undefined,
         input.districtId
           ? eq(quotaOverride.districtId, input.districtId)
@@ -512,7 +515,10 @@ export const quotasRouter = createTRPCRouter({
 
       if (input.scopeType === "farm") {
         if (!input.farmId) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "farmId required" });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "farmId required",
+          });
         }
         await requireFarmAccess(ctx, input.farmId);
 
@@ -538,7 +544,7 @@ export const quotasRouter = createTRPCRouter({
         .insert(quotaOverride)
         .values({
           scopeType: input.scopeType,
-          farmId: input.scopeType === "farm" ? input.farmId ?? null : null,
+          farmId: input.scopeType === "farm" ? (input.farmId ?? null) : null,
           districtId,
           stateOverride: input.stateOverride,
           reason: input.reason,

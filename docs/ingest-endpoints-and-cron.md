@@ -12,24 +12,24 @@ This document summarizes all current ingestion-related endpoints and clarifies w
 
 ## Current Endpoint Inventory
 
-| Endpoint                      | Method                  | Auth Model                              | Primary Use                                            | Status |
-| ----------------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------ | ------ |
-| /api/sensors/ingest           | POST                    | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
-| /api/admin/mock-ingest        | POST                    | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
-| /api/cron/simulate-ingest     | GET (preferred) or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
-| /api/wells/:id/metrics        | GET                     | Logged-in session cookie                | Read aggregated well metrics                           | Active |
-| /api/health                   | GET                     | None                                    | Service and DB health verification                     | Active |
-| tRPC quotas.farmStatus        | Query                   | Logged-in session + ABAC                | Farm quota decision snapshot and trend direction       | Active |
-| tRPC quotas.districtStatus    | Query                   | Logged-in session + ABAC                | District quota decision snapshot and trend direction   | Active |
-| tRPC quotas.farmTrend         | Query                   | Logged-in session + ABAC                | Farm quota trend time series                           | Active |
-| tRPC quotas.districtTrend     | Query                   | Logged-in session + ABAC                | District quota trend time series                       | Active |
-| tRPC quotas.listBreaches      | Query                   | Logged-in session + ABAC                | Paginated quota breach events                          | Active |
-| tRPC quotas.listQuotaAlerts   | Query                   | Logged-in session + ABAC                | Actionable open quota alerts with severity projection  | Active |
-| tRPC quotas.listOverrides     | Query                   | Logged-in session + ABAC                | Paginated manual override windows                      | Active |
-| tRPC quotas.setFarmQuota      | Mutation                | Operator role + ABAC                    | Update farm monthly/annual quota values                | Active |
-| tRPC quotas.setDistrictQuota  | Mutation                | Operator role + ABAC                    | Update district safe yield and optional thresholds     | Active |
-| tRPC quotas.createOverride    | Mutation                | Operator role + ABAC                    | Create temporary farm/district state override          | Active |
-| tRPC quotas.revokeOverride    | Mutation                | Operator role + ABAC                    | Revoke an existing override                            | Active |
+| Endpoint                     | Method                  | Auth Model                              | Primary Use                                            | Status |
+| ---------------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------ | ------ |
+| /api/sensors/ingest          | POST                    | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
+| /api/admin/mock-ingest       | POST                    | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
+| /api/cron/simulate-ingest    | GET (preferred) or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
+| /api/wells/:id/metrics       | GET                     | Logged-in session cookie                | Read aggregated well metrics                           | Active |
+| /api/health                  | GET                     | None                                    | Service and DB health verification                     | Active |
+| tRPC quotas.farmStatus       | Query                   | Logged-in session + ABAC                | Farm quota decision snapshot and trend direction       | Active |
+| tRPC quotas.districtStatus   | Query                   | Logged-in session + ABAC                | District quota decision snapshot and trend direction   | Active |
+| tRPC quotas.farmTrend        | Query                   | Logged-in session + ABAC                | Farm quota trend time series                           | Active |
+| tRPC quotas.districtTrend    | Query                   | Logged-in session + ABAC                | District quota trend time series                       | Active |
+| tRPC quotas.listBreaches     | Query                   | Logged-in session + ABAC                | Paginated quota breach events                          | Active |
+| tRPC quotas.listQuotaAlerts  | Query                   | Logged-in session + ABAC                | Actionable open quota alerts with severity projection  | Active |
+| tRPC quotas.listOverrides    | Query                   | Logged-in session + ABAC                | Paginated manual override windows                      | Active |
+| tRPC quotas.setFarmQuota     | Mutation                | Operator role + ABAC                    | Update farm monthly/annual quota values                | Active |
+| tRPC quotas.setDistrictQuota | Mutation                | Operator role + ABAC                    | Update district safe yield and optional thresholds     | Active |
+| tRPC quotas.createOverride   | Mutation                | Operator role + ABAC                    | Create temporary farm/district state override          | Active |
+| tRPC quotas.revokeOverride   | Mutation                | Operator role + ABAC                    | Revoke an existing override                            | Active |
 
 ## Endpoint Details
 
