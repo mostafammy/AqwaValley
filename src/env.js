@@ -52,6 +52,7 @@ export const env = createEnv({
       .default(3),
     QUOTA_WARNING_THRESHOLD_PCT: z.coerce.number().min(1).max(100).default(80),
     QUOTA_CRITICAL_THRESHOLD_PCT: z.coerce.number().min(1).max(120).default(95),
+    OPENROUTER_API_KEY: z.string().optional(),
   },
 
   /**
@@ -86,6 +87,7 @@ export const env = createEnv({
     QUOTA_BASELINE_MONTH_WINDOW: process.env.QUOTA_BASELINE_MONTH_WINDOW,
     QUOTA_WARNING_THRESHOLD_PCT: process.env.QUOTA_WARNING_THRESHOLD_PCT,
     QUOTA_CRITICAL_THRESHOLD_PCT: process.env.QUOTA_CRITICAL_THRESHOLD_PCT,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
