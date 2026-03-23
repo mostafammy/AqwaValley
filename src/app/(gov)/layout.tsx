@@ -4,6 +4,10 @@ import { GovSidebar } from "../_components/layouts/Govsidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
+import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
+import { db } from "~/server/db";
+import { alerts } from "~/server/db/schema";
+import { isNull, count } from "drizzle-orm";
 
 /**
  * Layout component that enforces government-portal access and renders the portal chrome around its children.
@@ -22,6 +26,14 @@ export default async function GovLayout({ children }: { children: React.ReactNod
   const rolePath = await getUserRolePath();
   if (rolePath !== "/dashboard") redirect("/");
 
+  // Fetch unacknowledged alert count
+  const [alertCountResult] = await db
+    .select({ count: count() })
+    .from(alerts)
+    .where(isNull(alerts.acknowledgedAt));
+  
+  const alertCount = alertCountResult?.count ?? 0;
+
   // Prepare UI variables from session
   const name = session.user.name || "مستخدم";
   const parts = name.trim().split(" ");
@@ -32,15 +44,16 @@ export default async function GovLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <div className="layout-root">
+        <ScrollReset />
         <Topbar
           userName={name}
           userRole="GOV_ADMIN" // Representing the operating portal context
           userInitials={initials}
           portalLabel="نظام إدارة المياه · الوادي الجديد"
-          notifCount={3}
+          notifCount={alertCount}
         />
         <div className="layout-content-row">
-          <GovSidebar alertCount={3} />
+          <GovSidebar alertCount={alertCount} />
           <main className="layout-main">
             {children}
           </main>

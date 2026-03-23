@@ -5,6 +5,7 @@ import { useSidebar } from "./SidebarProvider";
 import { useState, useRef, useEffect } from "react";
 import { authClient } from "~/server/better-auth/client";
 import { useRouter } from "next/navigation";
+import { NotificationDropdown } from "./NotificationDropdown";
 
 const ROLE_LABELS: Record<string, string> = {
   GOV_ADMIN: "مسؤول حكومي",
@@ -44,7 +45,9 @@ export function Topbar({
   const { toggleMobile } = useSidebar();
   const [searchTerm, setSearchTerm] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -142,22 +145,23 @@ export function Topbar({
           </div>
         )}
 
-        <div className="flex items-center gap-2 rtl:space-x-reverse">
+        <div className="relative flex items-center gap-2 rtl:space-x-reverse">
           <button
+            ref={bellRef}
             className="topbar-icon-btn relative"
             aria-label="عرض الإشعارات"
+            onClick={() => setIsNotifOpen(!isNotifOpen)}
           >
             <Bell className="h-4 w-4" />
             {notifCount > 0 && (
               <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-(--color-danger) outline-2 outline-(--color-navy)"></span>
             )}
           </button>
-          <button
-            className="topbar-icon-btn hidden sm:flex"
-            aria-label="الإعدادات"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
+          <NotificationDropdown
+            isOpen={isNotifOpen}
+            onClose={() => setIsNotifOpen(false)}
+            anchorRef={bellRef}
+          />
         </div>
 
         {/* Divider */}

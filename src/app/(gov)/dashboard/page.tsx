@@ -4,6 +4,7 @@ import { KpiCards }        from "./_components/KpiCards";
 import { DistrictMap }     from "./_components/DistrictMap";
 import { AlertsFeed }      from "./_components/alerts";
 import { ChartsContainer } from "./_components/ChartsContainer";
+import { DemoAlertButton } from "./_components/DemoAlertButton";
 
 export const metadata = { title: "لوحة التحكم | AquaValley" };
 
@@ -20,14 +21,17 @@ export default function GovDashboardPage() {
           <h1 className="text-xl md:text-3xl font-bold">لوحة التحكم الرئيسية</h1>
           <p className="text-sm md:text-base text-gray-500 mt-1">الوادي الجديد</p>
         </div>
-        <span className="text-xs text-gray-400 shrink-0 mt-1">
-          {new Date().toLocaleDateString("ar-EG", {
-            weekday: "long",
-            year:    "numeric",
-            month:   "long",
-            day:     "numeric",
-          })}
-        </span>
+        <div className="flex items-center gap-3">
+          <DemoAlertButton />
+          <span className="text-xs text-gray-400 shrink-0 mt-1">
+            {new Date().toLocaleDateString("ar-EG", {
+              weekday: "long",
+              year:    "numeric",
+              month:   "long",
+              day:     "numeric",
+            })}
+          </span>
+        </div>
       </div>
 
       {/* KPI Cards — 2 cols mobile, 4 cols desktop */}

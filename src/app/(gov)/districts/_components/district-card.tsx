@@ -11,7 +11,8 @@ type Well = {
 };
 
 type DistrictCardProps = {
-  id:           string;
+  id:           string;   // slug — anchor
+  dbId:         string;   // real DB uuid
   name:         string;
   totalWells:   number;
   activeWells:  number;
@@ -23,6 +24,7 @@ type DistrictCardProps = {
 
 export function DistrictCard({
   id,
+  dbId: _dbId,   // not used in UI — prefixed with _ to avoid lint warning
   name,
   totalWells,
   activeWells,
@@ -30,14 +32,17 @@ export function DistrictCard({
   alertCount,
   depletionRate,
   wells,
-}: DistrictCardProps) {  const riskColor =
+}: DistrictCardProps) {
+  const riskColor =
     avgLevelPct < 30 ? "text-red-600" :
     avgLevelPct < 60 ? "text-amber-600" :
     "text-teal-600";
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
+    <div
+      id={id}
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden scroll-mt-20"
+    >
       {/* District Header */}
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-start justify-between mb-4">
@@ -108,7 +113,6 @@ export function DistrictCard({
           ))}
         </div>
       </div>
-
     </div>
   );
 }
