@@ -51,11 +51,7 @@ export const env = createEnv({
       .max(24)
       .default(3),
     QUOTA_WARNING_THRESHOLD_PCT: z.coerce.number().min(1).max(100).default(80),
-    QUOTA_CRITICAL_THRESHOLD_PCT: z.coerce
-      .number()
-      .min(1)
-      .max(120)
-      .default(95),
+    QUOTA_CRITICAL_THRESHOLD_PCT: z.coerce.number().min(1).max(120).default(95),
   },
 
   /**

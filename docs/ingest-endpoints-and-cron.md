@@ -1,7 +1,7 @@
 ---
 title: Ingest Endpoints and Cron Readiness
 owner: Platform and Data Team
-last_updated: 2026-03-17
+last_updated: 2026-03-23
 audience: Backend, Frontend, DevOps, QA
 status: active
 ---
@@ -12,13 +12,24 @@ This document summarizes all current ingestion-related endpoints and clarifies w
 
 ## Current Endpoint Inventory
 
-| Endpoint                  | Method                  | Auth Model                              | Primary Use                                            | Status |
-| ------------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------ | ------ |
-| /api/sensors/ingest       | POST                    | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
-| /api/admin/mock-ingest    | POST                    | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
-| /api/cron/simulate-ingest | GET (preferred) or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
-| /api/wells/:id/metrics    | GET                     | Logged-in session cookie                | Read aggregated well metrics                           | Active |
-| /api/health               | GET                     | None                                    | Service and DB health verification                     | Active |
+| Endpoint                      | Method                  | Auth Model                              | Primary Use                                            | Status |
+| ----------------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------ | ------ |
+| /api/sensors/ingest           | POST                    | API key in X-API-Key or Bearer          | Production-style sensor ingest (single or batch)       | Active |
+| /api/admin/mock-ingest        | POST                    | Logged-in admin session cookie          | Manual admin-triggered mock reading ingest             | Active |
+| /api/cron/simulate-ingest     | GET (preferred) or POST | CRON secret via Bearer or x-cron-secret | Scheduled machine-to-machine live simulation execution | Active |
+| /api/wells/:id/metrics        | GET                     | Logged-in session cookie                | Read aggregated well metrics                           | Active |
+| /api/health                   | GET                     | None                                    | Service and DB health verification                     | Active |
+| tRPC quotas.farmStatus        | Query                   | Logged-in session + ABAC                | Farm quota decision snapshot and trend direction       | Active |
+| tRPC quotas.districtStatus    | Query                   | Logged-in session + ABAC                | District quota decision snapshot and trend direction   | Active |
+| tRPC quotas.farmTrend         | Query                   | Logged-in session + ABAC                | Farm quota trend time series                           | Active |
+| tRPC quotas.districtTrend     | Query                   | Logged-in session + ABAC                | District quota trend time series                       | Active |
+| tRPC quotas.listBreaches      | Query                   | Logged-in session + ABAC                | Paginated quota breach events                          | Active |
+| tRPC quotas.listQuotaAlerts   | Query                   | Logged-in session + ABAC                | Actionable open quota alerts with severity projection  | Active |
+| tRPC quotas.listOverrides     | Query                   | Logged-in session + ABAC                | Paginated manual override windows                      | Active |
+| tRPC quotas.setFarmQuota      | Mutation                | Operator role + ABAC                    | Update farm monthly/annual quota values                | Active |
+| tRPC quotas.setDistrictQuota  | Mutation                | Operator role + ABAC                    | Update district safe yield and optional thresholds     | Active |
+| tRPC quotas.createOverride    | Mutation                | Operator role + ABAC                    | Create temporary farm/district state override          | Active |
+| tRPC quotas.revokeOverride    | Mutation                | Operator role + ABAC                    | Revoke an existing override                            | Active |
 
 ## Endpoint Details
 
@@ -32,7 +43,7 @@ Authentication:
 
 - Required API key in one of:
   - X-API-Key header
-  - Authorization: Bearer <key>
+  - Authorization: Bearer KEY_VALUE
 
 Request shapes:
 
@@ -231,3 +242,28 @@ What is missing for scheduled simulation:
 
 - Production Vercel environment variables must be set (CRON_SECRET and simulator limits).
 - DevOps monitoring should track cron run success rate, duration, and failure codes.
+
+## Quota API Notes
+
+Quota decisions currently run in the backend service layer and persist snapshot rows in periodized quota snapshot tables. The API computes and returns both:
+
+- rawState: pure decision output from quota + consumption + trend logic.
+- effectiveState: decision adjusted by any active manual override.
+
+Current state values:
+
+- ok
+- warning
+- critical
+- exceeded
+- needs_review
+
+Baseline and thresholds are configurable via environment variables:
+
+- QUOTA_BASELINE_MONTH_WINDOW
+- QUOTA_WARNING_THRESHOLD_PCT
+- QUOTA_CRITICAL_THRESHOLD_PCT
+
+For full runtime behavior details, including when quota is evaluated and whether ingest is blocked on exceed, see:
+
+- [Quota Service Runtime Behavior](./quota-service-runtime-behavior.md)

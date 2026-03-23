@@ -108,6 +108,41 @@ export const alertRuleOperatorEnum = pgEnum("alert_rule_operator", [
   "eq",
 ]);
 
+export const quotaPeriodTypeEnum = pgEnum("quota_period_type", [
+  "daily",
+  "monthly",
+]);
+
+export const quotaStateEnum = pgEnum("quota_state", [
+  "ok",
+  "warning",
+  "critical",
+  "exceeded",
+  "needs_review",
+]);
+
+export const quotaTrendDirectionEnum = pgEnum("quota_trend_direction", [
+  "increase",
+  "decrease",
+  "flat",
+]);
+
+export const quotaScopeTypeEnum = pgEnum("quota_scope_type", [
+  "farm",
+  "district",
+]);
+
+export const quotaBreachStatusEnum = pgEnum("quota_breach_status", [
+  "open",
+  "resolved",
+]);
+
+export const quotaOverrideStatusEnum = pgEnum("quota_override_status", [
+  "active",
+  "revoked",
+  "expired",
+]);
+
 // ============================================================================
 // AUTHENTICATION TABLES (Better Auth managed)
 // ============================================================================
@@ -754,6 +789,234 @@ export const alerts = pgTable(
   ],
 );
 
+/**
+ * farm_period_consumption_snapshot: Pre-aggregated farm quota decisions by period.
+ * Acts as the primary read model for quota status endpoints.
+ */
+export const farmPeriodConsumptionSnapshot = pgTable(
+  "farm_period_consumption_snapshot",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    farmId: uuid("farm_id")
+      .notNull()
+      .references(() => farm.id, { onDelete: "cascade" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => district.id, { onDelete: "restrict" }),
+    periodType: quotaPeriodTypeEnum("period_type").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    quotaM3: numeric("quota_m3", { precision: 15, scale: 2 }).notNull(),
+    consumptionM3: numeric("consumption_m3", {
+      precision: 15,
+      scale: 2,
+    })
+      .default("0")
+      .notNull(),
+    utilizationPct: numeric("utilization_pct", {
+      precision: 7,
+      scale: 2,
+    })
+      .default("0")
+      .notNull(),
+    baselineConsumptionM3: numeric("baseline_consumption_m3", {
+      precision: 15,
+      scale: 2,
+    }),
+    trendDirection: quotaTrendDirectionEnum("trend_direction"),
+    trendDeltaPct: numeric("trend_delta_pct", {
+      precision: 7,
+      scale: 2,
+    }),
+    rawState: quotaStateEnum("raw_state").notNull(),
+    effectiveState: quotaStateEnum("effective_state").notNull(),
+    dataQualityFlag: text("data_quality_flag"),
+    decisionReasons: jsonb("decision_reasons"),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("farm_snapshot_farm_period_start_idx").on(t.farmId, t.periodStart),
+    index("farm_snapshot_district_period_start_idx").on(
+      t.districtId,
+      t.periodStart,
+    ),
+    index("farm_snapshot_effective_state_computed_at_idx").on(
+      t.effectiveState,
+      t.computedAt,
+    ),
+    unique("farm_snapshot_unique").on(t.farmId, t.periodType, t.periodStart),
+  ],
+);
+
+/**
+ * district_period_consumption_snapshot: Pre-aggregated district (city in phase 1)
+ * quota decisions by period.
+ */
+export const districtPeriodConsumptionSnapshot = pgTable(
+  "district_period_consumption_snapshot",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => district.id, { onDelete: "cascade" }),
+    periodType: quotaPeriodTypeEnum("period_type").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    quotaM3: numeric("quota_m3", { precision: 15, scale: 2 }).notNull(),
+    consumptionM3: numeric("consumption_m3", {
+      precision: 15,
+      scale: 2,
+    })
+      .default("0")
+      .notNull(),
+    utilizationPct: numeric("utilization_pct", {
+      precision: 7,
+      scale: 2,
+    })
+      .default("0")
+      .notNull(),
+    baselineConsumptionM3: numeric("baseline_consumption_m3", {
+      precision: 15,
+      scale: 2,
+    }),
+    trendDirection: quotaTrendDirectionEnum("trend_direction"),
+    trendDeltaPct: numeric("trend_delta_pct", {
+      precision: 7,
+      scale: 2,
+    }),
+    rawState: quotaStateEnum("raw_state").notNull(),
+    effectiveState: quotaStateEnum("effective_state").notNull(),
+    dataQualityFlag: text("data_quality_flag"),
+    decisionReasons: jsonb("decision_reasons"),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("district_snapshot_period_start_idx").on(t.districtId, t.periodStart),
+    index("district_snapshot_effective_state_computed_at_idx").on(
+      t.effectiveState,
+      t.computedAt,
+    ),
+    unique("district_snapshot_unique").on(
+      t.districtId,
+      t.periodType,
+      t.periodStart,
+    ),
+  ],
+);
+
+/**
+ * quota_breach_event: Immutable record of quota breach detections.
+ */
+export const quotaBreachEvent = pgTable(
+  "quota_breach_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: quotaScopeTypeEnum("scope_type").notNull(),
+    farmId: uuid("farm_id").references(() => farm.id, { onDelete: "cascade" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => district.id, { onDelete: "cascade" }),
+    periodType: quotaPeriodTypeEnum("period_type").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    rawState: quotaStateEnum("raw_state").notNull(),
+    effectiveState: quotaStateEnum("effective_state").notNull(),
+    quotaM3: numeric("quota_m3", { precision: 15, scale: 2 }).notNull(),
+    consumptionM3: numeric("consumption_m3", {
+      precision: 15,
+      scale: 2,
+    }).notNull(),
+    utilizationPct: numeric("utilization_pct", {
+      precision: 7,
+      scale: 2,
+    }).notNull(),
+    deltaM3: numeric("delta_m3", { precision: 15, scale: 2 }).notNull(),
+    status: quotaBreachStatusEnum("status").default("open").notNull(),
+    reasonCodes: jsonb("reason_codes"),
+    message: text("message"),
+    triggeredAt: timestamp("triggered_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    resolvedByUserId: text("resolved_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("quota_breach_scope_period_start_idx").on(
+      t.scopeType,
+      t.periodStart,
+      t.periodType,
+    ),
+    index("quota_breach_farm_idx").on(t.farmId),
+    index("quota_breach_district_idx").on(t.districtId),
+    index("quota_breach_status_triggered_at_idx").on(t.status, t.triggeredAt),
+  ],
+);
+
+/**
+ * quota_override: Manual override windows that can temporarily adjust effective
+ * quota state for farm or district scope.
+ */
+export const quotaOverride = pgTable(
+  "quota_override",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: quotaScopeTypeEnum("scope_type").notNull(),
+    farmId: uuid("farm_id").references(() => farm.id, { onDelete: "cascade" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => district.id, { onDelete: "cascade" }),
+    stateOverride: quotaStateEnum("state_override").notNull(),
+    reason: text("reason").notNull(),
+    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+    endAt: timestamp("end_at", { withTimezone: true }).notNull(),
+    status: quotaOverrideStatusEnum("status").default("active").notNull(),
+    approvedByUserId: text("approved_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    revokedByUserId: text("revoked_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    revokedReason: text("revoked_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("quota_override_scope_status_start_idx").on(
+      t.scopeType,
+      t.status,
+      t.startAt,
+    ),
+    index("quota_override_farm_idx").on(t.farmId),
+    index("quota_override_district_idx").on(t.districtId),
+    index("quota_override_approved_by_idx").on(t.approvedByUserId),
+  ],
+);
+
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -821,6 +1084,10 @@ export const districtRelations = relations(district, ({ many }) => ({
   wells: many(well),
   farms: many(farm),
   userProfiles: many(userProfile),
+  farmSnapshots: many(farmPeriodConsumptionSnapshot),
+  districtSnapshots: many(districtPeriodConsumptionSnapshot),
+  quotaBreachEvents: many(quotaBreachEvent),
+  quotaOverrides: many(quotaOverride),
 }));
 
 export const wellRelations = relations(well, ({ one, many }) => ({
@@ -908,6 +1175,9 @@ export const farmRelations = relations(farm, ({ one, many }) => ({
   wells: many(farmWell),
   cropProfile: many(cropProfile),
   cropHistory: many(cropHistory),
+  quotaSnapshots: many(farmPeriodConsumptionSnapshot),
+  quotaBreachEvents: many(quotaBreachEvent),
+  quotaOverrides: many(quotaOverride),
 }));
 
 export const farmWellRelations = relations(farmWell, ({ one }) => ({
@@ -975,6 +1245,67 @@ export const apiKeyRelations = relations(apiKey, ({ one }) => ({
   }),
   createdByUser: one(user, {
     fields: [apiKey.createdByUserId],
+    references: [user.id],
+  }),
+}));
+
+export const farmPeriodConsumptionSnapshotRelations = relations(
+  farmPeriodConsumptionSnapshot,
+  ({ one }) => ({
+    farm: one(farm, {
+      fields: [farmPeriodConsumptionSnapshot.farmId],
+      references: [farm.id],
+    }),
+    district: one(district, {
+      fields: [farmPeriodConsumptionSnapshot.districtId],
+      references: [district.id],
+    }),
+  }),
+);
+
+export const districtPeriodConsumptionSnapshotRelations = relations(
+  districtPeriodConsumptionSnapshot,
+  ({ one }) => ({
+    district: one(district, {
+      fields: [districtPeriodConsumptionSnapshot.districtId],
+      references: [district.id],
+    }),
+  }),
+);
+
+export const quotaBreachEventRelations = relations(
+  quotaBreachEvent,
+  ({ one }) => ({
+    farm: one(farm, {
+      fields: [quotaBreachEvent.farmId],
+      references: [farm.id],
+    }),
+    district: one(district, {
+      fields: [quotaBreachEvent.districtId],
+      references: [district.id],
+    }),
+    resolvedByUser: one(user, {
+      fields: [quotaBreachEvent.resolvedByUserId],
+      references: [user.id],
+    }),
+  }),
+);
+
+export const quotaOverrideRelations = relations(quotaOverride, ({ one }) => ({
+  farm: one(farm, {
+    fields: [quotaOverride.farmId],
+    references: [farm.id],
+  }),
+  district: one(district, {
+    fields: [quotaOverride.districtId],
+    references: [district.id],
+  }),
+  approvedByUser: one(user, {
+    fields: [quotaOverride.approvedByUserId],
+    references: [user.id],
+  }),
+  revokedByUser: one(user, {
+    fields: [quotaOverride.revokedByUserId],
     references: [user.id],
   }),
 }));

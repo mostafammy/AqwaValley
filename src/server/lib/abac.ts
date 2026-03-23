@@ -99,6 +99,39 @@ export async function canAccessWell(
   return canAccessDistrict(ctx, wellRecord[0].districtId);
 }
 
+/**
+ * True if the user can interact with the given farm.
+ */
+export async function canAccessFarm(
+  ctx: AuthContext,
+  farmId: string,
+): Promise<boolean> {
+  if (hasRole(ctx, "admin", "auditor")) return true;
+
+  const farmRecord = await ctx.db
+    .select({
+      districtId: farm.districtId,
+      ownerId: farm.ownerId,
+      farmerUserId: farm.farmerUserId,
+    })
+    .from(farm)
+    .where(eq(farm.id, farmId))
+    .limit(1);
+
+  const targetFarm = farmRecord[0];
+  if (!targetFarm) return false;
+
+  if (
+    hasRole(ctx, "farm_owner", "farmer") &&
+    (targetFarm.ownerId === ctx.session.user.id ||
+      targetFarm.farmerUserId === ctx.session.user.id)
+  ) {
+    return true;
+  }
+
+  return canAccessDistrict(ctx, targetFarm.districtId);
+}
+
 /** Throws FORBIDDEN if the user cannot access the given district. */
 export async function requireDistrictAccess(
   ctx: AuthContext,
@@ -123,6 +156,20 @@ export async function requireWellAccess(
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Access to this well is not permitted",
+    });
+  }
+}
+
+/** Throws FORBIDDEN if the user cannot access the given farm. */
+export async function requireFarmAccess(
+  ctx: AuthContext,
+  farmId: string,
+): Promise<void> {
+  const allowed = await canAccessFarm(ctx, farmId);
+  if (!allowed) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Access to this farm is not permitted",
     });
   }
 }
