@@ -38,7 +38,6 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
           userRole="FARMER"
           userInitials={initials}
           portalLabel="مزرعة الفرافرة — القمح والبنجر"
-          notifCount={0}
           weatherChip="34°م - جاف"
         />
         <div className="layout-content-row">

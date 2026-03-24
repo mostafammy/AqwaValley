@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
+import { api } from "~/trpc/react";
 import {
   LayoutDashboard,
   Map,
@@ -16,11 +17,7 @@ import {
   Settings,
 } from "lucide-react";
 
-interface GovSidebarProps {
-  alertCount?: number;
-}
-
-export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
+export function GovSidebar() {
   const pathname = usePathname();
   const is = (path: string) =>
     path === "/"
@@ -28,6 +25,16 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
       : pathname === path || pathname.startsWith(`${path}/`);
       
   const { isMobileOpen, closeMobile } = useSidebar();
+  
+  // Fetch unacknowledged alert count reactively via tRPC
+  const { data: alertCount = 0, isLoading, error } = api.alerts.count.useQuery(undefined, {
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Debug: Log errors
+  if (error) {
+    console.error("Alert count query error:", error);
+  }
 
   return (
     <>

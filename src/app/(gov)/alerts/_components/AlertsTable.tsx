@@ -44,6 +44,7 @@ export function AlertsTable() {
     onSuccess: () => {
       setPendingAckId(null);
       void utils.alerts.list.invalidate();
+      void utils.alerts.count.invalidate(); // Refresh the count in sidebar/topbar
     },
     onError: () => {
       setPendingAckId(null);

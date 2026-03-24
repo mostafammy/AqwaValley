@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNotNull, isNull, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNotNull, isNull, lte, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -26,6 +26,18 @@ const sensorTypeValues = [
 ] as const;
 
 export const alertsRouter = createTRPCRouter({
+  /**
+   * Count of unacknowledged alerts for the sidebar badge.
+   */
+  count: viewerProcedure.query(async ({ ctx }) => {
+    // Simple query - count all unacknowledged alerts
+    const [result] = await ctx.db
+      .select({ count: count() })
+      .from(alerts)
+      .where(isNull(alerts.acknowledgedAt));
+    return result?.count ?? 0;
+  }),
+
   /**
    * Paginated list of alerts, scoped to accessible wells.
    */
