@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useIntersectionObserver } from "~/lib/hooks";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart, Area, XAxis, YAxis,
@@ -41,6 +42,7 @@ async function fetchMetrics(
 }
 
 export function ReadingsChart({ wellId }: { wellId: string }) {
+  const { targetRef, isVisible } = useIntersectionObserver();
   const [activeRange, setActiveRange] = useState<RangeKey>("1w");
   const cfg = RANGES.find((r) => r.key === activeRange)!;
 
@@ -52,7 +54,7 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
   });
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div ref={targetRef} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
       {/* Header + Tabs */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-2">
@@ -97,7 +99,7 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart data={isVisible ? data : []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="levelGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="#1D6FA8" stopOpacity={0.2} />
@@ -146,6 +148,7 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
               fill="url(#levelGrad)"
               dot={false}
               activeDot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
+              isAnimationActive={isVisible}
               animationDuration={800}
             />
           </AreaChart>

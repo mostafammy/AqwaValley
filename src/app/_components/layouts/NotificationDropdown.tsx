@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Bell, Check, AlertTriangle, Info, ChevronLeft } from "lucide-react";
+import { Bell, Check, AlertTriangle, Info, ChevronLeft, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
-import { useRouter } from "next/navigation";
 import { formatAlertMessage } from "~/lib/utils";
 
 interface NotificationDropdownProps {
@@ -29,7 +28,7 @@ export function NotificationDropdown({
   onClose,
   anchorRef,
 }: NotificationDropdownProps) {
-  const router = useRouter();
+  const utils = api.useContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch recent alerts
@@ -42,7 +41,8 @@ export function NotificationDropdown({
   // Acknowledge mutation
   const ackMutation = api.alerts.acknowledge.useMutation({
     onSuccess: () => {
-      router.refresh();
+      void utils.alerts.list.invalidate();
+      void utils.alerts.count.invalidate();
     },
   });
 
@@ -112,7 +112,7 @@ export function NotificationDropdown({
             </div>
           ) : data?.items.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
-              <span className="text-3xl">✅</span>
+              <CheckCircle className="h-10 w-10 mx-auto text-gray-300" />
               <p className="text-sm mt-2">لا توجد إشعارات جديدة</p>
             </div>
           ) : (

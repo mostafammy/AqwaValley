@@ -101,7 +101,7 @@ export function WaterDropGauge({ levelPct, size = 160 }: WaterDropGaugeProps) {
       </svg>
 
       <span className="text-sm font-semibold" style={{ color: textColor }}>
-        {displayPct < 20 ? "⚠️ حرج" : displayPct < 40 ? "⚡ منخفض" : "✅ طبيعي"}
+        {displayPct < 20 ? "حرج" : displayPct < 40 ? "منخفض" : "طبيعي"}
       </span>
     </div>
   );

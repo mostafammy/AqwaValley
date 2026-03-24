@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Filter, ChevronRight } from "lucide-react";
+import { Check, Filter, ChevronRight, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/UI/Button";
 import { Badge } from "~/app/_components/UI/Badge";
@@ -44,6 +44,7 @@ export function AlertsTable() {
     onSuccess: () => {
       setPendingAckId(null);
       void utils.alerts.list.invalidate();
+      void utils.alerts.count.invalidate(); // Refresh the count in sidebar/topbar
     },
     onError: () => {
       setPendingAckId(null);
@@ -58,7 +59,7 @@ export function AlertsTable() {
   const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden min-w-md">
       {/* Filters Bar */}
       <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -162,7 +163,7 @@ export function AlertsTable() {
               <tr>
                 <td colSpan={7} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center text-gray-400">
-                    <span className="text-4xl mb-3">✅</span>
+                    <CheckCircle className="h-10 w-10 text-gray-300 mb-3" />
                     <p className="text-sm">لا توجد تنبيهات</p>
                   </div>
                 </td>

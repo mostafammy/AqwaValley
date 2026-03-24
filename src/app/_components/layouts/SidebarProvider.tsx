@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode , useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 interface SidebarContextType {

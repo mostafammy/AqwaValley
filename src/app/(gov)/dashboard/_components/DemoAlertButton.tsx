@@ -12,14 +12,14 @@ export function DemoAlertButton() {
 
   const triggerDemoAlerts = async () => {
     setIsLoading(true);
-    setMessage("⏳ جارٍ إنشاء تنبيهات تجريبية...");
+    setMessage("جارٍ إنشاء تنبيهات تجريبية...");
 
     try {
       // Get wells using tRPC
       const wellsResponse = await fetch("/api/trpc/wells.list?input=%7B%22json%22%3A%7B%22page%22%3A1%2C%22pageSize%22%3A3%7D%7D");
       
       if (!wellsResponse.ok) {
-        setMessage("⚠️ خطأ في جلب قائمة الآبار");
+        setMessage("خطأ في جلب قائمة الآبار");
         setIsLoading(false);
         return;
       }
@@ -28,7 +28,7 @@ export function DemoAlertButton() {
       const wells = wellsData.result?.data?.json?.items ?? [];
 
       if (wells.length === 0) {
-        setMessage("⚠️ لا توجد آبار في النظام. يرجى تشغيل سكريبت الزراعة أولاً (pnpm seed)");
+        setMessage("لا توجد آبار في النظام. يرجى تشغيل سكريبت الزراعة أولاً (pnpm seed)");
         setIsLoading(false);
         return;
       }
@@ -39,7 +39,7 @@ export function DemoAlertButton() {
           sensorType: "water_level", 
           value: 3,
           severity: "حرج",
-          color: "🔴",
+          color: "[حرج]",
           title: "انخفاض حاد في منسوب المياه",
           description: "انخفض منسوب المياه في البئر إلى مستويات حرجة!",
         },
@@ -47,7 +47,7 @@ export function DemoAlertButton() {
           sensorType: "flow_rate", 
           value: 12,
           severity: "تحذير",
-          color: "🟡",
+          color: "[تحذير]",
           title: "ارتفاع في معدل التدفق",
           description: "تم تجاوز الحد الآمن لمعدل تدفق المياه.",
         },
@@ -55,7 +55,7 @@ export function DemoAlertButton() {
           sensorType: "pressure", 
           value: 5,
           severity: "تحذير",
-          color: "🟡",
+          color: "[تحذير]",
           title: "ارتفاع ضغط غير طبيعي",
           description: "تم اكتشاف ضغط عالي غير طبيعي في النظام.",
         },
@@ -90,15 +90,15 @@ export function DemoAlertButton() {
       }
 
       if (results.length > 0) {
-        setMessage(`✅ تم إنشاء ${results.length} تنبيه تجريبي:\n\n${results.join("\n")}\n\nℹ️ ستظهر هذه التنبيهات في صفحة التنبيهات والإشعارات`);
+        setMessage(`تم إنشاء ${results.length} تنبيه تجريبي:\n\n${results.join("\n")}\n\nستظهر هذه التنبيهات في صفحة التنبيهات والإشعارات`);
         router.refresh();
         
         setTimeout(() => setMessage(null), 6000);
       } else {
-        setMessage("❌ فشلت عملية إنشاء التنبيهات. تأكد من وجود حساسات في الآبار.");
+        setMessage("فشلت عملية إنشاء التنبيهات. تأكد من وجود حساسات في الآبار.");
       }
     } catch {
-      setMessage("❌ حدث خطأ أثناء الاتصال بالخادم");
+      setMessage("حدث خطأ أثناء الاتصال بالخادم");
     } finally {
       setIsLoading(false);
     }

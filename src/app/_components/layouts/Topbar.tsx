@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { authClient } from "~/server/better-auth/client";
 import { useRouter } from "next/navigation";
 import { NotificationDropdown } from "./NotificationDropdown";
+import { api } from "~/trpc/react";
 
 const ROLE_LABELS: Record<string, string> = {
   GOV_ADMIN: "مسؤول حكومي",
@@ -18,7 +19,6 @@ interface TopbarProps {
   userRole?: UserRole;
   userInitials?: string;
   portalLabel?: string;
-  notifCount?: number;
   weatherChip?: string; // للـ farm portal فقط
 }
 
@@ -29,7 +29,6 @@ interface TopbarProps {
  * @param userRole - User role key; controls role label and branding variant (e.g., GOV_ADMIN, SUPER_ADMIN, FARMER)
  * @param userInitials - Initials shown inside the avatar circle
  * @param portalLabel - Subtitle shown under the portal title
- * @param notifCount - Number of unread notifications; a small indicator is shown when greater than zero
  * @param weatherChip - Optional small badge (e.g., current weather) rendered next to icons when provided
  * @returns The top-level JSX element for the portal topbar UI
  */
@@ -38,7 +37,6 @@ export function Topbar({
   userRole = "GOV_ADMIN",
   userInitials = "م.أ",
   portalLabel = "نظام إدارة الموارد المائية",
-  notifCount = 0,
   weatherChip,
 }: TopbarProps) {
   const isGov = userRole === "GOV_ADMIN" || userRole === "SUPER_ADMIN";
@@ -49,6 +47,11 @@ export function Topbar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
+
+  // Fetch unacknowledged alert count reactively via tRPC
+  const { data: notifCount = 0 } = api.alerts.count.useQuery(undefined, {
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,9 +111,9 @@ export function Topbar({
         <div className="topbar-logo-bg">
           {isGov ? (
             <Droplets className="h-6 w-6 text-white" strokeWidth={1.8} />
-          ) : (
-            <span className="text-xl">🌾</span>
-          )}
+            ) : (
+              <Droplets className="h-5 w-5 text-white" />
+            )}
         </div>
         <div className="hidden flex-col pr-2 sm:flex">
           <h1 className="topbar-title">أكوا الوادي</h1>

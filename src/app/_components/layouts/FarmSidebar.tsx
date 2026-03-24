@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { useSidebar } from "./SidebarProvider";
+import { LayoutDashboard, Leaf, Droplets, FlaskConical, Sparkles, PlayCircle, History, Scale } from "lucide-react";
 
 export function FarmSidebar() {
   const pathname = usePathname();
@@ -23,19 +24,19 @@ export function FarmSidebar() {
 
       <NavItem
         href="/farm/dashboard"
-        icon=""
+        icon={<LayoutDashboard size={18} />}
         label="الرئيسية"
         active={is("/farm/dashboard")}
       />
-      <NavItem
-        href="/farm/crops"
-        icon="🌱"
-        label="بروفايل المحاصيل"
-        active={is("/farm/crops")}
-      />
+        <NavItem
+          href="/farm/crops"
+          icon={<Leaf size={18} />}
+          label="بروفايل المحاصيل"
+          active={is("/farm/crops")}
+        />
       <NavItem
         href="/farm/soil"
-        icon=""
+        icon={<FlaskConical size={18} />}
         label="قراءات التربة"
         active={is("/farm/soil")}
       />
@@ -46,25 +47,25 @@ export function FarmSidebar() {
 
       <NavItem
         href="/farm/ai-plan"
-        icon=""
+        icon={<Sparkles size={18} />}
         label="خطة الري الذكي"
         active={is("/farm/ai-plan")}
       />
       <NavItem
         href="/farm/irrigate"
-        icon=""
+        icon={<PlayCircle size={18} />}
         label="تشغيل الري"
         active={is("/farm/irrigate")}
       />
       <NavItem
         href="/farm/history"
-        icon=""
+        icon={<History size={18} />}
         label="سجل الري"
         active={is("/farm/history")}
       />
       <NavItem
         href="/farm/quota"
-        icon=""
+        icon={<Scale size={18} />}
         label="الحصة المائية"
         active={is("/farm/quota")}
       />

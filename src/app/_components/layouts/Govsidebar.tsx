@@ -4,12 +4,21 @@ import { usePathname } from "next/navigation";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
+import { api } from "~/trpc/react";
+import { useState, useEffect } from "react";
+import {
+  LayoutDashboard,
+  Map,
+  Bell,
+  Building2,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  Users,
+  Settings,
+} from "lucide-react";
 
-interface GovSidebarProps {
-  alertCount?: number;
-}
-
-export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
+export function GovSidebar() {
   const pathname = usePathname();
   const is = (path: string) =>
     path === "/"
@@ -17,6 +26,18 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
       : pathname === path || pathname.startsWith(`${path}/`);
       
   const { isMobileOpen, closeMobile } = useSidebar();
+  
+  // Fetch unacknowledged alert count reactively via tRPC
+  const { data: alertCount = 0, isLoading, error } = api.alerts.count.useQuery(undefined, {
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Debug: Log errors
+  useEffect(() => {
+    if (error) {
+      console.error("Alert count query error:", error);
+    }
+  }, [error]);
 
   return (
     <>
@@ -31,19 +52,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/dashboard"
-          icon="🏠"
+          icon={<LayoutDashboard size={18} />}
           label="الرئيسية"
           active={is("/dashboard")}
         />
         <NavItem
           href="/map"
-          icon="🗺️"
+          icon={<Map size={18} />}
           label="خريطة الآبار"
           active={is("/map")}
         />
         <NavItem
           href="/alerts"
-          icon="🚨"
+          icon={<Bell size={18} />}
           label="التنبيهات"
           active={is("/alerts")}
           badge={
@@ -59,19 +80,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/districts"
-          icon="🏛️"
+          icon={<Building2 size={18} />}
           label="المراكز والآبار"
           active={is("/districts") || is("/wells")}        />
         
         <NavItem
           href="/distribution"
-          icon="📊"
+          icon={<BarChart3 size={18} />}
           label="توزيع المياه"
           active={is("/distribution")}
         />
         <NavItem
           href="/forecast"
-          icon="📈"
+          icon={<TrendingUp size={18} />}
           label="توقعات الخزان"
           active={is("/forecast")}
         />
@@ -82,19 +103,19 @@ export function GovSidebar({ alertCount = 0 }: GovSidebarProps) {
 
         <NavItem
           href="/reports"
-          icon="📄"
+          icon={<FileText size={18} />}
           label="التقارير"
           active={is("/reports")}
         />
         <NavItem
           href="/users"
-          icon="👥"
+          icon={<Users size={18} />}
           label="المستخدمون"
           active={is("/users")}
         />
         <NavItem
           href="/settings"
-          icon="⚙️"
+          icon={<Settings size={18} />}
           label="الإعدادات"
           active={is("/settings")}
         />

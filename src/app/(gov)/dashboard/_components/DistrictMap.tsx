@@ -57,7 +57,7 @@ export async function DistrictMap() {
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-semibold">
-          🗺️ خريطة الآبار — الوادي الجديد
+          خريطة الآبار — الوادي الجديد
         </span>
         <span className="text-xs text-gray-400">{markers.length} بئر</span>
       </div>

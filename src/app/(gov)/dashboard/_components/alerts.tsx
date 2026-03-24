@@ -4,7 +4,7 @@ import { eq, desc, isNull } from "drizzle-orm";
 import { Badge } from "~/app/_components/UI/Badge";
 import { alertSeverityVariant, alertSeverityLabel, formatAlertMessage } from "~/lib/utils";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CheckCircle } from "lucide-react";
 
 async function getActiveAlerts() {
   return db
@@ -24,10 +24,10 @@ async function getActiveAlerts() {
     .limit(5);
 }
 
-const SEVERITY_EMOJI: Record<string, string> = {
-  critical: "🔴",
-  warning: "🟡",
-  info: "🔵",
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: "#ef4444",
+  warning: "#f59e0b",
+  info: "#3b82f6",
 };
 
 export async function AlertsFeed() {
@@ -40,7 +40,7 @@ export async function AlertsFeed() {
           href="/alerts"
           className="flex items-center gap-1 text-sm font-semibold hover:text-blue-600 transition-colors"
         >
-          <span>🚨 التنبيهات النشطة</span>
+          <span>التنبيهات النشطة</span>
         </Link>
         {active.length > 0 && (
           <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">
@@ -52,7 +52,7 @@ export async function AlertsFeed() {
       <div className="flex-1 overflow-y-auto space-y-2">
         {active.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 py-8">
-            <span className="text-3xl">✅</span>
+            <CheckCircle className="h-10 w-10 text-gray-300" />
             <span className="text-sm mt-2">لا توجد تنبيهات نشطة</span>
           </div>
         ) : (
@@ -62,8 +62,11 @@ export async function AlertsFeed() {
               href="/alerts"
               className="flex gap-3 items-start border-b border-gray-100 pb-2 last:border-0 hover:bg-gray-50 rounded p-2 -mx-2 transition-colors"
             >
-              <span className="text-lg leading-none mt-0.5">
-                {SEVERITY_EMOJI[alert.severity] ?? "⚪"}
+              <span 
+                className="text-lg leading-none mt-0.5" 
+                style={{ color: SEVERITY_COLORS[alert.severity] ?? "#6b7280" }}
+              >
+                ●
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-800 line-clamp-2">
