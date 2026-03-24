@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useIntersectionObserver } from "~/lib/hooks";
 import {
   AreaChart,
   Area,
@@ -69,6 +70,8 @@ export function DistributionPageClient({
   trendData,
   summary,
 }: DistributionPageClientProps) {
+  const { targetRef: trendRef, isVisible: trendVisible } = useIntersectionObserver();
+  const { targetRef: barRef, isVisible: barVisible } = useIntersectionObserver();
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
 
   // Filter districts based on selection
@@ -190,14 +193,14 @@ export function DistributionPageClient({
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div ref={trendRef} className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Consumption Trend Chart */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <h3 className="text-sm font-semibold mb-4 text-right">
             اتجاه الاستهلاك
           </h3>
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={trendData}>
+            <AreaChart data={trendVisible ? trendData : []}>
               <defs>
                 <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#1D6FA8" stopOpacity={0.15} />
@@ -239,6 +242,7 @@ export function DistributionPageClient({
                 strokeWidth={2}
                 fill="url(#colorActual)"
                 dot={{ r: 4, fill: "#1D6FA8" }}
+                isAnimationActive={trendVisible}
               />
               <Area
                 type="monotone"
@@ -249,6 +253,7 @@ export function DistributionPageClient({
                 strokeDasharray="5 5"
                 fill="url(#colorQuota)"
                 dot={false}
+                isAnimationActive={trendVisible}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -262,12 +267,13 @@ export function DistributionPageClient({
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={pieData}
+                data={trendVisible ? pieData : []}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
+                isAnimationActive={trendVisible}
               >
                 {pieData.map((_, index) => (
                   <Cell
@@ -294,12 +300,12 @@ export function DistributionPageClient({
         {/* Consumer Type Donut Chart */}
         <ConsumerTypeChart />
       {/* Quota vs Consumption Bar Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div ref={barRef} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <h3 className="text-sm font-semibold mb-4 text-right">
           الاستهلاك مقابل الحصة المتبقية
         </h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={barData} barCategoryGap="20%">
+          <BarChart data={barVisible ? barData : []} barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis
               dataKey="name"
@@ -329,12 +335,14 @@ export function DistributionPageClient({
               fill="#1D6FA8"
               name="الاستهلاك"
               radius={[4, 4, 0, 0]}
+              isAnimationActive={barVisible}
             />
             <Bar
               dataKey="المتبقي (م³)"
               fill="#0D9E7E"
               name="المتبقي"
               radius={[4, 4, 0, 0]}
+              isAnimationActive={barVisible}
             />
           </BarChart>
         </ResponsiveContainer>

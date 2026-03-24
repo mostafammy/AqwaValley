@@ -7,7 +7,6 @@ export default function ForecastLoading() {
       aria-live="polite"
       aria-busy="true"
     >
-      <span className="sr-only">جاري تحميل التوقعات...</span>
       {/* Header Skeleton */}
       <div className="space-y-2">
         <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />

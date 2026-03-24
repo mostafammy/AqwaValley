@@ -34,7 +34,7 @@ export default async function AlertsPage() {
 
   return (
     <div
-      className="p-4 md:p-6 space-y-6"
+      className="md:p-6 space-y-6 flex flex-col gap-2 max-w-sm md:max-w-full"
       dir="rtl"
       style={{ animation: "fadeSlideUp 0.4s ease-out both" }}
     >

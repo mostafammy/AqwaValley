@@ -1,4 +1,5 @@
 "use client";
+import { useIntersectionObserver } from "~/lib/hooks";
 
 import {
   PieChart,
@@ -40,6 +41,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
 };
 
 export function ConsumerTypeChart() {
+  const { targetRef, isVisible } = useIntersectionObserver();
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 h-full">
       <h3 className="text-sm font-semibold mb-4 text-right">
@@ -48,11 +50,11 @@ export function ConsumerTypeChart() {
       
       <div className="flex flex-col items-center">
         {/* Donut Chart */}
-        <div className="w-full h-[200px]">
+        <div ref={targetRef} className="w-full h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={CONSUMER_TYPES}
+                data={isVisible ? CONSUMER_TYPES : []}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
@@ -62,6 +64,7 @@ export function ConsumerTypeChart() {
                 paddingAngle={2}
                 startAngle={90}
                 endAngle={-270}
+                isAnimationActive={isVisible}
               >
                 {CONSUMER_TYPES.map((entry, index) => (
                   <Cell

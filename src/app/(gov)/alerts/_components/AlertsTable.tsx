@@ -59,7 +59,7 @@ export function AlertsTable() {
   const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden min-w-md">
       {/* Filters Bar */}
       <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-600">
