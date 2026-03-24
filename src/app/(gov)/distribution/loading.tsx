@@ -3,33 +3,32 @@ import { Skeleton } from "~/app/_components/UI/Skeleton";
 export default function DistributionLoading() {
   return (
     <div className="p-4 md:p-6 space-y-4" dir="rtl">
-      {/* Header skeleton */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
-
-      {/* Filters skeleton */}
-      <div className="flex flex-wrap gap-3">
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-10 w-40" />
-      </div>
-
       {/* Summary cards skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[...Array(4)].map((_, i) => (
           <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
       </div>
 
-      {/* Charts skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Skeleton className="h-80 rounded-xl" />
-        <Skeleton className="h-80 rounded-xl" />
+      {/* Filters skeleton */}
+      <div className="flex flex-wrap gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-10 w-32" />
       </div>
+
+      {/* Charts skeleton - 3 columns on xl */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <Skeleton className="h-[320px] rounded-xl" />
+        <Skeleton className="h-[320px] rounded-xl" />
+      </div>
+
+      {/* Consumer type chart skeleton */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Skeleton className="h-[320px] rounded-xl xl:col-span-1" />
+      </div>
+
+      {/* Bar chart skeleton */}
+      <Skeleton className="h-[350px] rounded-xl" />
 
       {/* District table skeleton */}
       <Skeleton className="h-96 rounded-xl" />

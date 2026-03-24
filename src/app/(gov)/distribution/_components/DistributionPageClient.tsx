@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { Card } from "~/app/_components/UI/Card";
 import { Badge } from "~/app/_components/UI/Badge";
+import { ConsumerTypeChart } from "./ConsumerTypeChart";
 
 interface DistrictStats {
   id: string;
@@ -114,9 +115,9 @@ export function DistributionPageClient({
   }, [filteredDistricts]);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 max-w-sm md:max-w-full">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="p-4">
           <p className="text-sm text-gray-500 mb-1">إجمالي الحصة</p>
           <p className="text-2xl font-bold text-gray-900">
@@ -215,7 +216,7 @@ export function DistributionPageClient({
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Consumption Trend Chart */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
           <h3 className="text-sm font-semibold mb-4 text-right">
@@ -312,8 +313,12 @@ export function DistributionPageClient({
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </div>
 
+
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        {/* Consumer Type Donut Chart */}
+        <ConsumerTypeChart />
       {/* Quota vs Consumption Bar Chart */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <h3 className="text-sm font-semibold mb-4 text-right">
@@ -360,7 +365,7 @@ export function DistributionPageClient({
           </BarChart>
         </ResponsiveContainer>
       </div>
-
+      </div>
       {/* District Details Table */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">

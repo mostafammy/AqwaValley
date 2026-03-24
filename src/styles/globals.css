@@ -124,6 +124,7 @@
     box-sizing: border-box;
   }
 
+
   body {
     font-family: var(--font-cairo), sans-serif;
     direction: rtl;
