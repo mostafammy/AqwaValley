@@ -69,7 +69,6 @@ export function DistributionPageClient({
   trendData,
   summary,
 }: DistributionPageClientProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "daily">("monthly");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
 
   // Filter districts based on selection
@@ -173,8 +172,9 @@ export function DistributionPageClient({
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">المركز:</label>
+          <label htmlFor="district-select" className="text-sm font-medium text-gray-600">المركز:</label>
           <select
+            id="district-select"
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
             className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -186,32 +186,6 @@ export function DistributionPageClient({
               </option>
             ))}
           </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">الفترة:</label>
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setSelectedPeriod("monthly")}
-              className={`px-3 py-2 text-sm transition-colors ${
-                selectedPeriod === "monthly"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              شهري
-            </button>
-            <button
-              onClick={() => setSelectedPeriod("daily")}
-              className={`px-3 py-2 text-sm transition-colors ${
-                selectedPeriod === "daily"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              يومي
-            </button>
-          </div>
         </div>
       </div>
 
@@ -458,7 +432,7 @@ export function DistributionPageClient({
               })}
               {filteredDistricts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                     لا توجد بيانات
                   </td>
                 </tr>

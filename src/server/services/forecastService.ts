@@ -57,9 +57,10 @@ export async function getDistrictForecast(
   const safeYield = Number(d.safeYieldM3Yr ?? 15000000);
 
   // Mock current level — slightly deeper than baseline due to historical depletion
-  const currentLevel = baselineDepth + depletionRate * 5 + (Math.random() - 0.5) * 5;
+  // deterministic base (Math.random replaced by floor check for demo)
+  const currentLevel = baselineDepth + depletionRate * 5 + (districtId.length % 5);
   
-  // Predict 12 months (starting from next month)
+  // Predict 24 months (starting from current month)
   const now = new Date();
   const monthlyPredictions: ForecastPoint[] = [];
 
@@ -81,13 +82,13 @@ export async function getDistrictForecast(
     });
   }
 
-  // Calculate years until critical level (e.g., 250m or 80% of total depth if depth was available)
-  // Let's assume a critical threshold from the table if available
-  const criticalThreshold = Number(d.criticalThresholdPct ?? 85); 
-  // For depth, let's assume 200m is deep for this region
-  const criticalDepth = 200; 
-  const remainingDepth = criticalDepth - currentLevel;
-  const yearsUntilCritical = remainingDepth / depletionRate;
+  // Calculate years until critical level
+  const criticalThresholdPct = Number(d.criticalThresholdPct ?? 85); 
+  // Compute critical depth based on baseline and threshold (demo logic)
+  const criticalDepth = baselineDepth + (criticalThresholdPct / 100) * 100; 
+
+  const remainingDepth = Math.max(0, criticalDepth - currentLevel);
+  const yearsUntilCritical = depletionRate > 0 ? remainingDepth / depletionRate : Number.POSITIVE_INFINITY;
 
   const sustainabilityScore = Math.max(0, Math.min(100, 100 - (depletionRate / 2) * 100));
 

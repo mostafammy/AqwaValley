@@ -47,7 +47,23 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
     );
   }
 
-  if (!forecast) return null;
+  if (!forecast) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-xl border border-gray-100 shadow-sm">
+        <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+        <h3 className="text-lg font-bold text-gray-900 mb-2">لا توجد بيانات توقعات</h3>
+        <p className="text-gray-500 max-w-xs mx-auto mb-6">
+          لم يتم العثور على بيانات توقعات لهذا المركز حالياً. يرجى المحاولة مرة أخرى لاحقاً أو اختيار مركز آخر.
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+        >
+          إعادة المحاولة
+        </button>
+      </div>
+    );
+  }
 
   const { summary, monthlyPredictions, scenarios } = forecast;
 
@@ -60,7 +76,7 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
             <p className="text-sm text-gray-500">حالة الاستدامة</p>
             <ShieldCheck className="w-4 h-4 text-blue-500" />
           </div>
-          <p className="text-2xl font-bold text-gray-900">{summary.sustainabilityScore}%</p>
+          <p className="text-2xl font-bold text-gray-900">{Math.round(Math.min(100, Math.max(0, summary.sustainabilityScore)))}%</p>
           <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${
@@ -70,7 +86,7 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
                   ? "bg-yellow-500"
                   : "bg-red-500"
               }`}
-              style={{ width: `${summary.sustainabilityScore}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, summary.sustainabilityScore))}%` }}
             />
           </div>
         </Card>
@@ -120,8 +136,9 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
       {/* Filter */}
       <div className="flex flex-wrap items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">المركز:</label>
+          <label htmlFor="district-select" className="text-sm font-medium text-gray-600">المركز:</label>
           <select
+            id="district-select"
             value={selectedDistrictId}
             onChange={(e) => setSelectedDistrictId(e.target.value)}
             className="px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"

@@ -3,7 +3,6 @@ import { alerts, well } from "~/server/db/schema";
 import { eq, desc, isNull, and } from "drizzle-orm";
 import { Badge } from "~/app/_components/UI/Badge";
 import { alertSeverityVariant, alertSeverityLabel } from "~/lib/utils";
-import { CheckCircle } from "lucide-react";
 
 const SEVERITY_ICONS: Record<string, { icon: string; color: string }> = {
   critical: { icon: "●", color: "#ef4444" },

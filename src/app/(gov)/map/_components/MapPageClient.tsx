@@ -84,8 +84,9 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
       <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
         {/* District filter */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">المركز:</label>
+          <label htmlFor="district-select" className="text-sm font-medium text-gray-600">المركز:</label>
           <select
+            id="district-select"
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
             className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
@@ -101,8 +102,9 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
 
         {/* Status filter */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">الحالة:</label>
+          <label htmlFor="status-select" className="text-sm font-medium text-gray-600">الحالة:</label>
           <select
+            id="status-select"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"

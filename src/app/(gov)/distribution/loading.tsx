@@ -16,7 +16,7 @@ export default function DistributionLoading() {
         <Skeleton className="h-10 w-32" />
       </div>
 
-      {/* Charts skeleton - 3 columns on xl */}
+      {/* Charts skeleton - 2 columns on xl */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Skeleton className="h-[320px] rounded-xl" />
         <Skeleton className="h-[320px] rounded-xl" />

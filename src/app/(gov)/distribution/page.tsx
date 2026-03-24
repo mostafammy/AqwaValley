@@ -69,7 +69,7 @@ async function getDistrictsWithStats(): Promise<DistrictStats[]> {
 
     // Determine state based on water level and active wells
     const activeWells = districtWells.filter(w => w.status === "active").length;
-    const criticalRatio = activeWells / wellCount;
+    const criticalRatio = wellCount > 0 ? activeWells / wellCount : 0;
 
     let effectiveState: "ok" | "warning" | "critical" = "ok";
     if (avgLevelPct < 30 || criticalRatio < 0.3) effectiveState = "critical";

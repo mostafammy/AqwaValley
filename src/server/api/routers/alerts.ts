@@ -30,11 +30,15 @@ export const alertsRouter = createTRPCRouter({
    * Count of unacknowledged alerts for the sidebar badge.
    */
   count: viewerProcedure.query(async ({ ctx }) => {
-    // Simple query - count all unacknowledged alerts
+    const districtFilter = await buildWellDistrictFilter(ctx);
+    
+    // Count unacknowledged alerts scoped to accessible wells
     const [result] = await ctx.db
       .select({ count: count() })
       .from(alerts)
-      .where(isNull(alerts.acknowledgedAt));
+      .innerJoin(well, eq(well.id, alerts.wellId))
+      .where(and(isNull(alerts.acknowledgedAt), districtFilter));
+      
     return result?.count ?? 0;
   }),
 

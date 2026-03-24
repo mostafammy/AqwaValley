@@ -5,6 +5,7 @@ import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
 import { api } from "~/trpc/react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Map,
@@ -32,9 +33,11 @@ export function GovSidebar() {
   });
 
   // Debug: Log errors
-  if (error) {
-    console.error("Alert count query error:", error);
-  }
+  useEffect(() => {
+    if (error) {
+      console.error("Alert count query error:", error);
+    }
+  }, [error]);
 
   return (
     <>
