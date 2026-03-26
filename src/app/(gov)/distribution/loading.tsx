@@ -2,36 +2,34 @@ import { Skeleton } from "~/app/_components/UI/Skeleton";
 
 export default function DistributionLoading() {
   return (
-    <div className="p-4 md:p-6 space-y-4" dir="rtl">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-8 animate-in fade-in duration-500" dir="rtl">
       {/* Summary cards skeleton */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
+          <Skeleton key={i} className="h-24 rounded-xl border border-gray-100" />
         ))}
       </div>
 
       {/* Filters skeleton */}
       <div className="flex flex-wrap gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-40 rounded-lg" />
+        <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
 
-      {/* Charts skeleton - 2 columns on xl */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <Skeleton className="h-[320px] rounded-xl" />
-        <Skeleton className="h-[320px] rounded-xl" />
+      {/* Charts skeleton */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Skeleton className="h-[360px] rounded-xl border border-gray-100" />
+        <Skeleton className="h-[360px] rounded-xl border border-gray-100" />
       </div>
 
-      {/* Consumer type chart skeleton */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Skeleton className="h-[320px] rounded-xl xl:col-span-1" />
+      {/* Consumer type chart & Table */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Skeleton className="h-[400px] rounded-xl border border-gray-100 xl:col-span-1" />
+        <Skeleton className="h-[400px] rounded-xl border border-gray-100 xl:col-span-2" />
       </div>
 
-      {/* Bar chart skeleton */}
-      <Skeleton className="h-[350px] rounded-xl" />
-
-      {/* District table skeleton */}
-      <Skeleton className="h-96 rounded-xl" />
+      {/* Full width element */}
+      <Skeleton className="h-80 rounded-xl border border-gray-100" />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { db } from "~/server/db";
 import { well, alerts, sensorData, sensors } from "~/server/db/schema";
 import { eq, count, and, isNull, avg, sum, sql, gte } from "drizzle-orm";
 import { Droplets, AlertTriangle, Activity, TrendingDown } from "lucide-react";
+import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
 
 async function getKpiData() {
   const [totalWells] = await db
@@ -67,7 +68,7 @@ async function getKpiData() {
   };
 }
 
-const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>) => [
+const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "إجمالي الآبار النشطة",
     value: kpi.totalWells.toLocaleString("ar-EG"),
@@ -100,29 +101,10 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>) => [
     iconBg: "bg-amber-50",
     iconColor: "text-amber-500",
   },
-] as const;
+];
 
 export async function KpiCards() {
   const kpi = await getKpiData();
 
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-      {cards(kpi).map((card) => (
-        <div
-          key={card.label}
-          className={`bg-white rounded-xl border border-gray-200 border-r-4 ${card.border} p-5 shadow-sm`}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-gray-500 font-medium">
-              {card.label}
-            </span>
-            <div className={`p-2 rounded-lg ${card.iconBg}`}>
-              <card.icon className={`h-4 w-4 ${card.iconColor}`} />
-            </div>
-          </div>
-          <div className="text-3xl font-bold">{card.value}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
+  return <KpiCardGrid cards={cards(kpi)} />;
+}
