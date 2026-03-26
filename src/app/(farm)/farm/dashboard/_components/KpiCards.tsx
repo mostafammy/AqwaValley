@@ -1,6 +1,6 @@
 "use client";
 
-import { Droplets, Activity, Percent } from "lucide-react";
+import { Droplets, Activity, Percent, CloudSun } from "lucide-react";
 import { api } from "~/trpc/react";
 import type { QuotaState } from "~/server/services/quotaDecisionService";
 import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
@@ -30,6 +30,14 @@ export function KpiCards({
     {
       refetchInterval: 60000,
       initialData: undefined,
+    }
+  );
+
+  // Fetch current weather
+  const { data: weather } = api.weather.getCurrent.useQuery(
+    { farmId },
+    {
+      refetchInterval: 900000, // 15 mins (matching server cache)
     }
   );
 
@@ -138,7 +146,27 @@ export function KpiCards({
         </div>
       ),
     },
+    {
+      label: "حالة الطقس",
+      value: weather ? (
+        <>
+          {weather.temp}° <span className="text-sm text-gray-400 font-semibold">م</span>
+        </>
+      ) : (
+        <span className="text-gray-400 text-lg">---</span>
+      ),
+      icon: CloudSun,
+      border: "border-r-sky-500",
+      iconBg: "bg-sky-50",
+      iconColor: "text-sky-500",
+      extra: (
+        <div className="text-xs mt-1 font-medium truncate" style={{ color: "var(--color-muted)" }}>
+          {weather?.description ?? "جاري التحميل..."} {weather ? `| رطوبة ${weather.humidity}%` : ""}
+        </div>
+      ),
+    },
   ];
+
 
   // Notice we only have 3 cards for the Farm, but KpiCardGrid uses a configurable map.
   // Wrap it in a div that gives some bottom margin

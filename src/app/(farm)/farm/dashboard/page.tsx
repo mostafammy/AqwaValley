@@ -143,7 +143,7 @@ export default async function FarmDashboardPage() {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h1 className="text-xl md:text-3xl font-bold">
-            أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"} 👋
+            أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"} 
           </h1>
           <p className="text-sm md:text-base text-gray-500 mt-1">
             {currentFarm.name}
