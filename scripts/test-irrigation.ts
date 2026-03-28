@@ -49,11 +49,14 @@ function printResult(label: string, value: unknown) {
   console.log(`  ${label}: ${JSON.stringify(value, null, 2)}`);
 }
 
+let hadErrors = false;
+
 function printSuccess(msg: string) {
   console.log(`  ✅ ${msg}`);
 }
 
 function printError(msg: string) {
+  hadErrors = true;
   console.log(`  ❌ ${msg}`);
 }
 
@@ -120,24 +123,30 @@ async function main() {
     console.log(`    Crop: ${cp.cropType} (${cp.growthStage}) — farm: ${cp.farmId}`);
   }
 
-  // Determine test farm ID — use existing if available
-  let testFarmId: string;
-  let testUserId: string;
-  let usingSyntheticData = false;
+  // Determine a valid farm/user parent pair for FK-safe DB insert tests.
+  let testFarmId: string | null = null;
+  let testUserId: string | null = null;
+  let canRunDbPersistenceTest = false;
 
-  const farmWithCrops = farms.find((f) =>
-    allCropProfiles.some((cp) => cp.farmId === f.id),
-  );
+  const [farmWithCrops] = await db
+    .select({
+      id: schema.farm.id,
+      name: schema.farm.name,
+      ownerId: schema.farm.ownerId,
+    })
+    .from(schema.farm)
+    .innerJoin(schema.cropProfile, eq(schema.cropProfile.farmId, schema.farm.id))
+    .limit(1);
 
   if (farmWithCrops) {
     testFarmId = farmWithCrops.id;
     testUserId = farmWithCrops.ownerId;
-    printSuccess(`Using existing farm: "${farmWithCrops.name}" (${testFarmId})`);
+    canRunDbPersistenceTest = true;
+    printSuccess(`Using existing farm with crops: "${farmWithCrops.name}" (${testFarmId})`);
   } else {
-    usingSyntheticData = true;
-    testFarmId = "00000000-0000-0000-0000-000000000001";
-    testUserId = "test-user-irrigation";
-    printInfo("No farms with crop profiles found — using synthetic test data");
+    printInfo(
+      "No farm with crop profiles found — TEST 6 (DB persistence) will be skipped to avoid FK failures.",
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -482,70 +491,77 @@ async function main() {
   // ═══════════════════════════════════════════════════════════════════════
   printHeader("TEST 6: DB Persistence — irrigation_recommendation table");
 
-  // Check the table exists and is queryable
-  try {
-    const count = await db
-      .select({ id: schema.irrigationRecommendation.id })
-      .from(schema.irrigationRecommendation)
-      .limit(1);
-
-    printSuccess(
-      `irrigation_recommendation table is queryable (${count.length} existing records)`,
+  if (!canRunDbPersistenceTest || !testFarmId || !testUserId) {
+    printInfo(
+      "Skipping TEST 6: no valid farm/user parent rows with crop profiles were found.",
     );
+  } else {
 
-    // Test insert a mock recommendation
-    const [inserted] = await db
-      .insert(schema.irrigationRecommendation)
-      .values({
-        farmId: testFarmId,
-        requestedBy: testUserId,
-        systemPrompt: "TEST — system prompt",
-        userMessage: "TEST — user message",
-        rawResponse: JSON.stringify(validPlan),
-        plan: validPlan as unknown as Record<string, unknown>,
-        totalLitres: validPlan.totalLitres,
-        modelUsed: "test/integration-test",
-        fallback: false,
-        status: "PENDING",
-      })
-      .returning();
-
-    if (inserted) {
-      printSuccess(
-        `Inserted test recommendation: ${inserted.id} (status: ${inserted.status})`,
-      );
-
-      // Query it back
-      const [fetched] = await db
-        .select()
+  // Check the table exists and is queryable
+    try {
+      const count = await db
+        .select({ id: schema.irrigationRecommendation.id })
         .from(schema.irrigationRecommendation)
-        .where(eq(schema.irrigationRecommendation.id, inserted.id))
         .limit(1);
 
-      if (fetched && fetched.totalLitres === validPlan.totalLitres) {
-        printSuccess("Successfully queried back the inserted record");
-        printInfo(`  id: ${fetched.id}`);
-        printInfo(`  farmId: ${fetched.farmId}`);
-        printInfo(`  totalLitres: ${fetched.totalLitres}`);
-        printInfo(`  modelUsed: ${fetched.modelUsed}`);
-        printInfo(`  status: ${fetched.status}`);
-        printInfo(`  createdAt: ${fetched.createdAt}`);
-      } else {
-        printError("Failed to query back the inserted record");
-      }
+      printSuccess(
+        `irrigation_recommendation table is queryable (${count.length} existing records)`,
+      );
 
-      // Clean up test data
-      await db
-        .delete(schema.irrigationRecommendation)
-        .where(eq(schema.irrigationRecommendation.id, inserted.id));
-      printSuccess("Cleaned up test record");
-    } else {
-      printError("Insert returned no record");
+      // Test insert a mock recommendation
+      const [inserted] = await db
+        .insert(schema.irrigationRecommendation)
+        .values({
+          farmId: testFarmId,
+          requestedBy: testUserId,
+          systemPrompt: "TEST — system prompt",
+          userMessage: "TEST — user message",
+          rawResponse: JSON.stringify(validPlan),
+          plan: validPlan as unknown as Record<string, unknown>,
+          totalLitres: validPlan.totalLitres,
+          modelUsed: "test/integration-test",
+          fallback: false,
+          status: "PENDING",
+        })
+        .returning();
+
+      if (inserted) {
+        printSuccess(
+          `Inserted test recommendation: ${inserted.id} (status: ${inserted.status})`,
+        );
+
+        // Query it back
+        const [fetched] = await db
+          .select()
+          .from(schema.irrigationRecommendation)
+          .where(eq(schema.irrigationRecommendation.id, inserted.id))
+          .limit(1);
+
+        if (fetched && fetched.totalLitres === validPlan.totalLitres) {
+          printSuccess("Successfully queried back the inserted record");
+          printInfo(`  id: ${fetched.id}`);
+          printInfo(`  farmId: ${fetched.farmId}`);
+          printInfo(`  totalLitres: ${fetched.totalLitres}`);
+          printInfo(`  modelUsed: ${fetched.modelUsed}`);
+          printInfo(`  status: ${fetched.status}`);
+          printInfo(`  createdAt: ${fetched.createdAt}`);
+        } else {
+          printError("Failed to query back the inserted record");
+        }
+
+        // Clean up test data
+        await db
+          .delete(schema.irrigationRecommendation)
+          .where(eq(schema.irrigationRecommendation.id, inserted.id));
+        printSuccess("Cleaned up test record");
+      } else {
+        printError("Insert returned no record");
+      }
+    } catch (err: unknown) {
+      printError(
+        `DB operation failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
-  } catch (err: unknown) {
-    printError(
-      `DB operation failed: ${err instanceof Error ? err.message : String(err)}`,
-    );
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -563,6 +579,11 @@ async function main() {
   );
   console.log("  ✅ DB persistence    — Insert, query, cleanup verified");
   console.log("");
+
+  if (hadErrors) {
+    printError("One or more checks failed — exiting with code 1");
+    process.exit(1);
+  }
 
   process.exit(0);
 }
