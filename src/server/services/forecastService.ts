@@ -57,8 +57,9 @@ export async function getDistrictForecast(
 
   // Mock current level — slightly deeper than baseline due to historical depletion
   // deterministic base (Math.random replaced by floor check for demo)
-  const currentLevel = baselineDepth + depletionRate * 5 + (districtId.length % 5);
-  
+  const currentLevel =
+    baselineDepth + depletionRate * 5 + (districtId.length % 5);
+
   // Predict 24 months (starting from current month)
   const now = new Date();
   const monthlyPredictions: ForecastPoint[] = [];
@@ -66,11 +67,13 @@ export async function getDistrictForecast(
   for (let i = 0; i <= 24; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const monthOffset = i / 12;
-    
+
     // Base prediction is current level + annual rate * years
     // Add seasonal variation (sinusoidal)
-    const seasonalImpact = 2 * Math.sin((2 * Math.PI * (date.getMonth() + 1)) / 12);
-    const predicted = currentLevel + depletionRate * monthOffset + seasonalImpact;
+    const seasonalImpact =
+      2 * Math.sin((2 * Math.PI * (date.getMonth() + 1)) / 12);
+    const predicted =
+      currentLevel + depletionRate * monthOffset + seasonalImpact;
 
     monthlyPredictions.push({
       date: date.toISOString(),
@@ -82,14 +85,20 @@ export async function getDistrictForecast(
   }
 
   // Calculate years until critical level
-  const criticalThresholdPct = Number(d.criticalThresholdPct ?? 85); 
+  const criticalThresholdPct = Number(d.criticalThresholdPct ?? 85);
   // Compute critical depth based on baseline and threshold (demo logic)
-  const criticalDepth = baselineDepth + (criticalThresholdPct / 100) * 100; 
+  const criticalDepth = baselineDepth + (criticalThresholdPct / 100) * 100;
 
   const remainingDepth = Math.max(0, criticalDepth - currentLevel);
-  const yearsUntilCritical = depletionRate > 0 ? remainingDepth / depletionRate : Number.POSITIVE_INFINITY;
+  const yearsUntilCritical =
+    depletionRate > 0
+      ? remainingDepth / depletionRate
+      : Number.POSITIVE_INFINITY;
 
-  const sustainabilityScore = Math.max(0, Math.min(100, 100 - (depletionRate / 2) * 100));
+  const sustainabilityScore = Math.max(
+    0,
+    Math.min(100, 100 - (depletionRate / 2) * 100),
+  );
 
   const scenarios: ConsumptionScenario[] = [
     {
@@ -104,14 +113,18 @@ export async function getDistrictForecast(
       name: "ترشيد متوسط",
       description: "تقليل استخدام المياه في الزراعة بنسبة ١٥٪.",
       impactOnDepletionPct: -15,
-      predictedLevelAfter12m: Number((currentLevel + depletionRate * 0.85).toFixed(2)),
+      predictedLevelAfter12m: Number(
+        (currentLevel + depletionRate * 0.85).toFixed(2),
+      ),
     },
     {
       id: "aggressive_conservation",
       name: "ترشيد مكثف",
       description: "تقليل الاستهلاك بنسبة ٣٠٪ عبر تقنيات الري الذكي.",
       impactOnDepletionPct: -30,
-      predictedLevelAfter12m: Number((currentLevel + depletionRate * 0.70).toFixed(2)),
+      predictedLevelAfter12m: Number(
+        (currentLevel + depletionRate * 0.7).toFixed(2),
+      ),
     },
   ];
 
@@ -124,7 +137,12 @@ export async function getDistrictForecast(
       yearsUntilCritical: Number(yearsUntilCritical.toFixed(1)),
       sustainabilityScore: Math.round(sustainabilityScore),
       lastUpdated: now.toISOString(),
-      trend: depletionRate > 1.5 ? "critical" : depletionRate > 0.5 ? "declining" : "stable",
+      trend:
+        depletionRate > 1.5
+          ? "critical"
+          : depletionRate > 0.5
+            ? "declining"
+            : "stable",
     },
     monthlyPredictions,
     scenarios,
