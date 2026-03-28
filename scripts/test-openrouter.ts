@@ -31,9 +31,11 @@ if (!apiKey) {
   process.exit(1);
 }
 
+const resolvedApiKey: string = apiKey;
+
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: apiKey,
+  apiKey: resolvedApiKey,
   defaultHeaders: {
     "HTTP-Referer": "http://localhost:3000",
     "X-OpenRouter-Title": "Testing Connection",
@@ -42,7 +44,7 @@ const openai = new OpenAI({
 
 async function main() {
   console.log("🔄 Calling OpenRouter API...");
-  console.log(`🔑 Key length: ${apiKey.length}`);
+  console.log(`🔑 Key length: ${resolvedApiKey.length}`);
 
   try {
     const start = Date.now();
