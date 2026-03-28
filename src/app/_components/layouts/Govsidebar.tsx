@@ -5,7 +5,7 @@ import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
 import { api } from "~/trpc/react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   LayoutDashboard,
   Map,
@@ -28,7 +28,7 @@ export function GovSidebar() {
   const { isMobileOpen, closeMobile } = useSidebar();
   
   // Fetch unacknowledged alert count reactively via tRPC
-  const { data: alertCount = 0, isLoading, error } = api.alerts.count.useQuery(undefined, {
+  const { data: alertCount = 0, error } = api.alerts.count.useQuery(undefined, {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
