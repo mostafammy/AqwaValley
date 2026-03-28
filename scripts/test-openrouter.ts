@@ -64,7 +64,7 @@ async function main() {
     
   } catch (error: any) {
     console.error("\n❌ API Call Failed:");
-    if (error.response) {
+    if (error?.status || error?.error) {
         console.error(`Status: ${error.status}`);
         console.error(JSON.stringify(error.error, null, 2));
     } else {
@@ -75,6 +75,8 @@ async function main() {
     if (error.message && error.message.includes("ByteString")) {
         console.log("\n💡 This is a ByteString character encoding error.");
     }
+
+    process.exit(1);
   }
 }
 
