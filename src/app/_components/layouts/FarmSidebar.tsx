@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { useSidebar } from "./SidebarProvider";
-import { LayoutDashboard, Leaf, Droplets, FlaskConical, Sparkles, PlayCircle, History, Scale } from "lucide-react";
+import { LayoutDashboard, Leaf, FlaskConical, Sparkles, PlayCircle, History, Scale } from "lucide-react";
 
 export function FarmSidebar() {
   const pathname = usePathname();
