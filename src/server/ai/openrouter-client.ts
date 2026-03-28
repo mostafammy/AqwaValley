@@ -36,7 +36,7 @@ const GROQ_MODEL = "openai/gpt-oss-120b" as const;
  * if Groq is unavailable.
  */
 const OPENROUTER_CASCADE = [
-  "openai/gpt-oss-120b:free",                   // same model, via OpenRouter
+  "openai/gpt-oss-120b:free", // same model, via OpenRouter
   "meta-llama/llama-3.3-70b-instruct:free",
   "nousresearch/hermes-3-llama-3.1-405b:free",
   "qwen/qwen-2.5-72b-instruct:free",
@@ -181,7 +181,10 @@ export async function callIrrigationAI(
   if (groqClient) {
     try {
       const text = await callGroq(groqClient, GROQ_MODEL, messages);
-      logger.info({ model: GROQ_MODEL, provider: "groq" }, "ai.irrigation.success");
+      logger.info(
+        { model: GROQ_MODEL, provider: "groq" },
+        "ai.irrigation.success",
+      );
       return { text, modelUsed: `groq:${GROQ_MODEL}` };
     } catch (err: unknown) {
       const status = extractStatus(err);
