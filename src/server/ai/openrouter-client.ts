@@ -67,10 +67,13 @@ function createGroqClient(): Groq | null {
   return new Groq({ apiKey: key });
 }
 
-function createOpenRouterClient(): OpenAI {
+function createOpenRouterClient(): OpenAI | null {
+  const key = env.OPENROUTER_API_KEY;
+  if (!key) return null;
+
   return new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
-    apiKey: env.OPENROUTER_API_KEY ?? "",
+    apiKey: key,
     defaultHeaders: {
       "HTTP-Referer": "https://aquavalley.gov.eg",
       "X-OpenRouter-Title": "AquaValley - Smart Water Management",
@@ -202,24 +205,31 @@ export async function callIrrigationAI(
   // ── Tier 2: OpenRouter cascade ───────────────────────────────────────────
   const openRouterClient = createOpenRouterClient();
 
-  for (const model of OPENROUTER_CASCADE) {
-    try {
-      const text = await callOpenRouter(openRouterClient, model, messages);
-      logger.info({ model, provider: "openrouter" }, "ai.irrigation.success");
-      return { text, modelUsed: model };
-    } catch (err: unknown) {
-      const status = extractStatus(err);
-      const isRetryable = status !== undefined && isTransientError(status);
+  if (openRouterClient) {
+    for (const model of OPENROUTER_CASCADE) {
+      try {
+        const text = await callOpenRouter(openRouterClient, model, messages);
+        logger.info({ model, provider: "openrouter" }, "ai.irrigation.success");
+        return { text, modelUsed: model };
+      } catch (err: unknown) {
+        const status = extractStatus(err);
+        const isRetryable = status !== undefined && isTransientError(status);
 
-      if (!isRetryable) {
-        throw err; // Hard error — bail out immediately
+        if (!isRetryable) {
+          throw err; // Hard error — bail out immediately
+        }
+
+        logger.warn(
+          { model, status, provider: "openrouter" },
+          "ai.irrigation.model_unavailable — trying next model",
+        );
       }
-
-      logger.warn(
-        { model, status, provider: "openrouter" },
-        "ai.irrigation.model_unavailable — trying next model",
-      );
     }
+  } else {
+    logger.warn(
+      { provider: "openrouter" },
+      "ai.irrigation.openrouter_skipped — OPENROUTER_API_KEY not configured",
+    );
   }
 
   // ── All providers exhausted ───────────────────────────────────────────────
