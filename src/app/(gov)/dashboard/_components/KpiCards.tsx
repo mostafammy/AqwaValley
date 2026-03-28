@@ -1,6 +1,6 @@
 import { db } from "~/server/db";
 import { well, alerts, sensorData, sensors } from "~/server/db/schema";
-import { eq, count, and, isNull, avg, sum, sql, gte } from "drizzle-orm";
+import { eq, count, and, isNull, avg, sum, gte } from "drizzle-orm";
 import { Droplets, AlertTriangle, Activity, TrendingDown } from "lucide-react";
 
 async function getKpiData() {
