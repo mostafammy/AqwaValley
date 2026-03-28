@@ -65,39 +65,47 @@ export function LoginForm() {
   };
 
   return (
-    <div className="card w-full max-w-sm mx-auto z-10 shadow-modal p-0 overflow-hidden border-border-2">
-      
-      
-      <div className="bg-navy p-8 text-center relative border-b border-border">
+    <div className="card shadow-modal border-border-2 z-10 mx-auto w-full max-w-sm overflow-hidden p-0">
+      <div className="bg-navy border-border relative border-b p-8 text-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(29,111,168,0.2),transparent_100%)]"></div>
-        <div className="relative flex justify-center mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy-3 border border-white/10 shadow-lg">
+        <div className="relative mb-4 flex justify-center">
+          <div className="bg-navy-3 flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 shadow-lg">
             <Droplets className="h-6 w-6 text-white" strokeWidth={2} />
           </div>
         </div>
-        <h1 className="relative text-xl font-bold text-white mb-1">أكوا الوادي</h1>
-        <p className="relative text-light-text text-sm">بوابة الدخول الموحدة</p>
+        <h1 className="relative mb-1 text-xl font-bold text-white">
+          أكوا الوادي
+        </h1>
+        <p className="text-light-text relative text-sm">بوابة الدخول الموحدة</p>
       </div>
 
-      <div className="p-8 bg-white">
+      <div className="bg-white p-8">
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-danger-bg text-danger-text text-sm border border-danger/20 flex items-center gap-2 font-medium">
-            <Image src="/svg/alert-circle.svg" width={16} height={16} className="w-4 h-4 opacity-70" alt="" />
+          <div className="bg-danger-bg text-danger-text border-danger/20 mb-5 flex items-center gap-2 rounded-lg border p-3 text-sm font-medium">
+            <Image
+              src="/svg/alert-circle.svg"
+              width={16}
+              height={16}
+              className="h-4 w-4 opacity-70"
+              alt=""
+            />
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-text mb-3 block">الرقم القومي</label>
+            <label className="text-text mb-3 block text-xs font-bold">
+              الرقم القومي
+            </label>
             <div className="relative">
-              <User className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+              <User className="text-muted absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="text"
                 value={nationalId}
                 onChange={(e) => setNationalId(e.target.value)}
                 placeholder="أدخل الرقم القومي الخاص بك"
-                className="w-full rounded-md border border-border-2 bg-bg px-4 py-2.5 pr-10 text-sm text-text outline-none transition-colors focus:border-blue focus:bg-white"
+                className="border-border-2 bg-bg text-text focus:border-blue w-full rounded-md border px-4 py-2.5 pr-10 text-sm transition-colors outline-none focus:bg-white"
                 dir="ltr"
                 required
                 disabled={isLoading}
@@ -106,17 +114,19 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-xs font-bold text-text block">كلمة المرور</label>
+            <div className="mb-3 flex items-center justify-between">
+              <label className="text-text block text-xs font-bold">
+                كلمة المرور
+              </label>
             </div>
             <div className="relative">
-              <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+              <Lock className="text-muted absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-md border border-border-2 bg-bg px-4 py-2.5 pr-10 text-sm text-text outline-none transition-colors focus:border-blue focus:bg-white"
+                className="border-border-2 bg-bg text-text focus:border-blue w-full rounded-md border px-4 py-2.5 pr-10 text-sm transition-colors outline-none focus:bg-white"
                 dir="ltr"
                 required
                 disabled={isLoading}
@@ -128,9 +138,13 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn btn-primary btn-lg w-full flex justify-center !text-sm !font-bold"
+              className="btn btn-primary btn-lg flex w-full justify-center !text-sm !font-bold"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "تسجيل الدخول"}
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "تسجيل الدخول"
+              )}
             </button>
           </div>
         </form>
