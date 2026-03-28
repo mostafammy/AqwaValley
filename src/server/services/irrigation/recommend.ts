@@ -357,15 +357,73 @@ export async function requestIrrigationPlan(
   );
 
   if (totalRequested > quota.remainingLitres) {
-    const scaleFactor = quota.remainingLitres / totalRequested;
+    const remainingQuota = Math.max(0, Math.floor(quota.remainingLitres));
+    const scaleFactor = totalRequested > 0 ? remainingQuota / totalRequested : 0;
+
+    const scaledZones = plan.zones.map((z) => ({
+      ...z,
+      recommendedLitres:
+        z.recommendedLitres > 0
+          ? Math.max(1, Math.round(z.recommendedLitres * scaleFactor))
+          : 0,
+    }));
+
+    let scaledTotal = scaledZones.reduce(
+      (sum, z) => sum + z.recommendedLitres,
+      0,
+    );
+
+    // Reduce from largest zones first so final sum never exceeds quota.
+    if (scaledTotal > remainingQuota) {
+      let overflow = scaledTotal - remainingQuota;
+      const sortedIndexes = scaledZones
+        .map((zone, index) => ({
+          index,
+          original: plan.zones[index]?.recommendedLitres ?? 0,
+          scaled: zone.recommendedLitres,
+        }))
+        .sort((a, b) => b.scaled - a.scaled);
+
+      // First pass: keep zones that originally needed water at a minimum of 1.
+      for (const item of sortedIndexes) {
+        if (overflow <= 0) break;
+
+        const current = scaledZones[item.index]?.recommendedLitres ?? 0;
+        const minAllowed = item.original > 0 ? 1 : 0;
+        const reducible = Math.max(0, current - minAllowed);
+        if (reducible === 0) continue;
+
+        const reduceBy = Math.min(reducible, overflow);
+        if (scaledZones[item.index]) {
+          scaledZones[item.index].recommendedLitres = current - reduceBy;
+        }
+        overflow -= reduceBy;
+      }
+
+      // Second pass: rare edge case where quota is too small to keep all positive zones at 1.
+      if (overflow > 0) {
+        for (const item of sortedIndexes) {
+          if (overflow <= 0) break;
+
+          const current = scaledZones[item.index]?.recommendedLitres ?? 0;
+          if (current <= 0) continue;
+
+          const reduceBy = Math.min(current, overflow);
+          if (scaledZones[item.index]) {
+            scaledZones[item.index].recommendedLitres = current - reduceBy;
+          }
+          overflow -= reduceBy;
+        }
+      }
+
+      scaledTotal = scaledZones.reduce((sum, z) => sum + z.recommendedLitres, 0);
+    }
+
     plan = {
       ...plan,
       quotaWarning: true,
-      totalLitres: Math.round(quota.remainingLitres),
-      zones: plan.zones.map((z) => ({
-        ...z,
-        recommendedLitres: Math.round(z.recommendedLitres * scaleFactor),
-      })),
+      totalLitres: scaledTotal,
+      zones: scaledZones,
     };
   }
 
