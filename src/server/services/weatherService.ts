@@ -24,7 +24,12 @@ export const weatherService = {
     try {
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${env.OPENWEATHER_API_KEY}&units=metric&lang=ar`;
       
-      const response = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         console.warn(`OpenWeather API returned ${response.status}: ${response.statusText}. This usually happens if the API key is new and pending activation (takes 1-2 hours) OR if the subscription tier is exceeded.`);
         return this.getFallbackWeather();
@@ -32,11 +37,16 @@ export const weatherService = {
 
       const data = (await response.json()) as any;
 
+      if (!data || !data.main || typeof data.main.temp !== "number" || !Array.isArray(data.weather) || data.weather.length === 0) {
+        console.error("OpenWeather API returned unexpected data structure:", data);
+        return this.getFallbackWeather();
+      }
+
       const weatherInfo: WeatherInfo = {
         temp: Math.round(data.main.temp),
-        description: data.weather[0].description,
-        icon: data.weather[0].icon,
-        humidity: data.main.humidity,
+        description: data.weather[0]?.description ?? "غير متاح",
+        icon: data.weather[0]?.icon ?? "01d",
+        humidity: data.main.humidity ?? 0,
         city: data.name,
       };
 
@@ -46,8 +56,12 @@ export const weatherService = {
       });
 
       return weatherInfo;
-    } catch (error) {
-      console.error("Failed to fetch weather:", error);
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.error("OpenWeather API request timed out after 10s");
+      } else {
+        console.error("Failed to fetch weather:", error);
+      }
       return this.getFallbackWeather();
     }
   },

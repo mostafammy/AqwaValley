@@ -35,7 +35,7 @@ export function SoilHumidityCard({ soilReadings }: SoilHumidityCardProps) {
                     }}
                   />
                   <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-navy)" }}>
-                    بئر {reading.wellId.slice(0, 6)}
+                    بئر {reading.wellId?.slice(0, 6) ?? ""}
                   </div>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)" }}>

@@ -74,6 +74,11 @@ export function QuotaBarCard({
 
         {/* Progress Bar Container */}
         <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={clampedPct}
+          aria-valuetext={`${clampedPct}% used`}
           style={{
             height: 12,
             backgroundColor: "var(--color-bg-2)",

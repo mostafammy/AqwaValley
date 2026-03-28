@@ -22,10 +22,18 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
 
   // Format data for chart
   const data = (weeklyTrend && weeklyTrend.length > 0)
-    ? weeklyTrend.map((item) => ({
-        date: new Date(item.periodStart).toLocaleDateString("ar-EG", { weekday: "short", day: "numeric" }),
-        value: Number(item.consumptionM3),
-      }))
+    ? weeklyTrend.map((item) => {
+        const consumption = Number(item.consumptionM3);
+        const dateObj = new Date(item.periodStart);
+        const isValidDate = !isNaN(dateObj.getTime());
+        
+        return {
+          date: isValidDate 
+            ? dateObj.toLocaleDateString("ar-EG", { weekday: "short", day: "numeric" })
+            : "",
+          value: Number.isFinite(consumption) ? consumption : 0,
+        };
+      })
     : [];
 
   return (

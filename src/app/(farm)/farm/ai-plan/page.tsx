@@ -121,7 +121,7 @@ export default function IrrigationPlanPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Overview & KPI */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="card bg-linear-to-br from-blue-900 to-navy text-white border-none shadow-lg">
+          <div className="card bg-gradient-to-br from-blue-900 to-navy text-white border-none shadow-lg">
             <div className="card-body">
               <div className="flex items-center justify-between mb-6">
                 <span className="text-blue-200 text-sm font-medium">الإجمالي الموصى به</span>

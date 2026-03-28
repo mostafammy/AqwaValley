@@ -54,7 +54,7 @@ export function AiRecommendationCard({ farmId }: AiRecommendationCardProps) {
             </p>
           </div>
         </div>
-        <Link href="/farm/ai-plan" className="btn btn-gold btn-md">
+        <Link href={`/farm/${farmId}/ai-plan`} className="btn btn-gold btn-md">
           إنشاء خطة ري <ArrowLeft className="w-4 h-4 ml-1" />
         </Link>
       </div>

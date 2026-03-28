@@ -168,7 +168,7 @@ export function KpiCards({
   ];
 
 
-  // Notice we only have 3 cards for the Farm, but KpiCardGrid uses a configurable map.
+  // The dashboard shows 4 key metric cards: daily, monthly, humidity, and weather.
   // Wrap it in a div that gives some bottom margin
   return (
     <div className="mb-v">

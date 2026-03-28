@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { or, eq } from "drizzle-orm";
+import { or, eq, desc } from "drizzle-orm";
 import { Topbar } from "../_components/layouts/Topbar";
 import { FarmSidebar } from "../_components/layouts/FarmSidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
@@ -44,6 +44,7 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
         eq(farm.ownerId, session.user.id),
       ),
     )
+    .orderBy(desc(farm.createdAt))
     .limit(1);
 
   const currentFarm = farmRows[0];

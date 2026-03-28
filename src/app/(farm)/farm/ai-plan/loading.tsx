@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Skeleton } from "~/app/_components/UI/Skeleton";
 
 export default function IrrigationPlanLoading() {

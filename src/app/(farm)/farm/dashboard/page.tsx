@@ -50,7 +50,8 @@ export default async function FarmDashboardPage() {
   let currentFarm = farmRows[0];
 
   // Fallback for development/demo: if no farm is assigned to this user, grab the first one
-  if (!currentFarm) {
+  if (!currentFarm && process.env.NODE_ENV === "development") {
+    console.log("No farm assigned to user, falling back to first farm (development mode only)");
     const fallbackRows = await db
       .select({
         id: farm.id,
