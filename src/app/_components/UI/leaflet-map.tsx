@@ -6,18 +6,18 @@ import type { Map as LMap, LayerGroup } from "leaflet";
 import { wellStatusColor, wellStatusLabel } from "~/lib/utils";
 
 export type OasisMarker = {
-  id:   string;
+  id: string;
   name: string;
-  lat:  number;
-  lng:  number;
+  lat: number;
+  lng: number;
 };
 
 export type WellMarker = {
-  id:       string;
-  name:     string;
-  lat:      number;
-  lng:      number;
-  status:   "active" | "inactive" | "maintenance" | "offline" | "restricted";
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  status: "active" | "inactive" | "maintenance" | "offline" | "restricted";
   levelPct: number;
   district: string;
 };
@@ -32,15 +32,20 @@ function escapeHtml(str: string) {
 }
 
 interface LeafletMapProps {
-  wells:        WellMarker[];
-  oases?:       OasisMarker[];
+  wells: WellMarker[];
+  oases?: OasisMarker[];
   onWellClick?: (wellId: string) => void;
   onOasisClick?: (oasisId: string) => void;
 }
 
-export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: LeafletMapProps) {
+export function LeafletMap({
+  wells,
+  oases = [],
+  onWellClick,
+  onOasisClick,
+}: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef       = useRef<LMap | null>(null);
+  const mapRef = useRef<LMap | null>(null);
   const layerGroupRef = useRef<LayerGroup | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
@@ -59,18 +64,21 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
       if (containerRef.current._leaflet_id) return;
 
       mapInstance = L.map(containerRef.current, {
-        center:             [25.7, 29.5],
-        zoom:               7,
-        minZoom:            7, // Lock zoom to 7
-        maxZoom:            10,
+        center: [25.7, 29.5],
+        zoom: 7,
+        minZoom: 7, // Lock zoom to 7
+        maxZoom: 10,
         attributionControl: true,
-        dragging:           true, 
-        scrollWheelZoom:    true,
-        doubleClickZoom:    true,
-        zoomControl:        true , 
+        dragging: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        zoomControl: true,
       });
 
-      L.tileLayer("https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png", { maxZoom: 18 }).addTo(mapInstance);
+      L.tileLayer(
+        "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png",
+        { maxZoom: 18 },
+      ).addTo(mapInstance);
 
       layerGroupRef.current = L.layerGroup().addTo(mapInstance);
       mapRef.current = mapInstance;
@@ -88,7 +96,6 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
     };
   }, []);
 
-
   // ── 2. Update Markers when Data or Map state Changes ──────────────────────
   useEffect(() => {
     if (!isMapReady || !mapRef.current || !layerGroupRef.current) return;
@@ -101,7 +108,7 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
       // Render Oasis Markers
       oases.forEach((o) => {
         const escapedName = escapeHtml(o.name);
-        
+
         const oasisIcon = L.divIcon({
           className: "",
           html: `
@@ -112,13 +119,13 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
               <img src="/svg/oasis-marker.svg" style="width:30px; height:30px;" />
             </div>
           `,
-          iconSize:   [0, 0],
+          iconSize: [0, 0],
           iconAnchor: [0, 0],
         });
 
-        const marker = L.marker([o.lat, o.lng], { icon: oasisIcon })
-          .addTo(layerGroup)
-          .bindPopup(`
+        const marker = L.marker([o.lat, o.lng], { icon: oasisIcon }).addTo(
+          layerGroup,
+        ).bindPopup(`
             <div style="font-family:Cairo,sans-serif;direction:rtl;text-align:center">
               <strong style="color:#0A1628">🏝️ واحة ${escapedName}</strong><br/>
               <span style="font-size:10px;color:gray">انقر لفتح تفاصيل الواحة</span>
@@ -132,8 +139,8 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
 
       // Render Well Markers
       wells.forEach((w) => {
-        const color      = wellStatusColor(w.status);
-        const label      = wellStatusLabel(w.status);
+        const color = wellStatusColor(w.status);
+        const label = wellStatusLabel(w.status);
         const isCritical = CRITICAL_STATUSES.includes(w.status);
         const escapedWellName = escapeHtml(w.name);
 
@@ -145,12 +152,11 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
               <div style="position:relative;width:14px;height:14px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 1px 5px rgba(0,0,0,.4);z-index:1;"></div>
             </div>
           `,
-          iconSize:   [20, 20],
+          iconSize: [20, 20],
           iconAnchor: [10, 10],
         });
 
-        const marker = L.marker([w.lat, w.lng], { icon })
-          .addTo(layerGroup)
+        const marker = L.marker([w.lat, w.lng], { icon }).addTo(layerGroup)
           .bindPopup(`
             <div style="font-family:Cairo,sans-serif;direction:rtl;min-width:140px">
               <strong>${escapedWellName}</strong><br/>
