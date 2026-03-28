@@ -74,7 +74,7 @@ async function main() {
     }
 
     // Check if it's the specific header parsing error we saw earlier
-    if (error.message && error.message.includes("ByteString")) {
+    if (error.message?.includes("ByteString")) {
       console.log("\n💡 This is a ByteString character encoding error.");
     }
 
