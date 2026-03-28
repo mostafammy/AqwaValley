@@ -29,7 +29,7 @@ async function getWellsWithLocation() {
     name: w.name,
     lat: Number(w.latitude),
     lng: Number(w.longitude),
-    status: w.status as (typeof WELL_STATUSES)[number],
+    status: w.status,
     levelPct: Number(w.currentLevelPct ?? 0),
     district: w.district?.name ?? "",
     districtId: w.districtId,
