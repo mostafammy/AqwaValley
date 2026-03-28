@@ -1,4 +1,4 @@
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { eq, inArray, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import type { db as DbInstance } from "~/server/db";
