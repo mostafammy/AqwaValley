@@ -1,4 +1,4 @@
-import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { eq, inArray, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import type { db as DbInstance } from "~/server/db";
@@ -182,7 +182,7 @@ export async function requireFarmAccess(
 export async function buildWellDistrictFilter(
   ctx: AuthContext,
   districtIds?: string[],
-): Promise<ReturnType<typeof inArray> | ReturnType<typeof sql> | undefined> {
+): Promise<ReturnType<typeof inArray> | undefined> {
   const accessible = await getAccessibleDistrictIds(ctx);
   if (accessible === null) {
     // admin/auditor: no filter, or apply the provided override

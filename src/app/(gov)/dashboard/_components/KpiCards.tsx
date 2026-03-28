@@ -107,4 +107,4 @@ export async function KpiCards() {
   const kpi = await getKpiData();
 
   return <KpiCardGrid cards={cards(kpi)} />;
-}
+}

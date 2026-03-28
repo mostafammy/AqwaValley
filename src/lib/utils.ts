@@ -78,7 +78,7 @@ export function formatAlertMessage(message: string): string {
 
   // Parse technical messages
   // Pattern: "sensorType value X operator Y (rule: uuid)"
-  const match = message.match(/^(\w+)_?\s*value\s*(\d+\.?\d*)\s*(gt|lt|gte|lte|eq)\s*(\d+\.?\d*)/i);
+  const match = /^(\w+)_?\s*value\s*(\d+\.?\d*)\s*(gt|lt|gte|lte|eq)\s*(\d+\.?\d*)/i.exec(message);
   
   if (!match) {
     return message;

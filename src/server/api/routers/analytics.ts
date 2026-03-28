@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, viewerProcedure } from "~/server/api/trpc";
@@ -7,7 +7,6 @@ import {
   alerts,
   district,
   latestSensorState,
-  sensorData,
   sensors,
   well,
 } from "~/server/db/schema";
@@ -156,9 +155,7 @@ export const analyticsRouter = createTRPCRouter({
         totalWells: Number(wellStats[0]?.total ?? 0),
         activeWells: Number(wellStats[0]?.active ?? 0),
         unacknowledgedAlerts: Number(alertStats[0]?.total ?? 0),
-        avgWaterLevelM: levelStats[0]
-          ? Number((levelStats[0] as Record<string, unknown>).avg_level)
-          : null,
+        avgWaterLevelM: levelStats[0] ? Number(levelStats[0].avg_level) : null,
       };
     }),
 

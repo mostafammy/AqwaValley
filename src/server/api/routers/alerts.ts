@@ -1,4 +1,14 @@
-import { and, count, desc, eq, gte, isNotNull, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  isNotNull,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -8,7 +18,7 @@ import {
   viewerProcedure,
 } from "~/server/api/trpc";
 import { requireWellAccess, buildWellDistrictFilter } from "~/server/lib/abac";
-import { alertRule, alerts, sensors, well } from "~/server/db/schema";
+import { alertRule, alerts, well } from "~/server/db/schema";
 
 const alertSeverityValues = ["critical", "warning", "info"] as const;
 const alertTypeValues = [
@@ -31,14 +41,14 @@ export const alertsRouter = createTRPCRouter({
    */
   count: viewerProcedure.query(async ({ ctx }) => {
     const districtFilter = await buildWellDistrictFilter(ctx);
-    
+
     // Count unacknowledged alerts scoped to accessible wells
     const [result] = await ctx.db
       .select({ count: count() })
       .from(alerts)
       .innerJoin(well, eq(well.id, alerts.wellId))
       .where(and(isNull(alerts.acknowledgedAt), districtFilter));
-      
+
     return result?.count ?? 0;
   }),
 

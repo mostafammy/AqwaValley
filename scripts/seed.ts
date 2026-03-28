@@ -993,7 +993,7 @@ async function createRegionalUser(args: {
     if (!existing) {
         // Create via Better Auth API
         // @ts-ignore
-        const signUp = auth.api.signUpUsername || (auth.api.signUp && auth.api.signUp.username) || auth.api.signUpEmail;
+        const signUp = auth.api.signUpUsername || (auth.api.signUp?.username) || auth.api.signUpEmail;
         
         if (signUp) {
             await signUp({

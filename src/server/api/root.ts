@@ -4,8 +4,10 @@ import { alertsRouter } from "~/server/api/routers/alerts";
 import { analyticsRouter } from "~/server/api/routers/analytics";
 import { usersRouter } from "~/server/api/routers/users";
 import { quotasRouter } from "~/server/api/routers/quotas";
+import { irrigationRouter } from "~/server/api/routers/irrigation";
 import { forecastRouter } from "~/server/api/routers/forecast";
 import { weatherRouter } from "~/server/api/routers/weather";
+
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -20,6 +22,7 @@ export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   users: usersRouter,
   quotas: quotasRouter,
+  irrigation: irrigationRouter,
   forecast: forecastRouter,
   weather: weatherRouter,
 });

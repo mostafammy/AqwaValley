@@ -1,8 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/simulate-ingest",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "crons": []
 }
