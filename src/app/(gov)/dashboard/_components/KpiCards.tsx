@@ -12,12 +12,7 @@ async function getKpiData() {
   const [criticalAlerts] = await db
     .select({ count: count() })
     .from(alerts)
-    .where(
-      and(
-        eq(alerts.severity, "critical"),
-        isNull(alerts.acknowledgedAt),
-      )
-    );
+    .where(and(eq(alerts.severity, "critical"), isNull(alerts.acknowledgedAt)));
 
   // Average Level from all wells
   const [avgLevelRes] = await db
@@ -34,7 +29,8 @@ async function getKpiData() {
     day: "2-digit",
   }).formatToParts(now);
 
-  const getPart = (type: string) => cairoTimeParts.find(p => p.type === type)?.value;
+  const getPart = (type: string) =>
+    cairoTimeParts.find((p) => p.type === type)?.value;
   const todayStr = `${getPart("year")}-${getPart("month")}-${getPart("day")}T00:00:00+02:00`;
   const today = new Date(todayStr);
 
@@ -43,14 +39,11 @@ async function getKpiData() {
     .from(sensorData)
     .innerJoin(sensors, eq(sensors.id, sensorData.sensorId))
     .where(
-      and(
-        eq(sensors.type, "flow_rate"),
-        gte(sensorData.timestamp, today)
-      )
+      and(eq(sensors.type, "flow_rate"), gte(sensorData.timestamp, today)),
     );
 
   const consumptionVal = Number(consumptionRes?.total ?? 0);
-  
+
   // Format consumption: Standardized Arabic formatting with compact notation for >= 1M
   const formatter = new Intl.NumberFormat("ar-EG", {
     notation: consumptionVal >= 1000000 ? "compact" : "standard",
@@ -60,63 +53,64 @@ async function getKpiData() {
   const formattedConsumption = formatter.format(consumptionVal);
 
   return {
-    totalWells:     totalWells?.count  ?? 0,
+    totalWells: totalWells?.count ?? 0,
     criticalAlerts: criticalAlerts?.count ?? 0,
     todayConsumption: formattedConsumption,
     avgLevel: Math.round(Number(avgLevelRes?.avg ?? 0)) + "%",
   };
 }
 
-const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>) => [
-  {
-    label: "إجمالي الآبار النشطة",
-    value: kpi.totalWells.toLocaleString("ar-EG"),
-    icon: Droplets,
-    border: "border-r-blue-500",
-    iconBg: "bg-blue-50",
-    iconColor: "text-blue-500",
-  },
-  {
-    label: "تنبيهات حرجة",
-    value: String(kpi.criticalAlerts),
-    icon: AlertTriangle,
-    border: "border-r-red-500",
-    iconBg: "bg-red-50",
-    iconColor: "text-red-500",
-  },
-  {
-    label: "استهلاك اليوم (م³)",
-    value: kpi.todayConsumption,
-    icon: Activity,
-    border: "border-r-teal-500",
-    iconBg: "bg-teal-50",
-    iconColor: "text-teal-500",
-  },
-  {
-    label: "متوسط منسوب المياه",
-    value: kpi.avgLevel,
-    icon: TrendingDown,
-    border: "border-r-amber-500",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-500",
-  },
-] as const;
+const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>) =>
+  [
+    {
+      label: "إجمالي الآبار النشطة",
+      value: kpi.totalWells.toLocaleString("ar-EG"),
+      icon: Droplets,
+      border: "border-r-blue-500",
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-500",
+    },
+    {
+      label: "تنبيهات حرجة",
+      value: String(kpi.criticalAlerts),
+      icon: AlertTriangle,
+      border: "border-r-red-500",
+      iconBg: "bg-red-50",
+      iconColor: "text-red-500",
+    },
+    {
+      label: "استهلاك اليوم (م³)",
+      value: kpi.todayConsumption,
+      icon: Activity,
+      border: "border-r-teal-500",
+      iconBg: "bg-teal-50",
+      iconColor: "text-teal-500",
+    },
+    {
+      label: "متوسط منسوب المياه",
+      value: kpi.avgLevel,
+      icon: TrendingDown,
+      border: "border-r-amber-500",
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-500",
+    },
+  ] as const;
 
 export async function KpiCards() {
   const kpi = await getKpiData();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
       {cards(kpi).map((card) => (
         <div
           key={card.label}
-          className={`bg-white rounded-xl border border-gray-200 border-r-4 ${card.border} p-5 shadow-sm`}
+          className={`rounded-xl border border-r-4 border-gray-200 bg-white ${card.border} p-5 shadow-sm`}
         >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-gray-500 font-medium">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-500">
               {card.label}
             </span>
-            <div className={`p-2 rounded-lg ${card.iconBg}`}>
+            <div className={`rounded-lg p-2 ${card.iconBg}`}>
               <card.icon className={`h-4 w-4 ${card.iconColor}`} />
             </div>
           </div>
