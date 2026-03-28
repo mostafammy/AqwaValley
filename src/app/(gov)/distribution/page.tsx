@@ -38,8 +38,9 @@ async function getDistrictsWithStats(): Promise<DistrictStats[]> {
   // Group wells by district
   const wellsByDistrict = wellsData.reduce(
     (acc, w) => {
-      acc[w.districtId] ??= [];
-      acc[w.districtId].push(w);
+      const districtWells = acc[w.districtId] ?? [];
+      districtWells.push(w);
+      acc[w.districtId] = districtWells;
       return acc;
     },
     {} as Record<string, typeof wellsData>,
