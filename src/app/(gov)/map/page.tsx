@@ -1,17 +1,9 @@
 import { db } from "~/server/db";
-import { well, district } from "~/server/db/schema";
-import { inArray, and, isNotNull } from "drizzle-orm";
+import { well } from "~/server/db/schema";
+import { and, isNotNull } from "drizzle-orm";
 import { MapPageClient } from "./_components/MapPageClient";
 
 export const metadata = { title: "خريطة الآبار | AquaValley" };
-
-const WELL_STATUSES = [
-  "active",
-  "inactive",
-  "maintenance",
-  "offline",
-  "restricted",
-] as const;
 
 async function getWellsWithLocation() {
   const wells = await db.query.well.findMany({
