@@ -24,9 +24,9 @@ export function GovSidebar() {
     path === "/"
       ? pathname === path
       : pathname === path || pathname.startsWith(`${path}/`);
-      
+
   const { isMobileOpen, closeMobile } = useSidebar();
-  
+
   // Fetch unacknowledged alert count reactively via tRPC
   const { data: alertCount = 0, error } = api.alerts.count.useQuery(undefined, {
     refetchInterval: 30000, // Refetch every 30 seconds
@@ -82,8 +82,9 @@ export function GovSidebar() {
           href="/districts"
           icon={<Building2 size={18} />}
           label="المراكز والآبار"
-          active={is("/districts") || is("/wells")}        />
-        
+          active={is("/districts") || is("/wells")}
+        />
+
         <NavItem
           href="/distribution"
           icon={<BarChart3 size={18} />}
