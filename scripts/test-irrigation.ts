@@ -546,7 +546,7 @@ async function main() {
           .where(eq(schema.irrigationRecommendation.id, inserted.id))
           .limit(1);
 
-        if (fetched && fetched.totalLitres === validPlan.totalLitres) {
+        if (fetched?.totalLitres === validPlan.totalLitres) {
           printSuccess("Successfully queried back the inserted record");
           printInfo(`  id: ${fetched.id}`);
           printInfo(`  farmId: ${fetched.farmId}`);
