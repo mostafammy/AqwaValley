@@ -15,10 +15,7 @@
 import { z } from "zod";
 import { desc, eq } from "drizzle-orm";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import { irrigationRecommendation, farm } from "~/server/db/schema";
 import { requestIrrigationPlan } from "~/server/services/irrigation/recommend";
@@ -51,7 +48,11 @@ async function ensureUserCanAccessFarm(
   farmId: string,
 ) {
   const [farmRecord] = await db
-    .select({ id: farm.id, ownerId: farm.ownerId, farmerUserId: farm.farmerUserId })
+    .select({
+      id: farm.id,
+      ownerId: farm.ownerId,
+      farmerUserId: farm.farmerUserId,
+    })
     .from(farm)
     .where(eq(farm.id, farmId))
     .limit(1);
