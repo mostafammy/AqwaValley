@@ -27,7 +27,11 @@ export function AlertsTable() {
 
   // Build query params
   const acknowledged =
-    ackStatus === "open" ? false : ackStatus === "acknowledged" ? true : undefined;
+    ackStatus === "open"
+      ? false
+      : ackStatus === "acknowledged"
+        ? true
+        : undefined;
 
   // Fetch alerts
   const { data, isLoading } = api.alerts.list.useQuery({
@@ -57,9 +61,9 @@ export function AlertsTable() {
   const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden min-w-md">
+    <div className="min-w-md overflow-hidden rounded-xl border border-gray-200 bg-white">
       {/* Filters Bar */}
-      <div className="p-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-gray-100 p-4">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Filter className="h-4 w-4" />
           <span>تصفية:</span>
@@ -69,10 +73,12 @@ export function AlertsTable() {
         <select
           value={severity ?? ""}
           onChange={(e) => {
-            setSeverity(e.target.value ? (e.target.value as Severity) : undefined);
+            setSeverity(
+              e.target.value ? (e.target.value as Severity) : undefined,
+            );
             setPage(1);
           }}
-          className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-blue focus:ring-1 focus:ring-blue"
+          className="focus:border-blue focus:ring-blue h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-1"
         >
           <option value="">كل الدرجات</option>
           <option value="critical">حرج</option>
@@ -87,7 +93,7 @@ export function AlertsTable() {
             setAckStatus(e.target.value as AckStatus);
             setPage(1);
           }}
-          className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-blue focus:ring-1 focus:ring-blue"
+          className="focus:border-blue focus:ring-blue h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-1"
         >
           <option value="all">الكل</option>
           <option value="open">مفتوحة</option>
@@ -96,7 +102,7 @@ export function AlertsTable() {
 
         {/* Results count */}
         {data && (
-          <span className="text-sm text-gray-400 mr-auto">
+          <span className="mr-auto text-sm text-gray-400">
             {data.total} تنبيه
           </span>
         )}
@@ -105,27 +111,27 @@ export function AlertsTable() {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 الحالة
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 الرسالة
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 البئر
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 الدرجة
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 النوع
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 التاريخ
               </th>
-              <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 py-3">
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
                 إجراء
               </th>
             </tr>
@@ -135,25 +141,25 @@ export function AlertsTable() {
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="animate-pulse">
                   <td className="px-4 py-4">
-                    <div className="h-6 w-6 bg-gray-200 rounded-full" />
+                    <div className="h-6 w-6 rounded-full bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-4 w-48 bg-gray-200 rounded" />
+                    <div className="h-4 w-48 rounded bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-4 w-24 bg-gray-200 rounded" />
+                    <div className="h-4 w-24 rounded bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-6 w-12 bg-gray-200 rounded-full" />
+                    <div className="h-6 w-12 rounded-full bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-4 w-20 bg-gray-200 rounded" />
+                    <div className="h-4 w-20 rounded bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-4 w-16 bg-gray-200 rounded" />
+                    <div className="h-4 w-16 rounded bg-gray-200" />
                   </td>
                   <td className="px-4 py-4">
-                    <div className="h-8 w-20 bg-gray-200 rounded" />
+                    <div className="h-8 w-20 rounded bg-gray-200" />
                   </td>
                 </tr>
               ))
@@ -161,7 +167,7 @@ export function AlertsTable() {
               <tr>
                 <td colSpan={7} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center text-gray-400">
-                    <CheckCircle className="h-10 w-10 text-gray-300 mb-3" />
+                    <CheckCircle className="mb-3 h-10 w-10 text-gray-300" />
                     <p className="text-sm">لا توجد تنبيهات</p>
                   </div>
                 </td>
@@ -178,8 +184,8 @@ export function AlertsTable() {
                   <td className="px-4 py-4">
                     {!alert.acknowledgedAt ? (
                       <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
                       </span>
                     ) : (
                       <span className="text-green-500">✓</span>
@@ -188,7 +194,7 @@ export function AlertsTable() {
 
                   {/* Message */}
                   <td className="px-4 py-4">
-                    <p className="text-sm font-medium text-gray-800 max-w-md">
+                    <p className="max-w-md text-sm font-medium text-gray-800">
                       {formatAlertMessage(alert.message)}
                     </p>
                   </td>
@@ -197,7 +203,7 @@ export function AlertsTable() {
                   <td className="px-4 py-4">
                     <a
                       href={`/wells/${alert.wellId}`}
-                      className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                      className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
                     >
                       عرض البئر
                       <ChevronRight className="h-3 w-3" />
@@ -244,15 +250,16 @@ export function AlertsTable() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleAcknowledge(alert.id)}
-                        loading={pendingAckId === alert.id && acknowledgeMutation.isPending}
+                        loading={
+                          pendingAckId === alert.id &&
+                          acknowledgeMutation.isPending
+                        }
                         icon={<Check className="h-3 w-3" />}
                       >
                         استلام
                       </Button>
                     ) : (
-                      <span className="text-xs text-gray-400">
-                        تم الاستلام
-                      </span>
+                      <span className="text-xs text-gray-400">تم الاستلام</span>
                     )}
                   </td>
                 </tr>
@@ -264,7 +271,7 @@ export function AlertsTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="p-4 border-t border-gray-100 flex items-center justify-between">
+        <div className="flex items-center justify-between border-t border-gray-100 p-4">
           <span className="text-sm text-gray-500">
             صفحة {page} من {totalPages}
           </span>
