@@ -45,27 +45,40 @@ async function main() {
   const testUsernames = ["12345678901234", "98765432109876"];
 
   console.log("🗑️ Cleaning up old test accounts for a fresh start...");
-  await db.delete(schema.user).where(inArray(schema.user.username, testUsernames));
+  await db
+    .delete(schema.user)
+    .where(inArray(schema.user.username, testUsernames));
 
   // 1. Ensure essential roles exist
   const roleValues = [
-    { type: "admin" as const, displayName: "مدير النظام", description: "Full system access" },
-    { type: "farmer" as const, displayName: "مزارع", description: "Farmer access" },
+    {
+      type: "admin" as const,
+      displayName: "مدير النظام",
+      description: "Full system access",
+    },
+    {
+      type: "farmer" as const,
+      displayName: "مزارع",
+      description: "Farmer access",
+    },
   ];
 
   for (const r of roleValues) {
-    await db.insert(schema.role).values(r).onConflictDoNothing({ target: schema.role.type });
+    await db
+      .insert(schema.role)
+      .values(r)
+      .onConflictDoNothing({ target: schema.role.type });
   }
 
   const allRoles = await db.query.role.findMany();
-  const adminRole = allRoles.find(r => r.type === "admin");
-  const farmerRole = allRoles.find(r => r.type === "farmer");
+  const adminRole = allRoles.find((r) => r.type === "admin");
+  const farmerRole = allRoles.find((r) => r.type === "farmer");
 
   if (!adminRole || !farmerRole) throw new Error("Roles missing");
 
   const testAccounts = [
     { name: "Admin User", username: "12345678901234", roleId: adminRole.id },
-    { name: "Farmer User", username: "98765432109876", roleId: farmerRole.id }
+    { name: "Farmer User", username: "98765432109876", roleId: farmerRole.id },
   ];
 
   for (const acc of testAccounts) {
@@ -77,19 +90,24 @@ async function main() {
       };
 
       const signUp =
-        authApi.signUpUsername ?? authApi.signUp?.username ?? authApi.signUpEmail;
-      
-      if (!signUp) throw new Error("No sign-up method (signUpUsername or signUpEmail) found on auth.api");
+        authApi.signUpUsername ??
+        authApi.signUp?.username ??
+        authApi.signUpEmail;
+
+      if (!signUp)
+        throw new Error(
+          "No sign-up method (signUpUsername or signUpEmail) found on auth.api",
+        );
 
       const email = `test_${acc.username}@local.test`;
-      
+
       await signUp({
         body: {
-            name: acc.name,
-            username: acc.username, // signUpUsername/signUp.username uses this
-            email: email,           // signUpEmail uses this
-            password: "password123",
-        }
+          name: acc.name,
+          username: acc.username, // signUpUsername/signUp.username uses this
+          email: email, // signUpEmail uses this
+          password: "password123",
+        },
       });
       console.log(`✅ Created ${acc.username}`);
     } catch (e: unknown) {
@@ -99,28 +117,39 @@ async function main() {
 
     // Manual Fix: Ensure the username and profile are correctly set up regardless of which API we used
     const userRec = await db.query.user.findFirst({
-        where: (u, { or, eq }) => or(eq(u.username, acc.username), eq(u.email, `test_${acc.username}@local.test`))
+      where: (u, { or, eq }) =>
+        or(
+          eq(u.username, acc.username),
+          eq(u.email, `test_${acc.username}@local.test`),
+        ),
     });
 
     if (userRec) {
-        // Ensure the Better Auth user has the correct username
-        await db.update(schema.user)
-            .set({ username: acc.username, displayUsername: acc.username })
-            .where(eq(schema.user.id, userRec.id));
+      // Ensure the Better Auth user has the correct username
+      await db
+        .update(schema.user)
+        .set({ username: acc.username, displayUsername: acc.username })
+        .where(eq(schema.user.id, userRec.id));
 
-        // Create the user profile (operational side)
-        await db.insert(schema.userProfile).values({
-            userId: userRec.id,
-            nationalId: acc.username,
-            fullName: acc.name,
-            isActive: true,
-        }).onConflictDoNothing();
+      // Create the user profile (operational side)
+      await db
+        .insert(schema.userProfile)
+        .values({
+          userId: userRec.id,
+          nationalId: acc.username,
+          fullName: acc.name,
+          isActive: true,
+        })
+        .onConflictDoNothing();
 
-        // Assign Role
-        await db.insert(schema.userRoleAssignment).values({
-            userId: userRec.id,
-            roleId: acc.roleId
-        }).onConflictDoNothing();
+      // Assign Role
+      await db
+        .insert(schema.userRoleAssignment)
+        .values({
+          userId: userRec.id,
+          roleId: acc.roleId,
+        })
+        .onConflictDoNothing();
     }
   }
 
