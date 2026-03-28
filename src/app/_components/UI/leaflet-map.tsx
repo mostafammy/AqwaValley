@@ -55,7 +55,7 @@ export function LeafletMap({ wells, oases = [], onWellClick, onOasisClick }: Lea
     void import("leaflet").then((L) => {
       if (!isMounted || !containerRef.current || mapRef.current) return;
 
-      // @ts-ignore
+      // @ts-expect-error Leaflet attaches _leaflet_id on initialized map containers.
       if (containerRef.current._leaflet_id) return;
 
       mapInstance = L.map(containerRef.current, {
