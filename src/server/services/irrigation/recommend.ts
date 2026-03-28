@@ -114,10 +114,7 @@ async function fetchSoilReadings(
     .innerJoin(well, eq(sensors.wellId, well.id))
     .innerJoin(farmWell, eq(well.id, farmWell.wellId))
     .where(
-      and(
-        eq(farmWell.farmId, farmId),
-        eq(latestSensorState.type, "humidity"),
-      ),
+      and(eq(farmWell.farmId, farmId), eq(latestSensorState.type, "humidity")),
     );
 
   // Build a simple reading map
@@ -146,8 +143,7 @@ async function fetchSoilReadings(
 
     const avgTemp =
       tempSensors.length > 0
-        ? tempSensors.reduce((sum, s) => sum + s.value, 0) /
-          tempSensors.length
+        ? tempSensors.reduce((sum, s) => sum + s.value, 0) / tempSensors.length
         : 30; // default desert temp
 
     // Apply same reading to all zones (one farm → shared sensors)
@@ -358,7 +354,8 @@ export async function requestIrrigationPlan(
 
   if (totalRequested > quota.remainingLitres) {
     const remainingQuota = Math.max(0, Math.floor(quota.remainingLitres));
-    const scaleFactor = totalRequested > 0 ? remainingQuota / totalRequested : 0;
+    const scaleFactor =
+      totalRequested > 0 ? remainingQuota / totalRequested : 0;
 
     const scaledZones = plan.zones.map((z) => ({
       ...z,
@@ -416,7 +413,10 @@ export async function requestIrrigationPlan(
         }
       }
 
-      scaledTotal = scaledZones.reduce((sum, z) => sum + z.recommendedLitres, 0);
+      scaledTotal = scaledZones.reduce(
+        (sum, z) => sum + z.recommendedLitres,
+        0,
+      );
     }
 
     plan = {
