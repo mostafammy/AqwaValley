@@ -407,8 +407,9 @@ export async function requestIrrigationPlan(
           if (current <= 0) continue;
 
           const reduceBy = Math.min(current, overflow);
-          if (scaledZones[item.index]) {
-            scaledZones[item.index].recommendedLitres = current - reduceBy;
+          const zone = scaledZones[item.index];
+          if (zone) {
+            zone.recommendedLitres = current - reduceBy;
           }
           overflow -= reduceBy;
         }
