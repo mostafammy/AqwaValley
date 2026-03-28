@@ -23,7 +23,7 @@ export const irrigationZoneSchema = z.object({
   zoneId: z.string().uuid(),
   cropType: z.string().min(1),
   growthStage: z.string().min(1),
-  recommendedLitres: z.number().positive().max(100_000_000),
+  recommendedLitres: z.number().min(0).max(100_000_000),
   scheduledAt: z.string().regex(/^\d{2}:\d{2}$/, {
     message: "Must be HH:MM format (e.g., 05:30)",
   }),
@@ -39,7 +39,7 @@ export const irrigationPlanSchema = z.object({
   reasoning: z.string().min(10, {
     message: "Reasoning must be at least 10 characters for traceability",
   }),
-  totalLitres: z.number().positive(),
+  totalLitres: z.number().min(0),
   quotaWarning: z.boolean(),
   zones: z.array(irrigationZoneSchema).min(1, {
     message: "Plan must contain at least one zone",
