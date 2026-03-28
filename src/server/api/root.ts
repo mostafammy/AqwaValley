@@ -1,4 +1,3 @@
-import { postRouter } from "~/server/api/routers/post";
 import { wellsRouter } from "~/server/api/routers/wells";
 import { sensorsRouter } from "~/server/api/routers/sensors";
 import { alertsRouter } from "~/server/api/routers/alerts";
@@ -6,6 +5,8 @@ import { analyticsRouter } from "~/server/api/routers/analytics";
 import { usersRouter } from "~/server/api/routers/users";
 import { quotasRouter } from "~/server/api/routers/quotas";
 import { irrigationRouter } from "~/server/api/routers/irrigation";
+import { forecastRouter } from "~/server/api/routers/forecast";
+
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -14,7 +15,6 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
   wells: wellsRouter,
   sensors: sensorsRouter,
   alerts: alertsRouter,
@@ -22,6 +22,7 @@ export const appRouter = createTRPCRouter({
   users: usersRouter,
   quotas: quotasRouter,
   irrigation: irrigationRouter,
+  forecast: forecastRouter,
 });
 
 // export type definition of API

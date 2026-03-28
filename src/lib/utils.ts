@@ -66,6 +66,70 @@ export function alertTypeLabel(type: string): string {
   return map[type] ?? type;
 }
 
+/**
+ * Transforms raw alert messages into user-friendly Arabic text.
+ * Handles messages like: "pressure value 5 gt 3.5 (rule: uuid)"
+ */
+export function formatAlertMessage(message: string): string {
+  // If already in Arabic, return as is
+  if (/[\u0600-\u06FF]/.test(message)) {
+    return message;
+  }
+
+  // Parse technical messages
+  // Pattern: "sensorType value X operator Y (rule: uuid)"
+  const match = message.match(/^(\w+)_?\s*value\s*(\d+\.?\d*)\s*(gt|lt|gte|lte|eq)\s*(\d+\.?\d*)/i);
+  
+  if (!match) {
+    return message;
+  }
+
+  const sensorType = match[1]?.toLowerCase() ?? "";
+  const value = match[2] ?? "";
+  const operator = (match[3] ?? "").toLowerCase();
+  const threshold = match[4] ?? "";
+  
+  // Sensor type labels
+  const sensorLabels: Record<string, { name: string; unit: string }> = {
+    water_level: { name: "منسوب المياه", unit: "%" },
+    flow_rate: { name: "معدل التدفق", unit: "م³/س" },
+    pressure: { name: "الضغط", unit: "بار" },
+    temperature: { name: "درجة الحرارة", unit: "°م" },
+    humidity: { name: "الرطوبة", unit: "%" },
+  };
+  
+  const sensor = sensorLabels[sensorType] ?? { name: sensorType, unit: "" };
+
+  // Operator labels
+  const operatorLabels: Record<string, string> = {
+    gt: "أعلى من",
+    lt: "أقل من",
+    gte: "أعلى من أو يساوي",
+    lte: "أقل من أو يساوي",
+    eq: "يساوي",
+  };
+  const opLabel = operatorLabels[operator] ?? operator;
+
+  // Direction indicators
+  const isHigh = operator === "gt" || operator === "gte";
+  const isLow = operator === "lt" || operator === "lte";
+  const isEq = operator === "eq";
+  
+  let direction: string;
+  if (isHigh) {
+    direction = "ارتفاع";
+  } else if (isLow) {
+    direction = "انخفاض";
+  } else if (isEq) {
+    direction = "ثبات";
+  } else {
+    direction = "تغيير";
+  }
+
+  // Build readable message
+  return `${sensor.name}: ${direction} ${value}${sensor.unit} (${opLabel} الحد: ${threshold}${sensor.unit})`;
+}
+
 /** @deprecated use alertSeverityVariant instead */
 export function alertTypeVariant(type: string): BadgeVariant {
   return alertSeverityVariant(type);

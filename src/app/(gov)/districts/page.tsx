@@ -1,43 +1,51 @@
 import { db } from "~/server/db";
 import { well, district, alerts } from "~/server/db/schema";
-import { eq, count, isNull, and, inArray } from "drizzle-orm";
+import { count, isNull, and, inArray } from "drizzle-orm";
+import { Suspense } from "react";
 import { DistrictCard } from "./_components/district-card";
+import { ScrollToHash } from "./_components/scroll-to-hash";
 
 export const metadata = { title: "المراكز والآبار | AquaValley" };
 
-async function getDistrictsWithWells() {
-  // 1. Fetch all districts
-  const districts = await db.query.district.findMany();
+function toSlug(name: string): string {
+  const map: Record<string, string> = {
+    "El Kharga":  "kharga",
+    "El Dakhla":  "dakhla",
+    "El Farafra": "farafra",
+    "Paris":      "paris",
+    "Balat":      "balat",
+  };
+  return map[name] ?? name.toLowerCase().replace(/\s+/g, "-");
+}
 
+async function getDistrictsWithWells() {
+  const districts = await db.query.district.findMany();
   if (districts.length === 0) return [];
 
   const districtIds = districts.map((d) => d.id);
 
-  // 2. Fetch all wells in these districts
   const allWells = await db.query.well.findMany({
     where: inArray(well.districtId, districtIds),
   });
 
   const wellIds = allWells.map((w) => w.id);
 
-  // 3. Fetch all active alerts for these wells
-  const activeAlerts = wellIds.length > 0 
+  const activeAlerts = wellIds.length > 0
     ? await db
         .select({ wellId: alerts.wellId, count: count() })
         .from(alerts)
         .where(
           and(
             inArray(alerts.wellId, wellIds),
-            isNull(alerts.acknowledgedAt)
+            isNull(alerts.acknowledgedAt),
           )
         )
         .groupBy(alerts.wellId)
     : [];
 
-  const alertMap = new Map(activeAlerts.map(a => [a.wellId, a.count ?? 0]));
+  const alertMap = new Map(activeAlerts.map((a) => [a.wellId, a.count ?? 0]));
 
-  // 4. Group wells by district and calculate stats
-  const results = districts.map((d) => {
+  return districts.map((d) => {
     const districtWells = allWells
       .filter((w) => w.districtId === d.id)
       .map((w) => ({
@@ -49,15 +57,16 @@ async function getDistrictsWithWells() {
         alertCount: alertMap.get(w.id) ?? 0,
       }));
 
-    const totalWells   = districtWells.length;
-    const activeWells  = districtWells.filter((w) => w.status === "active").length;
-    const avgLevelPct  = totalWells > 0
+    const totalWells  = districtWells.length;
+    const activeWells = districtWells.filter((w) => w.status === "active").length;
+    const avgLevelPct = totalWells > 0
       ? districtWells.reduce((sum, w) => sum + w.levelPct, 0) / totalWells
       : 0;
-    const totalAlerts  = districtWells.reduce((sum, w) => sum + w.alertCount, 0);
+    const totalAlerts = districtWells.reduce((sum, w) => sum + w.alertCount, 0);
 
     return {
-      id:           d.id,
+      id:           toSlug(d.name), // slug for anchor
+      dbId:         d.id, // unique DB id for React key
       name:         d.name,
       totalWells,
       activeWells,
@@ -67,8 +76,6 @@ async function getDistrictsWithWells() {
       wells:        districtWells,
     };
   });
-
-  return results;
 }
 
 export default async function DistrictsPage() {
@@ -80,7 +87,10 @@ export default async function DistrictsPage() {
       dir="rtl"
       style={{ animation: "fadeSlideUp 0.4s ease-out both" }}
     >
-      {/* Header */}
+      <Suspense fallback={null}>
+        <ScrollToHash />
+      </Suspense>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">المراكز والآبار</h1>
@@ -91,12 +101,11 @@ export default async function DistrictsPage() {
         </div>
       </div>
 
-      {/* District Cards */}
       <div className="space-y-6">
         {districts.map((d) => (
-          <DistrictCard key={d.id} {...d} />
+          <DistrictCard key={d.dbId} {...d} />
         ))}
       </div>
     </div>
   );
-}
+}

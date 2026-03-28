@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 
 type WaterDropGaugeProps = {
   levelPct: number;
@@ -8,27 +8,11 @@ type WaterDropGaugeProps = {
 };
 
 export function WaterDropGauge({ levelPct, size = 160 }: WaterDropGaugeProps) {
-  const uid     = useId();
-  const clipId  = `drop-clip-${uid}`;
-  const gradId  = `wave-grad-${uid}`;
+  const uid = useId();
+  const clipId = `drop-clip-${uid.replace(/:/g, "")}`;
+  const gradId = `wave-grad-${uid.replace(/:/g, "")}`;
 
-  const [displayPct, setDisplayPct] = useState(0);
-
-  useEffect(() => {
-    const target = Math.min(100, Math.max(0, levelPct));
-    let startTimestamp: number | null = null;
-    const duration = 1500;
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setDisplayPct(Math.floor(easeOutQuart * target));
-      if (progress < 1) window.requestAnimationFrame(step);
-    };
-
-    window.requestAnimationFrame(step);
-  }, [levelPct]);
+  const displayPct = Math.min(100, Math.max(0, Math.round(levelPct)));
 
   const fillColor =
     displayPct < 20 ? "#EF4444" :
@@ -83,6 +67,7 @@ export function WaterDropGauge({ levelPct, size = 160 }: WaterDropGaugeProps) {
             height={fillHeight + 20}
             fill={`url(#${gradId})`}
           />
+          {/* Animated wave surface */}
           <path
             d={`M0 ${fillY} Q20 ${fillY-6} 40 ${fillY} Q60 ${fillY+6} 80 ${fillY} Q100 ${fillY-6} 120 ${fillY} Q140 ${fillY+6} 160 ${fillY} L160 160 L0 160 Z`}
             fill={fillColor}
@@ -116,7 +101,7 @@ export function WaterDropGauge({ levelPct, size = 160 }: WaterDropGaugeProps) {
       </svg>
 
       <span className="text-sm font-semibold" style={{ color: textColor }}>
-        {displayPct < 20 ? "⚠️ حرج" : displayPct < 40 ? "⚡ منخفض" : "✅ طبيعي"}
+        {displayPct < 20 ? "حرج" : displayPct < 40 ? "منخفض" : "طبيعي"}
       </span>
     </div>
   );

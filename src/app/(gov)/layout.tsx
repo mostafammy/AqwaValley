@@ -4,6 +4,7 @@ import { GovSidebar } from "../_components/layouts/Govsidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
+import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
 
 /**
  * Layout component that enforces government-portal access and renders the portal chrome around its children.
@@ -32,15 +33,15 @@ export default async function GovLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <div className="layout-root">
+        <ScrollReset />
         <Topbar
           userName={name}
           userRole="GOV_ADMIN" // Representing the operating portal context
           userInitials={initials}
           portalLabel="نظام إدارة المياه · الوادي الجديد"
-          notifCount={3}
         />
         <div className="layout-content-row">
-          <GovSidebar alertCount={3} />
+          <GovSidebar />
           <main className="layout-main">
             {children}
           </main>

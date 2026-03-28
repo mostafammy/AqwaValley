@@ -124,6 +124,7 @@
     box-sizing: border-box;
   }
 
+
   body {
     font-family: var(--font-cairo), sans-serif;
     direction: rtl;
@@ -271,7 +272,7 @@
   .topbar {
     position: sticky;
     top: 0;
-    z-index: 1001;
+    z-index: 2000;
     display: flex;
     height: var(--topbar-height);
     width: 100%;
@@ -518,7 +519,7 @@
     overflow-x: hidden;
     padding: 10px 0;
     flex-shrink: 0;
-    z-index: 40;
+    z-index: 1500;
     transition: transform 0.3s ease;
   }
 
@@ -546,7 +547,7 @@
     inset: 0;
     top: var(--topbar-height);
     background: rgba(10, 22, 40, 0.4);
-    z-index: 30;
+    z-index: 1400;
     backdrop-filter: blur(2px);
     transition: opacity 0.3s ease;
     opacity: 0;
@@ -592,6 +593,17 @@
   }
 }
 
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Leaflet Map Enhancements ── */
 @keyframes well-ping {
   0%   { transform: scale(1);   opacity: 0.8; }
@@ -617,4 +629,4 @@
 
 .leaflet-tooltip-top:before {
   border-top-color: #0A1628 !important;
-}
+}

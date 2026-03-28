@@ -9,6 +9,7 @@ import { Suspense }       from "react";
 import { Skeleton }       from "~/app/_components/UI/Skeleton";
 import { Badge } from "~/app/_components/UI/Badge";
 import { wellStatusLabel, wellStatusVariant } from "~/lib/utils";
+import { MapPin, Building2, Ruler, Droplets, Settings } from "lucide-react";
 
 async function getWellDetail(wellId: string) {
   const [row] = await db
@@ -120,11 +121,11 @@ export default async function WellDetailPage({
           <h3 className="text-sm font-semibold mb-4">بيانات البئر الفنية</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: "عمق البئر",    value: `${data.depthM ?? "—"} متر`,                       icon: "📏" },
-              { label: "معدل التدفق",  value: data.flowRate ? `${data.flowRate} م³/ساعة` : "—", icon: "💧" },
-              { label: "حالة الصمام",  value: data.valveState === "open" ? "مفتوح" : data.valveState === "closed" ? "مغلق" : (data.valveState ?? "—"), icon: "🔧" },
-              { label: "خط العرض",     value: data.lat != null ? `${Number(data.lat).toFixed(4)}° شمالاً` : "—", icon: "📍" },
-              { label: "خط الطول",     value: data.lng != null ? `${Number(data.lng).toFixed(4)}° شرقاً` : "—",  icon: "🗺️" },              { label: "المركز الإداري", value: data.districtName ?? "—",                        icon: "🏛️" },
+              { label: "عمق البئر",    value: `${data.depthM ?? "—"} متر`,                       icon: <Ruler size={16} /> },
+              { label: "معدل التدفق",  value: data.flowRate ? `${data.flowRate} م³/ساعة` : "—", icon: <Droplets size={16} /> },
+              { label: "حالة الصمام",  value: data.valveState === "open" ? "مفتوح" : data.valveState === "closed" ? "مغلق" : (data.valveState ?? "—"), icon: <Settings size={16} /> },
+              { label: "خط العرض",     value: data.lat != null ? `${Number(data.lat).toFixed(4)}° شمالاً` : "—", icon: <MapPin size={16} /> },
+              { label: "خط الطول",     value: data.lng != null ? `${Number(data.lng).toFixed(4)}° شرقاً` : "—",  icon: <MapPin size={16} /> },              { label: "المركز الإداري", value: data.districtName ?? "—",                        icon: <Building2 size={16} /> },
             ].map((item) => (
               <div key={item.label} className="bg-gray-50/80 rounded-xl p-3 border border-gray-100/50">
                 <div className="text-[11px] text-gray-400 mb-1 flex items-center gap-1.5">

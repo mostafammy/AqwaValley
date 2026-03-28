@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import type { WellMarker, OasisMarker } from "~/app/_components/UI/leaflet-map";
 
 const LeafletMap = dynamic(
@@ -16,20 +16,21 @@ const LeafletMap = dynamic(
   }
 );
 
-export function MapClient({ wells, oases }: { wells: WellMarker[], oases?: OasisMarker[] }) {
+interface MapClientProps {
+  wells:  WellMarker[];
+  oases?: OasisMarker[];
+}
+
+export function MapClient({ wells, oases = [] }: MapClientProps) {
   const router = useRouter();
 
-  const handleOasisClick = (oasisId: string) => {
-    // console.log(`Navigating to oasis: ${oasisId}`);
-    // Future: router.push(`/gov/dashboard/districts/${oasisId}`);
-  };
-
   return (
-    <div style={{ width: "100%", height: "100%", zIndex: 0, position: "relative" }}>
-      <LeafletMap 
-        wells={wells} 
-        oases={oases} 
-        onOasisClick={handleOasisClick} 
+    <div style={{ width: "100%", height: "100%" }}>
+      <LeafletMap
+        wells={wells}
+        oases={oases}
+        onWellClick={(wellId) => router.push(`/wells/${wellId}`)}
+        onOasisClick={(oasisId) => router.push(`/districts#${oasisId}`)}
       />
     </div>
   );
