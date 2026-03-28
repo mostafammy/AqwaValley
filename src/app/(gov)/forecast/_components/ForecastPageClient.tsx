@@ -221,7 +221,10 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
                       fontSize: "12px",
                     }}
                     labelFormatter={(label: unknown) => {
-                      if (typeof label === "string" || typeof label === "number") {
+                      if (
+                        typeof label === "string" ||
+                        typeof label === "number"
+                      ) {
                         return new Date(label).toLocaleDateString("ar-EG", {
                           month: "long",
                           year: "numeric",
