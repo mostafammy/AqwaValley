@@ -137,6 +137,13 @@ export const quotaBreachStatusEnum = pgEnum("quota_breach_status", [
   "resolved",
 ]);
 
+export const recommendationStatusEnum = pgEnum("recommendation_status", [
+  "PENDING",
+  "ACTIVATED",
+  "COMPLETED",
+  "CANCELLED",
+]);
+
 export const quotaOverrideStatusEnum = pgEnum("quota_override_status", [
   "active",
   "revoked",
@@ -1017,6 +1024,49 @@ export const quotaOverride = pgTable(
   ],
 );
 
+/**
+ * irrigation_recommendation: Full traceability record for every AI irrigation plan.
+ * Stores system prompt, raw AI response, parsed plan, model used, and lifecycle.
+ * INSERT-only for the application service account — historical records are immutable.
+ */
+export const irrigationRecommendation = pgTable(
+  "irrigation_recommendation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    farmId: uuid("farm_id")
+      .notNull()
+      .references(() => farm.id, { onDelete: "cascade" }),
+    requestedBy: text("requested_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+
+    // Full prompt traceability — store everything for government compliance
+    systemPrompt: text("system_prompt").notNull(),
+    userMessage: text("user_message").notNull(),
+    rawResponse: text("raw_response").notNull(),
+
+    // Parsed + validated plan
+    plan: jsonb("plan").notNull(),
+    totalLitres: integer("total_litres").notNull(),
+
+    // Which model generated this plan
+    modelUsed: text("model_used").notNull(),
+    fallback: boolean("fallback").notNull().default(false),
+
+    // Lifecycle: PENDING → ACTIVATED → COMPLETED or CANCELLED
+    status: recommendationStatusEnum("status").notNull().default("PENDING"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    activatedAt: timestamp("activated_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("irrigation_rec_farm_created_idx").on(t.farmId, t.createdAt),
+    index("irrigation_rec_status_idx").on(t.status),
+    index("irrigation_rec_requested_by_idx").on(t.requestedBy),
+  ],
+);
+
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -1178,6 +1228,7 @@ export const farmRelations = relations(farm, ({ one, many }) => ({
   quotaSnapshots: many(farmPeriodConsumptionSnapshot),
   quotaBreachEvents: many(quotaBreachEvent),
   quotaOverrides: many(quotaOverride),
+  irrigationRecommendations: many(irrigationRecommendation),
 }));
 
 export const farmWellRelations = relations(farmWell, ({ one }) => ({
@@ -1309,3 +1360,17 @@ export const quotaOverrideRelations = relations(quotaOverride, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const irrigationRecommendationRelations = relations(
+  irrigationRecommendation,
+  ({ one }) => ({
+    farm: one(farm, {
+      fields: [irrigationRecommendation.farmId],
+      references: [farm.id],
+    }),
+    requestedByUser: one(user, {
+      fields: [irrigationRecommendation.requestedBy],
+      references: [user.id],
+    }),
+  }),
+);

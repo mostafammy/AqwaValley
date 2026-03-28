@@ -1,9 +1,8 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
-  adminProcedure,
   createTRPCRouter,
   operatorProcedure,
   viewerProcedure,

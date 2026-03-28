@@ -27,7 +27,7 @@ async function getWellMarkers(): Promise<WellMarker[]> {
   const ALLOWED_STATUSES: WellMarker["status"][] = ["active", "inactive", "maintenance", "offline", "restricted"];
 
   return validRows.map((r) => {
-    const rawStatus = r.status as WellMarker["status"];
+    const rawStatus = r.status;
     const status = ALLOWED_STATUSES.includes(rawStatus) ? rawStatus : "inactive";
 
     return {

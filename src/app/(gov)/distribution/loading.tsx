@@ -2,11 +2,11 @@ import { Skeleton } from "~/app/_components/UI/Skeleton";
 
 export default function DistributionLoading() {
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-8 animate-in fade-in duration-500" dir="rtl">
+    <div className="space-y-4 p-4 md:p-6" dir="rtl">
       {/* Summary cards skeleton */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl border border-gray-100" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
       </div>
 

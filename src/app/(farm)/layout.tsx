@@ -18,7 +18,11 @@ import { api } from "~/trpc/server";
  * @param children - Content to render inside the layout's main area.
  * @returns A React element containing the sidebar, topbar (populated from session data), and a main content area that wraps `children`.
  */
-export default async function FarmLayout({ children }: { children: React.ReactNode }) {
+export default async function FarmLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // Validate session is present
   const session = await getSession();
   if (!session?.user) redirect("/");
@@ -28,11 +32,12 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
   if (rolePath !== "/farm/dashboard") redirect("/");
 
   // Prepare UI variables from session
-  const name = session.user.name || "مزارع";
+  const name = session.user.name ?? "مزارع";
   const parts = name.trim().split(" ");
-  const initials = parts.length > 1 
-    ? `${parts[0]?.[0] || ""}.${parts[parts.length - 1]?.[0] || ""}` 
-    : (name[0] || "F");
+  const initials =
+    parts.length > 1
+      ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}`
+      : (name[0] ?? "F");
 
   // Resolve farm for weather coordinates
   const farmRows = await db
@@ -72,9 +77,7 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
         />
         <div className="layout-content-row">
           <FarmSidebar />
-          <main className="layout-main">
-            {children}
-          </main>
+          <main className="layout-main">{children}</main>
         </div>
       </div>
     </SidebarProvider>

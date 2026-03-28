@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -9,13 +9,11 @@ import {
 } from "~/server/api/trpc";
 import {
   buildWellDistrictFilter,
-  getAccessibleDistrictIds,
   requireDistrictAccess,
   requireWellAccess,
 } from "~/server/lib/abac";
 import {
   alerts,
-  district,
   latestSensorState,
   sensors,
   well,
