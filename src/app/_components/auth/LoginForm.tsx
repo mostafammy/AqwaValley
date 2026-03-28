@@ -28,11 +28,19 @@ export function LoginForm() {
     setError("");
 
     // Use Better Auth's username plugin (National ID = username)
-    const { error: signInError } = await authClient.signIn.username({
-      username: nationalId,
-      password: password,
-      rememberMe: false,
-    });
+    let signInError;
+    try {
+      const result = await authClient.signIn.username({
+        username: nationalId,
+        password: password,
+        rememberMe: false,
+      });
+      signInError = result.error;
+    } catch {
+      setError("حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.");
+      setIsLoading(false);
+      return;
+    }
 
     if (signInError) {
       // Basic error message handling
@@ -40,7 +48,6 @@ export function LoginForm() {
       setIsLoading(false);
       return;
     }
-
     // Lookup role after successful session creation
     try {
       const redirectPath = await getUserRolePath();
@@ -74,7 +81,7 @@ export function LoginForm() {
       <div className="p-8 bg-white">
         {error && (
           <div className="mb-5 p-3 rounded-lg bg-danger-bg text-danger-text text-sm border border-danger/20 flex items-center gap-2 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <img src="/svg/alert-circle.svg" className="w-4 h-4 opacity-70" alt="" />
             {error}
           </div>
         )}

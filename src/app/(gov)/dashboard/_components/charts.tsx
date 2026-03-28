@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useId } from "react";
+import { useId } from "react";
+import { useIntersectionObserver } from "~/lib/hooks";
 import {
   AreaChart,
   Area,
@@ -31,31 +32,12 @@ interface DashboardChartsProps {
 }
 
 export function DashboardCharts({ consumptionData, distributionData }: DashboardChartsProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { targetRef, isVisible } = useIntersectionObserver();
   const actualId = useId();
   const quotaId  = useId();
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect(); // Only animate once
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div ref={targetRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
       {/* Line Chart — اتجاه الاستهلاك */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
