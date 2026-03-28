@@ -135,10 +135,18 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
                 fontSize:     "12px",
                 direction:    "rtl",
               }}
-              formatter={(value: number) => [`${value.toFixed(2)}`, "متوسط المنسوب"]}
-              labelFormatter={(label: string) =>
-                new Date(label).toLocaleString("ar-EG")
-              }
+              formatter={(value: unknown) => {
+                if (typeof value === "number") {
+                  return [`${value.toFixed(2)}`, "متوسط المنسوب"];
+                }
+                return ["", "متوسط المنسوب"];
+              }}
+              labelFormatter={(label: unknown) => {
+                if (typeof label === "string") {
+                  return new Date(label).toLocaleString("ar-EG");
+                }
+                return "";
+              }}
             />
             <Area
               type="monotone"
