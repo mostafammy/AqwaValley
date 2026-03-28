@@ -13,12 +13,13 @@
  */
 
 import { z } from "zod";
-import { desc, eq, and } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import {
   createTRPCRouter,
   protectedProcedure,
 } from "~/server/api/trpc";
+import { db } from "~/server/db";
 import { irrigationRecommendation, farm } from "~/server/db/schema";
 import { requestIrrigationPlan } from "~/server/services/irrigation/recommend";
 import { TRPCError } from "@trpc/server";
@@ -46,15 +47,14 @@ const listPlansInput = z.object({
 // ---------------------------------------------------------------------------
 
 async function ensureUserCanAccessFarm(
-  ctx: { db: any; session: { user: { id: string } }; userRoles: string[] },
+  ctx: { session: { user: { id: string } }; userRoles: string[] },
   farmId: string,
 ) {
-  const farmRecord = await ctx.db
+  const [farmRecord] = await db
     .select({ id: farm.id, ownerId: farm.ownerId, farmerUserId: farm.farmerUserId })
     .from(farm)
     .where(eq(farm.id, farmId))
-    .limit(1)
-    .then((rows: any[]) => rows[0]);
+    .limit(1);
 
   if (!farmRecord) {
     throw new TRPCError({
