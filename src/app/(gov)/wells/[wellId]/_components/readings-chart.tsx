@@ -4,33 +4,38 @@ import { useState } from "react";
 import { useIntersectionObserver } from "~/lib/hooks";
 import { useQuery } from "@tanstack/react-query";
 import {
-  AreaChart, Area, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from "recharts";
 
 type MetricRow = {
-  bucket:    string;
-  type:      string;
+  bucket: string;
+  type: string;
   avg_value: number;
 };
 
 type ApiResponse = {
   wellId: string;
-  rows:   MetricRow[];
+  rows: MetricRow[];
 };
 
 const RANGES = [
-  { label: "يوم",      key: "1d",  range: "24",    bucket: "30"   },
-  { label: "أسبوع",   key: "1w",  range: "168",   bucket: "60"   },
-  { label: "شهر",     key: "1m",  range: "720",   bucket: "360"  },
-  { label: "سنة",     key: "1y",  range: "8760",  bucket: "1440" },
+  { label: "يوم", key: "1d", range: "24", bucket: "30" },
+  { label: "أسبوع", key: "1w", range: "168", bucket: "60" },
+  { label: "شهر", key: "1m", range: "720", bucket: "360" },
+  { label: "سنة", key: "1y", range: "8760", bucket: "1440" },
 ] as const;
 
-type RangeKey = typeof RANGES[number]["key"];
+type RangeKey = (typeof RANGES)[number]["key"];
 
 async function fetchMetrics(
   wellId: string,
-  range:  string,
+  range: string,
   bucket: string,
 ): Promise<MetricRow[]> {
   const res = await fetch(
@@ -47,36 +52,37 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
   const cfg = RANGES.find((r) => r.key === activeRange)!;
 
   const { data, isLoading, isError } = useQuery({
-    queryKey:        ["well-metrics", wellId, activeRange],
-    queryFn:         () => fetchMetrics(wellId, cfg.range, cfg.bucket),
+    queryKey: ["well-metrics", wellId, activeRange],
+    queryFn: () => fetchMetrics(wellId, cfg.range, cfg.bucket),
     refetchInterval: 30_000,
-    staleTime:       20_000,
+    staleTime: 20_000,
   });
 
   return (
-    <div ref={targetRef} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div
+      ref={targetRef}
+      className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+    >
       {/* Header + Tabs */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold"> قراءات منسوب المياه</h3>
           {isLoading && (
-            <span className="text-xs text-gray-400 animate-pulse">
+            <span className="animate-pulse text-xs text-gray-400">
               جاري التحديث...
             </span>
           )}
         </div>
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
           {RANGES.map((r) => (
             <button
               key={r.key}
               onClick={() => setActiveRange(r.key)}
-              className={`
-                px-3 py-1 rounded-md text-xs font-semibold transition-all
-                ${activeRange === r.key
+              className={`rounded-md px-3 py-1 text-xs font-semibold transition-all ${
+                activeRange === r.key
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-                }
-              `}
+              } `}
             >
               {r.label}
             </button>
@@ -86,27 +92,34 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
 
       {/* States */}
       {isError ? (
-        <div className="h-48 flex items-center justify-center text-red-400 text-sm">
+        <div className="flex h-48 items-center justify-center text-sm text-red-400">
           فشل تحميل البيانات
         </div>
       ) : isLoading ? (
-        <div className="h-48 flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <div className="flex h-48 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
         </div>
       ) : !data?.length ? (
-        <div className="h-48 flex items-center justify-center text-gray-400 text-sm">
+        <div className="flex h-48 items-center justify-center text-sm text-gray-400">
           لا توجد بيانات لهذه الفترة
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={isVisible ? data : []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart
+            data={isVisible ? data : []}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="levelGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#1D6FA8" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#1D6FA8" stopOpacity={0}   />
+                <stop offset="5%" stopColor="#1D6FA8" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#1D6FA8" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#f0f0f0"
+              vertical={false}
+            />
             <XAxis
               dataKey="bucket"
               tick={{ fontSize: 10, fontFamily: "Cairo" }}
@@ -116,10 +129,11 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
               tickFormatter={(val: string) =>
                 new Date(val).toLocaleDateString("ar-EG", {
                   month: "short",
-                  day:   activeRange === "1y" ? undefined : "numeric",
-                  hour:  activeRange === "1d" ? "2-digit" : undefined,
+                  day: activeRange === "1y" ? undefined : "numeric",
+                  hour: activeRange === "1d" ? "2-digit" : undefined,
                 })
-              }            />
+              }
+            />
             <YAxis
               tick={{ fontSize: 11, fontFamily: "Cairo" }}
               axisLine={false}
@@ -129,11 +143,11 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
             />
             <Tooltip
               contentStyle={{
-                fontFamily:   "Cairo",
+                fontFamily: "Cairo",
                 borderRadius: "8px",
-                border:       "1px solid #e5e7eb",
-                fontSize:     "12px",
-                direction:    "rtl",
+                border: "1px solid #e5e7eb",
+                fontSize: "12px",
+                direction: "rtl",
               }}
               formatter={(value: unknown) => {
                 if (typeof value === "number") {
@@ -164,8 +178,8 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
       )}
 
       {/* Live indicator */}
-      <div className="flex items-center gap-1.5 mt-3 justify-end">
-        <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+      <div className="mt-3 flex items-center justify-end gap-1.5">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-teal-500" />
         <span className="text-xs text-gray-400">تحديث كل 30 ثانية</span>
       </div>
     </div>
