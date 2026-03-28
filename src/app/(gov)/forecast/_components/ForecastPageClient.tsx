@@ -166,7 +166,7 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(val) =>
+                    tickFormatter={(val: string | number) =>
                       new Date(val).toLocaleDateString("ar-EG", { month: "short", year: "2-digit" })
                     }
                     tick={{ fontSize: 11, fill: "#64748b" }}
@@ -176,12 +176,12 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
                     domain={["auto", "auto"]}
                     tick={{ fontSize: 11, fill: "#64748b" }}
                     axisLine={false}
-                    tickFormatter={(val) => val.toLocaleString("ar-EG")}
+                    tickFormatter={(val: string | number) => Number(val).toLocaleString("ar-EG")}
                     width={40}
                   />
                   <Tooltip
                     contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "12px" }}
-                    labelFormatter={(label) => new Date(label).toLocaleDateString("ar-EG", { month: "long", year: "numeric" })}
+                    labelFormatter={(label: string | number) => new Date(label).toLocaleDateString("ar-EG", { month: "long", year: "numeric" })}
                   />
                   <Area
                     type="monotone"
@@ -220,7 +220,7 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
                     domain={["auto", "auto"]}
                     tick={{ fontSize: 11, fill: "#64748b" }}
                     axisLine={false}
-                    tickFormatter={(val) => val.toLocaleString("ar-EG")}
+                    tickFormatter={(val: string | number) => Number(val).toLocaleString("ar-EG")}
                     width={40}
                   />
                   <Tooltip
