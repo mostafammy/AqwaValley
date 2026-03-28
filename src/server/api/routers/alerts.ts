@@ -8,7 +8,7 @@ import {
   viewerProcedure,
 } from "~/server/api/trpc";
 import { requireWellAccess, buildWellDistrictFilter } from "~/server/lib/abac";
-import { alertRule, alerts, sensors, well } from "~/server/db/schema";
+import { alertRule, alerts, well } from "~/server/db/schema";
 
 const alertSeverityValues = ["critical", "warning", "info"] as const;
 const alertTypeValues = [
