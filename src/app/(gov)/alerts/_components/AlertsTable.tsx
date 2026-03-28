@@ -71,7 +71,7 @@ export function AlertsTable() {
         <select
           value={severity ?? ""}
           onChange={(e) => {
-            setSeverity(e.target.value as Severity || undefined);
+            setSeverity(e.target.value ? (e.target.value as Severity) : undefined);
             setPage(1);
           }}
           className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-blue focus:ring-1 focus:ring-blue"
