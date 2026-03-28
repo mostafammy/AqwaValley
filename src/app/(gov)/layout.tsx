@@ -14,7 +14,11 @@ import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
  * @param children - Content to render inside the layout's main area
  * @returns A React element containing the Topbar, GovSidebar, and the provided children wrapped by SidebarProvider
  */
-export default async function GovLayout({ children }: { children: React.ReactNode }) {
+export default async function GovLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // Validate session is present
   const session = await getSession();
   if (!session?.user) redirect("/");
@@ -26,9 +30,10 @@ export default async function GovLayout({ children }: { children: React.ReactNod
   // Prepare UI variables from session
   const name = session.user.name ?? "مستخدم";
   const parts = name.trim().split(" ");
-  const initials = parts.length > 1 
-    ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}` 
-    : (name[0] ?? "U");
+  const initials =
+    parts.length > 1
+      ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}`
+      : (name[0] ?? "U");
 
   return (
     <SidebarProvider>
@@ -42,9 +47,7 @@ export default async function GovLayout({ children }: { children: React.ReactNod
         />
         <div className="layout-content-row">
           <GovSidebar />
-          <main className="layout-main">
-            {children}
-          </main>
+          <main className="layout-main">{children}</main>
         </div>
       </div>
     </SidebarProvider>
