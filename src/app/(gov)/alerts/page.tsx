@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { db } from "~/server/db";
-import { alerts, well } from "~/server/db/schema";
-import { count, desc, eq, isNull, and } from "drizzle-orm";
+import { alerts } from "~/server/db/schema";
+import { count, eq, isNull, and } from "drizzle-orm";
 import { AlertsTable } from "./_components/AlertsTable";
 import { Skeleton } from "~/app/_components/UI/Skeleton";
 
