@@ -171,15 +171,26 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
   const quotaWarning = total > ctx.quota.remainingLitres;
 
   // Scale down proportionally if over quota
-  const scaledZones = quotaWarning
-    ? zonePlans.map((z) => ({
+  let scaledZones = zonePlans;
+  if (quotaWarning) {
+    if (total > 0 && ctx.quota.remainingLitres > 0) {
+      const factor = ctx.quota.remainingLitres / total;
+      scaledZones = zonePlans.map((z) => ({
         ...z,
-        recommendedLitres: Math.round(
-          z.recommendedLitres * (ctx.quota.remainingLitres / total),
-        ),
+        recommendedLitres:
+          z.recommendedLitres === 0
+            ? 0
+            : Math.max(1, Math.round(z.recommendedLitres * factor)),
         notes: "Scaled down to fit remaining quota — rule-based ETc",
-      }))
-    : zonePlans;
+      }));
+    } else {
+      scaledZones = zonePlans.map((z) => ({
+        ...z,
+        recommendedLitres: 0,
+        notes: "Quota exhausted — rule-based ETc",
+      }));
+    }
+  }
 
   const scaledTotal = scaledZones.reduce(
     (sum, z) => sum + z.recommendedLitres,
