@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, viewerProcedure } from "~/server/api/trpc";
@@ -7,7 +7,6 @@ import {
   alerts,
   district,
   latestSensorState,
-  sensorData,
   sensors,
   well,
 } from "~/server/db/schema";
