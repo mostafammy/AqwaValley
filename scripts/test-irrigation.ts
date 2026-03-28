@@ -72,18 +72,14 @@ async function main() {
   const { eq, desc } = await import("drizzle-orm");
 
   // Import irrigation modules
-  const { generateRuleBasedPlan } = await import(
-    "../src/server/services/irrigation/fallback"
-  );
-  const { buildIrrigationPrompt } = await import(
-    "../src/server/services/irrigation/prompt-builder"
-  );
-  const { irrigationPlanSchema } = await import(
-    "../src/server/services/irrigation/schemas"
-  );
-  const { getWeatherForecast } = await import(
-    "../src/server/services/irrigation/weather"
-  );
+  const { generateRuleBasedPlan } =
+    await import("../src/server/services/irrigation/fallback");
+  const { buildIrrigationPrompt } =
+    await import("../src/server/services/irrigation/prompt-builder");
+  const { irrigationPlanSchema } =
+    await import("../src/server/services/irrigation/schemas");
+  const { getWeatherForecast } =
+    await import("../src/server/services/irrigation/weather");
 
   // ═══════════════════════════════════════════════════════════════════════
   // TEST 0: Check DB Connection & Find Test Data
@@ -104,7 +100,9 @@ async function main() {
 
   printInfo(`Found ${farms.length} farms in DB`);
   for (const f of farms) {
-    console.log(`    Farm: "${f.name}" (${f.id}) — ${f.totalAreaAcres ?? "?"} acres`);
+    console.log(
+      `    Farm: "${f.name}" (${f.id}) — ${f.totalAreaAcres ?? "?"} acres`,
+    );
   }
 
   // Find crop profiles
@@ -120,7 +118,9 @@ async function main() {
 
   printInfo(`Found ${allCropProfiles.length} crop profiles in DB`);
   for (const cp of allCropProfiles) {
-    console.log(`    Crop: ${cp.cropType} (${cp.growthStage}) — farm: ${cp.farmId}`);
+    console.log(
+      `    Crop: ${cp.cropType} (${cp.growthStage}) — farm: ${cp.farmId}`,
+    );
   }
 
   // Determine a valid farm/user parent pair for FK-safe DB insert tests.
@@ -135,14 +135,19 @@ async function main() {
       ownerId: schema.farm.ownerId,
     })
     .from(schema.farm)
-    .innerJoin(schema.cropProfile, eq(schema.cropProfile.farmId, schema.farm.id))
+    .innerJoin(
+      schema.cropProfile,
+      eq(schema.cropProfile.farmId, schema.farm.id),
+    )
     .limit(1);
 
   if (farmWithCrops) {
     testFarmId = farmWithCrops.id;
     testUserId = farmWithCrops.ownerId;
     canRunDbPersistenceTest = true;
-    printSuccess(`Using existing farm with crops: "${farmWithCrops.name}" (${testFarmId})`);
+    printSuccess(
+      `Using existing farm with crops: "${farmWithCrops.name}" (${testFarmId})`,
+    );
   } else {
     printInfo(
       "No farm with crop profiles found — TEST 6 (DB persistence) will be skipped to avoid FK failures.",
@@ -234,7 +239,9 @@ async function main() {
     "temperature: 0",
   ];
   const missingTerms = requiredSystemTerms.filter(
-    (t) => !systemPrompt.includes(t) && !systemPrompt.toLowerCase().includes(t.toLowerCase()),
+    (t) =>
+      !systemPrompt.includes(t) &&
+      !systemPrompt.toLowerCase().includes(t.toLowerCase()),
   );
 
   if (missingTerms.length === 0) {
@@ -311,9 +318,7 @@ async function main() {
       name: "Litres exceeds 100M cap",
       data: {
         ...validPlan,
-        zones: [
-          { ...validPlan.zones[0]!, recommendedLitres: 150_000_000 },
-        ],
+        zones: [{ ...validPlan.zones[0]!, recommendedLitres: 150_000_000 }],
       },
     },
     {
@@ -327,9 +332,7 @@ async function main() {
       name: "Invalid confidence (fairly confident)",
       data: {
         ...validPlan,
-        zones: [
-          { ...validPlan.zones[0]!, confidence: "fairly confident" },
-        ],
+        zones: [{ ...validPlan.zones[0]!, confidence: "fairly confident" }],
       },
     },
     {
@@ -406,7 +409,9 @@ async function main() {
     soilReading: testContext.soilReading,
   });
 
-  printInfo(`Total litres (tight): ${tightQuotaResult.recommendation.totalLitres}`);
+  printInfo(
+    `Total litres (tight): ${tightQuotaResult.recommendation.totalLitres}`,
+  );
   printInfo(`Quota warning: ${tightQuotaResult.recommendation.quotaWarning}`);
 
   if (tightQuotaResult.recommendation.quotaWarning === true) {
@@ -437,18 +442,21 @@ async function main() {
     );
     printInfo("The fallback engine would be used in production for this case.");
   } else {
-    printInfo(`API Keys detected (Groq: ${hasGroqKey}, OpenRouter: ${hasOpenRouterKey}) — calling AI...`);
+    printInfo(
+      `API Keys detected (Groq: ${hasGroqKey}, OpenRouter: ${hasOpenRouterKey}) — calling AI...`,
+    );
 
     try {
-      const { callIrrigationAI } = await import(
-        "../src/server/ai/openrouter-client"
-      );
+      const { callIrrigationAI } =
+        await import("../src/server/ai/openrouter-client");
 
       const start = Date.now();
       const aiResult = await callIrrigationAI(systemPrompt, userMessage);
       const elapsed = Date.now() - start;
 
-      printSuccess(`AI responded in ${elapsed}ms using model: ${aiResult.modelUsed}`);
+      printSuccess(
+        `AI responded in ${elapsed}ms using model: ${aiResult.modelUsed}`,
+      );
       printInfo(`Response length: ${aiResult.text.length} chars`);
 
       // Try to parse the AI response
@@ -481,7 +489,9 @@ async function main() {
       if (err instanceof Error && err.message === "ALL_MODELS_EXHAUSTED") {
         printInfo("All models exhausted — fallback would be used");
       } else {
-        printError(`AI call failed: ${err instanceof Error ? err.message : String(err)}`);
+        printError(
+          `AI call failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
   }
@@ -496,8 +506,7 @@ async function main() {
       "Skipping TEST 6: no valid farm/user parent rows with crop profiles were found.",
     );
   } else {
-
-  // Check the table exists and is queryable
+    // Check the table exists and is queryable
     try {
       const count = await db
         .select({ id: schema.irrigationRecommendation.id })
