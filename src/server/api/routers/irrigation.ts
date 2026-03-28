@@ -42,6 +42,41 @@ const listPlansInput = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+async function ensureUserCanAccessFarm(
+  ctx: { db: any; session: { user: { id: string } }; userRoles: string[] },
+  farmId: string,
+) {
+  const farmRecord = await ctx.db
+    .select({ id: farm.id, ownerId: farm.ownerId, farmerUserId: farm.farmerUserId })
+    .from(farm)
+    .where(eq(farm.id, farmId))
+    .limit(1)
+    .then((rows: any[]) => rows[0]);
+
+  if (!farmRecord) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Farm not found",
+    });
+  }
+
+  const userId = ctx.session.user.id;
+  const isAdmin = ctx.userRoles.includes("admin");
+  const isOwner = farmRecord.ownerId === userId;
+  const isFarmer = farmRecord.farmerUserId === userId;
+
+  if (!isOwner && !isFarmer && !isAdmin) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You do not have access to this farm",
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Router
 // ---------------------------------------------------------------------------
 
@@ -59,34 +94,8 @@ export const irrigationRouter = createTRPCRouter({
   requestPlan: protectedProcedure
     .input(requestPlanInput)
     .mutation(async ({ ctx, input }) => {
-      // Verify user has access to this farm
-      const farmRecord = await ctx.db
-        .select({ id: farm.id, ownerId: farm.ownerId, farmerUserId: farm.farmerUserId })
-        .from(farm)
-        .where(eq(farm.id, input.farmId))
-        .limit(1)
-        .then((rows) => rows[0]);
-
-      if (!farmRecord) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Farm not found",
-        });
-      }
-
-      // Authorization: must be farm owner, assigned farmer, or admin
-      const userId = ctx.session.user.id;
-      const isOwner = farmRecord.ownerId === userId;
-      const isFarmer = farmRecord.farmerUserId === userId;
-
-      if (!isOwner && !isFarmer) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have access to this farm",
-        });
-      }
-
-      return requestIrrigationPlan(input.farmId, userId);
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+      return requestIrrigationPlan(input.farmId, ctx.session.user.id);
     }),
 
   /**
@@ -95,6 +104,8 @@ export const irrigationRouter = createTRPCRouter({
   getLatestPlan: protectedProcedure
     .input(getLatestPlanInput)
     .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
       const [latest] = await ctx.db
         .select()
         .from(irrigationRecommendation)
@@ -111,6 +122,8 @@ export const irrigationRouter = createTRPCRouter({
   listPlans: protectedProcedure
     .input(listPlansInput)
     .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
       const plans = await ctx.db
         .select({
           id: irrigationRecommendation.id,
