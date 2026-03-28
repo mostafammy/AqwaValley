@@ -1,6 +1,14 @@
 "use client";
 import { type UserRole } from "~/lib/types";
-import { Bell, Droplets, LogOut, Menu, Search, Settings, ChevronDown } from "lucide-react";
+import {
+  Bell,
+  Droplets,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 import { useSidebar } from "./SidebarProvider";
 import { useState, useRef, useEffect } from "react";
 import { authClient } from "~/server/better-auth/client";
@@ -55,7 +63,10 @@ export function Topbar({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     };
@@ -92,7 +103,7 @@ export function Topbar({
     setIsProfileOpen(false);
     // TODO: Implement actual settings navigation or modal
     console.log("Navigating to settings...");
-    // router.push("/settings"); 
+    // router.push("/settings");
   };
 
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
@@ -111,9 +122,9 @@ export function Topbar({
         <div className="topbar-logo-bg">
           {isGov ? (
             <Droplets className="h-6 w-6 text-white" strokeWidth={1.8} />
-            ) : (
-              <Droplets className="h-5 w-5 text-white" />
-            )}
+          ) : (
+            <Droplets className="h-5 w-5 text-white" />
+          )}
         </div>
         <div className="hidden flex-col pr-2 sm:flex">
           <h1 className="topbar-title">أكوا الوادي</h1>
@@ -172,34 +183,40 @@ export function Topbar({
 
         {/* Profile */}
         <div className="topbar-profile-wrapper" ref={dropdownRef}>
-          <button 
-            className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80 border-none bg-transparent p-0 text-inherit"
+          <button
+            className="flex cursor-pointer items-center gap-3 border-none bg-transparent p-0 text-inherit transition-opacity hover:opacity-80"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             aria-haspopup="true"
             aria-expanded={isProfileOpen}
           >
-            <div className="hidden flex-col items-end sm:flex text-right">
-              <span className="text-xs font-semibold text-white">{userName}</span>
+            <div className="hidden flex-col items-end text-right sm:flex">
+              <span className="text-xs font-semibold text-white">
+                {userName}
+              </span>
               <span className="topbar-subtitle">{roleLabel}</span>
             </div>
             <div className="topbar-profile-avatar">{userInitials}</div>
-            <ChevronDown className={`h-3 w-3 text-light-text transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`text-light-text h-3 w-3 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
+            />
           </button>
 
           {isProfileOpen && (
             <div className="topbar-dropdown">
-              <div className="px-3 py-2 border-b border-white/5 mb-1 sm:hidden">
-                <p className="text-xs font-bold text-white mb-0.5">{userName}</p>
-                <p className="text-[10px] text-light-text">{roleLabel}</p>
+              <div className="mb-1 border-b border-white/5 px-3 py-2 sm:hidden">
+                <p className="mb-0.5 text-xs font-bold text-white">
+                  {userName}
+                </p>
+                <p className="text-light-text text-[10px]">{roleLabel}</p>
               </div>
-              <button 
+              <button
                 className="topbar-dropdown-item"
                 onClick={handleSettingsClick}
               >
                 <Settings className="h-4 w-4" />
                 <span>إعدادات الحساب</span>
               </button>
-              <button 
+              <button
                 className="topbar-dropdown-item danger"
                 onClick={handleSignOut}
               >
@@ -211,6 +228,5 @@ export function Topbar({
         </div>
       </div>
     </header>
-
   );
 }
