@@ -59,22 +59,30 @@ async function getDistrictsWithStats(): Promise<DistrictStats[]> {
 
     // Estimated consumption based on water level decrease
     // Lower level = higher consumption
-    const avgLevelPct = districtWells.length > 0
-      ? districtWells.reduce((sum, w) => sum + (Number(w.currentLevelPct) || 0), 0) / districtWells.length
-      : 100;
+    const avgLevelPct =
+      districtWells.length > 0
+        ? districtWells.reduce(
+            (sum, w) => sum + (Number(w.currentLevelPct) || 0),
+            0,
+          ) / districtWells.length
+        : 100;
 
     // Estimate consumption (inverse of level = consumption proxy)
-    const totalConsumption = totalQuota * (1 - (avgLevelPct / 100));
+    const totalConsumption = totalQuota * (1 - avgLevelPct / 100);
 
-    const utilizationPct = totalQuota > 0 ? (totalConsumption / totalQuota) * 100 : 0;
+    const utilizationPct =
+      totalQuota > 0 ? (totalConsumption / totalQuota) * 100 : 0;
 
     // Determine state based on water level and active wells
-    const activeWells = districtWells.filter(w => w.status === "active").length;
+    const activeWells = districtWells.filter(
+      (w) => w.status === "active",
+    ).length;
     const criticalRatio = wellCount > 0 ? activeWells / wellCount : 0;
 
     let effectiveState: "ok" | "warning" | "critical" = "ok";
     if (avgLevelPct < 30 || criticalRatio < 0.3) effectiveState = "critical";
-    else if (avgLevelPct < 50 || criticalRatio < 0.6) effectiveState = "warning";
+    else if (avgLevelPct < 50 || criticalRatio < 0.6)
+      effectiveState = "warning";
 
     return {
       id: d.id,
@@ -91,9 +99,7 @@ async function getDistrictsWithStats(): Promise<DistrictStats[]> {
 async function getConsumptionTrend() {
   // Generate trend data from current wells data
   // This creates a simulated trend for demo purposes
-  const months = [
-    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو"
-  ];
+  const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو"];
 
   return months.map((month, index) => {
     // Simulate consumption trend with some variance
@@ -117,17 +123,21 @@ export default async function DistributionPage() {
   ]);
 
   const totalQuota = districts.reduce((sum, d) => sum + d.totalQuota, 0);
-  const totalConsumption = districts.reduce((sum, d) => sum + d.totalConsumption, 0);
-  const avgUtilization = totalQuota > 0 ? (totalConsumption / totalQuota) * 100 : 0;
+  const totalConsumption = districts.reduce(
+    (sum, d) => sum + d.totalConsumption,
+    0,
+  );
+  const avgUtilization =
+    totalQuota > 0 ? (totalConsumption / totalQuota) * 100 : 0;
   const totalWells = districts.reduce((sum, d) => sum + d.wellCount, 0);
 
   return (
-    <div className="p-4 md:p-6 space-y-4" dir="rtl">
+    <div className="space-y-4 p-4 md:p-6" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">توزيع المياه</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold md:text-3xl">توزيع المياه</h1>
+          <p className="mt-1 text-sm text-gray-500">
             متابعة الاستهلاك والحصص المائية
           </p>
         </div>
