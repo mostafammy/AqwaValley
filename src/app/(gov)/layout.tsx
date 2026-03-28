@@ -24,11 +24,11 @@ export default async function GovLayout({ children }: { children: React.ReactNod
   if (rolePath !== "/dashboard") redirect("/");
 
   // Prepare UI variables from session
-  const name = session.user.name || "مستخدم";
+  const name = session.user.name ?? "مستخدم";
   const parts = name.trim().split(" ");
   const initials = parts.length > 1 
-    ? `${parts[0]?.[0] || ""}.${parts[parts.length - 1]?.[0] || ""}` 
-    : (name[0] || "U");
+    ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}` 
+    : (name[0] ?? "U");
 
   return (
     <SidebarProvider>
