@@ -22,7 +22,9 @@
     "mock:simulator": "tsx --tsconfig tsconfig.json scripts/mock-simulator.ts",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:irrigation": "tsx scripts/test-irrigation.ts",
+    "test:ai": "tsx scripts/test-openrouter.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
@@ -34,6 +36,7 @@
     "better-auth": "^1.3",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.41.0",
+    "groq-sdk": "^1.1.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.577.0",
     "next": "^15.2.3",

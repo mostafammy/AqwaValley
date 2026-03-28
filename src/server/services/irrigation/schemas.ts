@@ -23,7 +23,7 @@ export const irrigationZoneSchema = z.object({
   zoneId: z.string().uuid(),
   cropType: z.string().min(1),
   growthStage: z.string().min(1),
-  recommendedLitres: z.number().positive().max(500_000),
+  recommendedLitres: z.number().positive().max(100_000_000),
   scheduledAt: z.string().regex(/^\d{2}:\d{2}$/, {
     message: "Must be HH:MM format (e.g., 05:30)",
   }),
