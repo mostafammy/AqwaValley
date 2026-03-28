@@ -5,11 +5,9 @@ import { z } from "zod";
 import {
   adminProcedure,
   createTRPCRouter,
-  viewerProcedure,
 } from "~/server/api/trpc";
 import {
   role,
-  user,
   userProfile,
   userRoleAssignment,
 } from "~/server/db/schema";
