@@ -5,6 +5,36 @@ import { useRouter } from "next/navigation";
 import { Zap, Loader2 } from "lucide-react";
 import { Button } from "~/app/_components/UI/Button";
 
+type DemoWell = {
+  id: string;
+  name?: string | null;
+};
+
+type WellsListPayload = {
+  result?: {
+    data?: {
+      json?: {
+        items?: DemoWell[];
+      };
+    };
+  };
+};
+
+function extractWells(payload: unknown): DemoWell[] {
+  if (!payload || typeof payload !== "object") return [];
+
+  const items = (payload as WellsListPayload).result?.data?.json?.items;
+  if (!Array.isArray(items)) return [];
+
+  return items.filter(
+    (item): item is DemoWell =>
+      !!item &&
+      typeof item === "object" &&
+      typeof item.id === "string" &&
+      (typeof item.name === "string" || item.name == null),
+  );
+}
+
 export function DemoAlertButton() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +54,8 @@ export function DemoAlertButton() {
         return;
       }
 
-      const wellsData = await wellsResponse.json();
-      const wells = wellsData.result?.data?.json?.items ?? [];
+      const wellsPayload: unknown = await wellsResponse.json();
+      const wells = extractWells(wellsPayload);
 
       if (wells.length === 0) {
         setMessage("لا توجد آبار في النظام. يرجى تشغيل سكريبت الزراعة أولاً (pnpm seed)");
