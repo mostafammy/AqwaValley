@@ -157,7 +157,7 @@ export const analyticsRouter = createTRPCRouter({
         activeWells: Number(wellStats[0]?.active ?? 0),
         unacknowledgedAlerts: Number(alertStats[0]?.total ?? 0),
         avgWaterLevelM: levelStats[0]
-          ? Number((levelStats[0] as Record<string, unknown>).avg_level)
+          ? Number((levelStats[0]).avg_level)
           : null,
       };
     }),
