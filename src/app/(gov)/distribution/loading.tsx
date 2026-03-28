@@ -5,7 +5,7 @@ export default function DistributionLoading() {
     <div className="p-4 md:p-6 space-y-4" dir="rtl">
       {/* Summary cards skeleton */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[...Array(4)].map((_, i) => (
+        {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
       </div>
