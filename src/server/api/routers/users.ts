@@ -2,15 +2,8 @@ import { and, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import {
-  adminProcedure,
-  createTRPCRouter,
-} from "~/server/api/trpc";
-import {
-  role,
-  userProfile,
-  userRoleAssignment,
-} from "~/server/db/schema";
+import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { role, userProfile, userRoleAssignment } from "~/server/db/schema";
 
 const roleTypeValues = [
   "admin",
