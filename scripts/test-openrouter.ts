@@ -4,7 +4,7 @@
  * to isolate whether the API key and model are functioning
  * without any domain-specific app logic.
  */
-import OpenAI from 'openai';
+import OpenAI from "openai";
 import { existsSync, readFileSync } from "fs";
 
 // Load .env
@@ -27,8 +27,8 @@ for (const file of envFiles) {
 const apiKey = process.env.OPENROUTER_API_KEY;
 
 if (!apiKey) {
-    console.error("❌ OPENROUTER_API_KEY is missing from .env");
-    process.exit(1);
+  console.error("❌ OPENROUTER_API_KEY is missing from .env");
+  process.exit(1);
 }
 
 const openai = new OpenAI({
@@ -43,17 +43,18 @@ const openai = new OpenAI({
 async function main() {
   console.log("🔄 Calling OpenRouter API...");
   console.log(`🔑 Key length: ${apiKey.length}`);
-  
+
   try {
     const start = Date.now();
     const completion = await openai.chat.completions.create({
       model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         {
-          "role": "user",
-          "content": "What is the meaning of life? Please answer in one sentence."
-        }
-      ]
+          role: "user",
+          content:
+            "What is the meaning of life? Please answer in one sentence.",
+        },
+      ],
     });
     const elapsed = Date.now() - start;
 
@@ -61,19 +62,18 @@ async function main() {
     console.log(`⏱️ Response time: ${elapsed}ms`);
     console.log("🤖 Response:");
     console.log(completion.choices[0]?.message?.content);
-    
   } catch (error: any) {
     console.error("\n❌ API Call Failed:");
     if (error?.status || error?.error) {
-        console.error(`Status: ${error.status}`);
-        console.error(JSON.stringify(error.error, null, 2));
+      console.error(`Status: ${error.status}`);
+      console.error(JSON.stringify(error.error, null, 2));
     } else {
-        console.dir(error, { depth: null });
+      console.dir(error, { depth: null });
     }
-    
+
     // Check if it's the specific header parsing error we saw earlier
     if (error.message && error.message.includes("ByteString")) {
-        console.log("\n💡 This is a ByteString character encoding error.");
+      console.log("\n💡 This is a ByteString character encoding error.");
     }
 
     process.exit(1);
