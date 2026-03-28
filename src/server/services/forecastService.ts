@@ -54,7 +54,6 @@ export async function getDistrictForecast(
 
   const baselineDepth = Number(d.baselineDepthM ?? 120);
   const depletionRate = Number(d.annualDepletionRateM ?? 0.85);
-  const safeYield = Number(d.safeYieldM3Yr ?? 15000000);
 
   // Mock current level — slightly deeper than baseline due to historical depletion
   // deterministic base (Math.random replaced by floor check for demo)
