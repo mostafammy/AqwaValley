@@ -95,7 +95,7 @@ export function Topbar({
     // router.push("/settings"); 
   };
 
-  const roleLabel = ROLE_LABELS[userRole] || userRole;
+  const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
   return (
     <header className="topbar">
