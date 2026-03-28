@@ -5,8 +5,8 @@
  *  1. Groq      — `openai/gpt-oss-120b`  (fastest inference, generous free tier)
  *  2. OpenRouter — full model waterfall   (broad fallback pool)
  *
- * Within each provider, only 429 / 503 / 404 / 400 trigger a retry to the
- * next model. Hard errors (401, 500) throw immediately — no point retrying.
+ * Within each provider, 429 / 503 / 404 / 400 and all 5xx trigger a retry to
+ * the next model. Hard errors (for example 401) throw immediately.
  *
  * temperature: 0 — deterministic output for a regulated irrigation system.
  * Always returns { text, modelUsed } for DB traceability.
@@ -53,9 +53,14 @@ const OPENROUTER_CASCADE = [
  * - 503  Unavailable   — upstream server down
  * - 404  Not Found     — model removed or data-policy blocked
  * - 400  Bad Request   — model ID string no longer valid
+ * - 5xx  Server errors  — transient provider instability
  */
 const isTransientError = (status: number): boolean =>
-  status === 429 || status === 503 || status === 404 || status === 400;
+  status === 429 ||
+  status === 503 ||
+  status === 404 ||
+  status === 400 ||
+  (status >= 500 && status < 600);
 
 // ---------------------------------------------------------------------------
 // Client factories (lazy-initialised, only when key is present)
