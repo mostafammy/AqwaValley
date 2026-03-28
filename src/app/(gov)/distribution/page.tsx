@@ -1,6 +1,6 @@
 import { db } from "~/server/db";
 import { district, well } from "~/server/db/schema";
-import { asc, inArray, eq } from "drizzle-orm";
+import { asc, inArray } from "drizzle-orm";
 import { DistributionPageClient } from "./_components/DistributionPageClient";
 
 export const metadata = { title: "توزيع المياه | AquaValley" };
@@ -38,7 +38,7 @@ async function getDistrictsWithStats(): Promise<DistrictStats[]> {
   // Group wells by district
   const wellsByDistrict = wellsData.reduce(
     (acc, w) => {
-      if (!acc[w.districtId]) acc[w.districtId] = [];
+      acc[w.districtId] ??= [];
       acc[w.districtId].push(w);
       return acc;
     },
