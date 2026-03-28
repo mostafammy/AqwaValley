@@ -23,11 +23,11 @@ export default async function FarmLayout({ children }: { children: React.ReactNo
   if (rolePath !== "/farm/dashboard") redirect("/");
 
   // Prepare UI variables from session
-  const name = session.user.name || "مزارع";
+  const name = session.user.name ?? "مزارع";
   const parts = name.trim().split(" ");
   const initials = parts.length > 1 
-    ? `${parts[0]?.[0] || ""}.${parts[parts.length - 1]?.[0] || ""}` 
-    : (name[0] || "F");
+    ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}` 
+    : (name[0] ?? "F");
 
   return (
     <SidebarProvider>
