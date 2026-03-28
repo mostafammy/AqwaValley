@@ -6,6 +6,7 @@ import { usersRouter } from "~/server/api/routers/users";
 import { quotasRouter } from "~/server/api/routers/quotas";
 import { irrigationRouter } from "~/server/api/routers/irrigation";
 import { forecastRouter } from "~/server/api/routers/forecast";
+import { weatherRouter } from "~/server/api/routers/weather";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   quotas: quotasRouter,
   irrigation: irrigationRouter,
   forecast: forecastRouter,
+  weather: weatherRouter,
 });
 
 // export type definition of API

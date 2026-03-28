@@ -1,10 +1,15 @@
 import { redirect } from "next/navigation";
+import { or, eq, desc } from "drizzle-orm";
 import { Topbar } from "../_components/layouts/Topbar";
 import { FarmSidebar } from "../_components/layouts/FarmSidebar";
 import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
 import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
+import { db } from "~/server/db";
+import { farm } from "~/server/db/schema";
+import { api } from "~/trpc/server";
+
 /**
  * Render the farm portal layout for authenticated users with the farmer role.
  *
@@ -34,6 +39,32 @@ export default async function FarmLayout({
       ? `${parts[0]?.[0] ?? ""}.${parts[parts.length - 1]?.[0] ?? ""}`
       : (name[0] ?? "F");
 
+  // Resolve farm for weather coordinates
+  const farmRows = await db
+    .select({ id: farm.id, name: farm.name })
+    .from(farm)
+    .where(
+      or(
+        eq(farm.farmerUserId, session.user.id),
+        eq(farm.ownerId, session.user.id),
+      ),
+    )
+    .orderBy(desc(farm.createdAt))
+    .limit(1);
+
+  const currentFarm = farmRows[0];
+
+  // Fetch live weather based on farm's well coordinates
+  let weatherChip = "—";
+  try {
+    const weather = await api.weather.getCurrent({
+      farmId: currentFarm?.id,
+    });
+    weatherChip = weather.formatted;
+  } catch {
+    weatherChip = "الطقس غير متاح";
+  }
+
   return (
     <SidebarProvider>
       <div className="layout-root">
@@ -42,8 +73,8 @@ export default async function FarmLayout({
           userName={name}
           userRole="FARMER"
           userInitials={initials}
-          portalLabel="مزرعة الفرافرة — القمح والبنجر"
-          weatherChip="34°م - جاف"
+          portalLabel={currentFarm?.name ?? "مزرعتي"}
+          weatherChip={weatherChip}
         />
         <div className="layout-content-row">
           <FarmSidebar />

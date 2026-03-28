@@ -11,27 +11,25 @@ export default function DistributionLoading() {
       </div>
 
       {/* Filters skeleton */}
-      <div className="flex flex-wrap gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-10 w-32" />
+      <div className="flex flex-wrap gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+        <Skeleton className="h-10 w-40 rounded-lg" />
+        <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
 
-      {/* Charts skeleton - 2 columns on xl */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Skeleton className="h-[320px] rounded-xl" />
-        <Skeleton className="h-[320px] rounded-xl" />
+      {/* Charts skeleton */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <Skeleton className="h-[360px] rounded-xl border border-gray-100" />
+        <Skeleton className="h-[360px] rounded-xl border border-gray-100" />
       </div>
 
-      {/* Consumer type chart skeleton */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Skeleton className="h-[320px] rounded-xl xl:col-span-1" />
+      {/* Consumer type chart & Table */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Skeleton className="h-[400px] rounded-xl border border-gray-100 xl:col-span-1" />
+        <Skeleton className="h-[400px] rounded-xl border border-gray-100 xl:col-span-2" />
       </div>
 
-      {/* Bar chart skeleton */}
-      <Skeleton className="h-[350px] rounded-xl" />
-
-      {/* District table skeleton */}
-      <Skeleton className="h-96 rounded-xl" />
+      {/* Full width element */}
+      <Skeleton className="h-80 rounded-xl border border-gray-100" />
     </div>
   );
 }
