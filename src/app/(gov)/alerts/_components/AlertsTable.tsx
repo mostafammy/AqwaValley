@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check, Filter, ChevronRight, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/UI/Button";
@@ -17,7 +16,6 @@ type Severity = "critical" | "warning" | "info" | undefined;
 type AckStatus = "all" | "open" | "acknowledged";
 
 export function AlertsTable() {
-  const router = useRouter();
   const utils = api.useContext();
 
   // Filters
