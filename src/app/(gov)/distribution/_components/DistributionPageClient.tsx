@@ -68,7 +68,7 @@ const PIE_COLORS = ["#1D6FA8", "#0D9E7E", "#0A1628", "#f59e0b", "#22c55e"];
 export function DistributionPageClient({
   districts,
   trendData,
-  summary,
+  summary: _summary,
 }: DistributionPageClientProps) {
   const { targetRef: trendRef, isVisible: trendVisible } = useIntersectionObserver();
   const { targetRef: barRef, isVisible: barVisible } = useIntersectionObserver();
