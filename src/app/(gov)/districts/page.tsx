@@ -1,5 +1,5 @@
 import { db } from "~/server/db";
-import { well, district, alerts } from "~/server/db/schema";
+import { well, alerts } from "~/server/db/schema";
 import { count, isNull, and, inArray } from "drizzle-orm";
 import { Suspense } from "react";
 import { DistrictCard } from "./_components/district-card";
