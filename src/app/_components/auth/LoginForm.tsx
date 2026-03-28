@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Droplets, Loader2, User, Lock } from "lucide-react";
 import { authClient } from "~/server/better-auth/client";
@@ -57,7 +58,7 @@ export function LoginForm() {
         setError("عذراً، لا تملك الصلاحيات الكافية للوصول.");
         setIsLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError("حدث خطأ أثناء فحص الصلاحيات.");
       setIsLoading(false);
     }
@@ -81,7 +82,7 @@ export function LoginForm() {
       <div className="p-8 bg-white">
         {error && (
           <div className="mb-5 p-3 rounded-lg bg-danger-bg text-danger-text text-sm border border-danger/20 flex items-center gap-2 font-medium">
-            <img src="/svg/alert-circle.svg" className="w-4 h-4 opacity-70" alt="" />
+            <Image src="/svg/alert-circle.svg" width={16} height={16} className="w-4 h-4 opacity-70" alt="" />
             {error}
           </div>
         )}
