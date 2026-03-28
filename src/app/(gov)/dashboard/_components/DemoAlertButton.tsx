@@ -92,9 +92,8 @@ export function DemoAlertButton() {
       ];
 
       const results = [];
-      
-      for (let i = 0; i < Math.min(wells.length, 3); i++) {
-        const well = wells[i];
+
+      for (const [i, well] of wells.slice(0, 3).entries()) {
         const scenario = alertScenarios[i]!;
         const wellName = well.name ?? `البئر ${i + 1}`;
 
