@@ -182,7 +182,7 @@ export async function requireFarmAccess(
 export async function buildWellDistrictFilter(
   ctx: AuthContext,
   districtIds?: string[],
-): Promise<ReturnType<typeof inArray>   | undefined> {
+): Promise<ReturnType<typeof inArray> | undefined> {
   const accessible = await getAccessibleDistrictIds(ctx);
   if (accessible === null) {
     // admin/auditor: no filter, or apply the provided override
