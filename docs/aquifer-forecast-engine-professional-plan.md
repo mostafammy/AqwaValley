@@ -90,6 +90,7 @@ Reuse proven patterns from current codebase:
 ### Service Components (SOLID)
 
 1. HistoricalDataLoader
+
 - Responsibility: orchestration only for data retrieval and provenance checks.
 - Required abstraction:
   - DataSourceAdapter interface with concrete adapters such as PostgresAdapter,
@@ -99,12 +100,14 @@ Reuse proven patterns from current codebase:
     well-series in a bulk query path to avoid N+1 query behavior.
 
 2. FeaturePreparationService
+
 - Responsibility split required:
   - TimeAxisNormalizer for time-axis normalization and frequency alignment.
   - DataQualityFilter for missing-value and outlier policy application.
   - FeaturePipeline coordinator to compose both components.
 
 3. LinearRegressionTrainer
+
 - Responsibility: coefficient generation for each target.
 - Interface segregation required:
   - IModelTrainer for training output.
@@ -112,6 +115,7 @@ Reuse proven patterns from current codebase:
     coverage metrics, and completeness diagnostics).
 
 4. UncertaintyEstimator
+
 - Responsibility: interval generation and interval health diagnostics.
 - Strategy abstraction required:
   - IIntervalEstimator interface.
@@ -119,18 +123,21 @@ Reuse proven patterns from current codebase:
   - Selector component that chooses strategy based on policy and calibration.
 
 5. PhysicalPlausibilityValidator
+
 - Responsibility: enforce hydrogeologic guardrails.
 - Pattern requirement:
   - Specification pattern via IPlausibilityRule and a versioned rule registry
     keyed by plausibilityPolicyVersion.
 
 6. SQ13RiskEvaluator
+
 - Responsibility: risk mapping for SQ-13 policy.
 - Substitutability requirement:
   - IRiskEvaluator contract to support future evaluators without orchestration
     changes.
 
 7. ForecastRunOrchestrator
+
 - Responsibility: pipeline coordination only.
 - Persistence separation requirement:
   - ForecastArtifactRepository, RiskFlagRepository, and ModelVersionRepository
@@ -140,26 +147,33 @@ Reuse proven patterns from current codebase:
 ### Required Design Patterns for Implementation
 
 1. Strategy
+
 - Interval estimator selection and fallback switching.
 
 2. Specification
+
 - Composable plausibility rule evaluation and policy versioning.
 
 3. Repository
+
 - All database operations through repository boundaries.
 
 4. Factory
+
 - ForecastRunFactory for deterministic run creation and runKey consistency.
 
 5. Chain of Responsibility
+
 - Pipeline gate chain: data quality, training, interval estimation,
   plausibility, risk mapping, publish.
 
 6. Observer
+
 - Model approval state transition side-effects (for example cron unblocking,
   lineage lock, operational notifications).
 
 7. Decorator
+
 - Observability wrappers for duration, qualityGateStatus, failureClass, and
   correlation metadata without polluting core logic.
 
@@ -179,6 +193,7 @@ Reuse proven patterns from current codebase:
 ### New Entities
 
 1. aquifer_forecast_run
+
 - Purpose: execution lifecycle, replay safety, telemetry, and audit trail.
 - Key fields:
   - id, runKey, triggerType, triggeredBy
@@ -187,6 +202,7 @@ Reuse proven patterns from current codebase:
   - qualityGateStatus, responseSummary, errorSummary
 
 2. aquifer_linear_regression_model
+
 - Purpose: model versioning and quality artifact persistence.
 - Key fields:
   - id, scopeType, scopeId, targetType
@@ -196,6 +212,7 @@ Reuse proven patterns from current codebase:
   - approvalState, approvedBy, approvedAt, approvalExpiresAt
 
 3. aquifer_risk_flag
+
 - Purpose: risk outputs for policy and UI consumption.
 - Key fields:
   - id, scopeType, scopeId, targetType
@@ -206,6 +223,7 @@ Reuse proven patterns from current codebase:
   - plausibilityPolicyVersion
 
 4. aquifer_external_reference_observation
+
 - Purpose: external benchmark alignment (CEDARE and RIGW).
 - Key fields:
   - id, sourceSystem, stationId, districtId, wellId
@@ -213,6 +231,7 @@ Reuse proven patterns from current codebase:
   - mappingConfidence, ingestedAt, sourceSnapshotId
 
 5. aquifer_model_reference_observation_link
+
 - Purpose: end-to-end lineage from model artifact to exact external references.
 - Key fields:
   - id, modelVersionId, observationId
@@ -308,24 +327,29 @@ The following v0 rules are mandatory implementation blockers for Phase 2.
 Values below are conservative draft defaults requiring hydrogeology approval.
 
 1. Maximum annual recovery-rate rule
+
 - Reject forecast steps implying recovery > MAX_RECOVERY_M_PER_YEAR.
 - Draft default: MAX_RECOVERY_M_PER_YEAR = 0.20.
 
 2. Maximum annual depletion-rate rule
+
 - Reject forecast steps implying depletion > MAX_DEPLETION_M_PER_YEAR unless
   explicitly tagged as exceptional scenario with signed rationale.
 - Draft default: MAX_DEPLETION_M_PER_YEAR = 1.50.
 
 3. Physical floor rule
+
 - Reject projections crossing district physical floor depth PHYSICAL_FLOOR_DEPTH_M.
 - If crossed at year N, projections beyond year N are withheld and marked as
   non-projectable.
 
 4. Recharge-extraction consistency rule
+
 - Reject scenarios where implied recharge required to sustain projected level
   exceeds MAX_IMPL_RECHARGE_M3_PER_YEAR.
 
 5. Boundary continuity rule
+
 - Reject abrupt discontinuities where year-over-year level delta magnitude
   exceeds MAX_YOY_DELTA_M without exogenous event annotation.
 
@@ -360,6 +384,7 @@ Rule governance:
 ### tRPC Procedures (Forecast Router)
 
 1. forecast.getDistrictAquiferForecast
+
 - Input: districtId, optional asOf.
 - Output:
   - dual targets
@@ -368,14 +393,17 @@ Rule governance:
   - model quality and data quality diagnostics
 
 2. forecast.getDistrictWellBreakdown
+
 - Input: districtId, paging, sort, filters.
 - Output: well-level forecast summaries and risk ordering.
 
 3. forecast.listRiskFlags
+
 - Input: districtId optional, horizon optional, severity optional, paging.
 - Output: paged risk artifacts with reasons and model references.
 
 4. forecast.triggerRecompute
+
 - Input: scope and optional runKey.
 - Access: admin and operator only.
 
@@ -461,13 +489,13 @@ Rule governance:
 
 ## Acceptance Criteria (Proposed for Review)
 
-| Category | 5-Year | 10-Year | 25-Year |
-|---|---:|---:|---:|
-| Point forecast bias threshold | <= 5% | <= 8% | <= 12% |
+| Category                        |  5-Year | 10-Year | 25-Year |
+| ------------------------------- | ------: | ------: | ------: |
+| Point forecast bias threshold   |   <= 5% |   <= 8% |  <= 12% |
 | 95% interval empirical coverage | 92%-98% | 90%-98% | 88%-98% |
-| Data completeness minimum | >= 90% | >= 85% | >= 80% |
-| Outlier ratio maximum | <= 5% | <= 7% | <= 10% |
-| Plausibility violations allowed | 0 | 0 | 0 |
+| Data completeness minimum       |  >= 90% |  >= 85% |  >= 80% |
+| Outlier ratio maximum           |   <= 5% |   <= 7% |  <= 10% |
+| Plausibility violations allowed |       0 |       0 |       0 |
 
 These values are placeholders and must be approved by hydrogeology and policy
 stakeholders before release.
@@ -500,14 +528,14 @@ Concurrent district processing model (mandatory):
 The following initial SLO targets are mandatory pass-fail criteria for Phase 3
 load testing.
 
-| SLO Dimension | Initial Target | Measurement Window | Owner |
-|---|---|---|---|
-| End-to-end daily run completion (all districts) | P95 <= 25 min, P99 <= 35 min | rolling 14 days | Platform |
-| District-level forecast compute latency | P95 <= 90 sec per district | rolling 14 days | Platform |
-| Worker memory ceiling | P99 RSS <= 1.5 GB per worker | rolling 14 days | Platform |
-| Freshness SLA for policy dashboard | 99% of days updated by 06:00 local time | monthly | Platform + Product |
-| Failed-run rate | <= 1.0% daily scheduled runs | rolling 30 days | Platform |
-| Blocked-no-approved-model incidents | 0 unresolved beyond 24h | monthly | DS + Hydro + Product |
+| SLO Dimension                                   | Initial Target                          | Measurement Window | Owner                |
+| ----------------------------------------------- | --------------------------------------- | ------------------ | -------------------- |
+| End-to-end daily run completion (all districts) | P95 <= 25 min, P99 <= 35 min            | rolling 14 days    | Platform             |
+| District-level forecast compute latency         | P95 <= 90 sec per district              | rolling 14 days    | Platform             |
+| Worker memory ceiling                           | P99 RSS <= 1.5 GB per worker            | rolling 14 days    | Platform             |
+| Freshness SLA for policy dashboard              | 99% of days updated by 06:00 local time | monthly            | Platform + Product   |
+| Failed-run rate                                 | <= 1.0% daily scheduled runs            | rolling 30 days    | Platform             |
+| Blocked-no-approved-model incidents             | 0 unresolved beyond 24h                 | monthly            | DS + Hydro + Product |
 
 SLO governance:
 
@@ -550,14 +578,17 @@ Operational controls:
 ## Rollout Strategy
 
 1. Shadow mode
+
 - Run daily and publish diagnostics internally only.
 - Compare to external observations and monitor calibration.
 
 2. District pilot
+
 - Enable selected districts under manual review cadence.
 - Track false-risk and under-risk rates before expansion.
 
 3. Progressive rollout
+
 - Expand district coverage with rollback checkpoints.
 - Require maintained calibration and operational SLOs.
 
@@ -574,15 +605,19 @@ Operational controls:
 ## Risks and Mitigations
 
 1. Risk: Long-horizon uncertainty too wide for actionable guidance.
+
 - Mitigation: confidence communication policy and scenario labeling.
 
 2. Risk: External benchmark data latency or quality gaps.
+
 - Mitigation: source-quality scoring and strict provenance gates.
 
 3. Risk: Drift after environmental or extraction regime changes.
+
 - Mitigation: periodic retraining, drift monitoring, and approval expiry.
 
 4. Risk: Policy misuse of point estimates.
+
 - Mitigation: API and UI contracts require intervals and confidence metadata.
 
 ## Open Decisions Requiring Stakeholder Input
