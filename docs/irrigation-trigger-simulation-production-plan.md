@@ -137,6 +137,7 @@ Missing mapping behavior is explicit and typed (no silent fallback by default).
   - rng_seed
   - input_hash
   - provider_snapshot_hash
+  - pricing_snapshot_version
   - adapter_unit_version
   - start_timestamp
   - timezone
@@ -233,7 +234,7 @@ The ODE integrator is not the scientific model by itself. Scientific ownership o
 Required interface:
 
 ```ts
-interface HydrologyModel {
+interface IHydrologyModel {
   computeETc(input: ETcInput): number; // m^3/s
   computeDrainage(input: DrainageInput): number; // m^3/s
   computeInflow(input: InflowInput): number; // m^3/s
@@ -334,6 +335,16 @@ Residual checks enforce sensor consistency (flow, pressure, water-level derivati
 
 - Threshold breach for N consecutive samples -> DEGRADED
 - Persistent breach beyond M samples -> INVALID + sensor_fusion_divergence alert
+
+Default transition thresholds:
+
+- N = 3 consecutive breaches (DEGRADED)
+- M = 10 consecutive breaches (INVALID)
+
+Config paths:
+
+- `simulation.fusion.thresholds.degradedConsecutiveBreaches`
+- `simulation.fusion.thresholds.invalidConsecutiveBreaches`
 
 ---
 
@@ -699,6 +710,15 @@ Operational note:
 - no NaN/Infinity outputs
 - conservation consistency across random valid inputs
 
+Input generator physical plausibility constraints:
+
+- `Ks > 0`
+- `Kc in (0, 2]`
+- `A > 0`
+- `Q_in >= 0`
+- `dt in [dtMin, dtMax]`
+- `h_m in [0, maxDepth]`
+
 ### 13.3 Integration tests
 
 - queue lifecycle transitions
@@ -800,8 +820,17 @@ No-Go if any of the following:
 ## 17. Open Decisions for Review
 
 1. Exact pilot cohort size and duration.
+
+- Deadline: close before Phase B kickoff.
+
 2. Whether sensor_override_schedule is in V1 or deferred to V1.1.
-3. Whether fallback for missing Kc/Ks is enabled in pilot (recommended: disabled).
+
+- Current recommendation: defer to V1.1 unless a concrete Phase A use case emerges.
+
+Decision closed:
+
+- Kc/Ks fallback in pilot: DISABLED.
+  - Any enablement requires explicit exception approval and pilot risk sign-off.
 
 ---
 
