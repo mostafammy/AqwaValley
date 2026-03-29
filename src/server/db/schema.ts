@@ -1198,6 +1198,7 @@ export const irrigationSimulationRun = pgTable(
     irrigationEventId: uuid("irrigation_event_id")
       .notNull()
       .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    isPrimary: boolean("is_primary").notNull().default(true),
     queueJobId: text("queue_job_id"),
     runStatus: irrigationSimulationRunStatusEnum("run_status")
       .notNull()
@@ -1257,6 +1258,7 @@ export const irrigationSimulationRun = pgTable(
   },
   (t) => [
     index("irrigation_sim_run_event_idx").on(t.irrigationEventId),
+    index("irrigation_sim_run_event_primary_idx").on(t.irrigationEventId, t.isPrimary),
     index("irrigation_sim_run_status_created_idx").on(t.runStatus, t.createdAt),
     index("irrigation_sim_run_hydrology_version_idx").on(
       t.hydrologyModelVersion,
