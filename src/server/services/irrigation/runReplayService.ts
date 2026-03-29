@@ -261,7 +261,7 @@ export async function replaySimulationRun(runId: string): Promise<
     limit 1
   `);
 
-  const runRecord = rows[0];
+  const runRecord = rows[0] as RunReplayDbRow | undefined;
   if (!runRecord) {
     return err(
       createDomainError({
