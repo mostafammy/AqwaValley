@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-const __dirname = join(fileURLToPath(import.meta.url), "..");
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = join(__dirname, "../.env.local");
 
 try {
@@ -18,5 +18,5 @@ try {
   });
   console.log("✓ Environment variables loaded from .env.local");
 } catch (e) {
-  console.warn("⚠ Could not load .env.local:", (e as Error).message);
+  console.warn("⚠ Could not load .env.local:", e?.message ?? String(e));
 }
