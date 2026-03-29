@@ -32,6 +32,8 @@ type IntegratorInput = Omit<PhysicsRunInput, "getDerivativeTerms"> & {
   derivativeAtState: DerivativeAtStateFn;
 };
 
+const DRY_LEVEL_EPSILON_M = 1e-9;
+
 type StepResult = {
   accepted: boolean;
   acceptedDtS: number;
@@ -343,7 +345,10 @@ export function runAdaptiveIntegrator(
       massDebtPeakM3 = toNumber(state.waterDebtM3);
     }
 
-    if (toNumber(state.waterLevelM) === 0 && toNumber(state.waterDebtM3) > 0) {
+    if (
+      Math.abs(toNumber(state.waterLevelM)) <= DRY_LEVEL_EPSILON_M &&
+      toNumber(state.waterDebtM3) > 0
+    ) {
       dryDurationS += acceptedDtS;
       if (dryDurationS > toNumber(input.maxDryDurationSeconds)) {
         return err(
