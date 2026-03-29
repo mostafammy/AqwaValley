@@ -17,8 +17,21 @@ import { desc, eq } from "drizzle-orm";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { irrigationRecommendation, farm } from "~/server/db/schema";
+import {
+  farm,
+  irrigationEvent,
+  irrigationRecommendation,
+  irrigationSimulationRun,
+} from "~/server/db/schema";
+import { evaluateAndPersistRunDiff } from "~/server/services/irrigation/runDiffService";
+import { replaySimulationRun } from "~/server/services/irrigation/runReplayService";
 import { requestIrrigationPlan } from "~/server/services/irrigation/recommend";
+import {
+  cancelIrrigationActivation,
+  getIrrigationEventStatus,
+  listRecentIrrigationEvents,
+  startIrrigationActivation,
+} from "~/server/services/irrigation/triggerService";
 import { TRPCError } from "@trpc/server";
 
 // ---------------------------------------------------------------------------
@@ -37,6 +50,40 @@ const listPlansInput = z.object({
   farmId: z.string().uuid(),
   limit: z.number().int().min(1).max(50).default(10),
   offset: z.number().int().min(0).default(0),
+});
+
+const activateRecommendationInput = z.object({
+  farmId: z.string().uuid(),
+  recommendationId: z.string().uuid(),
+  wellIds: z.array(z.string().uuid()).min(1),
+  durationMinutes: z.number().int().min(1).max(24 * 60),
+  planSource: z.string().min(1).max(64).optional(),
+  modelMode: z.enum(["production", "demo"]).optional(),
+});
+
+const getIrrigationStatusInput = z.object({
+  farmId: z.string().uuid(),
+  irrigationEventId: z.string().uuid(),
+});
+
+const cancelIrrigationInput = z.object({
+  farmId: z.string().uuid(),
+  irrigationEventId: z.string().uuid(),
+});
+
+const listRecentIrrigationsInput = z.object({
+  farmId: z.string().uuid(),
+  limit: z.number().int().min(1).max(50).default(10),
+  offset: z.number().int().min(0).default(0),
+});
+
+const replaySimulationRunInput = z.object({
+  runId: z.string().uuid(),
+});
+
+const diffSimulationRunsInput = z.object({
+  baseRunId: z.string().uuid(),
+  candidateRunId: z.string().uuid(),
 });
 
 // ---------------------------------------------------------------------------
@@ -75,6 +122,31 @@ async function ensureUserCanAccessFarm(
       message: "You do not have access to this farm",
     });
   }
+}
+
+async function ensureUserCanAccessSimulationRun(
+  ctx: { session: { user: { id: string } }; userRoles: string[] },
+  runId: string,
+): Promise<string> {
+  const [runRecord] = await db
+    .select({ farmId: irrigationEvent.farmId })
+    .from(irrigationSimulationRun)
+    .innerJoin(
+      irrigationEvent,
+      eq(irrigationSimulationRun.irrigationEventId, irrigationEvent.id),
+    )
+    .where(eq(irrigationSimulationRun.id, runId))
+    .limit(1);
+
+  if (!runRecord) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Simulation run not found",
+    });
+  }
+
+  await ensureUserCanAccessFarm(ctx, runRecord.farmId);
+  return runRecord.farmId;
 }
 
 // ---------------------------------------------------------------------------
@@ -144,5 +216,112 @@ export const irrigationRouter = createTRPCRouter({
         .offset(input.offset);
 
       return plans;
+    }),
+
+  activateRecommendation: protectedProcedure
+    .input(activateRecommendationInput)
+    .mutation(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      return startIrrigationActivation({
+        farmId: input.farmId,
+        recommendationId: input.recommendationId,
+        requestedByUserId: ctx.session.user.id,
+        wellIds: input.wellIds,
+        durationMinutes: input.durationMinutes,
+        planSource: input.planSource,
+        modelMode: input.modelMode,
+      });
+    }),
+
+  getIrrigationStatus: protectedProcedure
+    .input(getIrrigationStatusInput)
+    .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      const status = await getIrrigationEventStatus(
+        input.farmId,
+        input.irrigationEventId,
+      );
+
+      if (!status) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Irrigation event not found.",
+        });
+      }
+
+      return status;
+    }),
+
+  cancelIrrigation: protectedProcedure
+    .input(cancelIrrigationInput)
+    .mutation(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      return cancelIrrigationActivation({
+        farmId: input.farmId,
+        irrigationEventId: input.irrigationEventId,
+        cancelledByUserId: ctx.session.user.id,
+      });
+    }),
+
+  listRecentIrrigations: protectedProcedure
+    .input(listRecentIrrigationsInput)
+    .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      return listRecentIrrigationEvents({
+        farmId: input.farmId,
+        limit: input.limit,
+        offset: input.offset,
+      });
+    }),
+
+  replaySimulationRun: protectedProcedure
+    .input(replaySimulationRunInput)
+    .mutation(async ({ ctx, input }) => {
+      await ensureUserCanAccessSimulationRun(ctx, input.runId);
+
+      const replayResult = await replaySimulationRun(input.runId);
+      if (!replayResult.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: replayResult.error.message,
+        });
+      }
+
+      return replayResult.value;
+    }),
+
+  diffSimulationRuns: protectedProcedure
+    .input(diffSimulationRunsInput)
+    .mutation(async ({ ctx, input }) => {
+      const baseFarmId = await ensureUserCanAccessSimulationRun(ctx, input.baseRunId);
+      const candidateFarmId = await ensureUserCanAccessSimulationRun(
+        ctx,
+        input.candidateRunId,
+      );
+
+      if (baseFarmId !== candidateFarmId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Simulation runs must belong to the same farm.",
+        });
+      }
+
+      const diffResult = await evaluateAndPersistRunDiff({
+        baseRunId: input.baseRunId,
+        candidateRunId: input.candidateRunId,
+      });
+
+      if (!diffResult.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: diffResult.error.message,
+        });
+      }
+
+      return diffResult.value;
     }),
 });
