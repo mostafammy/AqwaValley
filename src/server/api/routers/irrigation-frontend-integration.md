@@ -65,7 +65,7 @@ Output includes:
 - event status and timestamps
 - debit status and attempts
 - failure code and message when applicable
-- latest simulationRun summary
+- latest simulation run summary
 
 Backend flow:
 
