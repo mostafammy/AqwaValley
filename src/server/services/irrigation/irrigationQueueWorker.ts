@@ -242,7 +242,10 @@ async function processQueuedRun(
     return "failed";
   }
 
-  transitionOrThrow(preRunStatuses.eventStatus as IrrigationEventStatus, "RUNNING");
+  transitionOrThrow(
+    preRunStatuses.eventStatus as IrrigationEventStatus,
+    "RUNNING",
+  );
 
   const now = new Date();
   await db
@@ -532,12 +535,16 @@ async function processQueuedRun(
       irrigationEventId: eventRecord.id,
       simulationRunId: queued.simulationRunId,
       failureCode: "MISSING_EVENT",
-      failureMessage: "Irrigation event disappeared before COMPLETED transition.",
+      failureMessage:
+        "Irrigation event disappeared before COMPLETED transition.",
     });
     return "failed";
   }
 
-  transitionOrThrow(preCompleteStatuses.eventStatus as IrrigationEventStatus, "COMPLETED");
+  transitionOrThrow(
+    preCompleteStatuses.eventStatus as IrrigationEventStatus,
+    "COMPLETED",
+  );
 
   await db
     .update(irrigationEvent)
