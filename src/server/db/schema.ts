@@ -144,6 +144,42 @@ export const recommendationStatusEnum = pgEnum("recommendation_status", [
   "CANCELLED",
 ]);
 
+export const irrigationEventStatusEnum = pgEnum("irrigation_event_status", [
+  "REQUESTED",
+  "QUEUED",
+  "RUNNING",
+  "COMPLETED",
+  "DEBIT_PENDING",
+  "FAILED",
+  "CANCELLED",
+]);
+
+export const irrigationDebitStatusEnum = pgEnum("irrigation_debit_status", [
+  "PENDING",
+  "APPLIED",
+  "FAILED",
+]);
+
+export const irrigationSimulationRunStatusEnum = pgEnum(
+  "irrigation_simulation_run_status",
+  ["QUEUED", "RUNNING", "COMPLETED", "FAILED", "CANCELLED"],
+);
+
+export const irrigationModelModeEnum = pgEnum("irrigation_model_mode", [
+  "production",
+  "demo",
+]);
+
+export const irrigationTelemetrySourceEnum = pgEnum(
+  "irrigation_telemetry_source",
+  ["REAL", "SIMULATION"],
+);
+
+export const irrigationValveAuditStateEnum = pgEnum(
+  "irrigation_valve_audit_state",
+  ["CLOSED", "OPENING", "OPEN", "CLOSING"],
+);
+
 export const quotaOverrideStatusEnum = pgEnum("quota_override_status", [
   "active",
   "revoked",
@@ -1064,6 +1100,216 @@ export const irrigationRecommendation = pgTable(
     index("irrigation_rec_farm_created_idx").on(t.farmId, t.createdAt),
     index("irrigation_rec_status_idx").on(t.status),
     index("irrigation_rec_requested_by_idx").on(t.requestedBy),
+  ],
+);
+
+/**
+ * irrigation_event: Lifecycle for farmer-triggered irrigation executions.
+ */
+export const irrigationEvent = pgTable(
+  "irrigation_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    farmId: uuid("farm_id")
+      .notNull()
+      .references(() => farm.id, { onDelete: "cascade" }),
+    recommendationId: uuid("recommendation_id").references(
+      () => irrigationRecommendation.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    triggeredByUserId: text("triggered_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    wellIds: uuid("well_ids").array().notNull(),
+    status: irrigationEventStatusEnum("status").notNull().default("REQUESTED"),
+    planSource: text("plan_source").notNull(),
+    durationMinutes: integer("duration_minutes").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    actualConsumptionM3: numeric("actual_consumption_m3", {
+      precision: 15,
+      scale: 4,
+    }),
+    quotaDebitM3: numeric("quota_debit_m3", {
+      precision: 15,
+      scale: 4,
+    }),
+    quotaDebitStatus: irrigationDebitStatusEnum("quota_debit_status")
+      .notNull()
+      .default("PENDING"),
+    quotaDebitAttempts: integer("quota_debit_attempts").notNull().default(0),
+    quotaDebitLastError: text("quota_debit_last_error"),
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("irrigation_event_farm_created_idx").on(t.farmId, t.createdAt),
+    index("irrigation_event_status_idx").on(t.status),
+    index("irrigation_event_triggered_by_idx").on(t.triggeredByUserId),
+  ],
+);
+
+/**
+ * well_valve_state: Immutable audit log of valve transitions per irrigation event.
+ */
+export const wellValveState = pgTable(
+  "well_valve_state",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    state: irrigationValveAuditStateEnum("state").notNull(),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    transitionedAt: timestamp("transitioned_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("well_valve_state_event_transitioned_idx").on(
+      t.irrigationEventId,
+      t.transitionedAt,
+    ),
+    index("well_valve_state_well_transitioned_idx").on(
+      t.wellId,
+      t.transitionedAt,
+    ),
+  ],
+);
+
+/**
+ * irrigation_simulation_run: Diagnostics and replay envelope metadata per run.
+ */
+export const irrigationSimulationRun = pgTable(
+  "irrigation_simulation_run",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    isPrimary: boolean("is_primary").notNull().default(true),
+    queueJobId: text("queue_job_id"),
+    runStatus: irrigationSimulationRunStatusEnum("run_status")
+      .notNull()
+      .default("QUEUED"),
+    engineVersion: text("engine_version").notNull(),
+    hydrologyModelVersion: text("hydrology_model_version").notNull(),
+    modelMode: irrigationModelModeEnum("model_mode")
+      .notNull()
+      .default("production"),
+    rngSeed: text("rng_seed"),
+    inputHash: text("input_hash"),
+    inputEnvelopeJson: jsonb("input_envelope_json"),
+    providerSnapshotHash: text("provider_snapshot_hash"),
+    providerSnapshotJson: jsonb("provider_snapshot_json"),
+    pricingSnapshotVersion: text("pricing_snapshot_version"),
+    adapterUnitVersion: text("adapter_unit_version"),
+    startTimestamp: timestamp("start_timestamp", {
+      withTimezone: true,
+    }).notNull(),
+    timezone: text("timezone").notNull().default("UTC"),
+    integrationStepCount: integer("integration_step_count")
+      .notNull()
+      .default(0),
+    phaseStepCountsJson: jsonb("phase_step_counts_json"),
+    retryCount: integer("retry_count").notNull().default(0),
+    dtMinObservedS: numeric("dt_min_observed_s", { precision: 12, scale: 4 }),
+    dtMaxObservedS: numeric("dt_max_observed_s", { precision: 12, scale: 4 }),
+    errorNormMax: doublePrecision("error_norm_max"),
+    errorNormP95: doublePrecision("error_norm_p95"),
+    numericalDivergenceCount: integer("numerical_divergence_count")
+      .notNull()
+      .default(0),
+    massDebtPeakM3: numeric("mass_debt_peak_m3", { precision: 15, scale: 4 }),
+    debtEventCount: integer("debt_event_count").notNull().default(0),
+    qualityStateCountsJson: jsonb("quality_state_counts_json"),
+    anomalyCodeCountsJson: jsonb("anomaly_code_counts_json"),
+    trajectoryHash: text("trajectory_hash"),
+    summaryHash: text("summary_hash"),
+    replayLastStatus: text("replay_last_status"),
+    replayLastOutputHash: text("replay_last_output_hash"),
+    replayLastCheckedAt: timestamp("replay_last_checked_at", {
+      withTimezone: true,
+    }),
+    replayLastError: text("replay_last_error"),
+    diffStatus: text("diff_status"),
+    diffBaseRunId: uuid("diff_base_run_id"),
+    diffMetricsJson: jsonb("diff_metrics_json"),
+    diffComputedAt: timestamp("diff_computed_at", { withTimezone: true }),
+    queueWaitTimeMs: integer("queue_wait_time_ms"),
+    executionTimeMs: integer("execution_time_ms"),
+    runCostUsd: numeric("run_cost_usd", { precision: 15, scale: 6 }),
+    runCostBreakdownJson: jsonb("run_cost_breakdown_json"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("irrigation_sim_run_event_idx").on(t.irrigationEventId),
+    index("irrigation_sim_run_event_primary_idx").on(
+      t.irrigationEventId,
+      t.isPrimary,
+    ),
+    index("irrigation_sim_run_status_created_idx").on(t.runStatus, t.createdAt),
+    index("irrigation_sim_run_hydrology_version_idx").on(
+      t.hydrologyModelVersion,
+    ),
+    index("irrigation_sim_run_model_mode_idx").on(t.modelMode),
+    unique("irrigation_sim_run_queue_job_key").on(t.queueJobId),
+  ],
+);
+
+/**
+ * sensor_data_simulation: Isolated telemetry store for synthetic readings.
+ * Keeps simulation data out of REAL operational ingest/query paths by default.
+ */
+export const sensorDataSimulation = pgTable(
+  "sensor_data_simulation",
+  {
+    sensorId: uuid("sensor_id")
+      .notNull()
+      .references(() => sensors.id, { onDelete: "cascade" }),
+    simulationRunId: uuid("simulation_run_id")
+      .notNull()
+      .references(() => irrigationSimulationRun.id, { onDelete: "cascade" }),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    source: irrigationTelemetrySourceEnum("source")
+      .notNull()
+      .default("SIMULATION"),
+    value: doublePrecision("value").notNull(),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+    generatedAt: timestamp("generated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    generatorVersion: text("generator_version").notNull(),
+  },
+  (t) => [
+    index("sensor_data_sim_source_sensor_ts_idx").on(
+      t.source,
+      t.sensorId,
+      t.timestamp,
+    ),
+    index("sensor_data_sim_run_ts_idx").on(t.simulationRunId, t.timestamp),
+    index("sensor_data_sim_event_ts_idx").on(t.irrigationEventId, t.timestamp),
+    unique("sensor_data_sim_run_sensor_ts_key").on(
+      t.simulationRunId,
+      t.sensorId,
+      t.timestamp,
+    ),
   ],
 );
 

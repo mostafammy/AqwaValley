@@ -24,7 +24,9 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:irrigation": "tsx scripts/test-irrigation.ts",
-    "test:ai": "tsx scripts/test-openrouter.ts"
+    "test:ai": "tsx scripts/test-openrouter.ts",
+    "test:replay-diff": "tsx --tsconfig tsconfig.json scripts/test-replay-diff.ts",
+    "test:irrigation-api": "tsx --tsconfig tsconfig.json scripts/test-irrigation-trigger-api.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
