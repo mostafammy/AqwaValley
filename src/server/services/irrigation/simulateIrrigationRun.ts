@@ -86,10 +86,16 @@ export function simulateIrrigationRun(
     horizonSeconds: asSeconds(input.horizonSeconds, "horizonSeconds"),
     initialState: {
       waterLevelM: asMeters(input.initialWaterLevelM, "initialWaterLevelM"),
-      waterDebtM3: asCubicMeters(input.initialWaterDebtM3 ?? 0, "initialWaterDebtM3"),
+      waterDebtM3: asCubicMeters(
+        input.initialWaterDebtM3 ?? 0,
+        "initialWaterDebtM3",
+      ),
     },
     irrigatedAreaM2: asSquareMeters(input.areaM2, "areaM2"),
-    initialDtS: asSeconds(input.initialDtS ?? DEFAULTS.initialDtS, "initialDtS"),
+    initialDtS: asSeconds(
+      input.initialDtS ?? DEFAULTS.initialDtS,
+      "initialDtS",
+    ),
     minDtS: asSeconds(input.minDtS ?? DEFAULTS.minDtS, "minDtS"),
     maxDtS: asSeconds(input.maxDtS ?? DEFAULTS.maxDtS, "maxDtS"),
     absTolM: input.absTolM ?? DEFAULTS.absTolM,
@@ -122,7 +128,8 @@ export function simulateIrrigationRun(
             irrigatedAreaM2: asSquareMeters(input.areaM2, "areaM2"),
           },
           drainage: {
-            drainageCoefficientPerSecond: runtimeInputs.drainageCoefficientPerSecond,
+            drainageCoefficientPerSecond:
+              runtimeInputs.drainageCoefficientPerSecond,
             fieldCapacityDepthM: asMeters(
               runtimeInputs.fieldCapacityDepthM,
               "fieldCapacityDepthM",

@@ -8,23 +8,25 @@ const envLocalPath = resolve(process.cwd(), ".env.local");
 try {
   const envContent = readFileSync(envLocalPath, "utf-8");
   const lines = envContent.split("\n");
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
-    
+
     const equalsIndex = trimmed.indexOf("=");
     if (equalsIndex === -1) continue;
-    
+
     const key = trimmed.substring(0, equalsIndex).trim();
     let value = trimmed.substring(equalsIndex + 1).trim();
-    
+
     // Remove surrounding quotes if present
-    if ((value.startsWith('"') && value.endsWith('"')) || 
-        (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       value = value.slice(1, -1);
     }
-    
+
     if (key && !process.env[key]) {
       process.env[key] = value;
     }
@@ -44,7 +46,11 @@ async function testMissingProviderMapping(): Promise<void> {
     at: new Date("2026-01-01T00:00:00.000Z"),
   });
 
-  assert.equal(result.ok, false, "Expected missing crop profile to fail mapping.");
+  assert.equal(
+    result.ok,
+    false,
+    "Expected missing crop profile to fail mapping.",
+  );
   if (result.ok) return;
   assert.equal(result.error.code, "MISSING_MAPPING");
 }

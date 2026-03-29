@@ -38,7 +38,10 @@ type QueuedRunRecord = {
   runCreatedAt: Date;
 };
 
-function transitionOrThrow(from: IrrigationEventStatus, to: IrrigationEventStatus): void {
+function transitionOrThrow(
+  from: IrrigationEventStatus,
+  to: IrrigationEventStatus,
+): void {
   assertIrrigationTransition(from, to);
 }
 
@@ -104,7 +107,9 @@ async function completeWithFailure(params: {
     .where(eq(irrigationSimulationRun.id, params.simulationRunId));
 }
 
-async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | "failed" | "cancelled"> {
+async function processQueuedRun(
+  queued: QueuedRunRecord,
+): Promise<"completed" | "failed" | "cancelled"> {
   const [eventRecord] = await db
     .select({
       id: irrigationEvent.id,
@@ -165,7 +170,10 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
   );
 
   const [farmRecord] = await db
-    .select({ totalAreaAcres: farm.totalAreaAcres, districtId: farm.districtId })
+    .select({
+      totalAreaAcres: farm.totalAreaAcres,
+      districtId: farm.districtId,
+    })
     .from(farm)
     .where(eq(farm.id, eventRecord.farmId))
     .limit(1);
@@ -188,7 +196,12 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
       isActive: sensors.isActive,
     })
     .from(sensors)
-    .where(and(inArray(sensors.wellId, eventRecord.wellIds), eq(sensors.isActive, true)));
+    .where(
+      and(
+        inArray(sensors.wellId, eventRecord.wellIds),
+        eq(sensors.isActive, true),
+      ),
+    );
 
   if (sensorRecords.length === 0) {
     await completeWithFailure({
@@ -200,14 +213,18 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
     return "failed";
   }
 
-  const areaM2 = Math.max(1000, toFinite(farmRecord?.totalAreaAcres ?? null) * 4046.85642);
+  const areaM2 = Math.max(
+    1000,
+    toFinite(farmRecord?.totalAreaAcres ?? null) * 4046.85642,
+  );
 
   if (!farmRecord) {
     await completeWithFailure({
       irrigationEventId: eventRecord.id,
       simulationRunId: queued.simulationRunId,
       failureCode: "MISSING_FARM",
-      failureMessage: "Farm record not found while processing irrigation event.",
+      failureMessage:
+        "Farm record not found while processing irrigation event.",
     });
     return "failed";
   }
@@ -247,17 +264,18 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
     baseFlowRateM3s: totalBaselineFlowM3Hr / 3600,
   };
 
-  const providerSnapshotHash = hashCanonical(providerInputs.value.providerSnapshot);
+  const providerSnapshotHash = hashCanonical(
+    providerInputs.value.providerSnapshot,
+  );
   const inputHash = hashCanonical(inputEnvelope);
 
   await db
     .update(irrigationSimulationRun)
     .set({
       inputHash,
-      inputEnvelopeJson: JSON.parse(canonicalJsonString(inputEnvelope)) as Record<
-        string,
-        unknown
-      >,
+      inputEnvelopeJson: JSON.parse(
+        canonicalJsonString(inputEnvelope),
+      ) as Record<string, unknown>,
       providerSnapshotHash,
       providerSnapshotJson: JSON.parse(
         canonicalJsonString(providerInputs.value.providerSnapshot),
@@ -277,7 +295,8 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
       et0DepthRateMps: providerInputs.value.et0DepthRateMps,
       kc: providerInputs.value.kc,
       stressCoefficient: providerInputs.value.stressCoefficient,
-      drainageCoefficientPerSecond: providerInputs.value.drainageCoefficientPerSecond,
+      drainageCoefficientPerSecond:
+        providerInputs.value.drainageCoefficientPerSecond,
       fieldCapacityDepthM: providerInputs.value.fieldCapacityDepthM,
       valveOpen: true,
       inflowMode: "pressure_aware",
@@ -322,7 +341,10 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
   const endedAt = new Date();
   const actualConsumptionM3 =
     (totalBaselineFlowM3Hr * Math.max(1, eventRecord.durationMinutes)) / 60;
-  const queueWaitTimeMs = Math.max(0, now.getTime() - queued.runCreatedAt.getTime());
+  const queueWaitTimeMs = Math.max(
+    0,
+    now.getTime() - queued.runCreatedAt.getTime(),
+  );
   const executionTimeMs = Math.max(0, endedAt.getTime() - now.getTime());
 
   const trajectoryHash = computeRunOutputHash(runResult.value);
@@ -341,12 +363,19 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
   };
   const summaryHash = hashCanonical(summaryDigestInput);
 
-  const costComputeUsd = Number((runResult.value.integrationStepCount * 0.0000025).toFixed(6));
+  const costComputeUsd = Number(
+    (runResult.value.integrationStepCount * 0.0000025).toFixed(6),
+  );
   const costStorageUsd = Number((readings.length * 0.0000001).toFixed(6));
   const costQueueUsd = 0.0001;
   const costExternalApiUsd = 0;
   const runCostUsd = Number(
-    (costComputeUsd + costStorageUsd + costQueueUsd + costExternalApiUsd).toFixed(6),
+    (
+      costComputeUsd +
+      costStorageUsd +
+      costQueueUsd +
+      costExternalApiUsd
+    ).toFixed(6),
   );
 
   const costBreakdown = {
@@ -399,7 +428,9 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
       queueWaitTimeMs,
       executionTimeMs,
       runCostUsd: runCostUsd.toFixed(6),
-      runCostBreakdownJson: JSON.parse(canonicalJsonString(costBreakdown)) as Record<string, unknown>,
+      runCostBreakdownJson: JSON.parse(
+        canonicalJsonString(costBreakdown),
+      ) as Record<string, unknown>,
       completedAt: endedAt,
     })
     .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
@@ -418,7 +449,10 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
         not(eq(irrigationSimulationRun.id, queued.simulationRunId)),
       ),
     )
-    .orderBy(desc(irrigationSimulationRun.completedAt), desc(irrigationSimulationRun.createdAt))
+    .orderBy(
+      desc(irrigationSimulationRun.completedAt),
+      desc(irrigationSimulationRun.createdAt),
+    )
     .limit(1);
 
   if (baseRun) {
@@ -473,7 +507,9 @@ async function processQueuedRun(queued: QueuedRunRecord): Promise<"completed" | 
   return "completed";
 }
 
-export async function processQueuedIrrigationEvents(limit = 10): Promise<WorkerSummary> {
+export async function processQueuedIrrigationEvents(
+  limit = 10,
+): Promise<WorkerSummary> {
   const queued = await db
     .select({
       irrigationEventId: irrigationEvent.id,
@@ -524,7 +560,9 @@ export async function processQueuedIrrigationEvents(limit = 10): Promise<WorkerS
         simulationRunId: item.simulationRunId,
         failureCode: "WORKER_UNHANDLED_ERROR",
         failureMessage:
-          error instanceof Error ? error.message : "Unhandled worker execution error.",
+          error instanceof Error
+            ? error.message
+            : "Unhandled worker execution error.",
       });
     }
   }

@@ -55,7 +55,11 @@ export async function POST(request: NextRequest) {
     const text = await request.text();
     rawBody = text.trim() ? (JSON.parse(text) as unknown) : {};
   } catch {
-    return errorResponse(400, "INVALID_JSON", "Request body must be valid JSON");
+    return errorResponse(
+      400,
+      "INVALID_JSON",
+      "Request body must be valid JSON",
+    );
   }
 
   const parsed = bodySchema.safeParse(rawBody);

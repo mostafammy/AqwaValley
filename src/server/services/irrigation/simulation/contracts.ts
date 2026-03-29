@@ -18,10 +18,7 @@ export interface ICropCoefficientProvider {
 }
 
 export interface ISoilHydraulicsProvider {
-  getHydraulics(input: {
-    soilType: string;
-    at: Date;
-  }): Promise<
+  getHydraulics(input: { soilType: string; at: Date }): Promise<
     Result<{
       drainageCoefficientPerSecond: number;
       fieldCapacityDepthM: number;
@@ -33,10 +30,7 @@ export interface ISoilHydraulicsProvider {
 export type WeatherFreshness = "FRESH" | "STALE" | "UNAVAILABLE";
 
 export interface IWeatherProvider {
-  getEt0DepthRateMps(input: {
-    districtId: string;
-    at: Date;
-  }): Promise<
+  getEt0DepthRateMps(input: { districtId: string; at: Date }): Promise<
     Result<{
       et0DepthRateMps: number;
       freshness: WeatherFreshness;
@@ -169,5 +163,8 @@ export type RunDiffResult = {
 };
 
 export interface IRunDiffService {
-  diffRuns(baseRunId: string, candidateRunId: string): Promise<Result<RunDiffResult>>;
+  diffRuns(
+    baseRunId: string,
+    candidateRunId: string,
+  ): Promise<Result<RunDiffResult>>;
 }

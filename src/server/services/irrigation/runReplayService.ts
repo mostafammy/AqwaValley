@@ -60,7 +60,8 @@ function parseEnvelope(input: unknown): StoredEnvelope | null {
 
   return {
     farmId: typeof v.farmId === "string" ? v.farmId : "",
-    irrigationEventId: typeof v.irrigationEventId === "string" ? v.irrigationEventId : "",
+    irrigationEventId:
+      typeof v.irrigationEventId === "string" ? v.irrigationEventId : "",
     wellIds: Array.isArray(v.wellIds)
       ? v.wellIds.filter((item): item is string => typeof item === "string")
       : [],
@@ -92,8 +93,10 @@ function parseProviderSnapshot(input: unknown): StoredProviderSnapshot | null {
     weather: {
       et0_value_si: weather.et0_value_si,
       source: typeof weather.source === "string" ? weather.source : "unknown",
-      freshness: typeof weather.freshness === "string" ? weather.freshness : "unknown",
-      age_minutes: typeof weather.age_minutes === "number" ? weather.age_minutes : 0,
+      freshness:
+        typeof weather.freshness === "string" ? weather.freshness : "unknown",
+      age_minutes:
+        typeof weather.age_minutes === "number" ? weather.age_minutes : 0,
       provider_timestamp:
         typeof weather.provider_timestamp === "string"
           ? weather.provider_timestamp
@@ -104,21 +107,29 @@ function parseProviderSnapshot(input: unknown): StoredProviderSnapshot | null {
           : "unknown",
     },
     crop: {
-      crop_type: typeof crop.crop_type === "string" ? crop.crop_type : "unknown",
+      crop_type:
+        typeof crop.crop_type === "string" ? crop.crop_type : "unknown",
       growth_stage:
         typeof crop.growth_stage === "string" ? crop.growth_stage : "unknown",
       kc_value: crop.kc_value,
       stress_coefficient:
-        typeof crop.stress_coefficient === "number" ? crop.stress_coefficient : undefined,
+        typeof crop.stress_coefficient === "number"
+          ? crop.stress_coefficient
+          : undefined,
       provider_version:
-        typeof crop.provider_version === "string" ? crop.provider_version : "unknown",
+        typeof crop.provider_version === "string"
+          ? crop.provider_version
+          : "unknown",
     },
     soil: {
-      soil_type: typeof soil.soil_type === "string" ? soil.soil_type : "unknown",
+      soil_type:
+        typeof soil.soil_type === "string" ? soil.soil_type : "unknown",
       ks_value_si: soil.ks_value_si,
       field_capacity_depth_m: soil.field_capacity_depth_m,
       provider_version:
-        typeof soil.provider_version === "string" ? soil.provider_version : "unknown",
+        typeof soil.provider_version === "string"
+          ? soil.provider_version
+          : "unknown",
     },
   };
 }
@@ -171,7 +182,9 @@ export async function replaySimulationRun(runId: string): Promise<
   }
 
   const envelope = parseEnvelope(runRecord.input_envelope_json);
-  const providerSnapshot = parseProviderSnapshot(runRecord.provider_snapshot_json);
+  const providerSnapshot = parseProviderSnapshot(
+    runRecord.provider_snapshot_json,
+  );
 
   if (!envelope || !providerSnapshot) {
     const message = "Replay envelope/provider snapshot missing or invalid.";
@@ -225,7 +238,9 @@ export async function replaySimulationRun(runId: string): Promise<
   }
 
   const expectedOutputHash =
-    typeof runRecord.trajectory_hash === "string" ? runRecord.trajectory_hash : null;
+    typeof runRecord.trajectory_hash === "string"
+      ? runRecord.trajectory_hash
+      : null;
   const replayOutputHash = computeRunOutputHash(runResult.value);
   const replayStatus: "MATCH" | "NONDETERMINISTIC" =
     expectedOutputHash === replayOutputHash ? "MATCH" : "NONDETERMINISTIC";

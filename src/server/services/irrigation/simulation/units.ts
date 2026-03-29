@@ -25,7 +25,10 @@ export function asMeters(value: number, label = "meters"): Meters {
   return value as Meters;
 }
 
-export function asSquareMeters(value: number, label = "squareMeters"): SquareMeters {
+export function asSquareMeters(
+  value: number,
+  label = "squareMeters",
+): SquareMeters {
   assertFiniteNumber(value, label);
   if (value <= 0) {
     throw new Error(`${label} must be > 0.`);
@@ -33,7 +36,10 @@ export function asSquareMeters(value: number, label = "squareMeters"): SquareMet
   return value as SquareMeters;
 }
 
-export function asCubicMeters(value: number, label = "cubicMeters"): CubicMeters {
+export function asCubicMeters(
+  value: number,
+  label = "cubicMeters",
+): CubicMeters {
   assertFiniteNumber(value, label);
   assertNonNegative(value, label);
   return value as CubicMeters;
@@ -64,7 +70,10 @@ export function asPascals(value: number, label = "pascals"): Pascals {
   return value as Pascals;
 }
 
-export function asUnitInterval(value: number, label = "unitInterval"): UnitInterval {
+export function asUnitInterval(
+  value: number,
+  label = "unitInterval",
+): UnitInterval {
   assertFiniteNumber(value, label);
   if (value < 0 || value > 1) {
     throw new Error(`${label} must be in [0, 1].`);

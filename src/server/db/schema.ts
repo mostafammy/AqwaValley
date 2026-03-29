@@ -1181,7 +1181,10 @@ export const wellValveState = pgTable(
       t.irrigationEventId,
       t.transitionedAt,
     ),
-    index("well_valve_state_well_transitioned_idx").on(t.wellId, t.transitionedAt),
+    index("well_valve_state_well_transitioned_idx").on(
+      t.wellId,
+      t.transitionedAt,
+    ),
   ],
 );
 
@@ -1201,7 +1204,9 @@ export const irrigationSimulationRun = pgTable(
       .default("QUEUED"),
     engineVersion: text("engine_version").notNull(),
     hydrologyModelVersion: text("hydrology_model_version").notNull(),
-    modelMode: irrigationModelModeEnum("model_mode").notNull().default("production"),
+    modelMode: irrigationModelModeEnum("model_mode")
+      .notNull()
+      .default("production"),
     rngSeed: text("rng_seed"),
     inputHash: text("input_hash"),
     inputEnvelopeJson: jsonb("input_envelope_json"),
@@ -1209,9 +1214,13 @@ export const irrigationSimulationRun = pgTable(
     providerSnapshotJson: jsonb("provider_snapshot_json"),
     pricingSnapshotVersion: text("pricing_snapshot_version"),
     adapterUnitVersion: text("adapter_unit_version"),
-    startTimestamp: timestamp("start_timestamp", { withTimezone: true }).notNull(),
+    startTimestamp: timestamp("start_timestamp", {
+      withTimezone: true,
+    }).notNull(),
     timezone: text("timezone").notNull().default("UTC"),
-    integrationStepCount: integer("integration_step_count").notNull().default(0),
+    integrationStepCount: integer("integration_step_count")
+      .notNull()
+      .default(0),
     phaseStepCountsJson: jsonb("phase_step_counts_json"),
     retryCount: integer("retry_count").notNull().default(0),
     dtMinObservedS: numeric("dt_min_observed_s", { precision: 12, scale: 4 }),
@@ -1249,7 +1258,9 @@ export const irrigationSimulationRun = pgTable(
   (t) => [
     index("irrigation_sim_run_event_idx").on(t.irrigationEventId),
     index("irrigation_sim_run_status_created_idx").on(t.runStatus, t.createdAt),
-    index("irrigation_sim_run_hydrology_version_idx").on(t.hydrologyModelVersion),
+    index("irrigation_sim_run_hydrology_version_idx").on(
+      t.hydrologyModelVersion,
+    ),
     index("irrigation_sim_run_model_mode_idx").on(t.modelMode),
     unique("irrigation_sim_run_queue_job_key").on(t.queueJobId),
   ],
@@ -1271,7 +1282,9 @@ export const sensorDataSimulation = pgTable(
     irrigationEventId: uuid("irrigation_event_id")
       .notNull()
       .references(() => irrigationEvent.id, { onDelete: "cascade" }),
-    source: irrigationTelemetrySourceEnum("source").notNull().default("SIMULATION"),
+    source: irrigationTelemetrySourceEnum("source")
+      .notNull()
+      .default("SIMULATION"),
     value: doublePrecision("value").notNull(),
     timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
     generatedAt: timestamp("generated_at", { withTimezone: true })
@@ -1280,7 +1293,11 @@ export const sensorDataSimulation = pgTable(
     generatorVersion: text("generator_version").notNull(),
   },
   (t) => [
-    index("sensor_data_sim_source_sensor_ts_idx").on(t.source, t.sensorId, t.timestamp),
+    index("sensor_data_sim_source_sensor_ts_idx").on(
+      t.source,
+      t.sensorId,
+      t.timestamp,
+    ),
     index("sensor_data_sim_run_ts_idx").on(t.simulationRunId, t.timestamp),
     index("sensor_data_sim_event_ts_idx").on(t.irrigationEventId, t.timestamp),
     unique("sensor_data_sim_run_sensor_ts_key").on(

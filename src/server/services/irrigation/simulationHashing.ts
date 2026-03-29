@@ -24,10 +24,7 @@ function normalize(value: unknown): CanonicalValue {
     return normalizeNumber(value);
   }
 
-  if (
-    typeof value === "string" ||
-    typeof value === "boolean"
-  ) {
+  if (typeof value === "string" || typeof value === "boolean") {
     return value;
   }
 

@@ -1,4 +1,9 @@
-import type { DrainageInput, ETcInput, IHydrologyModel, InflowInput } from "./contracts";
+import type {
+  DrainageInput,
+  ETcInput,
+  IHydrologyModel,
+  InflowInput,
+} from "./contracts";
 import { createDomainError, err, ok, type Result } from "./result";
 import { asCubicMetersPerSecond, toNumber } from "./units";
 
@@ -9,7 +14,9 @@ function clamp(value: number, min: number, max: number): number {
 export class HydrologyModelV1 implements IHydrologyModel {
   public readonly version = "hydrology_v1.0.0";
 
-  public computeETc(input: ETcInput): Result<ReturnType<typeof asCubicMetersPerSecond>> {
+  public computeETc(
+    input: ETcInput,
+  ): Result<ReturnType<typeof asCubicMetersPerSecond>> {
     const et0 = input.et0DepthRateMps;
     const kc = input.kc;
     const stress = toNumber(input.stressCoefficient);
@@ -36,10 +43,17 @@ export class HydrologyModelV1 implements IHydrologyModel {
       );
     }
 
-    return ok(asCubicMetersPerSecond(et0 * kc * stress * area, "etCubicMetersPerSecond"));
+    return ok(
+      asCubicMetersPerSecond(
+        et0 * kc * stress * area,
+        "etCubicMetersPerSecond",
+      ),
+    );
   }
 
-  public computeDrainage(input: DrainageInput): Result<ReturnType<typeof asCubicMetersPerSecond>> {
+  public computeDrainage(
+    input: DrainageInput,
+  ): Result<ReturnType<typeof asCubicMetersPerSecond>> {
     const drainageCoeff = input.drainageCoefficientPerSecond;
     const fieldCapacityDepth = toNumber(input.fieldCapacityDepthM);
     const waterLevel = toNumber(input.waterLevelM);
@@ -66,7 +80,9 @@ export class HydrologyModelV1 implements IHydrologyModel {
     return ok(asCubicMetersPerSecond(constrainedRate, "drainageM3s"));
   }
 
-  public computeInflow(input: InflowInput): Result<ReturnType<typeof asCubicMetersPerSecond>> {
+  public computeInflow(
+    input: InflowInput,
+  ): Result<ReturnType<typeof asCubicMetersPerSecond>> {
     if (!input.valveOpen) {
       return ok(asCubicMetersPerSecond(0, "inflowM3s"));
     }
@@ -84,7 +100,8 @@ export class HydrologyModelV1 implements IHydrologyModel {
       return err(
         createDomainError({
           code: "INVALID_INPUT",
-          message: "Nominal pressure must be > 0 for pressure-aware inflow mode.",
+          message:
+            "Nominal pressure must be > 0 for pressure-aware inflow mode.",
           retryable: false,
           context: { nominalPressurePa: nominalPressure },
         }),

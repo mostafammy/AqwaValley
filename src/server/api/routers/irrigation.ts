@@ -56,7 +56,11 @@ const activateRecommendationInput = z.object({
   farmId: z.string().uuid(),
   recommendationId: z.string().uuid(),
   wellIds: z.array(z.string().uuid()).min(1),
-  durationMinutes: z.number().int().min(1).max(24 * 60),
+  durationMinutes: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 60),
   planSource: z.string().min(1).max(64).optional(),
   modelMode: z.enum(["production", "demo"]).optional(),
 });
@@ -297,7 +301,10 @@ export const irrigationRouter = createTRPCRouter({
   diffSimulationRuns: protectedProcedure
     .input(diffSimulationRunsInput)
     .mutation(async ({ ctx, input }) => {
-      const baseFarmId = await ensureUserCanAccessSimulationRun(ctx, input.baseRunId);
+      const baseFarmId = await ensureUserCanAccessSimulationRun(
+        ctx,
+        input.baseRunId,
+      );
       const candidateFarmId = await ensureUserCanAccessSimulationRun(
         ctx,
         input.candidateRunId,

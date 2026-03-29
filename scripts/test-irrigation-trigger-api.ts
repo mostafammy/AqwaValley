@@ -76,7 +76,10 @@ function getErrorCode(error: unknown): string | undefined {
   return undefined;
 }
 
-async function expectTrpcCode(fn: AsyncCall, expectedCode: string): Promise<void> {
+async function expectTrpcCode(
+  fn: AsyncCall,
+  expectedCode: string,
+): Promise<void> {
   try {
     await fn();
     assert.fail(`Expected tRPC error code ${expectedCode} but call succeeded.`);
@@ -154,7 +157,7 @@ async function main(): Promise<void> {
         requestedBy: actorUserId,
         systemPrompt: "integration-test-system-prompt",
         userMessage: "integration-test-user-message",
-        rawResponse: "{\"source\":\"integration-test\"}",
+        rawResponse: '{"source":"integration-test"}',
         plan: {
           summary: "Integration test plan",
           wells: [wellId],
@@ -178,16 +181,13 @@ async function main(): Promise<void> {
     {
       name: "Unauthorized calls are blocked",
       run: async () => {
-        await expectTrpcCode(
-          async () => {
-            await unauthorizedCaller.listRecentIrrigations({
-              farmId,
-              limit: 5,
-              offset: 0,
-            });
-          },
-          "UNAUTHORIZED",
-        );
+        await expectTrpcCode(async () => {
+          await unauthorizedCaller.listRecentIrrigations({
+            farmId,
+            limit: 5,
+            offset: 0,
+          });
+        }, "UNAUTHORIZED");
       },
     },
     {
@@ -213,7 +213,10 @@ async function main(): Promise<void> {
         createdEventIds.push(result.irrigationEventId);
 
         const [eventRow] = await db
-          .select({ id: schema.irrigationEvent.id, status: schema.irrigationEvent.status })
+          .select({
+            id: schema.irrigationEvent.id,
+            status: schema.irrigationEvent.status,
+          })
           .from(schema.irrigationEvent)
           .where(eq(schema.irrigationEvent.id, result.irrigationEventId))
           .limit(1);
@@ -225,7 +228,10 @@ async function main(): Promise<void> {
     {
       name: "getIrrigationStatus returns event + simulation run snapshot",
       run: async () => {
-        assert.ok(activationEventId, "Activation event is missing from previous test.");
+        assert.ok(
+          activationEventId,
+          "Activation event is missing from previous test.",
+        );
 
         const status = await authorizedCaller.getIrrigationStatus({
           farmId,
@@ -233,13 +239,19 @@ async function main(): Promise<void> {
         });
 
         assert.equal(status.irrigationEventId, activationEventId);
-        assert.ok(status.simulationRun, "Expected simulationRun payload in status response.");
+        assert.ok(
+          status.simulationRun,
+          "Expected simulationRun payload in status response.",
+        );
       },
     },
     {
       name: "listRecentIrrigations includes newly created event",
       run: async () => {
-        assert.ok(activationEventId, "Activation event is missing from previous test.");
+        assert.ok(
+          activationEventId,
+          "Activation event is missing from previous test.",
+        );
 
         const list = await authorizedCaller.listRecentIrrigations({
           farmId,
@@ -248,13 +260,20 @@ async function main(): Promise<void> {
         });
 
         const hasEvent = list.some((item) => item.id === activationEventId);
-        assert.equal(hasEvent, true, "Expected recent list to contain the new event.");
+        assert.equal(
+          hasEvent,
+          true,
+          "Expected recent list to contain the new event.",
+        );
       },
     },
     {
       name: "cancelIrrigation moves event to CANCELLED",
       run: async () => {
-        assert.ok(activationEventId, "Activation event is missing from previous test.");
+        assert.ok(
+          activationEventId,
+          "Activation event is missing from previous test.",
+        );
 
         const cancel = await authorizedCaller.cancelIrrigation({
           farmId,
@@ -288,33 +307,30 @@ async function main(): Promise<void> {
           offset: 0,
         });
 
-        assert.ok(plans.length > 0, "Expected at least one recommendation in listPlans.");
+        assert.ok(
+          plans.length > 0,
+          "Expected at least one recommendation in listPlans.",
+        );
         assert.equal(plans[0]?.farmId, farmId);
       },
     },
     {
       name: "replaySimulationRun rejects unknown run id",
       run: async () => {
-        await expectTrpcCode(
-          async () => {
-            await authorizedCaller.replaySimulationRun({ runId: randomUUID() });
-          },
-          "NOT_FOUND",
-        );
+        await expectTrpcCode(async () => {
+          await authorizedCaller.replaySimulationRun({ runId: randomUUID() });
+        }, "NOT_FOUND");
       },
     },
     {
       name: "diffSimulationRuns rejects unknown run ids",
       run: async () => {
-        await expectTrpcCode(
-          async () => {
-            await authorizedCaller.diffSimulationRuns({
-              baseRunId: randomUUID(),
-              candidateRunId: randomUUID(),
-            });
-          },
-          "NOT_FOUND",
-        );
+        await expectTrpcCode(async () => {
+          await authorizedCaller.diffSimulationRuns({
+            baseRunId: randomUUID(),
+            candidateRunId: randomUUID(),
+          });
+        }, "NOT_FOUND");
       },
     },
   ];
@@ -343,7 +359,9 @@ async function main(): Promise<void> {
     if (createdRecommendationIds.length > 0) {
       await db
         .delete(schema.irrigationRecommendation)
-        .where(inArray(schema.irrigationRecommendation.id, createdRecommendationIds));
+        .where(
+          inArray(schema.irrigationRecommendation.id, createdRecommendationIds),
+        );
     }
 
     printPass("Removed test events and recommendations.");

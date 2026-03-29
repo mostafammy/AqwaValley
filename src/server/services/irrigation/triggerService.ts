@@ -90,7 +90,10 @@ async function assertRecommendationBelongsToFarm(
   }
 }
 
-async function assertWellsBelongToFarm(farmId: string, wellIds: string[]): Promise<void> {
+async function assertWellsBelongToFarm(
+  farmId: string,
+  wellIds: string[],
+): Promise<void> {
   if (wellIds.length === 0) {
     throw new TRPCError({
       code: "BAD_REQUEST",

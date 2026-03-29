@@ -7,10 +7,7 @@ import type {
 } from "./contracts";
 import { runAdaptiveIntegrator } from "./adaptiveIntegrator";
 import { createDomainError, err, type Result } from "./result";
-import {
-  asCubicMetersPerSecond,
-  toNumber,
-} from "./units";
+import { asCubicMetersPerSecond, toNumber } from "./units";
 
 function computeDhdtMps(params: {
   terms: DerivativeTerms;

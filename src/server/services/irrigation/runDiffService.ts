@@ -1,8 +1,18 @@
 import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "~/server/db";
-import { irrigationSimulationRun, sensorDataSimulation, sensors } from "~/server/db/schema";
-import { createDomainError, err, ok, type Result, type RunDiffResult } from "./simulation";
+import {
+  irrigationSimulationRun,
+  sensorDataSimulation,
+  sensors,
+} from "~/server/db/schema";
+import {
+  createDomainError,
+  err,
+  ok,
+  type Result,
+  type RunDiffResult,
+} from "./simulation";
 
 const THRESHOLDS = {
   passWaterLevelRmse: 0.02,
@@ -34,7 +44,9 @@ function parseInvalidCount(input: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-function integrateFlowVolumeM3(points: Array<{ ts: number; value: number }>): number {
+function integrateFlowVolumeM3(
+  points: Array<{ ts: number; value: number }>,
+): number {
   if (points.length < 2) return 0;
   let total = 0;
   for (let i = 1; i < points.length; i += 1) {
@@ -81,7 +93,9 @@ async function loadSeries(runId: string): Promise<RunSeries> {
     }
   }
 
-  const toAveragedSeries = (source: Map<number, number[]>): Array<{ ts: number; value: number }> =>
+  const toAveragedSeries = (
+    source: Map<number, number[]>,
+  ): Array<{ ts: number; value: number }> =>
     [...source.entries()]
       .sort((a, b) => a[0] - b[0])
       .map(([ts, values]) => ({
@@ -136,14 +150,18 @@ export async function evaluateRunDiff(params: {
   );
 
   const baseExtracted = integrateFlowVolumeM3(baseSeries.flowRatePoints);
-  const candidateExtracted = integrateFlowVolumeM3(candidateSeries.flowRatePoints);
+  const candidateExtracted = integrateFlowVolumeM3(
+    candidateSeries.flowRatePoints,
+  );
   const extractedDeltaPct =
     baseExtracted > 0
       ? Math.abs(((candidateExtracted - baseExtracted) / baseExtracted) * 100)
       : 0;
 
   const baseInvalid = parseInvalidCount(baseRun.qualityStateCountsJson);
-  const candidateInvalid = parseInvalidCount(candidateRun.qualityStateCountsJson);
+  const candidateInvalid = parseInvalidCount(
+    candidateRun.qualityStateCountsJson,
+  );
   const invalidIncrease = Math.max(0, candidateInvalid - baseInvalid);
 
   const violatedThresholds: string[] = [];

@@ -72,13 +72,22 @@ const KC_BY_CROP_STAGE: Record<string, Partial<Record<string, number>>> = {
   },
 };
 
-const SOIL_BY_CROP: Record<string, { drainageCoefficientPerSecond: number; fieldCapacityDepthM: number }> = {
+const SOIL_BY_CROP: Record<
+  string,
+  { drainageCoefficientPerSecond: number; fieldCapacityDepthM: number }
+> = {
   wheat: { drainageCoefficientPerSecond: 0.00045, fieldCapacityDepthM: 0.75 },
   rice: { drainageCoefficientPerSecond: 0.0002, fieldCapacityDepthM: 1.1 },
   corn: { drainageCoefficientPerSecond: 0.0005, fieldCapacityDepthM: 0.8 },
   cotton: { drainageCoefficientPerSecond: 0.00052, fieldCapacityDepthM: 0.78 },
-  sugarcane: { drainageCoefficientPerSecond: 0.00042, fieldCapacityDepthM: 0.9 },
-  vegetables: { drainageCoefficientPerSecond: 0.00058, fieldCapacityDepthM: 0.68 },
+  sugarcane: {
+    drainageCoefficientPerSecond: 0.00042,
+    fieldCapacityDepthM: 0.9,
+  },
+  vegetables: {
+    drainageCoefficientPerSecond: 0.00058,
+    fieldCapacityDepthM: 0.68,
+  },
   fruits: { drainageCoefficientPerSecond: 0.0004, fieldCapacityDepthM: 0.85 },
   other: { drainageCoefficientPerSecond: 0.0005, fieldCapacityDepthM: 0.8 },
 };
@@ -167,8 +176,12 @@ export async function resolveProviderInputsForRun(params: {
   const weather = getWeatherForecast(params.districtId);
   const et0MmDay = weather.daily[0]?.et0 ?? 6;
   const et0DepthRateMps = et0MmDay / 1000 / 86400;
-  const targetSoilMoisturePct = Number.parseFloat(profile.targetSoilMoisturePct ?? "90");
-  const stressCoefficient = clamp01(Number.isFinite(targetSoilMoisturePct) ? targetSoilMoisturePct / 100 : 0.9);
+  const targetSoilMoisturePct = Number.parseFloat(
+    profile.targetSoilMoisturePct ?? "90",
+  );
+  const stressCoefficient = clamp01(
+    Number.isFinite(targetSoilMoisturePct) ? targetSoilMoisturePct / 100 : 0.9,
+  );
 
   const providerSnapshot: ProviderSnapshot = {
     weather: {

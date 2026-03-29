@@ -1,4 +1,8 @@
-import type { PhysicsRunInput, PhysicsRunOutput, PhysicsState } from "./contracts";
+import type {
+  PhysicsRunInput,
+  PhysicsRunOutput,
+  PhysicsState,
+} from "./contracts";
 import { createDomainError, err, ok, type Result } from "./result";
 import {
   asCubicMeters,
@@ -43,11 +47,21 @@ function rk4Step(params: {
   baseState: PhysicsState;
   derivativeAtState: DerivativeAtStateFn;
 }): Result<number> {
-  const { currentTimeS, currentH, dtS, toDateAtElapsed, baseState, derivativeAtState } = params;
+  const {
+    currentTimeS,
+    currentH,
+    dtS,
+    toDateAtElapsed,
+    baseState,
+    derivativeAtState,
+  } = params;
 
   const k1 = derivativeAtState({
     timestamp: toDateAtElapsed(currentTimeS),
-    elapsedSeconds: asSeconds(Math.max(currentTimeS, Number.EPSILON), "elapsedSeconds"),
+    elapsedSeconds: asSeconds(
+      Math.max(currentTimeS, Number.EPSILON),
+      "elapsedSeconds",
+    ),
     state: { ...baseState, waterLevelM: asMeters(currentH, "waterLevelM") },
     dtS: asSeconds(dtS, "rk4.k1.dtS"),
   });
@@ -83,7 +97,10 @@ function rk4Step(params: {
   const nextH =
     currentH +
     (dtS / 6) *
-      (k1.value.dhdtMps + 2 * k2.value.dhdtMps + 2 * k3.value.dhdtMps + k4.value.dhdtMps);
+      (k1.value.dhdtMps +
+        2 * k2.value.dhdtMps +
+        2 * k3.value.dhdtMps +
+        k4.value.dhdtMps);
 
   return ok(nextH);
 }
@@ -180,7 +197,8 @@ function tryAdaptiveStep(params: {
 
     const errorNorm = Math.abs(full.value - halfB.value);
     const threshold =
-      input.absTolM + input.relTol * Math.max(Math.abs(full.value), Math.abs(halfB.value));
+      input.absTolM +
+      input.relTol * Math.max(Math.abs(full.value), Math.abs(halfB.value));
 
     if (errorNorm <= threshold) {
       return ok({
@@ -212,7 +230,9 @@ function tryAdaptiveStep(params: {
   });
 }
 
-export function runAdaptiveIntegrator(input: IntegratorInput): Result<PhysicsRunOutput> {
+export function runAdaptiveIntegrator(
+  input: IntegratorInput,
+): Result<PhysicsRunOutput> {
   const horizonS = toNumber(input.horizonSeconds);
   const minDtS = toNumber(input.minDtS);
   const maxDtS = toNumber(input.maxDtS);
@@ -246,8 +266,14 @@ export function runAdaptiveIntegrator(input: IntegratorInput): Result<PhysicsRun
         samples,
         integrationStepCount,
         retryCount,
-        dtMinObservedS: asSeconds(dtValues.length > 0 ? Math.min(...dtValues) : dtS, "dtMinObservedS"),
-        dtMaxObservedS: asSeconds(dtValues.length > 0 ? Math.max(...dtValues) : dtS, "dtMaxObservedS"),
+        dtMinObservedS: asSeconds(
+          dtValues.length > 0 ? Math.min(...dtValues) : dtS,
+          "dtMinObservedS",
+        ),
+        dtMaxObservedS: asSeconds(
+          dtValues.length > 0 ? Math.max(...dtValues) : dtS,
+          "dtMaxObservedS",
+        ),
         errorNormMax,
         errorNormP95: computeP95(errorValues),
         numericalDivergenceCount,
@@ -339,7 +365,10 @@ export function runAdaptiveIntegrator(input: IntegratorInput): Result<PhysicsRun
 
     samples.push({
       timestamp: toDateAtElapsed(elapsedS),
-      elapsedSeconds: asSeconds(Math.max(elapsedS, Number.EPSILON), "elapsedSeconds"),
+      elapsedSeconds: asSeconds(
+        Math.max(elapsedS, Number.EPSILON),
+        "elapsedSeconds",
+      ),
       waterLevelM: state.waterLevelM,
       waterDebtM3: state.waterDebtM3,
       dtUsedS: asSeconds(dtForStep, "dtUsedS"),
@@ -356,8 +385,14 @@ export function runAdaptiveIntegrator(input: IntegratorInput): Result<PhysicsRun
     samples,
     integrationStepCount,
     retryCount,
-    dtMinObservedS: asSeconds(dtValues.length > 0 ? Math.min(...dtValues) : dtS, "dtMinObservedS"),
-    dtMaxObservedS: asSeconds(dtValues.length > 0 ? Math.max(...dtValues) : dtS, "dtMaxObservedS"),
+    dtMinObservedS: asSeconds(
+      dtValues.length > 0 ? Math.min(...dtValues) : dtS,
+      "dtMinObservedS",
+    ),
+    dtMaxObservedS: asSeconds(
+      dtValues.length > 0 ? Math.max(...dtValues) : dtS,
+      "dtMaxObservedS",
+    ),
     errorNormMax,
     errorNormP95: computeP95(errorValues),
     numericalDivergenceCount,
