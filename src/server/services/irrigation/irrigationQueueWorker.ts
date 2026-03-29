@@ -38,6 +38,38 @@ type QueuedRunRecord = {
   runCreatedAt: Date;
 };
 
+async function loadExecutionStatuses(params: {
+  irrigationEventId: string;
+  simulationRunId: string;
+}): Promise<{
+  eventStatus: string | null;
+  runStatus: string | null;
+}> {
+  const [eventRow] = await db
+    .select({ status: irrigationEvent.status })
+    .from(irrigationEvent)
+    .where(eq(irrigationEvent.id, params.irrigationEventId))
+    .limit(1);
+
+  const [runRow] = await db
+    .select({ runStatus: irrigationSimulationRun.runStatus })
+    .from(irrigationSimulationRun)
+    .where(eq(irrigationSimulationRun.id, params.simulationRunId))
+    .limit(1);
+
+  return {
+    eventStatus: eventRow?.status ?? null,
+    runStatus: runRow?.runStatus ?? null,
+  };
+}
+
+function isCancelledState(params: {
+  eventStatus: string | null;
+  runStatus: string | null;
+}): boolean {
+  return params.eventStatus === "CANCELLED" || params.runStatus === "CANCELLED";
+}
+
 function transitionOrThrow(
   from: IrrigationEventStatus,
   to: IrrigationEventStatus,
@@ -85,6 +117,25 @@ async function completeWithFailure(params: {
   failureMessage: string;
 }): Promise<void> {
   const now = new Date();
+
+  const statuses = await loadExecutionStatuses({
+    irrigationEventId: params.irrigationEventId,
+    simulationRunId: params.simulationRunId,
+  });
+
+  // Do not overwrite late cancellation with FAILED.
+  if (isCancelledState(statuses)) {
+    await db
+      .update(irrigationSimulationRun)
+      .set({ runStatus: "CANCELLED", completedAt: now })
+      .where(
+        and(
+          eq(irrigationSimulationRun.id, params.simulationRunId),
+          not(eq(irrigationSimulationRun.runStatus, "CANCELLED")),
+        ),
+      );
+    return;
+  }
 
   const [event] = await db
     .select({ wellIds: irrigationEvent.wellIds })
@@ -168,7 +219,30 @@ async function processQueuedRun(
     return "cancelled";
   }
 
-  transitionOrThrow(eventRecord.status as IrrigationEventStatus, "RUNNING");
+  const preRunStatuses = await loadExecutionStatuses({
+    irrigationEventId: eventRecord.id,
+    simulationRunId: queued.simulationRunId,
+  });
+
+  if (isCancelledState(preRunStatuses)) {
+    await db
+      .update(irrigationSimulationRun)
+      .set({ runStatus: "CANCELLED", completedAt: new Date() })
+      .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
+    return "cancelled";
+  }
+
+  if (!preRunStatuses.eventStatus) {
+    await completeWithFailure({
+      irrigationEventId: eventRecord.id,
+      simulationRunId: queued.simulationRunId,
+      failureCode: "MISSING_EVENT",
+      failureMessage: "Irrigation event disappeared before RUNNING transition.",
+    });
+    return "failed";
+  }
+
+  transitionOrThrow(preRunStatuses.eventStatus as IrrigationEventStatus, "RUNNING");
 
   const now = new Date();
   await db
@@ -180,12 +254,35 @@ async function processQueuedRun(
       failureCode: null,
       failureMessage: null,
     })
-    .where(eq(irrigationEvent.id, eventRecord.id));
+    .where(
+      and(
+        eq(irrigationEvent.id, eventRecord.id),
+        not(eq(irrigationEvent.status, "CANCELLED")),
+      ),
+    );
 
   await db
     .update(irrigationSimulationRun)
     .set({ runStatus: "RUNNING" })
-    .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
+    .where(
+      and(
+        eq(irrigationSimulationRun.id, queued.simulationRunId),
+        not(eq(irrigationSimulationRun.runStatus, "CANCELLED")),
+      ),
+    );
+
+  const postRunningStatuses = await loadExecutionStatuses({
+    irrigationEventId: eventRecord.id,
+    simulationRunId: queued.simulationRunId,
+  });
+
+  if (isCancelledState(postRunningStatuses)) {
+    await db
+      .update(irrigationSimulationRun)
+      .set({ runStatus: "CANCELLED", completedAt: now })
+      .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
+    return "cancelled";
+  }
 
   await db.insert(wellValveState).values(
     eventRecord.wellIds.map((wellId) => ({
@@ -313,6 +410,8 @@ async function processQueuedRun(
     })
     .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
 
+  const cancellationToken = { cancelled: false };
+
   const runResult = simulateIrrigationRun({
     startTimestamp: now,
     horizonSeconds: eventRecord.durationMinutes * 60,
@@ -333,6 +432,7 @@ async function processQueuedRun(
       nominalPressurePa: 200_000,
       maxPressureMultiplier: 1.2,
     }),
+    shouldCancel: () => cancellationToken.cancelled,
   });
 
   if (!runResult.ok) {
@@ -414,7 +514,30 @@ async function processQueuedRun(
     pricing_snapshot_version: PRICING_SNAPSHOT_VERSION,
   };
 
-  transitionOrThrow("RUNNING", "COMPLETED");
+  const preCompleteStatuses = await loadExecutionStatuses({
+    irrigationEventId: eventRecord.id,
+    simulationRunId: queued.simulationRunId,
+  });
+
+  if (isCancelledState(preCompleteStatuses)) {
+    await db
+      .update(irrigationSimulationRun)
+      .set({ runStatus: "CANCELLED", completedAt: endedAt })
+      .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
+    return "cancelled";
+  }
+
+  if (!preCompleteStatuses.eventStatus) {
+    await completeWithFailure({
+      irrigationEventId: eventRecord.id,
+      simulationRunId: queued.simulationRunId,
+      failureCode: "MISSING_EVENT",
+      failureMessage: "Irrigation event disappeared before COMPLETED transition.",
+    });
+    return "failed";
+  }
+
+  transitionOrThrow(preCompleteStatuses.eventStatus as IrrigationEventStatus, "COMPLETED");
 
   await db
     .update(irrigationEvent)
@@ -427,7 +550,12 @@ async function processQueuedRun(
       quotaDebitStatus: "APPLIED",
       quotaDebitAttempts: 1,
     })
-    .where(eq(irrigationEvent.id, eventRecord.id));
+    .where(
+      and(
+        eq(irrigationEvent.id, eventRecord.id),
+        not(eq(irrigationEvent.status, "CANCELLED")),
+      ),
+    );
 
   await db
     .update(irrigationSimulationRun)
@@ -461,7 +589,12 @@ async function processQueuedRun(
       ) as Record<string, unknown>,
       completedAt: endedAt,
     })
-    .where(eq(irrigationSimulationRun.id, queued.simulationRunId));
+    .where(
+      and(
+        eq(irrigationSimulationRun.id, queued.simulationRunId),
+        not(eq(irrigationSimulationRun.runStatus, "CANCELLED")),
+      ),
+    );
 
   const [baseRun] = await db
     .select({ id: irrigationSimulationRun.id })
