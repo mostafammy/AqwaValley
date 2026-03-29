@@ -24,7 +24,7 @@ export async function writeSimulationReadings(params: {
   for (let i = 0; i < params.readings.length; i += chunkSize) {
     const chunk = params.readings.slice(i, i + chunkSize);
 
-    await db
+    const insertedRows = await db
       .insert(sensorDataSimulation)
       .values(
         chunk.map((reading) => ({
@@ -44,9 +44,12 @@ export async function writeSimulationReadings(params: {
           sensorDataSimulation.sensorId,
           sensorDataSimulation.timestamp,
         ],
+      })
+      .returning({
+        sensorId: sensorDataSimulation.sensorId,
       });
 
-    inserted += chunk.length;
+    inserted += insertedRows.length;
   }
 
   return { inserted };
