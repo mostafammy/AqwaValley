@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "~/server/db";
 import {
@@ -58,6 +58,15 @@ type ListRecentResult = {
   quotaDebitStatus: string;
 };
 
+const NON_TERMINAL_EVENT_STATUSES = [
+  "REQUESTED",
+  "QUEUED",
+  "RUNNING",
+  "DEBIT_PENDING",
+] as const;
+
+type ReadExecutor = Pick<typeof db, "select">;
+
 function assertDurationMinutes(value: number): void {
   if (!Number.isInteger(value) || value <= 0 || value > 24 * 60) {
     throw new TRPCError({
@@ -68,10 +77,11 @@ function assertDurationMinutes(value: number): void {
 }
 
 async function assertRecommendationBelongsToFarm(
+  executor: ReadExecutor,
   farmId: string,
   recommendationId: string,
 ): Promise<void> {
-  const [record] = await db
+  const [record] = await executor
     .select({ id: irrigationRecommendation.id })
     .from(irrigationRecommendation)
     .where(
@@ -91,6 +101,7 @@ async function assertRecommendationBelongsToFarm(
 }
 
 async function assertWellsBelongToFarm(
+  executor: ReadExecutor,
   farmId: string,
   wellIds: string[],
 ): Promise<void> {
@@ -101,7 +112,7 @@ async function assertWellsBelongToFarm(
     });
   }
 
-  const links = await db
+  const links = await executor
     .select({ wellId: farmWell.wellId })
     .from(farmWell)
     .where(and(eq(farmWell.farmId, farmId), inArray(farmWell.wellId, wellIds)));
@@ -118,75 +129,111 @@ export async function startIrrigationActivation(
   input: ActivationInput,
 ): Promise<ActivationResult> {
   assertDurationMinutes(input.durationMinutes);
-  await assertRecommendationBelongsToFarm(input.farmId, input.recommendationId);
-  await assertWellsBelongToFarm(input.farmId, input.wellIds);
+
+  const requestedWellIds = [...new Set(input.wellIds)].sort();
 
   const model = new HydrologyModelV1();
   const engine = new IrrigationPhysicsEngine(model);
-  const now = new Date();
-  const queueJobId = `irrigation:${input.farmId}:${now.getTime()}`;
 
-  const [event] = await db
-    .insert(irrigationEvent)
-    .values({
-      farmId: input.farmId,
-      recommendationId: input.recommendationId,
-      triggeredByUserId: input.requestedByUserId,
-      wellIds: input.wellIds,
-      status: "QUEUED",
-      planSource: input.planSource ?? "recommendation",
-      durationMinutes: input.durationMinutes,
-      quotaDebitStatus: "PENDING",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning({ id: irrigationEvent.id });
+  return db.transaction(async (tx) => {
+    await assertRecommendationBelongsToFarm(
+      tx,
+      input.farmId,
+      input.recommendationId,
+    );
+    await assertWellsBelongToFarm(tx, input.farmId, requestedWellIds);
 
-  if (!event) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to create irrigation event.",
-    });
-  }
+    // Acquire transaction-scoped advisory locks per well to serialize claims.
+    for (const wellId of requestedWellIds) {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${wellId}))`);
+    }
 
-  const [simRun] = await db
-    .insert(irrigationSimulationRun)
-    .values({
+    const overlappingEvents = await tx
+      .select({
+        id: irrigationEvent.id,
+        status: irrigationEvent.status,
+        wellIds: irrigationEvent.wellIds,
+      })
+      .from(irrigationEvent)
+      .where(inArray(irrigationEvent.status, [...NON_TERMINAL_EVENT_STATUSES]));
+
+    const claimedWellIds = requestedWellIds.filter((wellId) =>
+      overlappingEvents.some((event) => event.wellIds.includes(wellId)),
+    );
+
+    if (claimedWellIds.length > 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `One or more wells are already claimed by active irrigation events: ${claimedWellIds.join(", ")}.`,
+      });
+    }
+
+    const now = new Date();
+    const queueJobId = `irrigation:${input.farmId}:${now.getTime()}`;
+
+    const [event] = await tx
+      .insert(irrigationEvent)
+      .values({
+        farmId: input.farmId,
+        recommendationId: input.recommendationId,
+        triggeredByUserId: input.requestedByUserId,
+        wellIds: requestedWellIds,
+        status: "QUEUED",
+        planSource: input.planSource ?? "recommendation",
+        durationMinutes: input.durationMinutes,
+        quotaDebitStatus: "PENDING",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning({ id: irrigationEvent.id });
+
+    if (!event) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create irrigation event.",
+      });
+    }
+
+    const [simRun] = await tx
+      .insert(irrigationSimulationRun)
+      .values({
+        irrigationEventId: event.id,
+        isPrimary: true,
+        queueJobId,
+        runStatus: "QUEUED",
+        engineVersion: engine.engineVersion,
+        hydrologyModelVersion: engine.hydrologyModelVersion,
+        modelMode: input.modelMode ?? "production",
+        startTimestamp: now,
+        timezone: "UTC",
+        createdAt: now,
+      })
+      .returning({ id: irrigationSimulationRun.id });
+
+    if (!simRun) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create irrigation simulation run.",
+      });
+    }
+
+    await tx.insert(wellValveState).values(
+      requestedWellIds.map((wellId) => ({
+        wellId,
+        state: "OPENING" as const,
+        irrigationEventId: event.id,
+        reason: "Irrigation activation accepted and queued.",
+        transitionedAt: now,
+      })),
+    );
+
+    return {
       irrigationEventId: event.id,
+      simulationRunId: simRun.id,
+      status: "QUEUED" as const,
       queueJobId,
-      runStatus: "QUEUED",
-      engineVersion: engine.engineVersion,
-      hydrologyModelVersion: engine.hydrologyModelVersion,
-      modelMode: input.modelMode ?? "production",
-      startTimestamp: now,
-      timezone: "UTC",
-      createdAt: now,
-    })
-    .returning({ id: irrigationSimulationRun.id });
-
-  if (!simRun) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to create irrigation simulation run.",
-    });
-  }
-
-  await db.insert(wellValveState).values(
-    input.wellIds.map((wellId) => ({
-      wellId,
-      state: "OPENING" as const,
-      irrigationEventId: event.id,
-      reason: "Irrigation activation accepted and queued.",
-      transitionedAt: now,
-    })),
-  );
-
-  return {
-    irrigationEventId: event.id,
-    simulationRunId: simRun.id,
-    status: "QUEUED",
-    queueJobId,
-  };
+    };
+  });
 }
 
 export async function getIrrigationEventStatus(
@@ -228,7 +275,12 @@ export async function getIrrigationEventStatus(
       completedAt: irrigationSimulationRun.completedAt,
     })
     .from(irrigationSimulationRun)
-    .where(eq(irrigationSimulationRun.irrigationEventId, event.id))
+    .where(
+      and(
+        eq(irrigationSimulationRun.irrigationEventId, event.id),
+        eq(irrigationSimulationRun.isPrimary, true),
+      ),
+    )
     .orderBy(desc(irrigationSimulationRun.createdAt))
     .limit(1);
 
@@ -305,7 +357,12 @@ export async function cancelIrrigationActivation(params: {
   await db
     .update(irrigationSimulationRun)
     .set({ runStatus: "CANCELLED", completedAt: now })
-    .where(eq(irrigationSimulationRun.irrigationEventId, event.id));
+    .where(
+      and(
+        eq(irrigationSimulationRun.irrigationEventId, event.id),
+        eq(irrigationSimulationRun.isPrimary, true),
+      ),
+    );
 
   await db.insert(wellValveState).values(
     event.wellIds.map((wellId) => ({
