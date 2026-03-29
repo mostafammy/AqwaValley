@@ -292,12 +292,12 @@ Per step:
 
 $$err = ||h_{full} - h_{half}||$$
 
-4. Accept if:
+1. Accept if:
 
 $$err \le absTol + relTol \cdot max(|h_{full}|, |h_{half}|)$$
 
-5. If reject, halve dt and retry same step.
-6. If retries exceed MAX_REFINEMENTS_PER_STEP (8) or dt < dtMin:
+1. If reject, halve dt and retry same step.
+1. If retries exceed MAX_REFINEMENTS_PER_STEP (8) or dt < dtMin:
 
 - emit failure code NUMERICAL_DIVERGENCE
 - mark run failed (non-retryable)
@@ -819,13 +819,10 @@ No-Go if any of the following:
 
 ## 17. Open Decisions for Review
 
-1. Exact pilot cohort size and duration.
-
-- Deadline: close before Phase B kickoff.
-
-2. Whether sensor_override_schedule is in V1 or deferred to V1.1.
-
-- Current recommendation: defer to V1.1 unless a concrete Phase A use case emerges.
+- Exact pilot cohort size and duration.
+  - Deadline: close before Phase B kickoff.
+- Whether sensor_override_schedule is in V1 or deferred to V1.1.
+  - Current recommendation: defer to V1.1 unless a concrete Phase A use case emerges.
 
 Decision closed:
 
@@ -873,10 +870,12 @@ patterns with explicit SOLID alignment.
 ### Phase 0: Contract-First Foundations
 
 Scope:
+
 - Define TypeScript domain contracts and result types before infrastructure code.
 - Freeze canonical unit and error-code contracts.
 
 Deliverables:
+
 - `DomainErrorCode` union and typed `Result<T, E>` primitives.
 - Interfaces:
   - `IHydrologyModel`
@@ -888,10 +887,12 @@ Deliverables:
   - `IRunDiffService`
 
 Patterns:
+
 - Ports and Adapters (Hexagonal).
 - Value Object pattern for units and typed identifiers.
 
 SOLID mapping:
+
 - S: each interface has one reason to change.
 - I: narrow interfaces per capability.
 - D: high-level engine depends on abstractions only.
@@ -899,33 +900,40 @@ SOLID mapping:
 ### Phase 1: Schema and Storage Isolation
 
 Scope:
+
 - Implement persistence model and strict real/simulation isolation.
 
 Deliverables:
+
 - Tables and indexes defined in Section 4.
 - Source-tag strategy and lineage fields enforced.
 - Query contracts defaulting to `source=REAL`.
 
 Patterns:
+
 - Repository pattern per aggregate root (`IrrigationEventRepository`,
   `SimulationRunRepository`).
 - Specification pattern for query filters (source-scoped predicates).
 
 SOLID mapping:
+
 - O: new storage backend can be added without changing domain services.
 - L: repository implementations are substitutable under same contracts.
 
 ### Phase 2: Physics and Hydrology Core
 
 Scope:
+
 - Implement `IHydrologyModel` and adaptive integrator with conservation debt.
 
 Deliverables:
+
 - `HydrologyModelV1` implementing ET_c, D, Q_in ownership.
 - `AdaptiveIntegrator` with acceptance/rejection and retry policy.
 - `StateTransitionEngine` for conservation-safe updates.
 
 Patterns:
+
 - Strategy pattern:
   - `IHydrologyModel` strategy per model version.
   - Sensor synthesis strategy by sensor type.
@@ -933,15 +941,18 @@ Patterns:
   - simulation loop skeleton with overridable term calculators.
 
 SOLID mapping:
+
 - O: new hydrology versions added without changing integrator.
 - D: integrator depends on `IHydrologyModel` abstraction.
 
 ### Phase 3: Queue Orchestration and Workflow Control
 
 Scope:
+
 - Implement asynchronous run orchestration, cancellation, and debit workflow.
 
 Deliverables:
+
 - Worker pipeline:
   - simulation_stream -> shadow_ingest
 - Workflow states and transitions:
@@ -949,61 +960,74 @@ Deliverables:
 - Retry classifier for retryable vs non-retryable errors.
 
 Patterns:
+
 - State Machine pattern for lifecycle transitions.
 - Command pattern for queue jobs (`StartSimulationCommand`,
   `FinalizeDebitCommand`, `CancelRunCommand`).
 - Outbox pattern for reliable event emission.
 
 SOLID mapping:
+
 - S: state transition logic isolated from business math.
 - O: new states/events can be added without modifying existing handlers.
 
 ### Phase 4: API and Query Layer
 
 Scope:
+
 - Build tRPC endpoints with strict source filtering and typed contracts.
 
 Deliverables:
+
 - Procedures in Section 11 with source-aware defaults.
 - DTO schema validation with Zod for request/response boundaries.
 
 Patterns:
+
 - Facade pattern for API-facing orchestration services.
 - Policy pattern for role + source visibility rules.
 
 SOLID mapping:
+
 - I: separate read/write service interfaces.
 - D: API layer depends on application service interfaces, not repositories.
 
 ### Phase 5: Observability, Replay, and Diff Services
 
 Scope:
+
 - Implement run diagnostics, replay, and comparison gates.
 
 Deliverables:
+
 - Structured diagnostics in Section 9.1.
 - Deterministic replay service with canonical serialization and hashing.
 - Run-diff gate service with PASS/WARN/FAIL thresholds.
 
 Patterns:
+
 - Builder pattern for canonical hash payload generation.
 - Decorator pattern for telemetry enrichment around core operations.
 
 SOLID mapping:
+
 - S: replay and diff are separate services with distinct responsibilities.
 - O: new metrics and diff dimensions added without changing core runner.
 
 ### Phase 6: Hardening and Rollout
 
 Scope:
+
 - Execute test matrix, stress profile, and pilot rollout.
 
 Deliverables:
+
 - Full merge-gate completion from Section 13.
 - SLO dashboards and alert routes from Section 15.
 - Feature-flagged rollout plan from Section 14.
 
 Patterns:
+
 - Circuit Breaker for dependency providers.
 - Bulkhead isolation between simulation workers and API-facing services.
 
@@ -1014,69 +1038,85 @@ Patterns:
 ### 21.1 TriggerService
 
 Primary responsibility:
+
 - Validate activation request and orchestrate run creation.
 
 Patterns:
+
 - Orchestrator + State Machine.
 
 Best practices:
+
 - Idempotent command handling.
 - Explicit retry classification.
 - No direct SQL in service (repository abstraction only).
 
 Type-safety requirements:
+
 - Use discriminated unions for status transitions.
 - Compile-time transition map (invalid transitions impossible to encode).
 
 ### 21.2 SimulatorService
 
 Primary responsibility:
+
 - Coordinate provider fetches, hydrology engine, and ingest handoff.
 
 Patterns:
+
 - Facade + Pipeline.
 
 Best practices:
+
 - Parallel provider reads with timeout budgets.
 - Deterministic ordering of inputs before hashing.
 - Side effects isolated to final commit stage.
 
 Type-safety requirements:
+
 - Immutable input snapshot type.
 - `Result`-based error handling, no untyped throws crossing boundaries.
 
 ### 21.3 IHydrologyModel Implementations
 
 Primary responsibility:
+
 - Compute ET_c, D, and Q_in.
 
 Patterns:
+
 - Strategy pattern with versioned implementations (`HydrologyModelV1`,
   `HydrologyModelV2`).
 
 Best practices:
+
 - Pure functions for deterministic term computation.
 - No I/O in term calculators.
 - Equation/coeff changes require `hydrology_model_version` bump.
 
 Type-safety requirements:
+
 - Branded types for SI units (`Meters`, `CubicMetersPerSecond`, `Seconds`).
 - Compile-time prohibition of mixed units.
 
 ### 21.4 AdaptiveIntegrator
 
 Primary responsibility:
+
 - Numerical step integration and local error control.
 
 Patterns:
+
 - Template Method for step lifecycle.
 
 Best practices:
+
 - Explicit retry loop with bounded refinement count.
 - Deterministic failure semantics.
 - Preserve mass-conservation debt state.
 
 Type-safety requirements:
+
 - Step outcome union:
   - `accepted`
   - `rejected_retry`
@@ -1085,35 +1125,43 @@ Type-safety requirements:
 ### 21.5 Shadow Ingest and Storage Layer
 
 Primary responsibility:
+
 - Persist simulation telemetry in isolated tagged storage.
 
 Patterns:
+
 - Repository + Specification.
 
 Best practices:
+
 - Default REAL-only query policy.
 - Separate write principals for REAL vs SIMULATION.
 - Indexes aligned to access patterns (`source`, `sensor_id`, `timestamp`).
 
 Type-safety requirements:
+
 - `source` as enum, never raw string.
 - Mandatory lineage fields on simulation writes.
 
 ### 21.6 ReplayService and DiffService
 
 Primary responsibility:
+
 - Reproduce runs deterministically and evaluate regression gates.
 
 Patterns:
+
 - Builder for canonical hash payload.
 - Comparator strategy for diff dimensions.
 
 Best practices:
+
 - Replay envelope completeness checks before execution.
 - Hash versioning and schema evolution support.
 - Cross-model comparison requires explicit flag.
 
 Type-safety requirements:
+
 - Diff result as discriminated union with required violated-threshold list.
 
 ---
