@@ -34,6 +34,7 @@ type IntegratorInput = Omit<PhysicsRunInput, "getDerivativeTerms"> & {
 
 type StepResult = {
   accepted: boolean;
+  acceptedDtS: number;
   nextWaterLevelM: number;
   errorNorm: number;
   refinementsUsed: number;
@@ -203,6 +204,7 @@ function tryAdaptiveStep(params: {
     if (errorNorm <= threshold) {
       return ok({
         accepted: true,
+        acceptedDtS: dt,
         nextWaterLevelM: halfB.value,
         errorNorm,
         refinementsUsed,
@@ -215,6 +217,7 @@ function tryAdaptiveStep(params: {
     if (dt < toNumber(input.minDtS)) {
       return ok({
         accepted: false,
+        acceptedDtS: dt,
         nextWaterLevelM: currentH,
         errorNorm,
         refinementsUsed,
@@ -224,6 +227,7 @@ function tryAdaptiveStep(params: {
 
   return ok({
     accepted: false,
+    acceptedDtS: dt,
     nextWaterLevelM: currentH,
     errorNorm: Number.POSITIVE_INFINITY,
     refinementsUsed,
@@ -318,6 +322,8 @@ export function runAdaptiveIntegrator(
       );
     }
 
+    const acceptedDtS = step.value.acceptedDtS;
+
     const conserved = applyConservationDebt({
       candidateWaterLevelM: step.value.nextWaterLevelM,
       currentDebtM3: state.waterDebtM3,
@@ -338,7 +344,7 @@ export function runAdaptiveIntegrator(
     }
 
     if (toNumber(state.waterLevelM) === 0 && toNumber(state.waterDebtM3) > 0) {
-      dryDurationS += dtForStep;
+      dryDurationS += acceptedDtS;
       if (dryDurationS > toNumber(input.maxDryDurationSeconds)) {
         return err(
           createDomainError({
@@ -357,11 +363,11 @@ export function runAdaptiveIntegrator(
       dryDurationS = 0;
     }
 
-    elapsedS += dtForStep;
+    elapsedS += acceptedDtS;
     integrationStepCount += 1;
     errorNormMax = Math.max(errorNormMax, step.value.errorNorm);
     errorValues.push(step.value.errorNorm);
-    dtValues.push(dtForStep);
+    dtValues.push(acceptedDtS);
 
     samples.push({
       timestamp: toDateAtElapsed(elapsedS),
@@ -371,12 +377,12 @@ export function runAdaptiveIntegrator(
       ),
       waterLevelM: state.waterLevelM,
       waterDebtM3: state.waterDebtM3,
-      dtUsedS: asSeconds(dtForStep, "dtUsedS"),
+      dtUsedS: asSeconds(acceptedDtS, "dtUsedS"),
       errorNorm: step.value.errorNorm,
     });
 
     // Conservative adaptive growth after accepted steps.
-    dtS = Math.min(maxDtS, Math.max(minDtS, dtForStep * 1.25));
+    dtS = Math.min(maxDtS, Math.max(minDtS, acceptedDtS * 1.25));
   }
 
   return ok({
