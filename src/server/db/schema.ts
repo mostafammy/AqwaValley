@@ -175,6 +175,46 @@ export const irrigationTelemetrySourceEnum = pgEnum(
   ["REAL", "SIMULATION"],
 );
 
+export const forecastRunStatusEnum = pgEnum("forecast_run_status", [
+  "queued",
+  "running",
+  "completed",
+  "failed",
+]);
+
+export const forecastScopeTypeEnum = pgEnum("forecast_scope_type", [
+  "district",
+  "well",
+]);
+
+export const forecastTargetTypeEnum = pgEnum("forecast_target_type", [
+  "aquifer_level",
+  "extraction_vs_safe_yield",
+]);
+
+export const forecastRiskLevelEnum = pgEnum("forecast_risk_level", [
+  "low",
+  "moderate",
+  "high",
+  "critical",
+]);
+
+export const forecastModelApprovalStateEnum = pgEnum(
+  "forecast_model_approval_state",
+  ["pending_review", "approved", "rejected", "expired", "superseded"],
+);
+
+export const forecastTriggerTypeEnum = pgEnum("forecast_trigger_type", [
+  "cron",
+  "manual",
+  "system",
+]);
+
+export const forecastLineageUsageTypeEnum = pgEnum(
+  "forecast_lineage_usage_type",
+  ["train", "validate", "calibrate"],
+);
+
 export const irrigationValveAuditStateEnum = pgEnum(
   "irrigation_valve_audit_state",
   ["CLOSED", "OPENING", "OPEN", "CLOSING"],
@@ -762,6 +802,207 @@ export const cronSimulationRun = pgTable(
   (t) => [
     index("cron_simulation_run_status_started_idx").on(t.status, t.startedAt),
     index("cron_simulation_run_started_idx").on(t.startedAt),
+  ],
+);
+
+/**
+ * aquifer_forecast_run: Durable execution envelope for forecast jobs.
+ */
+export const aquiferForecastRun = pgTable(
+  "aquifer_forecast_run",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    runKey: text("run_key").notNull().unique(),
+    triggerType: forecastTriggerTypeEnum("trigger_type").notNull(),
+    triggeredBy: text("triggered_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeIds: text("scope_ids").array().notNull().default([]),
+    status: forecastRunStatusEnum("status").notNull().default("queued"),
+    qualityGateStatus: text("quality_gate_status"),
+    responseSummary: jsonb("response_summary"),
+    errorSummary: text("error_summary"),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    durationMs: integer("duration_ms"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_forecast_run_status_started_idx").on(t.status, t.startedAt),
+    index("aquifer_forecast_run_scope_started_idx").on(
+      t.scopeType,
+      t.startedAt,
+    ),
+  ],
+);
+
+/**
+ * aquifer_linear_regression_model: Versioned model artifact metadata.
+ */
+export const aquiferLinearRegressionModel = pgTable(
+  "aquifer_linear_regression_model",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeId: uuid("scope_id").notNull(),
+    targetType: forecastTargetTypeEnum("target_type").notNull(),
+    slope: numeric("slope", { precision: 14, scale: 6 }).notNull(),
+    intercept: numeric("intercept", { precision: 14, scale: 6 }).notNull(),
+    rSquared: numeric("r_squared", { precision: 8, scale: 6 }),
+    sampleCount: integer("sample_count").notNull(),
+    trainingWindowStart: timestamp("training_window_start", {
+      withTimezone: true,
+    }).notNull(),
+    trainingWindowEnd: timestamp("training_window_end", {
+      withTimezone: true,
+    }).notNull(),
+    dataCompletenessPct: numeric("data_completeness_pct", {
+      precision: 7,
+      scale: 4,
+    }),
+    outlierRatioPct: numeric("outlier_ratio_pct", { precision: 7, scale: 4 }),
+    approvalState: forecastModelApprovalStateEnum("approval_state")
+      .notNull()
+      .default("pending_review"),
+    approvedBy: text("approved_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    approvalExpiresAt: timestamp("approval_expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_model_scope_target_window_idx").on(
+      t.scopeType,
+      t.scopeId,
+      t.targetType,
+      t.trainingWindowEnd,
+    ),
+    index("aquifer_model_approval_state_idx").on(t.approvalState),
+    unique("aquifer_model_scope_target_unique").on(
+      t.scopeType,
+      t.scopeId,
+      t.targetType,
+      t.trainingWindowEnd,
+    ),
+  ],
+);
+
+/**
+ * aquifer_risk_flag: Persisted risk outputs for horizon and composite flags.
+ */
+export const aquiferRiskFlag = pgTable(
+  "aquifer_risk_flag",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeId: uuid("scope_id").notNull(),
+    targetType: forecastTargetTypeEnum("target_type").notNull(),
+    flagType: text("flag_type").notNull(),
+    riskLevel: forecastRiskLevelEnum("risk_level").notNull(),
+    pointForecast: numeric("point_forecast", { precision: 14, scale: 6 }),
+    interval80: jsonb("interval_80"),
+    interval95: jsonb("interval_95"),
+    reasonCodes: jsonb("reason_codes"),
+    plausibilityPolicyVersion: text("plausibility_policy_version").notNull(),
+    modelVersionId: uuid("model_version_id")
+      .notNull()
+      .references(() => aquiferLinearRegressionModel.id, {
+        onDelete: "restrict",
+      }),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => aquiferForecastRun.id, {
+        onDelete: "cascade",
+      }),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_risk_scope_flag_computed_idx").on(
+      t.scopeType,
+      t.scopeId,
+      t.flagType,
+      t.computedAt,
+    ),
+    index("aquifer_risk_model_idx").on(t.modelVersionId),
+  ],
+);
+
+/**
+ * aquifer_external_reference_observation: External benchmark observations.
+ */
+export const aquiferExternalReferenceObservation = pgTable(
+  "aquifer_external_reference_observation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sourceSystem: text("source_system").notNull(),
+    stationId: text("station_id").notNull(),
+    districtId: uuid("district_id").references(() => district.id, {
+      onDelete: "set null",
+    }),
+    wellId: uuid("well_id").references(() => well.id, {
+      onDelete: "set null",
+    }),
+    observedAt: timestamp("observed_at", { withTimezone: true }).notNull(),
+    metricType: text("metric_type").notNull(),
+    value: numeric("value", { precision: 16, scale: 6 }).notNull(),
+    unit: text("unit").notNull(),
+    mappingConfidence: numeric("mapping_confidence", {
+      precision: 7,
+      scale: 4,
+    }),
+    sourceSnapshotId: text("source_snapshot_id").notNull(),
+    ingestedAt: timestamp("ingested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_ext_ref_observed_idx").on(t.observedAt),
+    index("aquifer_ext_ref_district_idx").on(t.districtId),
+    index("aquifer_ext_ref_well_idx").on(t.wellId),
+  ],
+);
+
+/**
+ * aquifer_model_reference_observation_link: Lineage links from model to source observations.
+ */
+export const aquiferModelReferenceObservationLink = pgTable(
+  "aquifer_model_reference_observation_link",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    modelVersionId: uuid("model_version_id")
+      .notNull()
+      .references(() => aquiferLinearRegressionModel.id, {
+        onDelete: "cascade",
+      }),
+    observationId: uuid("observation_id")
+      .notNull()
+      .references(() => aquiferExternalReferenceObservation.id, {
+        onDelete: "cascade",
+      }),
+    usageType: forecastLineageUsageTypeEnum("usage_type").notNull(),
+    weight: numeric("weight", { precision: 10, scale: 6 }),
+    linkedAt: timestamp("linked_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("aquifer_lineage_unique").on(
+      t.modelVersionId,
+      t.observationId,
+      t.usageType,
+    ),
+    index("aquifer_lineage_observation_idx").on(t.observationId),
+    index("aquifer_lineage_model_idx").on(t.modelVersionId),
   ],
 );
 
@@ -1384,6 +1625,7 @@ export const districtRelations = relations(district, ({ many }) => ({
   districtSnapshots: many(districtPeriodConsumptionSnapshot),
   quotaBreachEvents: many(quotaBreachEvent),
   quotaOverrides: many(quotaOverride),
+  externalReferenceObservations: many(aquiferExternalReferenceObservation),
 }));
 
 export const wellRelations = relations(well, ({ one, many }) => ({
@@ -1398,6 +1640,7 @@ export const wellRelations = relations(well, ({ one, many }) => ({
   alerts: many(alerts),
   latestSensorStates: many(latestSensorState),
   apiKeys: many(apiKey),
+  externalReferenceObservations: many(aquiferExternalReferenceObservation),
 }));
 
 export const sensorsRelations = relations(sensors, ({ one, many }) => ({
@@ -1617,6 +1860,72 @@ export const irrigationRecommendationRelations = relations(
     requestedByUser: one(user, {
       fields: [irrigationRecommendation.requestedBy],
       references: [user.id],
+    }),
+  }),
+);
+
+export const aquiferForecastRunRelations = relations(
+  aquiferForecastRun,
+  ({ one, many }) => ({
+    triggeredByUser: one(user, {
+      fields: [aquiferForecastRun.triggeredBy],
+      references: [user.id],
+    }),
+    riskFlags: many(aquiferRiskFlag),
+  }),
+);
+
+export const aquiferLinearRegressionModelRelations = relations(
+  aquiferLinearRegressionModel,
+  ({ one, many }) => ({
+    approvedByUser: one(user, {
+      fields: [aquiferLinearRegressionModel.approvedBy],
+      references: [user.id],
+    }),
+    riskFlags: many(aquiferRiskFlag),
+    lineageLinks: many(aquiferModelReferenceObservationLink),
+  }),
+);
+
+export const aquiferRiskFlagRelations = relations(
+  aquiferRiskFlag,
+  ({ one }) => ({
+    run: one(aquiferForecastRun, {
+      fields: [aquiferRiskFlag.runId],
+      references: [aquiferForecastRun.id],
+    }),
+    model: one(aquiferLinearRegressionModel, {
+      fields: [aquiferRiskFlag.modelVersionId],
+      references: [aquiferLinearRegressionModel.id],
+    }),
+  }),
+);
+
+export const aquiferExternalReferenceObservationRelations = relations(
+  aquiferExternalReferenceObservation,
+  ({ one, many }) => ({
+    district: one(district, {
+      fields: [aquiferExternalReferenceObservation.districtId],
+      references: [district.id],
+    }),
+    well: one(well, {
+      fields: [aquiferExternalReferenceObservation.wellId],
+      references: [well.id],
+    }),
+    lineageLinks: many(aquiferModelReferenceObservationLink),
+  }),
+);
+
+export const aquiferModelReferenceObservationLinkRelations = relations(
+  aquiferModelReferenceObservationLink,
+  ({ one }) => ({
+    model: one(aquiferLinearRegressionModel, {
+      fields: [aquiferModelReferenceObservationLink.modelVersionId],
+      references: [aquiferLinearRegressionModel.id],
+    }),
+    observation: one(aquiferExternalReferenceObservation, {
+      fields: [aquiferModelReferenceObservationLink.observationId],
+      references: [aquiferExternalReferenceObservation.id],
     }),
   }),
 );
