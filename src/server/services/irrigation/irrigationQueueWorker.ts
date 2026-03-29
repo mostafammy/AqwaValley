@@ -118,7 +118,7 @@ async function completeWithFailure(params: {
         wellId,
         state: "CLOSING" as const,
         irrigationEventId: params.irrigationEventId,
-        reason: `Run failed (${params.failureCode}), closing valves.",
+        reason: `Run failed (${params.failureCode}), closing valves.`,
         transitionedAt: now,
       })),
     );
@@ -128,7 +128,7 @@ async function completeWithFailure(params: {
         wellId,
         state: "CLOSED" as const,
         irrigationEventId: params.irrigationEventId,
-        reason: `Run failed (${params.failureCode}), valves closed.",
+        reason: `Run failed (${params.failureCode}), valves closed.`,
         transitionedAt: now,
       })),
     );
