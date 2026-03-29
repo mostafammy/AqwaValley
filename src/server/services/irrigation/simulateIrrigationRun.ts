@@ -32,6 +32,8 @@ export type SimulateIrrigationRunInput = {
   relTol?: number;
   maxRefinementsPerStep?: number;
   maxDryDurationSeconds?: number;
+  shouldCancel?: () => boolean;
+  abortSignal?: AbortSignal;
   getHydrologyInputsAt: (params: {
     at: Date;
     elapsedSeconds: number;
@@ -106,6 +108,8 @@ export function simulateIrrigationRun(
       input.maxDryDurationSeconds ?? DEFAULTS.maxDryDurationSeconds,
       "maxDryDurationSeconds",
     ),
+    shouldCancel: () =>
+      Boolean(input.abortSignal?.aborted) || Boolean(input.shouldCancel?.()),
     getDerivativeTerms: ({ timestamp, elapsedSeconds, state, dtS }) => {
       const runtimeInputs = input.getHydrologyInputsAt({
         at: timestamp,
