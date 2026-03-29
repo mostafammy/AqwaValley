@@ -13,6 +13,12 @@ type StoredEnvelope = {
   areaM2: number;
   startTimestamp: string;
   baseFlowRateM3s: number;
+  initialWaterLevelM?: number;
+  initialWaterDebtM3?: number;
+  pressureTimeSeriesJson?: Array<{
+    elapsedSeconds: number;
+    pressurePa: number;
+  }>;
 };
 
 type StoredProviderSnapshot = {
@@ -46,6 +52,81 @@ type RunReplayDbRow = {
   trajectory_hash: string | null;
 };
 
+function syntheticPressurePa(elapsedSeconds: number): number {
+  return 200_000 + Math.sin(elapsedSeconds / 300) * 10_000;
+}
+
+function parsePressureSeries(
+  input: unknown,
+): Array<{ elapsedSeconds: number; pressurePa: number }> | undefined {
+  if (!Array.isArray(input)) return undefined;
+
+  const parsed = input
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as Record<string, unknown>;
+      const elapsedSeconds = record.elapsedSeconds;
+      const pressurePa = record.pressurePa;
+
+      if (
+        typeof elapsedSeconds !== "number" ||
+        !Number.isFinite(elapsedSeconds) ||
+        typeof pressurePa !== "number" ||
+        !Number.isFinite(pressurePa)
+      ) {
+        return null;
+      }
+
+      return { elapsedSeconds, pressurePa };
+    })
+    .filter(
+      (item): item is { elapsedSeconds: number; pressurePa: number } =>
+        item !== null,
+    )
+    .sort((a, b) => a.elapsedSeconds - b.elapsedSeconds);
+
+  return parsed.length > 0 ? parsed : undefined;
+}
+
+function resolvePressurePa(params: {
+  elapsedSeconds: number;
+  pressureSeries?: Array<{ elapsedSeconds: number; pressurePa: number }>;
+}): number {
+  const series = params.pressureSeries;
+  if (!series || series.length === 0) {
+    return syntheticPressurePa(params.elapsedSeconds);
+  }
+
+  if (series.length === 1) {
+    return series[0]!.pressurePa;
+  }
+
+  const target = params.elapsedSeconds;
+
+  if (target <= series[0]!.elapsedSeconds) {
+    return series[0]!.pressurePa;
+  }
+
+  const last = series[series.length - 1]!;
+  if (target >= last.elapsedSeconds) {
+    return last.pressurePa;
+  }
+
+  for (let i = 1; i < series.length; i += 1) {
+    const right = series[i]!;
+    const left = series[i - 1]!;
+
+    if (target <= right.elapsedSeconds) {
+      const span = right.elapsedSeconds - left.elapsedSeconds;
+      if (span <= 0) return right.pressurePa;
+      const t = (target - left.elapsedSeconds) / span;
+      return left.pressurePa + t * (right.pressurePa - left.pressurePa);
+    }
+  }
+
+  return syntheticPressurePa(target);
+}
+
 function parseEnvelope(input: unknown): StoredEnvelope | null {
   if (!input || typeof input !== "object") return null;
   const v = input as Record<string, unknown>;
@@ -69,6 +150,17 @@ function parseEnvelope(input: unknown): StoredEnvelope | null {
     areaM2: v.areaM2,
     startTimestamp: v.startTimestamp,
     baseFlowRateM3s: v.baseFlowRateM3s,
+    initialWaterLevelM:
+      typeof v.initialWaterLevelM === "number" &&
+      Number.isFinite(v.initialWaterLevelM)
+        ? v.initialWaterLevelM
+        : undefined,
+    initialWaterDebtM3:
+      typeof v.initialWaterDebtM3 === "number" &&
+      Number.isFinite(v.initialWaterDebtM3)
+        ? v.initialWaterDebtM3
+        : undefined,
+    pressureTimeSeriesJson: parsePressureSeries(v.pressureTimeSeriesJson),
   };
 }
 
@@ -209,8 +301,8 @@ export async function replaySimulationRun(runId: string): Promise<
     startTimestamp: new Date(envelope.startTimestamp),
     horizonSeconds: envelope.durationMinutes * 60,
     areaM2: envelope.areaM2,
-    initialWaterLevelM: 1,
-    initialWaterDebtM3: 0,
+    initialWaterLevelM: envelope.initialWaterLevelM ?? 1,
+    initialWaterDebtM3: envelope.initialWaterDebtM3 ?? 0,
     getHydrologyInputsAt: ({ elapsedSeconds }) => ({
       et0DepthRateMps: providerSnapshot.weather.et0_value_si,
       kc: providerSnapshot.crop.kc_value,
@@ -220,7 +312,10 @@ export async function replaySimulationRun(runId: string): Promise<
       valveOpen: true,
       inflowMode: "pressure_aware",
       baseFlowRateM3s: envelope.baseFlowRateM3s,
-      pressurePa: 200_000 + Math.sin(elapsedSeconds / 300) * 10_000,
+      pressurePa: resolvePressurePa({
+        elapsedSeconds,
+        pressureSeries: envelope.pressureTimeSeriesJson,
+      }),
       nominalPressurePa: 200_000,
       maxPressureMultiplier: 1.2,
     }),
