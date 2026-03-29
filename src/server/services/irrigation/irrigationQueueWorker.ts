@@ -86,6 +86,12 @@ async function completeWithFailure(params: {
 }): Promise<void> {
   const now = new Date();
 
+  const [event] = await db
+    .select({ wellIds: irrigationEvent.wellIds })
+    .from(irrigationEvent)
+    .where(eq(irrigationEvent.id, params.irrigationEventId))
+    .limit(1);
+
   await db
     .update(irrigationEvent)
     .set({
@@ -105,6 +111,28 @@ async function completeWithFailure(params: {
       completedAt: now,
     })
     .where(eq(irrigationSimulationRun.id, params.simulationRunId));
+
+  if (event && event.wellIds.length > 0) {
+    await db.insert(wellValveState).values(
+      event.wellIds.map((wellId) => ({
+        wellId,
+        state: "CLOSING" as const,
+        irrigationEventId: params.irrigationEventId,
+        reason: `Run failed (${params.failureCode}), closing valves.",
+        transitionedAt: now,
+      })),
+    );
+
+    await db.insert(wellValveState).values(
+      event.wellIds.map((wellId) => ({
+        wellId,
+        state: "CLOSED" as const,
+        irrigationEventId: params.irrigationEventId,
+        reason: `Run failed (${params.failureCode}), valves closed.",
+        transitionedAt: now,
+      })),
+    );
+  }
 }
 
 async function processQueuedRun(
