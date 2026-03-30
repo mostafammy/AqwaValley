@@ -11,6 +11,7 @@ function SetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenString = searchParams?.get("token");
+  const token = tokenString ?? "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,7 +19,7 @@ function SetPasswordContent() {
 
   // Queries & Mutations
   const { data: tokenData, isLoading, isError } = api.users.validateToken.useQuery(
-    { token: tokenString! },
+    { token },
     { enabled: !!tokenString, retry: false }
   );
 
@@ -59,7 +60,7 @@ function SetPasswordContent() {
             </svg>
           </div>
           <h2 className="text-center text-2xl font-bold text-gray-900">Invalid Link</h2>
-          <p className="mt-2 text-center text-gray-600">{errorMsg || messages[reason] || messages.INVALID_TOKEN}</p>
+          <p className="mt-2 text-center text-gray-600">{errorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}</p>
           <div className="mt-6 flex justify-center">
             <Button onClick={() => router.push("/")} className="w-full">
               Return to Homepage
@@ -92,9 +93,9 @@ function SetPasswordContent() {
     try {
       let res;
       if (isReset) {
-        res = await resetMutation.mutateAsync({ token: tokenString!, newPassword: password });
+        res = await resetMutation.mutateAsync({ token, newPassword: password });
       } else {
-        res = await acceptMutation.mutateAsync({ token: tokenString!, newPassword: password });
+        res = await acceptMutation.mutateAsync({ token, newPassword: password });
       }
 
       if (res.success && res.email) {
@@ -104,8 +105,9 @@ function SetPasswordContent() {
       } else {
          setErrorMsg("An unexpected error occurred. Please contact support.");
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to process your request.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg || "Failed to process your request.");
     }
   };
 
