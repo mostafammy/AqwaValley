@@ -26,12 +26,15 @@ type RoleType =
 export class RoleAssigner implements IRoleAssigner {
   constructor(private readonly db: DrizzleDB) {}
 
-  async assign(input: {
-    userId: string;
-    roleType: RoleType;
-    actorId: string;
-    ipAddress?: string;
-  }, tx?: DrizzleDB): Promise<{ roleId: string }> {
+  async assign(
+    input: {
+      userId: string;
+      roleType: RoleType;
+      actorId: string;
+      ipAddress?: string;
+    },
+    tx?: DrizzleDB,
+  ): Promise<{ roleId: string }> {
     // Resolve role record
     const roleRecord = await this.db.query.role.findFirst({
       where: eq(role.type, input.roleType),
