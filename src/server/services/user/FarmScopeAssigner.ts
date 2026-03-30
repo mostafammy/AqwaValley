@@ -22,7 +22,7 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
     farmId: string;
     actorId: string;
     ipAddress?: string;
-  }): Promise<void> {
+  }, tx?: DrizzleDB): Promise<void> {
     // Fetch current farm state for the audit 'before' snapshot
     const existingFarm = await this.db.query.farm.findFirst({
       where: eq(farm.id, input.farmId),
@@ -36,15 +36,36 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
       });
     }
 
+    const db = tx ?? this.db;
+
+    // If caller provided a transaction, use it; otherwise run a local transaction
+    if (tx) {
+      await db
+        .update(farm)
+        .set({ farmerUserId: input.userId })
+        .where(eq(farm.id, input.farmId));
+
+      await db.insert(auditLog).values({
+        entityType: "farm_scope",
+        entityId: input.userId,
+        actorId: input.actorId,
+        before: { farmId: input.farmId, farmerUserId: existingFarm.farmerUserId },
+        after: { farmId: input.farmId, farmerUserId: input.userId },
+        ipAddress: input.ipAddress ?? null,
+      });
+
+      return;
+    }
+
     // Command: DB mutation + audit_log write as one transaction
-    await this.db.transaction(async (tx) => {
-      await tx
+    await this.db.transaction(async (innerTx) => {
+      await innerTx
         .update(farm)
         .set({ farmerUserId: input.userId })
         .where(eq(farm.id, input.farmId));
 
       // Audit log — written inside the command, always
-      await tx.insert(auditLog).values({
+      await innerTx.insert(auditLog).values({
         entityType: "farm_scope",
         entityId: input.userId,
         actorId: input.actorId,
