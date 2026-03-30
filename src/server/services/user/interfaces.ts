@@ -32,7 +32,7 @@ export type ProvisionResult =
   | { status: "USER_ALREADY_EXISTS"; userId: string }
   | { status: "USER_EXISTS_NO_INVITE"; userId: string };
 
-export interface BulkProvisionItem extends ProvisionUserInput {}
+export type BulkProvisionItem = ProvisionUserInput;
 
 export interface BulkProvisionResult {
   nationalId: string;
@@ -84,14 +84,24 @@ export interface IInvitationIssuer {
 export interface IRoleAssigner {
   assign(input: {
     userId: string;
-    roleType: "admin" | "district_manager" | "farm_owner" | "farmer" | "auditor";
+    roleType:
+      | "admin"
+      | "district_manager"
+      | "farm_owner"
+      | "farmer"
+      | "auditor";
     actorId: string;
     ipAddress?: string;
   }): Promise<{ roleId: string }>;
 
   revoke(input: {
     userId: string;
-    roleType: "admin" | "district_manager" | "farm_owner" | "farmer" | "auditor";
+    roleType:
+      | "admin"
+      | "district_manager"
+      | "farm_owner"
+      | "farmer"
+      | "auditor";
     actorId: string;
     ipAddress?: string;
   }): Promise<void>;
