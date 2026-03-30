@@ -1,8 +1,8 @@
 ≡اأ Starting User Provisioning Integration Test...
 ≡اôخ Provisioning Payload:
 {
-  nationalId: '29001015817773',
-  email: 'test.farmer.1774891833973@aqwavalley.gov.eg',
+  nationalId: 'REDACTED_NATIONAL_ID',
+  email: 'REDACTED_EMAIL',
   fullName: 'Integration Test Farmer',
   roleType: 'farmer'
 }
@@ -10,8 +10,8 @@
 ظ│ Executing provision()...
 ظ£à Provisioning Result: {
   status: 'INVITED',
-  userId: '6oNTwsQ5ZjDd9NUil9S1l4clu1nNZWaX',
-  invitationId: '68ffc720-a7dd-430c-b41f-c67474917a4d'
+  userId: 'REDACTED_USER_ID',
+  invitationId: 'REDACTED_INVITATION_ID'
 }
 
 ≡ا¤ Verifying Database State...
@@ -21,12 +21,12 @@
   ظ£ëي╕ Outbox events queued: 1 (Expected 1 for invitation email)
      Example Outbox Payload: {
   eventType: 'user.invited',
-  inviteUrl: 'http://localhost:3000/set-password?token=b6ceaf1e9b5ab10fd63f4706a1c6f4d8ad4d18665556a8238c20853e87ef987e',
-  invitedByName: 'PBrA4TTRuc5v2kBqgyXOLRuIcxu7TtB7',
+  inviteUrl: 'http://localhost:3000/set-password?token=REDACTED_TOKEN',
+  invitedByName: 'REDACTED_INVITER_ID',
   recipientName: 'Integration Test Farmer',
   expiresInHours: 48,
-  recipientEmail: 'test.farmer.1774891833973@aqwavalley.gov.eg',
-  recipientUserId: '6oNTwsQ5ZjDd9NUil9S1l4clu1nNZWaX'
+  recipientEmail: 'REDACTED_EMAIL',
+  recipientUserId: 'REDACTED_USER_ID'
 }
 
 ≡اë ALL TESTS PASSED. The mediator orchestrated the transaction securely.
