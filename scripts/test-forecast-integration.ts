@@ -33,9 +33,7 @@ function logStep(message: string): void {
 async function main() {
   loadLocalEnv();
 
-  if (!process.env.CRON_SECRET) {
-    process.env.CRON_SECRET = "forecast-test-cron-secret";
-  }
+  process.env.CRON_SECRET ??= "forecast-test-cron-secret";
 
   const { eq, inArray, like } = await import("drizzle-orm");
   const { NextRequest } = await import("next/server");
