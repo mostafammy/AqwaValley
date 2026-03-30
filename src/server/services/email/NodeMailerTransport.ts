@@ -51,11 +51,11 @@ export class NodeMailerTransport implements IEmailTransport {
 
     for (let attempt = 0; attempt < RETRY_DELAYS_MS.length; attempt++) {
       if (attempt > 0) {
-        await sleep(RETRY_DELAYS_MS[attempt]!);
+        await sleep(RETRY_DELAYS_MS[attempt]);
       }
 
       try {
-        const info = await this.transporter.sendMail({
+        const info = (await this.transporter.sendMail({
           from: this.from,
           to: options.to,
           subject: options.subject,
@@ -65,10 +65,14 @@ export class NodeMailerTransport implements IEmailTransport {
           headers: {
             "X-Entity-Ref-ID": `aqwa-${Date.now()}`,
           },
-        });
+        })) as { messageId?: string | undefined };
 
-        return { messageId: info.messageId as string };
-      } catch (err) {
+        if (info && typeof info.messageId === "string") {
+          return { messageId: info.messageId };
+        } else {
+          lastError = new Error("NodeMailerTransport: transporter returned no messageId");
+        }
+      } catch (err: unknown) {
         lastError = err instanceof Error ? err : new Error(String(err));
 
         // Do not retry on permanent failures (e.g., invalid recipient)
