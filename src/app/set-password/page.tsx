@@ -18,9 +18,13 @@ function SetPasswordContent() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Queries & Mutations
-  const { data: tokenData, isLoading, isError } = api.users.validateToken.useQuery(
+  const {
+    data: tokenData,
+    isLoading,
+    isError,
+  } = api.users.validateToken.useQuery(
     { token },
-    { enabled: !!tokenString, retry: false }
+    { enabled: !!tokenString, retry: false },
   );
 
   const acceptMutation = api.users.acceptInvitation.useMutation();
@@ -44,7 +48,8 @@ function SetPasswordContent() {
   }
 
   if (isError || errorMsg || (tokenData && !tokenData.valid)) {
-    const reason = tokenData && !tokenData.valid ? tokenData.reason : "INVALID_TOKEN";
+    const reason =
+      tokenData && !tokenData.valid ? tokenData.reason : "INVALID_TOKEN";
     const messages: Record<string, string> = {
       TOKEN_EXPIRED: "This link has expired. Please request a new one.",
       TOKEN_ALREADY_USED: "This link has already been used.",
@@ -55,12 +60,26 @@ function SetPasswordContent() {
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
           <div className="mb-6 flex items-center justify-center text-red-500">
-            <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h2 className="text-center text-2xl font-bold text-gray-900">Invalid Link</h2>
-          <p className="mt-2 text-center text-gray-600">{errorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}</p>
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            Invalid Link
+          </h2>
+          <p className="mt-2 text-center text-gray-600">
+            {errorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}
+          </p>
           <div className="mt-6 flex justify-center">
             <Button onClick={() => router.push("/")} className="w-full">
               Return to Homepage
@@ -95,7 +114,10 @@ function SetPasswordContent() {
       if (isReset) {
         res = await resetMutation.mutateAsync({ token, newPassword: password });
       } else {
-        res = await acceptMutation.mutateAsync({ token, newPassword: password });
+        res = await acceptMutation.mutateAsync({
+          token,
+          newPassword: password,
+        });
       }
 
       if (res.success && res.email) {
@@ -103,7 +125,7 @@ function SetPasswordContent() {
         await authClient.signIn.email({ email: res.email, password });
         router.push("/dashboard"); // Redirect to dashboard after login
       } else {
-         setErrorMsg("An unexpected error occurred. Please contact support.");
+        setErrorMsg("An unexpected error occurred. Please contact support.");
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -118,18 +140,33 @@ function SetPasswordContent() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-xl">
         <div className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-            <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              className="h-6 w-6 text-blue-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">{title}</h2>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            {title}
+          </h2>
           <p className="mt-2 text-sm text-gray-600">{description}</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="password">
+              <label
+                className="mb-1 block text-sm font-medium text-gray-700"
+                htmlFor="password"
+              >
                 New Password
               </label>
               <input
@@ -137,14 +174,17 @@ function SetPasswordContent() {
                 name="password"
                 type="password"
                 required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm"
                 placeholder="Enter 8+ characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="confirm">
+              <label
+                className="mb-1 block text-sm font-medium text-gray-700"
+                htmlFor="confirm"
+              >
                 Confirm Password
               </label>
               <input
@@ -152,7 +192,7 @@ function SetPasswordContent() {
                 name="confirm"
                 type="password"
                 required
-                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm"
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -164,7 +204,9 @@ function SetPasswordContent() {
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{errorMsg}</h3>
+                  <h3 className="text-sm font-medium text-red-800">
+                    {errorMsg}
+                  </h3>
                 </div>
               </div>
             </div>
@@ -188,7 +230,13 @@ function SetPasswordContent() {
 // Ensure Suspense wraps useSearchParams per Next.js App Router rules
 export default function SetPasswordPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <SetPasswordContent />
     </Suspense>
   );
