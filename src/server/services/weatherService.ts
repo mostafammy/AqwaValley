@@ -45,7 +45,7 @@ export const weatherService = {
 
     try {
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${env.OPENWEATHER_API_KEY}&units=metric&lang=ar`;
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
@@ -53,14 +53,19 @@ export const weatherService = {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.warn(`OpenWeather API returned ${response.status}: ${response.statusText}. This usually happens if the API key is new and pending activation (takes 1-2 hours) OR if the subscription tier is exceeded.`);
+        console.warn(
+          `OpenWeather API returned ${response.status}: ${response.statusText}. This usually happens if the API key is new and pending activation (takes 1-2 hours) OR if the subscription tier is exceeded.`,
+        );
         return this.getFallbackWeather();
       }
 
       const data: unknown = await response.json();
 
       if (!isOpenWeatherPayload(data)) {
-        console.error("OpenWeather API returned unexpected data structure:", data);
+        console.error(
+          "OpenWeather API returned unexpected data structure:",
+          data,
+        );
         return this.getFallbackWeather();
       }
 
