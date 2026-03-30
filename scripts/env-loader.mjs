@@ -18,5 +18,8 @@ try {
   });
   console.log("✓ Environment variables loaded from .env.local");
 } catch (e) {
-  console.warn("⚠ Could not load .env.local:", e?.message ?? String(e));
+  console.warn(
+    "⚠ Could not load .env.local:",
+    e instanceof Error ? e.message : String(e),
+  );
 }
