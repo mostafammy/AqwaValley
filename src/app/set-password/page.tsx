@@ -15,7 +15,12 @@ function SetPasswordContent() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // linkInvalid: controls the early-return invalid-link screen
+  const [linkInvalid, setLinkInvalid] = useState(false);
+  const [linkErrorMsg, setLinkErrorMsg] = useState<string | null>(null);
+
+  // formError: inline form validation / submit errors (separate concern)
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Queries & Mutations
   const {
@@ -32,7 +37,11 @@ function SetPasswordContent() {
 
   useEffect(() => {
     if (!tokenString) {
-      setErrorMsg("No token provided in the URL.");
+      setLinkInvalid(true);
+      setLinkErrorMsg("No token provided in the URL.");
+    } else {
+      setLinkInvalid(false);
+      setLinkErrorMsg(null);
     }
   }, [tokenString]);
 
@@ -47,9 +56,10 @@ function SetPasswordContent() {
     );
   }
 
-  if (isError || errorMsg || (tokenData && !tokenData.valid)) {
-    const reason =
-      tokenData && !tokenData.valid ? tokenData.reason : "INVALID_TOKEN";
+  // invalidLink drives the early-return invalid-link screen; form errors are separate
+  const invalidLink = linkInvalid || isError || (tokenData && !tokenData.valid);
+  if (invalidLink) {
+    const reason = tokenData && !tokenData.valid ? tokenData.reason : "INVALID_TOKEN";
     const messages: Record<string, string> = {
       TOKEN_EXPIRED: "This link has expired. Please request a new one.",
       TOKEN_ALREADY_USED: "This link has already been used.",
@@ -78,7 +88,7 @@ function SetPasswordContent() {
             Invalid Link
           </h2>
           <p className="mt-2 text-center text-gray-600">
-            {errorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}
+            {linkErrorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}
           </p>
           <div className="mt-6 flex justify-center">
             <Button onClick={() => router.push("/")} className="w-full">
@@ -98,16 +108,16 @@ function SetPasswordContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Clear form errors and validate locally
+    setFormError(null);
     if (password !== confirmPassword) {
-      setErrorMsg("Passwords do not match.");
+      setFormError("Passwords do not match.");
       return;
     }
     if (password.length < 8) {
-      setErrorMsg("Password must be at least 8 characters long.");
+      setFormError("Password must be at least 8 characters long.");
       return;
     }
-
-    setErrorMsg(null);
 
     try {
       let res;
@@ -125,11 +135,11 @@ function SetPasswordContent() {
         await authClient.signIn.email({ email: res.email, password });
         router.push("/dashboard"); // Redirect to dashboard after login
       } else {
-        setErrorMsg("An unexpected error occurred. Please contact support.");
+        setFormError("An unexpected error occurred. Please contact support.");
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setErrorMsg(msg || "Failed to process your request.");
+      setFormError(msg || "Failed to process your request.");
     }
   };
 
@@ -200,13 +210,11 @@ function SetPasswordContent() {
             </div>
           </div>
 
-          {errorMsg && (
+          {formError && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    {errorMsg}
-                  </h3>
+                  <h3 className="text-sm font-medium text-red-800">{formError}</h3>
                 </div>
               </div>
             </div>

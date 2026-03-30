@@ -100,9 +100,9 @@ function SingleProvisionForm() {
     // Sanitize empty strings to undefined for UUID fields
     const payload = {
       ...formData,
-      districtId: formData.districtId ?? undefined,
-      farmId: formData.farmId ?? undefined,
-      phone: formData.phone ?? undefined,
+      districtId: formData.districtId === "" ? undefined : formData.districtId,
+      farmId: formData.farmId === "" ? undefined : formData.farmId,
+      phone: formData.phone === "" ? undefined : formData.phone,
     };
 
     try {
