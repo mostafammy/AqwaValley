@@ -252,7 +252,8 @@ export class ForecastRunOrchestrator {
                 computedAt: now,
                 modelVersionId: modelId,
                 runId,
-                plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
+                plausibilityPolicyVersion:
+                  this.policy.plausibilityPolicyVersion,
               };
             }),
             {
