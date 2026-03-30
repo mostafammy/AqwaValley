@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دعوة تفعيل حساب أكوا فالي</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background-color: #f0f9ff;
+      color: #0c4a6e;
+      direction: rtl;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(14, 116, 144, 0.12);
+    }
+    .header {
+      background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%);
+      padding: 36px 40px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header .subtitle {
+      color: #bae6fd;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .body {
+      padding: 40px;
+    }
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0e7490;
+      margin-bottom: 16px;
+    }
+    .text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #334155;
+      margin-bottom: 16px;
+    }
+    .info-box {
+      background: #f0f9ff;
+      border-right: 4px solid #0e7490;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .info-box p {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .info-box strong {
+      color: #0e7490;
+    }
+    .cta-container {
+      text-align: center;
+      margin: 32px 0;
+    }
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 16px 40px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .expiry-notice {
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .url-fallback {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 20px;
+      word-break: break-all;
+      font-size: 12px;
+      color: #64748b;
+      direction: ltr;
+      text-align: left;
+    }
+    .footer {
+      background: #f8fafc;
+      padding: 24px 40px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .footer p {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .security-notice {
+      margin-top: 24px;
+      padding: 16px;
+      background: #fef9c3;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #78350f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🌊 منظومة إدارة مياه أكوا فالي</h1>
+      <p class="subtitle">AqwaValley Water Management System</p>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <p class="greeting">مرحباً، {{recipientName}}</p>
+
+      <p class="text">
+        تمت دعوتك للانضمام إلى منظومة إدارة مياه أكوا فالي من قِبَل
+        <strong>{{invitedByName}}</strong>.
+        يرجى النقر على الزر أدناه لتفعيل حسابك وإنشاء كلمة مرور خاصة بك.
+      </p>
+
+      <!-- Info box -->
+      <div class="info-box">
+        <p><strong>المزرعة المرتبطة:</strong> {{farmName}}</p>
+        <p><strong>صلاحية الرابط:</strong> {{expiresInHours}} ساعة</p>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-container">
+        <a href="{{inviteUrl}}" class="cta-button">تفعيل الحساب</a>
+        <p class="expiry-notice">
+          ⏳ هذا الرابط صالح لمدة {{expiresInHours}} ساعة فقط
+        </p>
+      </div>
+
+      <!-- URL fallback -->
+      <p class="text" style="font-size: 13px; color: #64748b;">
+        إذا لم يعمل الزر، انسخ الرابط أدناه في متصفحك:
+      </p>
+      <div class="url-fallback">{{inviteUrl}}</div>
+
+      <!-- Security notice -->
+      <div class="security-notice">
+        ⚠️ <strong>تنبيه أمني:</strong> لا تشارك هذا الرابط مع أي شخص آخر.
+        إذا لم تطلب هذه الدعوة، يرجى تجاهل هذه الرسالة أو التواصل مع الدعم الفني.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>هذه الرسالة صادرة من منظومة إدارة مياه وادي الجديد — مصلحة الري</p>
+      <p style="margin-top: 8px;">AqwaValley · New Valley Governorate · Egypt</p>
+      <p style="margin-top: 8px; direction: ltr;">
+        noreply@aqwavalley.gov.eg — Do not reply to this email
+      </p>
+    </div>
+  </div>
+</body>
+</html>

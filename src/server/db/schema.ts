@@ -1555,6 +1555,168 @@ export const sensorDataSimulation = pgTable(
 );
 
 // ============================================================================
+// USER MANAGEMENT v2 — Enums
+// ============================================================================
+
+export const tokenTypeEnum = pgEnum("token_type", [
+  "invitation",
+  "password_reset",
+]);
+
+export const invitationStatusEnum = pgEnum("invitation_status", [
+  "pending",
+  "accepted",
+  "expired",
+  "revoked",
+]);
+
+export const emailTypeEnum = pgEnum("email_type", [
+  "welcome_invitation",
+  "password_reset",
+  "farm_scope_grant",
+  "password_changed_confirmation",
+]);
+
+export const emailStatusEnum = pgEnum("email_status", [
+  "queued",
+  "sent",
+  "delivered",
+  "bounced",
+  "failed",
+  "dead",
+]);
+
+export const outboxEventStatusEnum = pgEnum("outbox_event_status", [
+  "pending",
+  "processing",
+  "done",
+  "dead",
+]);
+
+// ============================================================================
+// USER MANAGEMENT v2 — Tables
+// ============================================================================
+
+/**
+ * audit_log: Immutable ledger for security-sensitive entity mutations.
+ * Every role change, farm assignment, and deactivation MUST produce a row here.
+ * Command pattern: written inside RoleAssigner and FarmScopeAssigner, never externally.
+ */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityType: text("entity_type").notNull(), // 'user_role' | 'farm_scope' | 'user_deactivation'
+    entityId: text("entity_id").notNull(),     // userId affected
+    actorId: text("actor_id").references(() => user.id, { onDelete: "set null" }),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    ipAddress: text("ip_address"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("audit_log_entity_type_id_idx").on(t.entityType, t.entityId),
+    index("audit_log_actor_id_idx").on(t.actorId),
+    index("audit_log_created_at_idx").on(t.createdAt),
+  ],
+);
+
+/**
+ * user_invitation: Unified token model for both first-time invitations and password resets.
+ * CRITICAL: Only SHA-256(rawToken) is stored — rawToken never touches the DB.
+ * Enforced at the type level by RawToken Value Object.
+ */
+export const userInvitation = pgTable(
+  "user_invitation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenType: tokenTypeEnum("token_type").notNull(),
+    tokenHash: text("token_hash").notNull().unique(), // SHA-256(rawToken) — NEVER raw
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    invitedBy: text("invited_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    farmId: uuid("farm_id").references(() => farm.id, { onDelete: "set null" }),
+    status: invitationStatusEnum("status").default("pending").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    ipRequestedFrom: text("ip_requested_from"), // Nullified after 90 days (PDPL)
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("user_invitation_token_hash_idx").on(t.tokenHash), // Primary lookup path
+    index("user_invitation_user_id_idx").on(t.userId),
+    index("user_invitation_status_idx").on(t.status),
+    index("user_invitation_expires_at_idx").on(t.expiresAt), // Expiry cleanup cron
+    index("user_invitation_type_status_idx").on(t.tokenType, t.status),
+  ],
+);
+
+/**
+ * email_audit_log: Legally defensible record of every email attempt.
+ * Updated by AuditingEmailTransport (Decorator pattern) — never by business logic.
+ * deliveredAt / openedAt populated by provider webhook for government compliance proof.
+ */
+export const emailAuditLog = pgTable(
+  "email_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    recipientUserId: text("recipient_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    recipientEmail: text("recipient_email").notNull(),
+    emailType: emailTypeEnum("email_type").notNull(),
+    status: emailStatusEnum("status").notNull().default("queued"),
+    providerMessageId: text("provider_message_id"), // SMTP/SES message ID for tracing
+    ipRequestedFrom: text("ip_requested_from"),     // Nullified after 90 days (PDPL)
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }), // From provider webhook
+    openedAt: timestamp("opened_at", { withTimezone: true }),       // From provider webhook
+    errorDetail: text("error_detail"),
+    sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("email_audit_log_user_idx").on(t.recipientUserId),
+    index("email_audit_log_type_idx").on(t.emailType),
+    index("email_audit_log_status_idx").on(t.status),
+    index("email_audit_log_sent_at_idx").on(t.sentAt),
+  ],
+);
+
+/**
+ * outbox_event: Transactional Outbox pattern — inserted inside DB transaction.
+ * Cron job reads pending rows, dispatches email, marks processed_at.
+ * Crash-safe: if server dies between commit and send, the row survives until next cron.
+ * Exactly-once delivery guarantee. Dead-lettered at maxAttempts.
+ */
+export const outboxEvent = pgTable(
+  "outbox_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventType: text("event_type").notNull(), // 'user.invited' | 'password.reset' | etc.
+    payload: jsonb("payload").notNull(),     // Email template variables (typed in OutboxPayload)
+    status: outboxEventStatusEnum("status").default("pending").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    maxAttempts: integer("max_attempts").default(5).notNull(),
+    lastError: text("last_error"),
+    nextRetryAt: timestamp("next_retry_at", { withTimezone: true }), // Exponential backoff
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("outbox_event_status_created_idx").on(t.status, t.createdAt), // Primary dispatch query
+    index("outbox_event_next_retry_idx").on(t.nextRetryAt),
+  ],
+);
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 
