@@ -78,7 +78,11 @@ const provisionInputSchema = z.object({
 
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
+function checkRateLimit(
+  key: string,
+  maxRequests: number,
+  windowMs: number,
+): boolean {
   const now = Date.now();
   const entry = rateLimitStore.get(key);
 
@@ -122,8 +126,6 @@ function buildOrchestrator(db: DrizzleDB): UserProvisioningOrchestrator {
 // ---------------------------------------------------------------------------
 
 export const usersRouter = createTRPCRouter({
-
-
   // ============================================================
   // PROVISIONING
   // ============================================================
@@ -231,7 +233,9 @@ export const usersRouter = createTRPCRouter({
   listInvitations: adminProcedure
     .input(
       z.object({
-        status: z.enum(["pending", "accepted", "expired", "revoked"]).optional(),
+        status: z
+          .enum(["pending", "accepted", "expired", "revoked"])
+          .optional(),
         tokenType: z.enum(["invitation", "password_reset"]).optional(),
         page: z.number().int().min(1).default(1),
         pageSize: z.number().int().min(1).max(100).default(20),
@@ -241,8 +245,10 @@ export const usersRouter = createTRPCRouter({
       const offset = (input.page - 1) * input.pageSize;
       const conditions = [];
 
-      if (input.status) conditions.push(eq(userInvitation.status, input.status));
-      if (input.tokenType) conditions.push(eq(userInvitation.tokenType, input.tokenType));
+      if (input.status)
+        conditions.push(eq(userInvitation.status, input.status));
+      if (input.tokenType)
+        conditions.push(eq(userInvitation.tokenType, input.tokenType));
 
       const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -289,13 +295,14 @@ export const usersRouter = createTRPCRouter({
       // We look up by checking the hash
       const tokenHash = createHash("sha256").update(input.token).digest("hex");
       const issuer = new InvitationIssuer(ctx.db);
-      
+
       const invitation = await issuer.findByTokenHash(tokenHash);
-      if (!invitation) return { valid: false as const, reason: "INVALID_TOKEN" as const };
+      if (!invitation)
+        return { valid: false as const, reason: "INVALID_TOKEN" as const };
 
       const validator = new InvitationValidator();
       const result = validator.validate(invitation);
-      
+
       if (!result.valid) return result;
 
       return {
@@ -312,7 +319,9 @@ export const usersRouter = createTRPCRouter({
     .input(
       z.object({
         token: z.string().min(64, "Invalid token format"),
-        newPassword: z.string().min(8, "Password must be at least 8 characters"),
+        newPassword: z
+          .string()
+          .min(8, "Password must be at least 8 characters"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -330,7 +339,10 @@ export const usersRouter = createTRPCRouter({
       // Pure domain validation (no DB)
       const validation = validator.validate(invitation);
       if (!validation.valid) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: validation.reason });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: validation.reason,
+        });
       }
 
       // Mark consumed (one-time-use enforced)
@@ -346,12 +358,15 @@ export const usersRouter = createTRPCRouter({
       // We lookup the user to return the email for the client to perform a seamless auto sign-in
       const userRecord = await ctx.db.query.user.findFirst({
         where: eq(user.id, invitation.userId),
-        columns: { email: true }
+        columns: { email: true },
       });
 
-      return { success: true, message: "Account activated. Please sign in.", email: userRecord?.email };
+      return {
+        success: true,
+        message: "Account activated. Please sign in.",
+        email: userRecord?.email,
+      };
     }),
-
 
   /**
    * consumeResetToken — consumes a password reset token.
@@ -378,7 +393,10 @@ export const usersRouter = createTRPCRouter({
 
       const validation = validator.validate(invitation);
       if (!validation.valid) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: validation.reason });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: validation.reason,
+        });
       }
 
       await issuer.accept(invitation.id);
@@ -411,7 +429,11 @@ export const usersRouter = createTRPCRouter({
         });
       }
 
-      return { success: true, message: "Password updated. Please sign in.", email: userRecord?.email };
+      return {
+        success: true,
+        message: "Password updated. Please sign in.",
+        email: userRecord?.email,
+      };
     }),
 
   // ============================================================
@@ -437,8 +459,7 @@ export const usersRouter = createTRPCRouter({
           "إذا كان الحساب موجوداً، سيتم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني.",
       };
 
-      const ip =
-        ctx.headers.get("x-forwarded-for") ?? "unknown";
+      const ip = ctx.headers.get("x-forwarded-for") ?? "unknown";
 
       // IP rate limit: 5 requests per 15 minutes
       const ipKey = `reset_ip:${ip}`;
