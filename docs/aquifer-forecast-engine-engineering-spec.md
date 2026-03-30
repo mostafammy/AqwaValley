@@ -98,7 +98,7 @@ criteria.
 Acceptance criteria:
 
 1. HistoricalDataLoader compiles without direct DB-specific logic.
-2. Bulk well loading executes in bounded query count for 1000 plus wells.
+2. Bulk well loading executes in bounded query count for 1,000-plus wells.
 3. Contract tests pass for all registered adapters.
 
 ## AFE-EPIC-02 Persistence and Migration Layer
