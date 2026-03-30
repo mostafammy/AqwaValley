@@ -21,18 +21,22 @@ import type { IInvitationIssuer } from "./interfaces";
 export class InvitationIssuer implements IInvitationIssuer {
   constructor(private readonly db: DrizzleDB) {}
 
-  async issue(input: {
-    userId: string;
-    tokenType: "invitation" | "password_reset";
-    ttlHours: number;
-    farmId?: string;
-    invitedBy?: string;
-    ipAddress?: string;
-  }): Promise<{ invitationId: string; token: RawToken }> {
+  async issue(
+    input: {
+      userId: string;
+      tokenType: "invitation" | "password_reset";
+      ttlHours: number;
+      farmId?: string;
+      invitedBy?: string;
+      ipAddress?: string;
+    },
+    tx?: DrizzleDB,
+  ): Promise<{ invitationId: string; token: RawToken }> {
     const token = RawToken.generate();
     const expiresAt = new Date(Date.now() + input.ttlHours * 60 * 60 * 1000);
+    const db = tx ?? this.db;
 
-    const [row] = await this.db
+    const [row] = await db
       .insert(userInvitation)
       .values({
         tokenType: input.tokenType,
@@ -56,8 +60,9 @@ export class InvitationIssuer implements IInvitationIssuer {
     return { invitationId: row.id, token };
   }
 
-  async findByTokenHash(tokenHash: string) {
-    const row = await this.db.query.userInvitation.findFirst({
+  async findByTokenHash(tokenHash: string, tx?: DrizzleDB) {
+    const db = tx ?? this.db;
+    const row = await db.query.userInvitation.findFirst({
       where: eq(userInvitation.tokenHash, tokenHash),
       columns: {
         id: true,
@@ -73,22 +78,25 @@ export class InvitationIssuer implements IInvitationIssuer {
     return row ?? null;
   }
 
-  async accept(invitationId: string): Promise<void> {
-    await this.db
+  async accept(invitationId: string, tx?: DrizzleDB): Promise<void> {
+    const db = tx ?? this.db;
+    await db
       .update(userInvitation)
       .set({ status: "accepted", usedAt: new Date() })
       .where(eq(userInvitation.id, invitationId));
   }
 
-  async revoke(invitationId: string): Promise<void> {
-    await this.db
+  async revoke(invitationId: string, tx?: DrizzleDB): Promise<void> {
+    const db = tx ?? this.db;
+    await db
       .update(userInvitation)
       .set({ status: "revoked" })
       .where(eq(userInvitation.id, invitationId));
   }
 
-  async revokeAllPendingForUser(userId: string): Promise<void> {
-    await this.db
+  async revokeAllPendingForUser(userId: string, tx?: DrizzleDB): Promise<void> {
+    const db = tx ?? this.db;
+    await db
       .update(userInvitation)
       .set({ status: "revoked" })
       .where(
