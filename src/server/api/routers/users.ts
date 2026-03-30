@@ -43,7 +43,6 @@ import { OutboxEnqueuer } from "~/server/services/user/OutboxEnqueuer";
 import { SessionInvalidator } from "~/server/services/user/SessionInvalidator";
 import { UserProvisioningOrchestrator } from "~/server/services/user/UserProvisioningOrchestrator";
 import { InvitationValidator } from "~/server/services/token/InvitationValidator";
-import { RawToken } from "~/server/services/token/RawToken";
 
 // ---------------------------------------------------------------------------
 // Shared validators
