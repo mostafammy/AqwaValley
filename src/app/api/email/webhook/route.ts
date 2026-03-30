@@ -12,7 +12,8 @@
  * HMAC key: EMAIL_PROVIDER_WEBHOOK_SECRET in env.
  */
 
-import { createHmac, timingSafeEqual } from "crypto";
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
+import { createVerify } from "crypto";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
@@ -28,45 +29,103 @@ interface SendGridEvent {
 }
 
 /**
- * Verify SendGrid webhook HMAC signature.
- * Uses timingSafeEqual to prevent timing attacks.
+ * Verify SendGrid/Twilio Email Events webhook signature using ECDSA P-256.
+ * The signed payload is: UTF8(timestamp) || rawBodyBytes
+ * Signature is expected as ASN.1/DER encoded ECDSA signature (base64).
+ * Public key may be provided via env.EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY or
+ * via a request header (e.g. 'x-twilio-email-event-webhook-public-key').
  */
-function verifySignature(body: string, signature: string): boolean {
-  const secret = env.EMAIL_PROVIDER_WEBHOOK_SECRET;
-  if (!secret) return false;
+function toPemPublicKey(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.includes("-----BEGIN PUBLIC KEY-----")) return trimmed;
+  const b64 = trimmed.replace(/\s+/g, "");
+  const chunks = b64.match(/.{1,64}/g) ?? [b64];
+  return `-----BEGIN PUBLIC KEY-----\n${chunks.join("\n")}\n-----END PUBLIC KEY-----`;
+}
+
+function parseSignatureHeader(sigHeader: string): Buffer | null {
+  let sig = sigHeader.trim();
+  // Some providers prefix with algorithm or key id (e.g. "v1=BASE64" or "sha256=BASE64")
+  const eqIdx = sig.indexOf("=");
+  if (eqIdx !== -1 && /^[a-z0-9_\-]+$/.test(sig.slice(0, eqIdx).toLowerCase())) {
+    sig = sig.slice(eqIdx + 1);
+  }
+  // If multiple comma-separated values, take the first
+  if (sig.includes(",")) sig = sig.split(",")[0].trim();
+
+  // Try base64 first, fall back to hex
+  try {
+    return Buffer.from(sig, "base64");
+  } catch {
+    try {
+      return Buffer.from(sig, "hex");
+    } catch {
+      return null;
+    }
+  }
+}
+
+function verifySignature(
+  rawBody: Buffer,
+  signatureHeader: string | null,
+  timestampHeader: string | null,
+  publicKeyRaw?: string | null,
+): boolean {
+  if (!signatureHeader || !timestampHeader) return false;
+
+  const sigBuf = parseSignatureHeader(signatureHeader);
+  if (!sigBuf) return false;
+
+  const pubRaw = publicKeyRaw ?? env.EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY ?? null;
+  if (!pubRaw) return false;
+
+  const pubPem = toPemPublicKey(pubRaw);
 
   try {
-    const expected = createHmac("sha256", secret)
-      .update(body)
-      .digest("base64");
+    const payload = Buffer.concat([Buffer.from(String(timestampHeader), "utf8"), rawBody]);
 
-    const expectedBuf = Buffer.from(expected);
-    const receivedBuf = Buffer.from(signature);
+    const verifier = createVerify("sha256");
+    verifier.update(payload);
+    verifier.end();
 
-    if (expectedBuf.length !== receivedBuf.length) return false;
-    return timingSafeEqual(expectedBuf, receivedBuf);
+    return verifier.verify(pubPem, sigBuf);
   } catch {
+    // Signature verification failed — treat as invalid
     return false;
   }
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
-  const rawBody = await req.text();
+  const rawArrayBuffer = await req.arrayBuffer();
+  const rawBodyBuf = Buffer.from(rawArrayBuffer);
+  const rawBodyText = rawBodyBuf.toString("utf8");
 
-  // HMAC verification — reject unauthenticated writes (STRIDE: Tampering)
-  const signature =
-    req.headers.get("x-twilio-email-event-webhook-signature") ?? // SendGrid header
-    req.headers.get("x-sendgrid-signature") ??
-    "";
+  // ECDSA verification — use timestamp + raw body bytes
+  const signatureHeader =
+    req.headers.get("x-twilio-email-event-webhook-signature") ??
+    req.headers.get("x-sendgrid-signature");
 
-  if (env.NODE_ENV === "production" && !verifySignature(rawBody, signature)) {
+  const timestampHeader =
+    req.headers.get("x-twilio-email-event-webhook-timestamp") ??
+    req.headers.get("x-sendgrid-timestamp");
+
+  // Public key may be provided in a header by some proxies/providers
+  const publicKeyHeader =
+    req.headers.get("x-twilio-email-event-webhook-public-key") ??
+    req.headers.get("x-sendgrid-public-key") ??
+    null;
+
+  if (
+    env.NODE_ENV === "production" &&
+    !verifySignature(rawBodyBuf, signatureHeader, timestampHeader, publicKeyHeader)
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let events: SendGridEvent[];
 
   try {
-    events = JSON.parse(rawBody) as SendGridEvent[];
+    events = JSON.parse(rawBodyText) as SendGridEvent[];
     if (!Array.isArray(events)) events = [events];
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
@@ -114,8 +173,11 @@ export async function POST(req: Request): Promise<NextResponse> {
           // We record but don't act on deferred/spamreport events in this version
           break;
       }
-    } catch (err) {
-      console.error(`[email webhook] Failed to update log for ${messageId}:`, err);
+    } catch (err: unknown) {
+      console.error(
+        `[email webhook] Failed to update log for ${messageId}: ` +
+          (err instanceof Error ? err.message : String(err)),
+      );
     }
   }
 
