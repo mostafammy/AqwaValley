@@ -41,6 +41,31 @@ export type ForecastExecutionContext = {
   failureReason?: string;
 };
 
+function levelMToStressPct(
+  levelM: number,
+  context: ForecastExecutionContext,
+): number {
+  // Guard: ensure we never propagate NaN/Infinity — use a safe default.
+  if (!Number.isFinite(levelM)) return 0;
+
+  // If we don't have a physical floor reference, fall back to returning the
+  // raw finite value so behavior is unchanged. When physicalFloorDepthM is
+  // present it was set by the orchestrator as `baseline + 120`, so we
+  // reverse that convention to estimate baseline and scale percent between
+  // baseline (0%) and physical floor (100%). This is a conservative linear
+  // mapping.
+  const floor = context.physicalFloorDepthM;
+  if (floor == null) return levelM;
+
+  const baseline = floor - 120;
+  const denom = floor - baseline;
+  if (!Number.isFinite(denom) || denom === 0) return 0;
+
+  const pct = ((levelM - baseline) / denom) * 100;
+  if (!Number.isFinite(pct)) return 0;
+  return Math.max(0, Math.min(100, pct));
+}
+
 export interface ForecastHandler {
   setNext(next: ForecastHandler): ForecastHandler;
   handle(context: ForecastExecutionContext): ForecastExecutionContext;
@@ -184,10 +209,21 @@ export class PlausibilityGateHandler extends BaseForecastHandler {
     }
 
     const trajectory: ForecastTrajectoryPoint[] = context.interval95.points.map(
-      (p, idx) => ({
-        yearOffset: [5, 10, 25][idx] ?? 25,
-        predictedLevelM: p.yHat,
-      }),
+      (p, idx) => {
+        const predictedLevelM = p.yHat;
+        const projectedStressPct = levelMToStressPct(predictedLevelM, context);
+        const projectedStressPctUpper95 = levelMToStressPct(
+          p.upper ?? predictedLevelM,
+          context,
+        );
+
+        return {
+          yearOffset: [5, 10, 25][idx] ?? 25,
+          predictedLevelM,
+          projectedStressPct,
+          projectedStressPctUpper95,
+        };
+      },
     );
 
     const plausibilityContext: PlausibilityContext = {
@@ -238,8 +274,11 @@ export class RiskMappingHandler extends BaseForecastHandler {
     const inputs: HorizonRiskInput[] = context.interval95.points.map(
       (p, idx) => ({
         horizonYears: ([5, 10, 25][idx] as 5 | 10 | 25) ?? 25,
-        projectedStressPct: p.yHat,
-        projectedStressPctUpper95: p.upper,
+        projectedStressPct: levelMToStressPct(p.yHat, context),
+        projectedStressPctUpper95: levelMToStressPct(
+          p.upper ?? p.yHat,
+          context,
+        ),
       }),
     );
 

@@ -3,6 +3,11 @@ export type ForecastTrajectoryPoint = {
   predictedLevelM: number;
   impliedRechargeM3PerYear?: number | null;
   hasExogenousEvent?: boolean;
+  // Projected stress expressed as a percent (0-100). Optional because not all
+  // callers compute or need it; stored here to avoid recomputing when
+  // downstream evaluators require percent-based inputs.
+  projectedStressPct?: number | null;
+  projectedStressPctUpper95?: number | null;
 };
 
 export type PlausibilityContext = {

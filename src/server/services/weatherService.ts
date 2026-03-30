@@ -67,42 +67,45 @@ export const weatherService = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
 
-      if (!response.ok) {
-        console.warn(
-          `OpenWeather API returned ${response.status}: ${response.statusText}. This usually happens if the API key is new and pending activation (takes 1-2 hours) OR if the subscription tier is exceeded.`,
-        );
-        return this.getFallbackWeather();
+        if (!response.ok) {
+          console.warn(
+            `OpenWeather API returned ${response.status}: ${response.statusText}. This usually happens if the API key is new and pending activation (takes 1-2 hours) OR if the subscription tier is exceeded.`,
+          );
+          return this.getFallbackWeather();
+        }
+
+        const data: unknown = await response.json();
+
+        if (!isOpenWeatherPayload(data)) {
+          console.error(
+            "OpenWeather API returned unexpected data structure:",
+            data,
+          );
+          return this.getFallbackWeather();
+        }
+
+        const firstWeather = data.weather?.[0];
+
+        const weatherInfo: WeatherInfo = {
+          temp: Math.round(data.main.temp),
+          description: firstWeather?.description ?? "غير متاح",
+          icon: firstWeather?.icon ?? "01d",
+          humidity: data.main.humidity ?? 0,
+          city: data.name,
+        };
+
+        weatherCache.set(cacheKey, {
+          data: weatherInfo,
+          expires: Date.now() + CACHE_TTL_MS,
+        });
+
+        return weatherInfo;
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      const data: unknown = await response.json();
-
-      if (!isOpenWeatherPayload(data)) {
-        console.error(
-          "OpenWeather API returned unexpected data structure:",
-          data,
-        );
-        return this.getFallbackWeather();
-      }
-
-      const firstWeather = data.weather?.[0];
-
-      const weatherInfo: WeatherInfo = {
-        temp: Math.round(data.main.temp),
-        description: firstWeather?.description ?? "غير متاح",
-        icon: firstWeather?.icon ?? "01d",
-        humidity: data.main.humidity ?? 0,
-        city: data.name,
-      };
-
-      weatherCache.set(cacheKey, {
-        data: weatherInfo,
-        expires: Date.now() + CACHE_TTL_MS,
-      });
-
-      return weatherInfo;
     } catch (error: unknown) {
       if (error instanceof Error && error.name === "AbortError") {
         console.error("OpenWeather API request timed out after 10s");
