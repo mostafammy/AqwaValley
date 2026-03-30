@@ -70,7 +70,9 @@ export class NodeMailerTransport implements IEmailTransport {
         if (info && typeof info.messageId === "string") {
           return { messageId: info.messageId };
         } else {
-          lastError = new Error("NodeMailerTransport: transporter returned no messageId");
+          lastError = new Error(
+            "NodeMailerTransport: transporter returned no messageId",
+          );
         }
       } catch (err: unknown) {
         lastError = err instanceof Error ? err : new Error(String(err));
