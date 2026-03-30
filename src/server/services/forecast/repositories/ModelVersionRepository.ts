@@ -1,4 +1,7 @@
 import type {
+  ForecastRepositoryDb,
+} from "~/server/services/forecast/repositories/ForecastArtifactRepository";
+import type {
   ExternalReferenceObservation,
   ForecastScopeType,
   ForecastTargetType,
@@ -49,11 +52,14 @@ export interface ModelVersionRepository {
     at: Date;
   }): Promise<PersistedModelVersion | null>;
 
-  saveVersion(version: PersistedModelVersion): Promise<void>;
+  saveVersion(
+    version: PersistedModelVersion,
+    executor?: ForecastRepositoryDb,
+  ): Promise<void>;
 
   saveLineage(args: {
     modelVersionId: string;
     usageType: "train" | "validate" | "calibrate";
     observations: ExternalReferenceObservation[];
-  }): Promise<void>;
+  }, executor?: ForecastRepositoryDb): Promise<void>;
 }
