@@ -1,4 +1,10 @@
 import type { ForecastRunDraft } from "~/server/services/forecast/types";
+import type { db as DbInstance } from "~/server/db";
+
+export type ForecastRepositoryDb = Pick<
+  typeof DbInstance,
+  "insert" | "select" | "update"
+>;
 
 export type PersistedForecastRun = {
   runKey: string;
