@@ -9,11 +9,11 @@ export type WeatherInfo = {
 };
 
 type OpenWeatherPayload = {
-  main?: {
-    temp?: number;
+  main: {
+    temp: number;
     humidity?: number;
   };
-  weather?: Array<{
+  weather: Array<{
     description?: string;
     icon?: string;
   }>;
@@ -22,9 +22,15 @@ type OpenWeatherPayload = {
 
 function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
   if (!value || typeof value !== "object") return false;
-  const candidate = value as OpenWeatherPayload;
+  const candidate = value as {
+    main?: { temp?: unknown; humidity?: unknown };
+    weather?: unknown;
+  };
+
   return (
-    typeof candidate.main?.temp === "number" &&
+    typeof candidate.main === "object" &&
+    candidate.main !== null &&
+    typeof candidate.main.temp === "number" &&
     Array.isArray(candidate.weather) &&
     candidate.weather.length > 0
   );
