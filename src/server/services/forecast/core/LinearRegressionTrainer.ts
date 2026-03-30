@@ -70,8 +70,8 @@ export class LinearRegressionTrainer
 
     return {
       coefficients: {
-        slope: round4(slope),
-        intercept: round4(intercept),
+        slope,
+        intercept,
       },
       sampleCount: n,
       x,
