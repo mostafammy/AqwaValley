@@ -271,7 +271,10 @@ export class RiskMappingHandler extends BaseForecastHandler {
       (p, idx) => ({
         horizonYears: ([5, 10, 25][idx] as 5 | 10 | 25) ?? 25,
         projectedStressPct: levelMToStressPct(p.yHat, context),
-        projectedStressPctUpper95: levelMToStressPct(p.upper ?? p.yHat, context),
+        projectedStressPctUpper95: levelMToStressPct(
+          p.upper ?? p.yHat,
+          context,
+        ),
       }),
     );
 
