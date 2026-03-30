@@ -14,9 +14,9 @@
  */
 
 import { NextResponse } from "next/server";
-import { and, eq, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, isNull, lte, or } from "drizzle-orm";
 import { db } from "~/server/db";
-import { emailAuditLog, outboxEvent } from "~/server/db/schema";
+import { outboxEvent } from "~/server/db/schema";
 import { env } from "~/env";
 import { NodeMailerTransport } from "~/server/services/email/NodeMailerTransport";
 import { NullTransport } from "~/server/services/email/NullTransport";
@@ -36,12 +36,12 @@ function buildEmailService(): EmailService {
   const baseTransport = isTestEnv
     ? new NullTransport()
     : new NodeMailerTransport({
-        host: env.SMTP_HOST!,
-        port: env.SMTP_PORT!,
-        secure: env.SMTP_SECURE!,
-        user: env.SMTP_USER!,
-        pass: env.SMTP_PASS!,
-        from: env.EMAIL_FROM!,
+        host: env.SMTP_HOST,
+        port: env.SMTP_PORT,
+        secure: env.SMTP_SECURE,
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+        from: env.EMAIL_FROM,
       });
 
   // Decorator: wrap with auditing regardless of transport type
@@ -84,7 +84,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     });
 
     // Process with allSettled — individual failures don't abort the batch
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       pendingEvents.map(async (event) => {
         // Mark as processing to prevent concurrent dispatch
         await db
