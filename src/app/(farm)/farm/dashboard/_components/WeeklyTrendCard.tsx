@@ -14,7 +14,10 @@ import {
 import { useIntersectionObserver } from "~/lib/hooks";
 
 type WeeklyTrendCardProps = {
-  weeklyTrend: any[];
+  weeklyTrend: Array<{
+    consumptionM3: number | string;
+    periodStart: string | Date;
+  }>;
 };
 
 export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
@@ -70,12 +73,23 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
                 tick={{ fontSize: 11, fill: "#8AA0B8" }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(val) => Math.round(val).toLocaleString("ar-EG")}
+                tickFormatter={(val: number | string) => {
+                  const numeric = Number(val);
+                  return Number.isFinite(numeric)
+                    ? Math.round(numeric).toLocaleString("ar-EG")
+                    : "0";
+                }}
                 width={40}
               />
               <Tooltip
                 contentStyle={{ borderRadius: "10px", border: "1px solid rgba(26,48,80,0.1)", fontSize: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-                formatter={(value: any) => [`${Number(value).toLocaleString("ar-EG")} م³`, "الاستهلاك"]}
+                formatter={(value: number | string) => {
+                  const numeric = Number(value);
+                  const formatted = Number.isFinite(numeric)
+                    ? numeric.toLocaleString("ar-EG")
+                    : "0";
+                  return [`${formatted} م³`, "الاستهلاك"];
+                }}
                 labelStyle={{ color: "#5A7090", marginBottom: 4 }}
               />
               <Area
