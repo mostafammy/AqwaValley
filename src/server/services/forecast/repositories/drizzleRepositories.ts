@@ -9,6 +9,7 @@ import {
   aquiferRiskFlag,
 } from "~/server/db/schema";
 import type {
+  ForecastRunClaimResult,
   ForecastArtifactRepository,
   PersistedForecastRun,
 } from "~/server/services/forecast/repositories/ForecastArtifactRepository";
@@ -26,6 +27,58 @@ type Db = typeof DbInstance;
 
 export class DrizzleForecastArtifactRepository implements ForecastArtifactRepository {
   public constructor(private readonly db: Db) {}
+
+  public async createOrClaimRun(
+    draft: ForecastRunDraft,
+  ): Promise<ForecastRunClaimResult> {
+    const inserted = await this.db
+      .insert(aquiferForecastRun)
+      .values({
+        runKey: draft.runKey,
+        triggerType: draft.triggerType,
+        scopeType: draft.scopeType,
+        scopeIds: draft.scopeIds,
+        status: "running",
+        startedAt: draft.triggeredAt,
+      })
+      .onConflictDoNothing({ target: aquiferForecastRun.runKey })
+      .returning({
+        runKey: aquiferForecastRun.runKey,
+        triggerType: aquiferForecastRun.triggerType,
+        scopeType: aquiferForecastRun.scopeType,
+        scopeIds: aquiferForecastRun.scopeIds,
+        startedAt: aquiferForecastRun.startedAt,
+        status: aquiferForecastRun.status,
+        completedAt: aquiferForecastRun.completedAt,
+        durationMs: aquiferForecastRun.durationMs,
+        errorSummary: aquiferForecastRun.errorSummary,
+      });
+
+    const insertedRow = inserted[0];
+    if (insertedRow) {
+      return {
+        state: "claimed",
+        run: insertedRow,
+      };
+    }
+
+    const existing = await this.findRun(draft.runKey);
+    if (!existing) {
+      throw new Error("Failed to claim or fetch forecast run");
+    }
+
+    if (existing.status === "completed") {
+      return {
+        state: "completed",
+        run: existing,
+      };
+    }
+
+    return {
+      state: "already_claimed",
+      run: existing,
+    };
+  }
 
   public async createRun(
     draft: ForecastRunDraft,
