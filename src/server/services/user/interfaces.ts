@@ -72,7 +72,10 @@ export interface IInvitationIssuer {
     tx?: DrizzleDB,
   ): Promise<{ invitationId: string; token: RawToken }>;
 
-  findByTokenHash(tokenHash: string, tx?: DrizzleDB): Promise<{
+  findByTokenHash(
+    tokenHash: string,
+    tx?: DrizzleDB,
+  ): Promise<{
     id: string;
     userId: string;
     tokenType: "invitation" | "password_reset";
