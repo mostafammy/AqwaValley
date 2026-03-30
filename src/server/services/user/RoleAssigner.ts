@@ -31,7 +31,7 @@ export class RoleAssigner implements IRoleAssigner {
     roleType: RoleType;
     actorId: string;
     ipAddress?: string;
-  }): Promise<{ roleId: string }> {
+  }, tx?: DrizzleDB): Promise<{ roleId: string }> {
     // Resolve role record
     const roleRecord = await this.db.query.role.findFirst({
       where: eq(role.type, input.roleType),
@@ -44,21 +44,44 @@ export class RoleAssigner implements IRoleAssigner {
       });
     }
 
-    // Command: DB mutation + audit_log write as one transaction
-    return await this.db.transaction(async (tx) => {
-      // Insert role assignment (idempotent via onConflictDoNothing)
-      const [assignment] = await tx
+    // If a transaction is provided, use it so callers (orchestrator) can
+    // compose multiple collaborator writes in a single DB transaction.
+    if (tx) {
+      await tx
         .insert(userRoleAssignment)
         .values({
           userId: input.userId,
           roleId: roleRecord.id,
           assignedBy: input.actorId,
         })
-        .onConflictDoNothing()
-        .returning({ id: userRoleAssignment.id });
+        .onConflictDoNothing();
+
+      await tx.insert(auditLog).values({
+        entityType: "user_role",
+        entityId: input.userId,
+        actorId: input.actorId,
+        before: null,
+        after: { roles: [input.roleType], action: "assigned" },
+        ipAddress: input.ipAddress ?? null,
+      });
+
+      return { roleId: roleRecord.id };
+    }
+
+    // No transaction provided — preserve existing behavior (transactional)
+    return await this.db.transaction(async (innerTx) => {
+      // Insert role assignment (idempotent via onConflictDoNothing)
+      await innerTx
+        .insert(userRoleAssignment)
+        .values({
+          userId: input.userId,
+          roleId: roleRecord.id,
+          assignedBy: input.actorId,
+        })
+        .onConflictDoNothing();
 
       // Audit log — written inside the command, always
-      await tx.insert(auditLog).values({
+      await innerTx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,
@@ -71,20 +94,22 @@ export class RoleAssigner implements IRoleAssigner {
     });
   }
 
-  async revoke(input: {
-    userId: string;
-    roleType: RoleType;
-    actorId: string;
-    ipAddress?: string;
-  }): Promise<void> {
+  async revoke(
+    input: {
+      userId: string;
+      roleType: RoleType;
+      actorId: string;
+      ipAddress?: string;
+    },
+    tx?: DrizzleDB,
+  ): Promise<void> {
     const roleRecord = await this.db.query.role.findFirst({
       where: eq(role.type, input.roleType),
     });
 
     if (!roleRecord) return; // Role does not exist — nothing to revoke
 
-    // Command: DB mutation + audit_log write as one transaction
-    await this.db.transaction(async (tx) => {
+    if (tx) {
       await tx
         .delete(userRoleAssignment)
         .where(
@@ -94,8 +119,31 @@ export class RoleAssigner implements IRoleAssigner {
           ),
         );
 
-      // Audit log — written inside the command, always
       await tx.insert(auditLog).values({
+        entityType: "user_role",
+        entityId: input.userId,
+        actorId: input.actorId,
+        before: { roles: [input.roleType] },
+        after: { roles: [], action: "revoked" },
+        ipAddress: input.ipAddress ?? null,
+      });
+
+      return;
+    }
+
+    // Command: DB mutation + audit_log write as one transaction
+    await this.db.transaction(async (innerTx) => {
+      await innerTx
+        .delete(userRoleAssignment)
+        .where(
+          and(
+            eq(userRoleAssignment.userId, input.userId),
+            eq(userRoleAssignment.roleId, roleRecord.id),
+          ),
+        );
+
+      // Audit log — written inside the command, always
+      await innerTx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,

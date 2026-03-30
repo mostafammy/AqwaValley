@@ -90,11 +90,14 @@ export class UserProvisioningOrchestrator
     // Full provisioning inside a single DB transaction
     const result = await this.db.transaction(async (tx) => {
       // Step 1: Create auth identity (Adapter — wraps better-auth)
-      const { authUserId } = await this.authUserCreator.createUser({
-        email: input.email,
-        nationalId: input.nationalId,
-        fullName: input.fullName,
-      });
+      const { authUserId } = await this.authUserCreator.createUser(
+        {
+          email: input.email,
+          nationalId: input.nationalId,
+          fullName: input.fullName,
+        },
+        tx,
+      );
 
       // Step 2: Create domain profile
       await tx.insert(userProfile).values({
@@ -107,47 +110,59 @@ export class UserProvisioningOrchestrator
       });
 
       // Step 3: Issue invitation token (Repository)
-      const { invitationId, token } = await this.invitationIssuer.issue({
-        userId: authUserId,
-        tokenType: "invitation",
-        ttlHours: env.INVITATION_TOKEN_TTL_HOURS,
-        farmId: input.farmId,
-        invitedBy: input.actorId,
-        ipAddress: input.ipAddress,
-      });
+      const { invitationId, token } = await this.invitationIssuer.issue(
+        {
+          userId: authUserId,
+          tokenType: "invitation",
+          ttlHours: env.INVITATION_TOKEN_TTL_HOURS,
+          farmId: input.farmId,
+          invitedBy: input.actorId,
+          ipAddress: input.ipAddress,
+        },
+        tx,
+      );
 
       // Step 4: Assign role (Command — includes audit_log write)
-      await this.roleAssigner.assign({
-        userId: authUserId,
-        roleType: input.roleType,
-        actorId: input.actorId,
-        ipAddress: input.ipAddress,
-      });
+      await this.roleAssigner.assign(
+        {
+          userId: authUserId,
+          roleType: input.roleType,
+          actorId: input.actorId,
+          ipAddress: input.ipAddress,
+        },
+        tx,
+      );
 
       // Step 5: Assign farm scope if provided (Command — includes audit_log write)
       if (input.farmId) {
-        await this.farmScopeAssigner.assign({
-          userId: authUserId,
-          farmId: input.farmId,
-          actorId: input.actorId,
-          ipAddress: input.ipAddress,
-        });
+        await this.farmScopeAssigner.assign(
+          {
+            userId: authUserId,
+            farmId: input.farmId,
+            actorId: input.actorId,
+            ipAddress: input.ipAddress,
+          },
+          tx,
+        );
       }
 
       // Step 6: Enqueue welcome email via outbox (Producer — inside tx)
       const inviteUrl = token.toEmailUrl(env.APP_URL);
-      await this.outboxEnqueuer.enqueue({
-        eventType: "user.invited",
-        payload: {
+      await this.outboxEnqueuer.enqueue(
+        {
           eventType: "user.invited",
-          recipientUserId: authUserId,
-          recipientEmail: input.email,
-          recipientName: input.fullName,
-          invitedByName: input.actorId, // Resolved to name in cron if needed
-          inviteUrl,
-          expiresInHours: env.INVITATION_TOKEN_TTL_HOURS,
+          payload: {
+            eventType: "user.invited",
+            recipientUserId: authUserId,
+            recipientEmail: input.email,
+            recipientName: input.fullName,
+            invitedByName: input.actorId, // Resolved to name in cron if needed
+            inviteUrl,
+            expiresInHours: env.INVITATION_TOKEN_TTL_HOURS,
+          },
         },
-      });
+        tx,
+      );
 
       return { authUserId, invitationId };
     });
