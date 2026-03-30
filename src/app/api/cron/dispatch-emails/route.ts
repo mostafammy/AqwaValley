@@ -29,9 +29,7 @@ const BATCH_SIZE = 50;
 // Build transport based on environment
 function buildEmailService(): EmailService {
   const isTestEnv =
-    env.NODE_ENV === "test" ||
-    !env.SMTP_HOST ||
-    env.SMTP_HOST === "localhost";
+    env.NODE_ENV === "test" || !env.SMTP_HOST || env.SMTP_HOST === "localhost";
 
   const baseTransport = isTestEnv
     ? new NullTransport()
@@ -115,7 +113,8 @@ export async function POST(req: Request): Promise<NextResponse> {
           const isDead = newAttempts >= (event.maxAttempts ?? 5);
 
           // Exponential backoff: 1min, 5min, 30min, 2h
-          const backoffMs = [60, 300, 1800, 7200][Math.min(newAttempts - 1, 3)]! * 1000;
+          const backoffMs =
+            [60, 300, 1800, 7200][Math.min(newAttempts - 1, 3)]! * 1000;
           const nextRetryAt = isDead ? null : new Date(Date.now() + backoffMs);
 
           await db
