@@ -102,8 +102,8 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
                   fontSize: "12px",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
-                formatter={(value: number | string) => {
-                  const numeric = Number(value);
+                formatter={(value) => {
+                  const numeric = Number(value ?? 0);
                   const formatted = Number.isFinite(numeric)
                     ? numeric.toLocaleString("ar-EG")
                     : "0";
