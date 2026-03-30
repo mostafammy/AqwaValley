@@ -198,6 +198,7 @@ CREATE INDEX IF NOT EXISTS "aquifer_forecast_run_scope_started_idx" ON "aquifer_
 CREATE INDEX IF NOT EXISTS "aquifer_model_scope_target_window_idx" ON "aquifer_linear_regression_model" USING btree ("scope_type", "scope_id", "target_type", "training_window_end");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "aquifer_model_approval_state_idx" ON "aquifer_linear_regression_model" USING btree ("approval_state");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "aquifer_risk_scope_flag_computed_idx" ON "aquifer_risk_flag" USING btree ("scope_type", "scope_id", "flag_type", "computed_at");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "aquifer_risk_flag_scope_flag_date_unique" ON "aquifer_risk_flag" USING btree ("scope_type", "scope_id", "flag_type", (date_trunc('day', "computed_at")));--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "aquifer_risk_model_idx" ON "aquifer_risk_flag" USING btree ("model_version_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "aquifer_ext_ref_observed_idx" ON "aquifer_external_reference_observation" USING btree ("observed_at");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "aquifer_ext_ref_district_idx" ON "aquifer_external_reference_observation" USING btree ("district_id");--> statement-breakpoint
