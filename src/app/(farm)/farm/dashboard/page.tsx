@@ -51,7 +51,9 @@ export default async function FarmDashboardPage() {
 
   // Fallback for development/demo: if no farm is assigned to this user, grab the first one
   if (!currentFarm && process.env.NODE_ENV === "development") {
-    console.log("No farm assigned to user, falling back to first farm (development mode only)");
+    console.log(
+      "No farm assigned to user, falling back to first farm (development mode only)",
+    );
     const fallbackRows = await db
       .select({
         id: farm.id,
@@ -137,21 +139,21 @@ export default async function FarmDashboardPage() {
 
   return (
     <div
-      className="p-4 md:p-6 space-y-4 md:space-y-8"
+      className="space-y-4 p-4 md:space-y-8 md:p-6"
       dir="rtl"
       style={{ animation: "fadeSlideUp 0.7s ease-out both" }}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold">
-            أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"} 
+          <h1 className="text-xl font-bold md:text-3xl">
+            أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"}
           </h1>
-          <p className="text-sm md:text-base text-gray-500 mt-1">
+          <p className="mt-1 text-sm text-gray-500 md:text-base">
             {currentFarm.name}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400 shrink-0 mt-1">
+          <span className="mt-1 shrink-0 text-xs text-gray-400">
             تحديث كل 60 ثانية
           </span>
         </div>
@@ -178,7 +180,7 @@ export default async function FarmDashboardPage() {
 
       <AiRecommendationCard farmId={currentFarm.id} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="md:col-span-2">
           <WeeklyTrendCard weeklyTrend={weeklyTrend} />
         </div>
