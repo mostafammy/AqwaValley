@@ -16,13 +16,18 @@ import { randomBytes } from "crypto";
 import { TRPCError } from "@trpc/server";
 import { auth } from "~/server/better-auth/config";
 import type { IAuthUserCreator } from "./interfaces";
+import type { DrizzleDB } from "~/server/db/index";
 
 export class AuthUserCreator implements IAuthUserCreator {
-  async createUser(input: {
-    email: string;
-    nationalId: string;
-    fullName: string;
-  }): Promise<{ authUserId: string }> {
+  async createUser(
+    input: {
+      email: string;
+      nationalId: string;
+      fullName: string;
+    },
+    // Optional tx provided by orchestrator for atomicity; not used here
+    _tx?: DrizzleDB,
+  ): Promise<{ authUserId: string }> {
     // Generate a random placeholder password — user never knows this.
     // It is superseded when they accept their invitation and set a real password.
     const placeholder = randomBytes(32).toString("hex");
