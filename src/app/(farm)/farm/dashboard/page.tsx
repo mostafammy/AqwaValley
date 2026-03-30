@@ -114,7 +114,7 @@ export default async function FarmDashboardPage() {
   // ── Step 3: Soil humidity from latestSensorState ──────────────────────────
   const wellIds = farmWellRows.map((fw) => fw.wellId);
 
-  let soilReadings: SoilReading[] =
+  const soilReadings: SoilReading[] =
     wellIds.length > 0
       ? await db
           .select()
