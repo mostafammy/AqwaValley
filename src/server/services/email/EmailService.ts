@@ -20,6 +20,7 @@ import type {
   MailOptions,
   OutboxPayload,
 } from "./interfaces";
+import type { AuditedMailOptions } from "./AuditingEmailTransport";
 
 // Cache templates in memory after first load (cold start only on first call per type)
 const templateCache = new Map<string, string>();
@@ -169,11 +170,43 @@ export class EmailService {
   ): Promise<{ messageId: string }> {
     const { subject, html, text } = renderPayload(payload);
 
-    return this.transport.sendMail({
+    // Map outbox event type to audit `emailType` enum values expected
+    // by the AuditingEmailTransport decorator.
+    const emailType = (() => {
+      switch (payload.eventType) {
+        case "user.invited":
+          return "welcome_invitation" as const;
+        case "password.reset":
+          return "password_reset" as const;
+        case "farm.scope_granted":
+          return "farm_scope_grant" as const;
+        case "password.changed":
+          return "password_changed_confirmation" as const;
+        default:
+          return "welcome_invitation" as const;
+      }
+    })();
+
+    const recipientUserId = payload.recipientUserId;
+
+    let ipRequestedFrom: string | undefined;
+    if ("ipRequestedFrom" in payload && payload.ipRequestedFrom) {
+      ipRequestedFrom = payload.ipRequestedFrom;
+    } else if ("ipAddress" in payload && payload.ipAddress) {
+      ipRequestedFrom = payload.ipAddress;
+    }
+
+    const audited: AuditedMailOptions = {
       to,
       subject,
       html,
       text,
-    });
+      // Audit metadata
+      emailType,
+      recipientUserId,
+      ipRequestedFrom,
+    };
+
+    return this.transport.sendMail(audited as unknown as MailOptions);
   }
 }
