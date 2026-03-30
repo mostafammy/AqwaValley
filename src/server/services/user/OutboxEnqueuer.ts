@@ -28,10 +28,13 @@ export type { OutboxPayload };
 export class OutboxEnqueuer implements IOutboxEnqueuer {
   constructor(private readonly db: DrizzleDB) {}
 
-  async enqueue(input: {
-    eventType: string;
-    payload: Record<string, unknown>;
-  }, tx?: DrizzleDB): Promise<{ eventId: string }> {
+  async enqueue(
+    input: {
+      eventType: string;
+      payload: Record<string, unknown>;
+    },
+    tx?: DrizzleDB,
+  ): Promise<{ eventId: string }> {
     const db = tx ?? this.db;
 
     const [row] = await db
@@ -59,7 +62,10 @@ export class OutboxEnqueuer implements IOutboxEnqueuer {
    * Enqueue a typed outbox payload. Validates the event type at compile time.
    * Use this in application code — enqueue() is the raw version for flexibility.
    */
-  async enqueueTyped(payload: OutboxPayload, tx?: DrizzleDB): Promise<{ eventId: string }> {
+  async enqueueTyped(
+    payload: OutboxPayload,
+    tx?: DrizzleDB,
+  ): Promise<{ eventId: string }> {
     return this.enqueue(
       {
         eventType: payload.eventType,
