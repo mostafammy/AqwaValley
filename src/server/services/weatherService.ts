@@ -8,6 +8,28 @@ export type WeatherInfo = {
   city?: string;
 };
 
+type OpenWeatherPayload = {
+  main?: {
+    temp?: number;
+    humidity?: number;
+  };
+  weather?: Array<{
+    description?: string;
+    icon?: string;
+  }>;
+  name?: string;
+};
+
+function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as OpenWeatherPayload;
+  return (
+    typeof candidate.main?.temp === "number" &&
+    Array.isArray(candidate.weather) &&
+    candidate.weather.length > 0
+  );
+}
+
 // Simple in-memory cache to stay within OpenWeather free limits
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const weatherCache = new Map<string, { data: WeatherInfo; expires: number }>();
@@ -35,17 +57,19 @@ export const weatherService = {
         return this.getFallbackWeather();
       }
 
-      const data = (await response.json()) as any;
+      const data: unknown = await response.json();
 
-      if (!data || !data.main || typeof data.main.temp !== "number" || !Array.isArray(data.weather) || data.weather.length === 0) {
+      if (!isOpenWeatherPayload(data)) {
         console.error("OpenWeather API returned unexpected data structure:", data);
         return this.getFallbackWeather();
       }
 
+      const firstWeather = data.weather?.[0];
+
       const weatherInfo: WeatherInfo = {
         temp: Math.round(data.main.temp),
-        description: data.weather[0]?.description ?? "غير متاح",
-        icon: data.weather[0]?.icon ?? "01d",
+        description: firstWeather?.description ?? "غير متاح",
+        icon: firstWeather?.icon ?? "01d",
         humidity: data.main.humidity ?? 0,
         city: data.name,
       };
@@ -56,8 +80,8 @@ export const weatherService = {
       });
 
       return weatherInfo;
-    } catch (error: any) {
-      if (error.name === "AbortError") {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
         console.error("OpenWeather API request timed out after 10s");
       } else {
         console.error("Failed to fetch weather:", error);

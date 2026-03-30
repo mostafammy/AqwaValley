@@ -29,7 +29,7 @@ export type WellSeries = {
 };
 
 export type ExternalReferenceObservation = {
-  sourceSystem: "CEDARE" | "RIGW" | string;
+  sourceSystem: string;
   stationId: string;
   districtId: string | null;
   wellId: string | null;

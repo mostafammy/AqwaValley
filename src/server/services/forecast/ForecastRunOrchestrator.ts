@@ -201,31 +201,36 @@ export class ForecastRunOrchestrator {
       }
 
       await this.riskRepository.publish([
-        ...executed.riskFlags.horizons.map((flag, idx) => ({
-          scopeType: "district" as const,
-          scopeId: input.districtId,
-          targetType: "aquifer_level" as const,
-          flagType: flag.flagType,
-          riskLevel: flag.riskLevel,
-          pointForecast: executed.interval95?.points[idx]?.yHat ?? null,
-          interval80: executed.interval80?.points[idx]
-            ? {
-                lower: executed.interval80.points[idx]!.lower,
-                upper: executed.interval80.points[idx]!.upper,
-              }
-            : null,
-          interval95: executed.interval95?.points[idx]
-            ? {
-                lower: executed.interval95.points[idx]!.lower,
-                upper: executed.interval95.points[idx]!.upper,
-              }
-            : null,
-          reasonCodes: flag.reasonCodes,
-          computedAt: now,
-          modelVersionId: modelId,
-          runId,
-          plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
-        })),
+        ...executed.riskFlags.horizons.map((flag, idx) => {
+          const interval80Point = executed.interval80?.points[idx];
+          const interval95Point = executed.interval95?.points[idx];
+
+          return {
+            scopeType: "district" as const,
+            scopeId: input.districtId,
+            targetType: "aquifer_level" as const,
+            flagType: flag.flagType,
+            riskLevel: flag.riskLevel,
+            pointForecast: interval95Point?.yHat ?? null,
+            interval80: interval80Point
+              ? {
+                  lower: interval80Point.lower,
+                  upper: interval80Point.upper,
+                }
+              : null,
+            interval95: interval95Point
+              ? {
+                  lower: interval95Point.lower,
+                  upper: interval95Point.upper,
+                }
+              : null,
+            reasonCodes: flag.reasonCodes,
+            computedAt: now,
+            modelVersionId: modelId,
+            runId,
+            plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
+          };
+        }),
         {
           scopeType: "district" as const,
           scopeId: input.districtId,
