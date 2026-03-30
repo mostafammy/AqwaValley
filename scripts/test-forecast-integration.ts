@@ -37,7 +37,7 @@ async function main() {
     process.env.CRON_SECRET = "forecast-test-cron-secret";
   }
 
-  const { and, eq, inArray, like } = await import("drizzle-orm");
+  const { eq, inArray, like } = await import("drizzle-orm");
   const { NextRequest } = await import("next/server");
   const { db } = await import("../src/server/db");
   const schema = await import("../src/server/db/schema");
@@ -65,8 +65,10 @@ async function main() {
   for (let i = 0; i < 45; i++) {
     const ts = new Date(now);
     ts.setUTCDate(ts.getUTCDate() - (45 - i));
-    const trend = 72 - i * 0.22;
-    const seasonal = Math.sin(i / 4) * 0.8;
+    // Use a deterministic low positive slope that remains under plausibility
+    // depletion thresholds across 5/10/25-year extrapolated horizon deltas.
+    const trend = 72 + i * 0.0002;
+    const seasonal = 0;
     readingRows.push({
       sensorId,
       value: Number((trend + seasonal).toFixed(4)),
@@ -177,7 +179,11 @@ async function main() {
       triggerType: "manual",
     });
 
-    assert.equal(firstRun.status, "completed");
+    assert.equal(
+      firstRun.status,
+      "completed",
+      `expected completed run but got ${firstRun.status} (${firstRun.failureReason ?? "no_reason"})`,
+    );
     assert.equal(firstRun.replay, false);
     assert.ok(firstRun.modelId, "first run must return modelId");
 
