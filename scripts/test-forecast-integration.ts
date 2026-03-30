@@ -1,48 +1,34 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
+import "./env-loader.mjs";
+import { eq, inArray, like } from "drizzle-orm";
+import { NextRequest } from "next/server";
 
-function loadLocalEnv() {
-  const envFiles = [".env.local", ".env"];
-  for (const file of envFiles) {
-    if (!existsSync(file)) continue;
+import { db } from "../src/server/db";
+import * as schema from "../src/server/db/schema";
+import { createForecastRuntime } from "../src/server/services/forecast/runtime";
+import * as forecastCronRoute from "../src/app/api/cron/aquifer-forecast/route";
 
-    const content = readFileSync(file, "utf8");
-    for (const line of content.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-
-      const idx = trimmed.indexOf("=");
-      if (idx === -1) continue;
-
-      const key = trimmed.slice(0, idx).trim();
-      const rawValue = trimmed.slice(idx + 1).trim();
-      const value = rawValue.replace(/^['"]|['"]$/g, "");
-
-      if (!(key in process.env)) {
-        process.env[key] = value;
-      }
-    }
-  }
-}
+type RiskRow = {
+  id: string;
+  modelVersionId: string;
+  runId: string;
+  flagType: string;
+  pointForecast: unknown;
+  interval80: unknown;
+  interval95: unknown;
+};
 
 function logStep(message: string): void {
   console.log(`[forecast-integration] ${message}`);
 }
 
 async function main() {
-  loadLocalEnv();
-
   process.env.CRON_SECRET ??= "forecast-test-cron-secret";
-
-  const { eq, inArray, like } = await import("drizzle-orm");
-  const { NextRequest } = await import("next/server");
-  const { db } = await import("../src/server/db");
-  const schema = await import("../src/server/db/schema");
-  const { createForecastRuntime } =
-    await import("../src/server/services/forecast/runtime");
-  const forecastCronRoute =
-    await import("../src/app/api/cron/aquifer-forecast/route");
 
   const fixtureTag = `forecast-itest-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const districtId = randomUUID();
@@ -213,7 +199,7 @@ async function main() {
         outlierRatioPct: schema.aquiferLinearRegressionModel.outlierRatioPct,
       })
       .from(schema.aquiferLinearRegressionModel)
-      .where(eq(schema.aquiferLinearRegressionModel.id, firstRun.modelId!));
+      .where(eq(schema.aquiferLinearRegressionModel.id, firstRun.modelId));
 
     assert.equal(persistedModelRows.length, 1, "model row must exist");
     assert.ok(
@@ -230,7 +216,7 @@ async function main() {
       "model rSquared must be persisted",
     );
 
-    const riskRows = await db
+    const riskRows: RiskRow[] = await db
       .select({
         id: schema.aquiferRiskFlag.id,
         modelVersionId: schema.aquiferRiskFlag.modelVersionId,
@@ -270,7 +256,7 @@ async function main() {
       .where(
         eq(
           schema.aquiferModelReferenceObservationLink.modelVersionId,
-          firstRun.modelId!,
+          firstRun.modelId,
         ),
       );
 
