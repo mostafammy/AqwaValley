@@ -96,13 +96,15 @@ export class DataQualityFilter {
           });
 
     const droppedOutlier = present.length - filtered.length;
+    const validSampleCount = present.length;
 
     return {
       filtered,
       droppedMissing,
       droppedOutlier,
       completenessPct: (present.length / total) * 100,
-      outlierRatioPct: (droppedOutlier / total) * 100,
+      outlierRatioPct:
+        validSampleCount === 0 ? 0 : (droppedOutlier / validSampleCount) * 100,
     };
   }
 }
