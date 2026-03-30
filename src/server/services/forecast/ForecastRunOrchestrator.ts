@@ -174,91 +174,106 @@ export class ForecastRunOrchestrator {
         };
       }
 
+      const model = executed.model;
+      const riskFlags = executed.riskFlags;
+
       const modelId = randomUUID();
       const trainingWindowStart =
         executed.preparedSeries?.points[0]?.timestamp ?? windowStart;
 
-      await this.modelRepository.saveVersion({
-        id: modelId,
-        scopeType: "district",
-        scopeId: input.districtId,
-        targetType: "aquifer_level",
-        slope: executed.model.coefficients.slope,
-        intercept: executed.model.coefficients.intercept,
-        sampleCount: executed.model.sampleCount,
-        trainingWindowStart,
-        approvalState: "pending_review",
-        approvalExpiresAt: null,
-        rSquared: executed.modelQuality?.rSquared ?? null,
-        dataCompletenessPct: executed.modelQuality?.dataCompletenessPct ?? null,
-        outlierRatioPct: executed.modelQuality?.outlierRatioPct ?? null,
-        trainingWindowEnd: now,
-      });
-
-      await this.modelRepository.saveLineage({
-        modelVersionId: modelId,
-        usageType: "validate",
-        observations: bundle.externalReferences,
-      });
-
-      const runRow = await this.db
-        .select({ id: aquiferForecastRun.id })
-        .from(aquiferForecastRun)
-        .where(eq(aquiferForecastRun.runKey, runKey))
-        .limit(1);
-
-      const runId = runRow[0]?.id;
-      if (!runId) {
-        throw new Error("Run row not found after creation");
-      }
-
-      await this.riskRepository.publish([
-        ...executed.riskFlags.horizons.map((flag, idx) => {
-          const interval80Point = executed.interval80?.points[idx];
-          const interval95Point = executed.interval95?.points[idx];
-
-          return {
-            scopeType: "district" as const,
+      await this.db.transaction(async (tx) => {
+        await this.modelRepository.saveVersion(
+          {
+            id: modelId,
+            scopeType: "district",
             scopeId: input.districtId,
-            targetType: "aquifer_level" as const,
-            flagType: flag.flagType,
-            riskLevel: flag.riskLevel,
-            pointForecast: interval95Point?.yHat ?? null,
-            interval80: interval80Point
-              ? {
-                  lower: interval80Point.lower,
-                  upper: interval80Point.upper,
-                }
-              : null,
-            interval95: interval95Point
-              ? {
-                  lower: interval95Point.lower,
-                  upper: interval95Point.upper,
-                }
-              : null,
-            reasonCodes: flag.reasonCodes,
-            computedAt: now,
+            targetType: "aquifer_level",
+            slope: model.coefficients.slope,
+            intercept: model.coefficients.intercept,
+            sampleCount: model.sampleCount,
+            trainingWindowStart,
+            approvalState: "pending_review",
+            approvalExpiresAt: null,
+            rSquared: executed.modelQuality?.rSquared ?? null,
+            dataCompletenessPct:
+              executed.modelQuality?.dataCompletenessPct ?? null,
+            outlierRatioPct: executed.modelQuality?.outlierRatioPct ?? null,
+            trainingWindowEnd: now,
+          },
+          tx,
+        );
+
+        await this.modelRepository.saveLineage(
+          {
             modelVersionId: modelId,
-            runId,
-            plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
-          };
-        }),
-        {
-          scopeType: "district" as const,
-          scopeId: input.districtId,
-          targetType: "aquifer_level" as const,
-          flagType: executed.riskFlags.composite.flagType,
-          riskLevel: executed.riskFlags.composite.riskLevel,
-          pointForecast: null,
-          interval80: null,
-          interval95: null,
-          reasonCodes: executed.riskFlags.composite.reasonCodes,
-          computedAt: now,
-          modelVersionId: modelId,
-          runId,
-          plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
-        },
-      ]);
+            usageType: "validate",
+            observations: bundle.externalReferences,
+          },
+          tx,
+        );
+
+        const runRow = await tx
+          .select({ id: aquiferForecastRun.id })
+          .from(aquiferForecastRun)
+          .where(eq(aquiferForecastRun.runKey, runKey))
+          .limit(1);
+
+        const runId = runRow[0]?.id;
+        if (!runId) {
+          throw new Error("Run row not found after creation");
+        }
+
+        await this.riskRepository.publish(
+          [
+            ...riskFlags.horizons.map((flag, idx) => {
+              const interval80Point = executed.interval80?.points[idx];
+              const interval95Point = executed.interval95?.points[idx];
+
+              return {
+                scopeType: "district" as const,
+                scopeId: input.districtId,
+                targetType: "aquifer_level" as const,
+                flagType: flag.flagType,
+                riskLevel: flag.riskLevel,
+                pointForecast: interval95Point?.yHat ?? null,
+                interval80: interval80Point
+                  ? {
+                      lower: interval80Point.lower,
+                      upper: interval80Point.upper,
+                    }
+                  : null,
+                interval95: interval95Point
+                  ? {
+                      lower: interval95Point.lower,
+                      upper: interval95Point.upper,
+                    }
+                  : null,
+                reasonCodes: flag.reasonCodes,
+                computedAt: now,
+                modelVersionId: modelId,
+                runId,
+                plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
+              };
+            }),
+            {
+              scopeType: "district" as const,
+              scopeId: input.districtId,
+              targetType: "aquifer_level" as const,
+              flagType: riskFlags.composite.flagType,
+              riskLevel: riskFlags.composite.riskLevel,
+              pointForecast: null,
+              interval80: null,
+              interval95: null,
+              reasonCodes: riskFlags.composite.reasonCodes,
+              computedAt: now,
+              modelVersionId: modelId,
+              runId,
+              plausibilityPolicyVersion: this.policy.plausibilityPolicyVersion,
+            },
+          ],
+          tx,
+        );
+      });
 
       await this.runRepository.markRunCompleted({
         runKey,
@@ -271,8 +286,8 @@ export class ForecastRunOrchestrator {
         replay: false,
         modelId,
         risk: {
-          horizons: executed.riskFlags.horizons,
-          composite: executed.riskFlags.composite,
+          horizons: riskFlags.horizons,
+          composite: riskFlags.composite,
         },
       };
     } catch (error) {
