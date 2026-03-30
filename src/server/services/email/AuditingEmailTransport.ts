@@ -22,6 +22,7 @@ import { emailAuditLog } from "~/server/db/schema";
 import type { IEmailTransport, MailOptions, SendResult } from "./interfaces";
 import type { emailTypeEnum } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "~/lib/logger";
 
 type EmailType = (typeof emailTypeEnum.enumValues)[number];
 
@@ -59,28 +60,46 @@ export class AuditingEmailTransport implements IEmailTransport {
     try {
       const result = await this.inner.sendMail(options);
 
-      // 3a. Success: update audit row with messageId and 'sent' status
-      await this.db
-        .update(emailAuditLog)
-        .set({
-          status: "sent",
-          providerMessageId: result.messageId,
-        })
-        .where(eq(emailAuditLog.id, auditId));
+      // 3a. Success: attempt to update audit row with messageId and 'sent' status.
+      // If the DB update fails, log it but do NOT rethrow — the send succeeded
+      // and callers should receive the successful SendResult.
+      try {
+        await this.db
+          .update(emailAuditLog)
+          .set({
+            status: "sent",
+            providerMessageId: result.messageId,
+          })
+          .where(eq(emailAuditLog.id, auditId));
+      } catch (auditErr) {
+        logger.error(
+          { err: auditErr, auditId, to: options.to },
+          "email.audit.update_failed_on_success",
+        );
+        // Optionally: push to a retry queue or record a non-fatal metric here.
+      }
 
       return result;
     } catch (err) {
-      // 3b. Failure: update audit row with error detail
-      const errorDetail =
-        err instanceof Error ? err.message : "Unknown send error";
+      // 3b. Failure: update audit row with error detail. If updating the audit
+      // row fails, log that error but rethrow the original send error so
+      // upstream retry semantics remain based on the send failure.
+      const errorDetail = err instanceof Error ? err.message : "Unknown send error";
 
-      await this.db
-        .update(emailAuditLog)
-        .set({
-          status: "failed",
-          errorDetail,
-        })
-        .where(eq(emailAuditLog.id, auditId));
+      try {
+        await this.db
+          .update(emailAuditLog)
+          .set({
+            status: "failed",
+            errorDetail,
+          })
+          .where(eq(emailAuditLog.id, auditId));
+      } catch (auditErr) {
+        logger.error(
+          { err: auditErr, auditId, to: options.to },
+          "email.audit.update_failed_on_error",
+        );
+      }
 
       throw err;
     }
