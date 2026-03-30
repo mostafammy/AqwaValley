@@ -17,12 +17,15 @@ import type { IFarmScopeAssigner } from "./interfaces";
 export class FarmScopeAssigner implements IFarmScopeAssigner {
   constructor(private readonly db: DrizzleDB) {}
 
-  async assign(input: {
-    userId: string;
-    farmId: string;
-    actorId: string;
-    ipAddress?: string;
-  }, tx?: DrizzleDB): Promise<void> {
+  async assign(
+    input: {
+      userId: string;
+      farmId: string;
+      actorId: string;
+      ipAddress?: string;
+    },
+    tx?: DrizzleDB,
+  ): Promise<void> {
     // Fetch current farm state for the audit 'before' snapshot
     const existingFarm = await this.db.query.farm.findFirst({
       where: eq(farm.id, input.farmId),
@@ -49,7 +52,10 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
         entityType: "farm_scope",
         entityId: input.userId,
         actorId: input.actorId,
-        before: { farmId: input.farmId, farmerUserId: existingFarm.farmerUserId },
+        before: {
+          farmId: input.farmId,
+          farmerUserId: existingFarm.farmerUserId,
+        },
         after: { farmId: input.farmId, farmerUserId: input.userId },
         ipAddress: input.ipAddress ?? null,
       });
@@ -69,7 +75,10 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
         entityType: "farm_scope",
         entityId: input.userId,
         actorId: input.actorId,
-        before: { farmId: input.farmId, farmerUserId: existingFarm.farmerUserId },
+        before: {
+          farmId: input.farmId,
+          farmerUserId: existingFarm.farmerUserId,
+        },
         after: { farmId: input.farmId, farmerUserId: input.userId },
         ipAddress: input.ipAddress ?? null,
       });
