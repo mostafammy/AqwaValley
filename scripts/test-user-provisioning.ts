@@ -41,8 +41,9 @@ async function main() {
   const adminActorId = firstUser.id;
 
   // Test Payload
-  const testNationalId = `2900101${Math.floor(Math.random() * 10000000).toString().padStart(7, "0")}`;
-  const testEmail = `test.farmer.${Date.now()}@aqwavalley.gov.eg`;
+  // Use non-sensitive deterministic test values to avoid committing real PII/tokens
+  const testNationalId = `REDACTED_NATIONAL_ID`;
+  const testEmail = `test.farmer+ci@example.com`;
   
   console.log("📦 Provisioning Payload:");
   console.log({
@@ -91,7 +92,20 @@ async function main() {
       });
       console.log(`  ✉️ Outbox events queued: ${userOutbox.length} (Expected 1 for invitation email)`);
       if (userOutbox.length > 0) {
-        console.log("     Example Outbox Payload:", userOutbox[0]?.payload);
+        // Sanitize any potentially sensitive fields before printing
+        const rawPayload = userOutbox[0]?.payload ?? {};
+        const sanitize = (p: any) => {
+          try {
+            const asStr = JSON.stringify(p);
+            return asStr
+              .replace(/token=[A-Za-z0-9._-]{8,}/g, 'token=REDACTED_TOKEN')
+              .replace(/\b[0-9a-fA-F]{16,}\b/g, 'REDACTED_ID')
+              .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, 'REDACTED_EMAIL');
+          } catch (e) {
+            return String(p);
+          }
+        };
+        console.log("     Example Outbox Payload:", JSON.parse(sanitize(rawPayload)));
       }
 
       console.log("\n🎉 ALL TESTS PASSED. The mediator orchestrated the transaction securely.");
