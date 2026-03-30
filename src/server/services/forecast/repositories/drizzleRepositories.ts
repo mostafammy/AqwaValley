@@ -1,4 +1,4 @@
-import { and, desc, eq, lte } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, lte, or } from "drizzle-orm";
 
 import type { db as DbInstance } from "~/server/db";
 import {
@@ -11,6 +11,7 @@ import {
 import type {
   ForecastRunClaimResult,
   ForecastArtifactRepository,
+  ForecastRepositoryDb,
   PersistedForecastRun,
 } from "~/server/services/forecast/repositories/ForecastArtifactRepository";
 import type {
@@ -210,6 +211,11 @@ export class DrizzleModelVersionRepository implements ModelVersionRepository {
           eq(aquiferLinearRegressionModel.targetType, args.targetType),
           eq(aquiferLinearRegressionModel.approvalState, "approved"),
           lte(aquiferLinearRegressionModel.createdAt, args.at),
+          lte(aquiferLinearRegressionModel.trainingWindowEnd, args.at),
+          or(
+            isNull(aquiferLinearRegressionModel.approvalExpiresAt),
+            gt(aquiferLinearRegressionModel.approvalExpiresAt, args.at),
+          ),
         ),
       )
       .orderBy(desc(aquiferLinearRegressionModel.trainingWindowEnd))
@@ -217,7 +223,6 @@ export class DrizzleModelVersionRepository implements ModelVersionRepository {
 
     const row = rows[0];
     if (!row) return null;
-    if (row.approvalExpiresAt && row.approvalExpiresAt <= args.at) return null;
 
     return {
       id: row.id,
@@ -241,8 +246,13 @@ export class DrizzleModelVersionRepository implements ModelVersionRepository {
     };
   }
 
-  public async saveVersion(version: PersistedModelVersion): Promise<void> {
-    await this.db.insert(aquiferLinearRegressionModel).values({
+  public async saveVersion(
+    version: PersistedModelVersion,
+    executor?: ForecastRepositoryDb,
+  ): Promise<void> {
+    const db = executor ?? this.db;
+
+    await db.insert(aquiferLinearRegressionModel).values({
       id: version.id,
       scopeType: version.scopeType,
       scopeId: version.scopeId,
@@ -281,49 +291,64 @@ export class DrizzleModelVersionRepository implements ModelVersionRepository {
       mappingConfidence: number | null;
       sourceSnapshotId: string;
     }>;
-  }): Promise<void> {
+  }, executor?: ForecastRepositoryDb): Promise<void> {
     if (args.observations.length === 0) return;
 
-    const inserted = await this.db
-      .insert(aquiferExternalReferenceObservation)
-      .values(
-        args.observations.map((observation) => ({
-          sourceSystem: observation.sourceSystem,
-          stationId: observation.stationId,
-          districtId: observation.districtId,
-          wellId: observation.wellId,
-          observedAt: observation.observedAt,
-          metricType: observation.metricType,
-          value: observation.value.toString(),
-          unit: observation.unit,
-          mappingConfidence:
-            observation.mappingConfidence == null
-              ? null
-              : observation.mappingConfidence.toString(),
-          sourceSnapshotId: observation.sourceSnapshotId,
+    const persistLineage = async (db: ForecastRepositoryDb): Promise<void> => {
+      const inserted = await db
+        .insert(aquiferExternalReferenceObservation)
+        .values(
+          args.observations.map((observation) => ({
+            sourceSystem: observation.sourceSystem,
+            stationId: observation.stationId,
+            districtId: observation.districtId,
+            wellId: observation.wellId,
+            observedAt: observation.observedAt,
+            metricType: observation.metricType,
+            value: observation.value.toString(),
+            unit: observation.unit,
+            mappingConfidence:
+              observation.mappingConfidence == null
+                ? null
+                : observation.mappingConfidence.toString(),
+            sourceSnapshotId: observation.sourceSnapshotId,
+          })),
+        )
+        .returning({ id: aquiferExternalReferenceObservation.id });
+
+      if (inserted.length === 0) return;
+
+      await db.insert(aquiferModelReferenceObservationLink).values(
+        inserted.map((row) => ({
+          modelVersionId: args.modelVersionId,
+          observationId: row.id,
+          usageType: args.usageType,
         })),
-      )
-      .returning({ id: aquiferExternalReferenceObservation.id });
+      );
+    };
 
-    if (inserted.length === 0) return;
+    if (executor) {
+      await persistLineage(executor);
+      return;
+    }
 
-    await this.db.insert(aquiferModelReferenceObservationLink).values(
-      inserted.map((row) => ({
-        modelVersionId: args.modelVersionId,
-        observationId: row.id,
-        usageType: args.usageType,
-      })),
-    );
+    await this.db.transaction(async (tx) => {
+      await persistLineage(tx);
+    });
   }
 }
 
 export class DrizzleRiskFlagRepository implements RiskFlagRepository {
   public constructor(private readonly db: Db) {}
 
-  public async publish(flags: PersistedRiskFlag[]): Promise<void> {
+  public async publish(
+    flags: PersistedRiskFlag[],
+    executor?: ForecastRepositoryDb,
+  ): Promise<void> {
     if (flags.length === 0) return;
+    const db = executor ?? this.db;
 
-    await this.db.insert(aquiferRiskFlag).values(
+    await db.insert(aquiferRiskFlag).values(
       flags.map((flag) => ({
         scopeType: flag.scopeType,
         scopeId: flag.scopeId,
