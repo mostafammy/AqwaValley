@@ -150,6 +150,11 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 }
 
+// Vercel Cron jobs issue GET requests. Support them by delegating to POST logic.
+export async function GET(req: Request): Promise<NextResponse> {
+  return POST(req);
+}
+
 /** Extract recipient email from any outbox payload type */
 function extractRecipientEmail(payload: OutboxPayload): string | null {
   if ("recipientEmail" in payload) {
