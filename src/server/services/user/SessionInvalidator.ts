@@ -17,6 +17,7 @@ import { eq } from "drizzle-orm";
 import type { DrizzleDB } from "~/server/db/index";
 import { session } from "~/server/db/schema";
 import type { ISessionInvalidator } from "./interfaces";
+import { logger } from "~/lib/logger";
 
 export class SessionInvalidator implements ISessionInvalidator {
   constructor(private readonly db: DrizzleDB) {}
@@ -30,13 +31,9 @@ export class SessionInvalidator implements ISessionInvalidator {
     try {
       await this.db.delete(session).where(eq(session.userId, userId));
     } catch (err) {
-      // Log but do not throw — session revocation failure is recoverable.
-      // The role IS revoked in DB (RoleAssigner committed first).
-      // The user's next request will re-load roles from DB and find the role gone.
-      console.error(
-        `[SessionInvalidator] Failed to revoke sessions for user ${userId}:`,
-        err,
-      );
+      // Log and rethrow so callers can observe failures and react (retry/alert).
+      logger.error({ err, userId }, "session.invalidator.revoke_failed");
+      throw err;
     }
   }
 }
