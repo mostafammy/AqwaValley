@@ -28,7 +28,7 @@ function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
     name?: unknown;
   };
 
-  const weather0 =
+  const weather0: unknown =
     Array.isArray(candidate.weather) && candidate.weather.length > 0
       ? candidate.weather[0]
       : null;
