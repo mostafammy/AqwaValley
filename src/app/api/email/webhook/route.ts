@@ -21,7 +21,13 @@ import { emailAuditLog } from "~/server/db/schema";
 import { env } from "~/env";
 
 interface SendGridEvent {
-  event: "delivered" | "open" | "bounce" | "dropped" | "deferred" | "spamreport";
+  event:
+    | "delivered"
+    | "open"
+    | "bounce"
+    | "dropped"
+    | "deferred"
+    | "spamreport";
   sg_message_id?: string;
   email: string;
   timestamp: number;
@@ -47,7 +53,10 @@ function parseSignatureHeader(sigHeader: string): Buffer | null {
   let sig = sigHeader.trim();
   // Some providers prefix with algorithm or key id (e.g. "v1=BASE64" or "sha256=BASE64")
   const eqIdx = sig.indexOf("=");
-  if (eqIdx !== -1 && /^[a-z0-9_\-]+$/.test(sig.slice(0, eqIdx).toLowerCase())) {
+  if (
+    eqIdx !== -1 &&
+    /^[a-z0-9_\-]+$/.test(sig.slice(0, eqIdx).toLowerCase())
+  ) {
     sig = sig.slice(eqIdx + 1);
   }
   // If multiple comma-separated values, take the first
@@ -82,7 +91,10 @@ function verifySignature(
   const pubPem = toPemPublicKey(pubRaw);
 
   try {
-    const payload = Buffer.concat([Buffer.from(String(timestampHeader), "utf8"), rawBody]);
+    const payload = Buffer.concat([
+      Buffer.from(String(timestampHeader), "utf8"),
+      rawBody,
+    ]);
 
     const verifier = createVerify("sha256");
     verifier.update(payload);
@@ -117,7 +129,12 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   if (
     env.NODE_ENV === "production" &&
-    !verifySignature(rawBodyBuf, signatureHeader, timestampHeader, publicKeyHeader)
+    !verifySignature(
+      rawBodyBuf,
+      signatureHeader,
+      timestampHeader,
+      publicKeyHeader,
+    )
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
