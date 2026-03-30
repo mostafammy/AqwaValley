@@ -7,7 +7,7 @@
  * Template selection is handled by EmailService.
  */
 
-import nodemailer, { type Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 import type { IEmailTransport, MailOptions, SendResult } from "./interfaces";
 
 export interface SmtpConfig {
@@ -25,13 +25,22 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+type TransporterLike = {
+  sendMail(opts: unknown): Promise<unknown>;
+  verify(): Promise<unknown>;
+};
+
 export class NodeMailerTransport implements IEmailTransport {
-  private readonly transporter: Transporter;
+  private readonly transporter: TransporterLike;
   private readonly from: string;
 
   constructor(config: SmtpConfig) {
     this.from = config.from;
-    this.transporter = nodemailer.createTransport({
+    const nodemailerTyped = nodemailer as unknown as {
+      createTransport(opts: unknown): unknown;
+    };
+
+    const transporterRaw = nodemailerTyped.createTransport({
       host: config.host,
       port: config.port,
       secure: config.secure,
@@ -44,6 +53,8 @@ export class NodeMailerTransport implements IEmailTransport {
         rejectUnauthorized: process.env.NODE_ENV === "production",
       },
     });
+
+    this.transporter = transporterRaw as TransporterLike;
   }
 
   async sendMail(options: MailOptions): Promise<SendResult> {
