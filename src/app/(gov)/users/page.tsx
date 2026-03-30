@@ -85,9 +85,9 @@ function SingleProvisionForm() {
     // Sanitize empty strings to undefined for UUID fields
     const payload = {
       ...formData,
-      districtId: formData.districtId || undefined,
-      farmId: formData.farmId || undefined,
-      phone: formData.phone || undefined,
+      districtId: formData.districtId ?? undefined,
+      farmId: formData.farmId ?? undefined,
+      phone: formData.phone ?? undefined,
     };
 
     try {
@@ -107,8 +107,9 @@ function SingleProvisionForm() {
           setFeedback({ type: "error", msg: "This user already has an active account." });
           break;
       }
-    } catch (err: any) {
-      setFeedback({ type: "error", msg: err.message || "Failed to parse or send." });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setFeedback({ type: "error", msg: msg || "Failed to parse or send." });
     }
   };
 
@@ -157,7 +158,7 @@ function SingleProvisionForm() {
           <select
             className="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 border shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             value={formData.roleType}
-            onChange={(e) => setFormData({ ...formData, roleType: e.target.value as any })}
+            onChange={(e) => setFormData({ ...formData, roleType: e.target.value as ProvisionInput['roleType'] })}
           >
             <option value="farmer">Farmer</option>
             <option value="farm_owner">Farm Owner</option>
@@ -190,7 +191,14 @@ function BulkProvisionArea() {
   const bulkMutation = api.users.bulkProvision.useMutation();
   const [parsedData, setParsedData] = useState<ProvisionInput[]>([]);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
-  const [results, setResults] = useState<any[] | null>(null);
+  type BulkResult = {
+    nationalId?: string;
+    status?: "created" | "skipped" | "failed";
+    userId?: string;
+    reason?: string;
+  };
+
+  const [results, setResults] = useState<BulkResult[] | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -199,20 +207,20 @@ function BulkProvisionArea() {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (result) => {
-        const rows = result.data as any[];
+      complete: (result: Papa.ParseResult<Record<string, string>>) => {
+        const rows = result.data;
         const errors: string[] = [];
         const validRows: ProvisionInput[] = [];
 
         rows.forEach((row, index) => {
           const payload = {
-            fullName: row.fullName?.trim(),
-            nationalId: row.nationalId?.trim(),
-            email: row.email?.trim(),
-            roleType: row.roleType?.trim() || "farmer",
-            phone: row.phone?.trim() || undefined,
-            districtId: row.districtId?.trim() || undefined,
-            farmId: row.farmId?.trim() || undefined,
+            fullName: (row.fullName ?? "").trim(),
+            nationalId: (row.nationalId ?? "").trim(),
+            email: (row.email ?? "").trim(),
+            roleType: row.roleType?.trim() ? (row.roleType.trim() as ProvisionInput['roleType']) : "farmer",
+            phone: row.phone?.trim() ? row.phone.trim() : undefined,
+            districtId: row.districtId?.trim() ? row.districtId.trim() : undefined,
+            farmId: row.farmId?.trim() ? row.farmId.trim() : undefined,
           };
 
           const parseRes = provisionInputSchema.safeParse(payload);
@@ -230,7 +238,7 @@ function BulkProvisionArea() {
           setParsedData(validRows);
         }
         setParseErrors(errors);
-        setResults(null); 
+        setResults(null);
       },
     });
   };
@@ -238,11 +246,12 @@ function BulkProvisionArea() {
   const handleBulkSubmit = async () => {
     if (parsedData.length === 0) return;
     try {
-      const res = await bulkMutation.mutateAsync({ users: parsedData });
+      const res = (await bulkMutation.mutateAsync({ users: parsedData })) as unknown as BulkResult[];
       setResults(res);
       setParsedData([]); // Clear post-success
-    } catch (err: any) {
-      setParseErrors([err.message || "Bulk provision API request failed"]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setParseErrors([msg || "Bulk provision API request failed"]);
     }
   };
 
@@ -322,13 +331,13 @@ function BulkProvisionArea() {
               <li key={i} className="p-4 flex flex-col hover:bg-gray-50">
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-sm text-gray-800">{res.nationalId}</span>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    res.status === 'created' ? 'bg-green-100 text-green-800' :
-                    res.status === 'skipped' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {res.status.toUpperCase()}
-                  </span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          res.status === 'created' ? 'bg-green-100 text-green-800' :
+                          res.status === 'skipped' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {(res.status ?? '').toUpperCase()}
+                        </span>
                 </div>
                 {res.reason && <p className="text-xs text-gray-500 mt-2">{res.reason}</p>}
               </li>
