@@ -19,7 +19,7 @@ export const forecastRouter = createTRPCRouter({
       return getDistrictForecast(ctx.db, input.districtId);
     }),
 
-  getDistrictAquiferForecast: viewerProcedure
+  getDistrictAquiferForecast: operatorProcedure
     .input(z.object({ districtId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       await requireDistrictAccess(ctx, input.districtId);
