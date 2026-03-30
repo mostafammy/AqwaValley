@@ -12,7 +12,22 @@ export type PersistedForecastRun = {
   errorSummary: string | null;
 };
 
+export type ForecastRunClaimResult =
+  | {
+      state: "claimed";
+      run: PersistedForecastRun;
+    }
+  | {
+      state: "completed";
+      run: PersistedForecastRun;
+    }
+  | {
+      state: "already_claimed";
+      run: PersistedForecastRun;
+    };
+
 export interface ForecastArtifactRepository {
+  createOrClaimRun(draft: ForecastRunDraft): Promise<ForecastRunClaimResult>;
   createRun(draft: ForecastRunDraft): Promise<PersistedForecastRun>;
   markRunCompleted(args: { runKey: string; durationMs: number }): Promise<void>;
   markRunFailed(args: { runKey: string; errorSummary: string }): Promise<void>;
