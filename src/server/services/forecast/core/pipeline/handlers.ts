@@ -45,13 +45,17 @@ function levelMToStressPct(
   levelM: number,
   context: ForecastExecutionContext,
 ): number {
+  // Guard: ensure we never propagate NaN/Infinity — use a safe default.
+  if (!Number.isFinite(levelM)) return 0;
+
   // If we don't have a physical floor reference, fall back to returning the
-  // raw value so behavior is unchanged. When physicalFloorDepthM is present
-  // it was set by the orchestrator as `baseline + 120`, so we reverse that
-  // convention to estimate baseline and scale percent between baseline (0%)
-  // and physical floor (100%). This is a conservative linear mapping.
+  // raw finite value so behavior is unchanged. When physicalFloorDepthM is
+  // present it was set by the orchestrator as `baseline + 120`, so we
+  // reverse that convention to estimate baseline and scale percent between
+  // baseline (0%) and physical floor (100%). This is a conservative linear
+  // mapping.
   const floor = context.physicalFloorDepthM;
-  if (floor == null || !Number.isFinite(levelM)) return levelM;
+  if (floor == null) return levelM;
 
   const baseline = floor - 120;
   const denom = floor - baseline;
