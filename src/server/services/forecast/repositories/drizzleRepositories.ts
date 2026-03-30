@@ -276,22 +276,25 @@ export class DrizzleModelVersionRepository implements ModelVersionRepository {
     });
   }
 
-  public async saveLineage(args: {
-    modelVersionId: string;
-    usageType: "train" | "validate" | "calibrate";
-    observations: Array<{
-      sourceSystem: string;
-      stationId: string;
-      districtId: string | null;
-      wellId: string | null;
-      observedAt: Date;
-      metricType: string;
-      value: number;
-      unit: string;
-      mappingConfidence: number | null;
-      sourceSnapshotId: string;
-    }>;
-  }, executor?: ForecastRepositoryDb): Promise<void> {
+  public async saveLineage(
+    args: {
+      modelVersionId: string;
+      usageType: "train" | "validate" | "calibrate";
+      observations: Array<{
+        sourceSystem: string;
+        stationId: string;
+        districtId: string | null;
+        wellId: string | null;
+        observedAt: Date;
+        metricType: string;
+        value: number;
+        unit: string;
+        mappingConfidence: number | null;
+        sourceSnapshotId: string;
+      }>;
+    },
+    executor?: ForecastRepositoryDb,
+  ): Promise<void> {
     if (args.observations.length === 0) return;
 
     const persistLineage = async (db: ForecastRepositoryDb): Promise<void> => {
