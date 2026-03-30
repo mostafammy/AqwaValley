@@ -66,8 +66,12 @@ export class ForecastRunOrchestrator {
     });
 
     const runKey = input.runKey ?? runDraft.runKey;
-    const existing = await this.runRepository.findRun(runKey);
-    if (existing?.status === "completed") {
+    const claimResult = await this.runRepository.createOrClaimRun({
+      ...runDraft,
+      runKey,
+    });
+
+    if (claimResult.state === "completed") {
       return {
         runKey,
         status: "completed",
@@ -75,8 +79,16 @@ export class ForecastRunOrchestrator {
       };
     }
 
+    if (claimResult.state === "already_claimed") {
+      return {
+        runKey,
+        status: "failed",
+        replay: true,
+        failureReason: `run_already_claimed:${claimResult.run.status}`,
+      };
+    }
+
     const startedAt = Date.now();
-    await this.runRepository.createRun({ ...runDraft, runKey });
 
     try {
       const districtRow = await this.db
