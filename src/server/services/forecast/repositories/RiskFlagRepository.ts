@@ -1,3 +1,4 @@
+import type { ForecastRepositoryDb } from "~/server/services/forecast/repositories/ForecastArtifactRepository";
 import type {
   ForecastScopeType,
   ForecastTargetType,
@@ -22,6 +23,9 @@ export type PersistedRiskFlag = {
 };
 
 export interface RiskFlagRepository {
-  publish(flags: PersistedRiskFlag[]): Promise<void>;
+  publish(
+    flags: PersistedRiskFlag[],
+    executor?: ForecastRepositoryDb,
+  ): Promise<void>;
   listByRun(runId: string): Promise<PersistedRiskFlag[]>;
 }
