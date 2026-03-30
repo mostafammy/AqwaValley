@@ -25,14 +25,26 @@ function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
   const candidate = value as {
     main?: { temp?: unknown; humidity?: unknown };
     weather?: unknown;
+    name?: unknown;
   };
+
+  const weather0 =
+    Array.isArray(candidate.weather) && candidate.weather.length > 0
+      ? candidate.weather[0]
+      : null;
 
   return (
     typeof candidate.main === "object" &&
     candidate.main !== null &&
     typeof candidate.main.temp === "number" &&
+    (candidate.main.humidity === undefined ||
+      typeof candidate.main.humidity === "number") &&
     Array.isArray(candidate.weather) &&
-    candidate.weather.length > 0
+    weather0 !== null &&
+    typeof weather0 === "object" &&
+    typeof (weather0 as { description?: unknown }).description === "string" &&
+    typeof (weather0 as { icon?: unknown }).icon === "string" &&
+    (candidate.name === undefined || typeof candidate.name === "string")
   );
 }
 
