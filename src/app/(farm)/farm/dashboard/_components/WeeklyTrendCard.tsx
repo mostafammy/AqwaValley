@@ -24,26 +24,33 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
   const { targetRef, isVisible } = useIntersectionObserver();
 
   // Format data for chart
-  const data = (weeklyTrend && weeklyTrend.length > 0)
-    ? weeklyTrend.map((item) => {
-        const consumption = Number(item.consumptionM3);
-        const dateObj = new Date(item.periodStart);
-        const isValidDate = !isNaN(dateObj.getTime());
-        
-        return {
-          date: isValidDate 
-            ? dateObj.toLocaleDateString("ar-EG", { weekday: "short", day: "numeric" })
-            : "",
-          value: Number.isFinite(consumption) ? consumption : 0,
-        };
-      })
-    : [];
+  const data =
+    weeklyTrend && weeklyTrend.length > 0
+      ? weeklyTrend.map((item) => {
+          const consumption = Number(item.consumptionM3);
+          const dateObj = new Date(item.periodStart);
+          const isValidDate = !isNaN(dateObj.getTime());
+
+          return {
+            date: isValidDate
+              ? dateObj.toLocaleDateString("ar-EG", {
+                  weekday: "short",
+                  day: "numeric",
+                })
+              : "",
+            value: Number.isFinite(consumption) ? consumption : 0,
+          };
+        })
+      : [];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 md:p-5 h-full flex flex-col" ref={targetRef}>
-      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-3">
+    <div
+      className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-5"
+      ref={targetRef}
+    >
+      <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
         <div className="flex items-center gap-2 text-base font-bold text-gray-800">
-          <BarChartIcon className="w-5 h-5 text-blue-500" />
+          <BarChartIcon className="h-5 w-5 text-blue-500" />
           استهلاك المياه آخر 7 أيام
         </div>
       </div>
@@ -54,14 +61,21 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={isVisible ? data : []} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+            <AreaChart
+              data={isVisible ? data : []}
+              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+            >
               <defs>
                 <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#1D6FA8" stopOpacity={0.2} />
                   <stop offset="95%" stopColor="#1D6FA8" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(26,48,80,0.05)" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="rgba(26,48,80,0.05)"
+              />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 11, fill: "#8AA0B8" }}
@@ -82,7 +96,12 @@ export function WeeklyTrendCard({ weeklyTrend }: WeeklyTrendCardProps) {
                 width={40}
               />
               <Tooltip
-                contentStyle={{ borderRadius: "10px", border: "1px solid rgba(26,48,80,0.1)", fontSize: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+                contentStyle={{
+                  borderRadius: "10px",
+                  border: "1px solid rgba(26,48,80,0.1)",
+                  fontSize: "12px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
                 formatter={(value: number | string) => {
                   const numeric = Number(value);
                   const formatted = Number.isFinite(numeric)
