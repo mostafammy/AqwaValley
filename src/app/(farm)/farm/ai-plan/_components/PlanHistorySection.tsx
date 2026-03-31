@@ -62,12 +62,14 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
         <div className="flex gap-2">
           <button 
             onClick={() => scroll("right")}
+            aria-label="التحريك لليمين"
             className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
           <button 
             onClick={() => scroll("left")}
+            aria-label="التحريك لليسار"
             className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -86,7 +88,7 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
           ))
         ) : (
           plans?.map((plan) => {
-            const planData = plan.plan as IrrigationPlanObject;
+            const planData = (plan.plan as IrrigationPlanObject) || { reasoning: "بدون تفاصيل", zones: [] };
             const isActivated = plan.status === "ACTIVATED";
 
             return (

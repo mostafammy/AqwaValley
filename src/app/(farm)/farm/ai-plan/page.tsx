@@ -28,8 +28,8 @@ export default async function AiPlanPage() {
 
   let currentFarm = farmRows[0];
 
-  // Fallback for development/demo
-  if (!currentFarm && process.env.NODE_ENV === "development") {
+  // Fallback for development/demo - only when DEMO_MODE is explicitly enabled
+  if (!currentFarm && process.env.DEMO_MODE === "true") {
     const fallbackRows = await db
       .select({ id: farm.id, name: farm.name })
       .from(farm)

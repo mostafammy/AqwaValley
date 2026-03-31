@@ -230,6 +230,13 @@ export const irrigationRouter = createTRPCRouter({
         .where(eq(irrigationRecommendation.id, input.planId))
         .returning();
 
+      if (!updated) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Could not activate plan: recommendation not found or deleted.",
+        });
+      }
+
       return updated;
     }),
 
@@ -279,24 +286,35 @@ export const irrigationRouter = createTRPCRouter({
         .where(eq(farm.id, input.farmId))
         .limit(1);
 
-      if (!farmRecord) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!farmRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Farm not found",
+        });
+      }
 
-      const { fetchSoilReadings, fetchQuotaContext } = await import("~/server/services/irrigation/recommend_helpers");
-      
+      const { fetchSoilReadings, fetchQuotaContext } = await import(
+        "~/server/services/irrigation/recommend_helpers"
+      );
+
       const [soilReadingMap, quota] = await Promise.all([
         fetchSoilReadings(input.farmId),
         fetchQuotaContext(input.farmId, farmRecord.monthlyQuotaM3),
       ]);
 
       const readings = Object.values(soilReadingMap).filter(Boolean);
-      const avgSoilMoisture = readings.length > 0 
-        ? readings.reduce((sum, r) => sum + r!.humidityPct, 0) / readings.length
-        : null;
+      const avgSoilMoisture =
+        readings.length > 0
+          ? readings.reduce((sum, r) => sum + r!.humidityPct, 0) /
+            readings.length
+          : null;
 
       return {
         avgSoilMoisture,
         remainingQuotaLitres: quota.remainingLitres,
       };
+    }),
+
   activateRecommendation: protectedProcedure
     .input(activateRecommendationInput)
     .mutation(async ({ ctx, input }) => {

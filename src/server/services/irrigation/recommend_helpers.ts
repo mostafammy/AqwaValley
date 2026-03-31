@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
   farmWell,
@@ -7,6 +7,8 @@ import {
   latestSensorState,
   farmPeriodConsumptionSnapshot,
 } from "~/server/db/schema";
+
+export const DEFAULT_MONTHLY_QUOTA_M3 = 10000;
 
 /**
  * Fetch soil sensory data (humidity, temperature) from all active sensors on the farm.
@@ -34,23 +36,24 @@ export async function fetchSoilReadings(
     .where(
       and(
         eq(sensors.isActive, true),
-        // filtering by farm wells
+        inArray(latestSensorState.wellId, wellIds),
       ),
     );
 
-  // Filter for wells only on this farm manually to be safe or use IN clause
-  // For brevity/correctness, let's just use the wellIds list
-  const filtered = allLatestStates.filter(s => s.wellId && wellIds.includes(s.wellId));
+  const filtered = allLatestStates;
 
   const resultMap: Record<string, { humidityPct: number; tempCelsius: number }> = {};
   
   filtered.forEach((s) => {
     if (!s.wellId) return;
+    const val = Number(s.value);
+    if (!Number.isFinite(val)) return;
+
     if (!resultMap[s.wellId]) {
-      resultMap[s.wellId] = { humidityPct: 65, tempCelsius: 28 }; // sensible defaults
+      resultMap[s.wellId] = { humidityPct: 0, tempCelsius: 0 };
     }
-    if (s.type === "humidity") resultMap[s.wellId]!.humidityPct = Number(s.value);
-    if (s.type === "temperature") resultMap[s.wellId]!.tempCelsius = Number(s.value);
+    if (s.type === "humidity") resultMap[s.wellId]!.humidityPct = val;
+    if (s.type === "temperature") resultMap[s.wellId]!.tempCelsius = val;
   });
 
   return resultMap;
@@ -93,8 +96,10 @@ export async function fetchQuotaContext(
     };
   }
 
-  // Fallback: use farm's monthly quota
-  const quotaM3 = monthlyQuotaM3 ? parseFloat(monthlyQuotaM3) : 10000;
+  // Fallback: use farm's monthly quota. Parse defensively to avoid NaN.
+  const parsedM3 = monthlyQuotaM3 ? parseFloat(monthlyQuotaM3) : NaN;
+  const quotaM3 = Number.isFinite(parsedM3) ? parsedM3 : DEFAULT_MONTHLY_QUOTA_M3;
+  
   const quotaLitres = quotaM3 * 1000;
   return {
     monthlyLimit: quotaLitres,

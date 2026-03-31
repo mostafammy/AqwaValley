@@ -24,6 +24,7 @@ import { api } from "~/trpc/react";
 import { Card, CardBody, CardHeader, CardTitle } from "~/app/_components/UI/Card";
 import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
+import { Button } from "~/app/_components/UI/Button";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -243,7 +244,7 @@ function InputsStrip({
   const inputs = [
     { icon: ThermometerSun, label: "الحرارة", value: temp, unit: "°م", warn: Number(temp) > 32 },
     { icon: Wind,           label: "ET₀",     value: et0, unit: "mm/يوم", warn: Number(et0) > 8 },
-    { icon: FlaskConical,   label: "رطوبة التربة", value: typeof hmd === 'number' ? Math.round(hmd) : hmd, unit: "%", warn: (Number(hmd) || 100) < 50 },
+    { icon: FlaskConical,   label: "رطوبة التربة", value: typeof hmd === 'number' ? Math.round(hmd) : hmd, unit: "%", warn: Number(hmd ?? 100) < 50 },
     { icon: CloudRain,      label: "أمطار",   value: rain, unit: "mm", isGood: Number(rain) > 0 },
     { icon: Gauge,          label: "الحصة المتبقية", value: quota ? (quota / 1000).toFixed(1) : "—", unit: "م³", warn: (quota ?? 99999) < 10000 },
   ];
@@ -325,9 +326,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
     { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 }
   );
 
-  const { data: liveWeather } = api.weather.getCurrent.useQuery({ farmId });
-  const { data: liveForecast } = api.weather.getForecast.useQuery({ farmId });
-  const { data: liveInputs } = api.irrigation.getLiveInputs.useQuery({ farmId });
+  const { data: liveWeather, isLoading: weatherLoading } = api.weather.getCurrent.useQuery({ farmId });
+  const { data: liveForecast, isLoading: forecastLoading } = api.weather.getForecast.useQuery({ farmId });
+  const { data: liveInputs, isLoading: inputsLoading } = api.irrigation.getLiveInputs.useQuery({ farmId });
 
   const generatePlan = api.irrigation.requestPlan.useMutation({
     onSuccess: () => { 
@@ -342,6 +343,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
   const plan = latestPlanRecord?.plan as any;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
+  const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
 
   if (isLoading) {
     return (
@@ -374,14 +376,14 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
         </div>
 
         <div className="flex items-center gap-6">
-          <button
+          <Button
             onClick={() => generatePlan.mutate({ farmId })}
             disabled={generatePlan.isPending}
-            className="btn btn-primary flex items-center gap-3 px-7"
+            className="btn btn-primary flex items-center gap-3"
           >
             <Cpu className={`w-4 h-4 ${generatePlan.isPending ? "animate-spin" : ""}`} />
             {generatePlan.isPending ? "جاري التوليد..." : "خطة جديدة"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -411,12 +413,12 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
                 <div className="flex items-baseline gap-3">
                   <span className="text-6xl font-semibold text-navy tabular-nums">
-                    {(plan.totalLitres / 1000).toFixed(1)}
+                    {((plan.totalLitres ?? 0) / 1000).toFixed(1)}
                   </span>
                   <span className="text-3xl text-slate-300">م³</span>
                 </div>
                 <div className="text-slate-500 text-sm mt-1">
-                  {plan.totalLitres?.toLocaleString("ar-EG")} لتر
+                  {(plan.totalLitres ?? 0).toLocaleString("ar-EG")} لتر
                 </div>
 
                 {plan.quotaWarning && (
@@ -482,7 +484,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               liveWeather={liveWeather}
               liveForecast={liveForecast}
               liveInputs={liveInputs}
-              loading={isLoading}
+              loading={isDataLoading}
             />
 
             <div className="flex items-center justify-between">
