@@ -12,7 +12,6 @@
  * HMAC key: EMAIL_PROVIDER_WEBHOOK_SECRET in env.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 import { createVerify } from "crypto";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
