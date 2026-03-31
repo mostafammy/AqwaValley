@@ -80,18 +80,36 @@ export class InvitationIssuer implements IInvitationIssuer {
 
   async accept(invitationId: string, tx?: DBConnection): Promise<void> {
     const db = tx ?? this.db;
-    await db
+
+    const updated = await db
       .update(userInvitation)
       .set({ status: "accepted", usedAt: new Date() })
-      .where(eq(userInvitation.id, invitationId));
+      .where(
+        and(
+          eq(userInvitation.id, invitationId),
+          eq(userInvitation.status, "pending"),
+        ),
+      )
+      .returning({ id: userInvitation.id });
+
+    return Array.isArray(updated) && updated.length > 0;
   }
 
-  async revoke(invitationId: string, tx?: DBConnection): Promise<void> {
+  async revoke(invitationId: string, tx?: DBConnection): Promise<boolean> {
     const db = tx ?? this.db;
-    await db
+
+    const updated = await db
       .update(userInvitation)
       .set({ status: "revoked" })
-      .where(eq(userInvitation.id, invitationId));
+      .where(
+        and(
+          eq(userInvitation.id, invitationId),
+          eq(userInvitation.status, "pending"),
+        ),
+      )
+      .returning({ id: userInvitation.id });
+
+    return Array.isArray(updated) && updated.length > 0;
   }
 
   async revokeAllPendingForUser(userId: string, tx?: DBConnection): Promise<void> {
