@@ -15,23 +15,20 @@ export default function DashboardError({
   useEffect(() => {
     console.error("[Gov Dashboard Error]:", error);
     // Mirror the global error handler: ensure dashboard errors are sent to Sentry.
-    Sentry.captureException(error)
+    Sentry.captureException(error);
   }, [error]);
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-[60vh] gap-4"
+      className="flex h-[60vh] flex-col items-center justify-center gap-4"
       dir="rtl"
     >
       <AlertTriangle className="h-12 w-12 text-red-400" />
       <h2 className="text-xl font-semibold">فشل تحميل لوحة التحكم</h2>
-      <p className="text-sm text-secondary">
+      <p className="text-secondary text-sm">
         حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.
-      </p>      <Button
-        onClick={reset}
-        variant="primary"
-        size="lg"
-      >
+      </p>{" "}
+      <Button onClick={reset} variant="primary" size="lg">
         إعادة المحاولة
       </Button>
     </div>
