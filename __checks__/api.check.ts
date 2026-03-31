@@ -8,13 +8,14 @@ import type { AlertChannelRef } from "checkly/constructs";
 // same check file can be used across environments (local, staging, prod).
 // Prefer `AQWA_VALLEY_URL`, then `CHECKLY_BASE_URL`, then localhost.
 const BASE_URL =
-  process.env.AQWA_VALLEY_URL ?? process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
+  process.env.AQWA_VALLEY_URL ??
+  process.env.CHECKLY_BASE_URL ??
+  "http://localhost:3000";
 // CHECKLY_ALERT_CHANNELS is a comma-separated list of Checkly alert channel IDs.
 // The constructs SDK expects an array of AlertChannel/AlertChannelRef objects,
 // so map the CSV into `{ channelId: string }` objects.
 const ALERT_CHANNELS: AlertChannelRef[] = process.env.CHECKLY_ALERT_CHANNELS
-  ? process.env.CHECKLY_ALERT_CHANNELS
-      .split(",")
+  ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
       .map((s) => s.trim())
       .filter((s) => s !== "")
       .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
