@@ -24,6 +24,9 @@
     "plugins": [{ "name": "next" }],
     "incremental": true,
 
+    /* Silence deprecation warnings for TS 6 -> 7 migration (baseUrl deprecation) */
+    "ignoreDeprecations": "6.0",
+
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
