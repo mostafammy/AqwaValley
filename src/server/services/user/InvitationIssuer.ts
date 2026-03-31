@@ -11,7 +11,7 @@
  *   - token.raw is NEVER accessible outside RawToken — compiler enforced
  */
 
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, lt, gt } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import type { DBConnection } from "~/server/db/index";
 import { userInvitation } from "~/server/db/schema";
@@ -81,6 +81,10 @@ export class InvitationIssuer implements IInvitationIssuer {
   async accept(invitationId: string, tx?: DBConnection): Promise<boolean> {
     const db = tx ?? this.db;
 
+    // Only accept if the invitation is still pending AND not expired.
+    // Use server time (`new Date()`) consistently for the comparison so
+    // we avoid accepting invitations that expired between validation and
+    // the update.
     const updated = await db
       .update(userInvitation)
       .set({ status: "accepted", usedAt: new Date() })
@@ -88,6 +92,7 @@ export class InvitationIssuer implements IInvitationIssuer {
         and(
           eq(userInvitation.id, invitationId),
           eq(userInvitation.status, "pending"),
+          gt(userInvitation.expiresAt, new Date()),
         ),
       )
       .returning({ id: userInvitation.id });
