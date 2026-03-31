@@ -50,21 +50,28 @@ export class RoleAssigner implements IRoleAssigner {
     // If a transaction is provided, use it so callers (orchestrator) can
     // compose multiple collaborator writes in a single DB transaction.
     if (tx) {
-      await tx
+      const insertResult = await tx
         .insert(userRoleAssignment)
         .values({
           userId: input.userId,
           roleId: roleRecord.id,
           assignedBy: input.actorId,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: userRoleAssignment.id });
 
+      const inserted = Array.isArray(insertResult) && insertResult.length > 0;
+
+      // Record audit: 'assigned' when we actually inserted, otherwise record a noop
       await tx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,
         before: null,
-        after: { roles: [input.roleType], action: "assigned" },
+        after: {
+          roles: [input.roleType],
+          action: inserted ? "assigned" : "assign_noop",
+        },
         ipAddress: input.ipAddress ?? null,
       });
 
@@ -74,22 +81,29 @@ export class RoleAssigner implements IRoleAssigner {
     // No transaction provided — preserve existing behavior (transactional)
     return await this.db.transaction(async (innerTx) => {
       // Insert role assignment (idempotent via onConflictDoNothing)
-      await innerTx
+      const insertResult = await innerTx
         .insert(userRoleAssignment)
         .values({
           userId: input.userId,
           roleId: roleRecord.id,
           assignedBy: input.actorId,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: userRoleAssignment.id });
 
-      // Audit log — written inside the command, always
+      const inserted = Array.isArray(insertResult) && insertResult.length > 0;
+
+      // Audit log — written inside the command, indicating whether the
+      // assignment actually occurred or was a noop due to existing assignment.
       await innerTx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,
         before: null,
-        after: { roles: [input.roleType], action: "assigned" },
+        after: {
+          roles: [input.roleType],
+          action: inserted ? "assigned" : "assign_noop",
+        },
         ipAddress: input.ipAddress ?? null,
       });
 
@@ -113,21 +127,26 @@ export class RoleAssigner implements IRoleAssigner {
     if (!roleRecord) return; // Role does not exist — nothing to revoke
 
     if (tx) {
-      await tx
+      const deleteResult = await tx
         .delete(userRoleAssignment)
         .where(
           and(
             eq(userRoleAssignment.userId, input.userId),
             eq(userRoleAssignment.roleId, roleRecord.id),
           ),
-        );
+        )
+        .returning({ id: userRoleAssignment.id });
+
+      const deleted = Array.isArray(deleteResult) && deleteResult.length > 0;
 
       await tx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,
-        before: { roles: [input.roleType] },
-        after: { roles: [], action: "revoked" },
+        before: deleted ? { roles: [input.roleType] } : null,
+        after: deleted
+          ? { roles: [], action: "revoked" }
+          : { roles: [], action: "revoke_noop" },
         ipAddress: input.ipAddress ?? null,
       });
 
@@ -136,22 +155,28 @@ export class RoleAssigner implements IRoleAssigner {
 
     // Command: DB mutation + audit_log write as one transaction
     await this.db.transaction(async (innerTx) => {
-      await innerTx
+      const deleteResult = await innerTx
         .delete(userRoleAssignment)
         .where(
           and(
             eq(userRoleAssignment.userId, input.userId),
             eq(userRoleAssignment.roleId, roleRecord.id),
           ),
-        );
+        )
+        .returning({ id: userRoleAssignment.id });
 
-      // Audit log — written inside the command, always
+      const deleted = Array.isArray(deleteResult) && deleteResult.length > 0;
+
+      // Audit log — written inside the command, indicating whether the
+      // revoke actually removed an assignment or was a noop.
       await innerTx.insert(auditLog).values({
         entityType: "user_role",
         entityId: input.userId,
         actorId: input.actorId,
-        before: { roles: [input.roleType] },
-        after: { roles: [], action: "revoked" },
+        before: deleted ? { roles: [input.roleType] } : null,
+        after: deleted
+          ? { roles: [], action: "revoked" }
+          : { roles: [], action: "revoke_noop" },
         ipAddress: input.ipAddress ?? null,
       });
     });
