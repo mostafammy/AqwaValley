@@ -17,7 +17,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import type { DrizzleDB } from "~/server/db/index";
+import type { DBConnection } from "~/server/db/index";
 import { outboxEvent } from "~/server/db/schema";
 import type { IOutboxEnqueuer } from "./interfaces";
 
@@ -26,14 +26,14 @@ import type { OutboxPayload } from "../email/interfaces";
 export type { OutboxPayload };
 
 export class OutboxEnqueuer implements IOutboxEnqueuer {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: DBConnection) {}
 
   async enqueue(
     input: {
       eventType: string;
       payload: Record<string, unknown>;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ eventId: string }> {
     const db = tx ?? this.db;
 
@@ -64,7 +64,7 @@ export class OutboxEnqueuer implements IOutboxEnqueuer {
    */
   async enqueueTyped(
     payload: OutboxPayload,
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ eventId: string }> {
     return this.enqueue(
       {
