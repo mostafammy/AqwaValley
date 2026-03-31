@@ -112,7 +112,10 @@ export class InvitationIssuer implements IInvitationIssuer {
     return Array.isArray(updated) && updated.length > 0;
   }
 
-  async revokeAllPendingForUser(userId: string, tx?: DBConnection): Promise<void> {
+  async revokeAllPendingForUser(
+    userId: string,
+    tx?: DBConnection,
+  ): Promise<void> {
     const db = tx ?? this.db;
     await db
       .update(userInvitation)
