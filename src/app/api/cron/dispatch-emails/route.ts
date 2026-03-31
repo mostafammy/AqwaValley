@@ -14,7 +14,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { and, eq, isNull, lte, or } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { outboxEvent } from "~/server/db/schema";
 import { env } from "~/env";
@@ -25,6 +25,12 @@ import { EmailService } from "~/server/services/email/EmailService";
 import type { OutboxPayload } from "~/server/services/email/interfaces";
 
 const BATCH_SIZE = 50;
+
+function rowsOf<T>(result: unknown): T[] {
+  if (Array.isArray(result)) return result as T[];
+  const maybe = result as { rows?: T[] };
+  return maybe.rows ?? [];
+}
 
 // Build transport based on environment
 function buildEmailService(): EmailService {
@@ -65,31 +71,35 @@ export async function POST(req: Request): Promise<NextResponse> {
   try {
     const emailService = buildEmailService();
 
-    // Select pending events, respect nextRetryAt for backoff
-    const pendingEvents = await db.query.outboxEvent.findMany({
-      where: and(
-        or(
-          eq(outboxEvent.status, "pending"),
-          eq(outboxEvent.status, "processing"),
-        ),
-        or(
-          isNull(outboxEvent.nextRetryAt),
-          lte(outboxEvent.nextRetryAt, new Date()),
-        ),
-      ),
-      limit: BATCH_SIZE,
-      orderBy: (ev, { asc }) => [asc(ev.createdAt)],
+    // Atomically claim up to BATCH_SIZE pending events using row locking
+    const pendingEvents = await db.transaction(async (tx) => {
+      // Lock candidate rows and avoid races with SKIP LOCKED
+      const lockResult = await tx.execute(sql`
+        SELECT id FROM outbox_event
+        WHERE (status = 'pending' OR status = 'processing')
+          AND (next_retry_at IS NULL OR next_retry_at <= now())
+        ORDER BY created_at ASC
+        FOR UPDATE SKIP LOCKED
+        LIMIT ${BATCH_SIZE}
+      `);
+
+      const locked = rowsOf<{ id: string }>(lockResult);
+      const ids = locked.map((r) => r.id);
+      if (!ids.length) return [];
+
+      // Mark claimed rows as processing and return the claimed rows (Drizzle will map to camelCase)
+      const claimed = await tx
+        .update(outboxEvent)
+        .set({ status: "processing" })
+        .where(inArray(outboxEvent.id, ids))
+        .returning();
+
+      return claimed;
     });
 
     // Process with allSettled — individual failures don't abort the batch
     await Promise.allSettled(
       pendingEvents.map(async (event) => {
-        // Mark as processing to prevent concurrent dispatch
-        await db
-          .update(outboxEvent)
-          .set({ status: "processing" })
-          .where(eq(outboxEvent.id, event.id));
-
         try {
           const payload = event.payload as OutboxPayload;
           const recipientEmail = extractRecipientEmail(payload);

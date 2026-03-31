@@ -1,46 +1,46 @@
-"use client"
+"use client";
 
-import Script from "next/script"
-import { useCallback } from "react"
+import Script from "next/script";
+import { useCallback } from "react";
 
 type AssistLoopWin = {
   AssistLoopWidget?: {
-    init?: (opts: { agentId: string }) => void
-  }
-}
+    init?: (opts: { agentId: string }) => void;
+  };
+};
 
 export default function AssistLoopLoader() {
-  const agentId = process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID
+  const agentId = process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID;
 
   const onReady = useCallback(() => {
-    const win = window as unknown as AssistLoopWin
+    const win = window as unknown as AssistLoopWin;
     if (win?.AssistLoopWidget?.init) {
       try {
-        win.AssistLoopWidget.init({ agentId: agentId! })
+        win.AssistLoopWidget.init({ agentId: agentId! });
       } catch (e) {
-        console.error("AssistLoop init failed:", e)
+        console.error("AssistLoop init failed:", e);
       }
-      return
+      return;
     }
 
     // Fallback polling in case the widget attaches slightly after onReady
-    let tries = 0
+    let tries = 0;
     const iv = setInterval(() => {
-      tries += 1
+      tries += 1;
       if (win?.AssistLoopWidget?.init) {
-        clearInterval(iv)
+        clearInterval(iv);
         try {
-          win.AssistLoopWidget.init({ agentId: agentId! })
+          win.AssistLoopWidget.init({ agentId: agentId! });
         } catch (e) {
-          console.error("AssistLoop init failed:", e)
+          console.error("AssistLoop init failed:", e);
         }
       } else if (tries > 10) {
-        clearInterval(iv)
+        clearInterval(iv);
       }
-    }, 200)
-  }, [agentId])
+    }, 200);
+  }, [agentId]);
 
-  if (!agentId) return null
+  if (!agentId) return null;
 
   return (
     <Script
@@ -48,5 +48,5 @@ export default function AssistLoopLoader() {
       strategy="afterInteractive"
       onReady={onReady}
     />
-  )
+  );
 }
