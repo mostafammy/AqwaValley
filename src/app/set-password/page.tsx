@@ -58,7 +58,10 @@ function SetPasswordContent() {
 
   // Early return for errors or invalid links
   if (linkInvalid || isError || !tokenData?.valid) {
-    const reason = tokenData?.valid === false ? (tokenData.reason as string) : "INVALID_TOKEN";
+    const reason =
+      tokenData?.valid === false
+        ? (tokenData.reason as string)
+        : "INVALID_TOKEN";
     const messages: Record<string, string> = {
       TOKEN_EXPIRED: "This link has expired. Please request a new one.",
       TOKEN_ALREADY_USED: "This link has already been used.",
@@ -213,7 +216,9 @@ function SetPasswordContent() {
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{formError}</h3>
+                  <h3 className="text-sm font-medium text-red-800">
+                    {formError}
+                  </h3>
                 </div>
               </div>
             </div>
