@@ -55,6 +55,24 @@ export const env = createEnv({
     QUOTA_CRITICAL_THRESHOLD_PCT: z.coerce.number().min(1).max(120).default(95),
     OPENROUTER_API_KEY: z.string().optional(),
     GROQ_API_KEY: z.string().optional(),
+
+    // ── User Management v2 ───────────────────────────────────────────────────
+    // SMTP / Email transport
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().int().positive().default(587),
+    SMTP_SECURE: z.coerce.boolean().default(false),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+    EMAIL_FROM: z.string().email().default("noreply@aqwavalley.gov.eg"),
+    EMAIL_PROVIDER_WEBHOOK_SECRET: z.string().min(16).optional(),
+    EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY: z.string().optional(),
+
+    // Token TTLs
+    INVITATION_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(48),
+    RESET_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(1),
+
+    // Application base URL (for building token links)
+    APP_URL: z.string().url().default("http://localhost:3000"),
   },
 
   /**
@@ -63,7 +81,9 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    // Expose AssistLoop agent id to the client when configured. Prefix with
+    // NEXT_PUBLIC_ to allow bundlers to inline the value at build/runtime.
+    NEXT_PUBLIC_ASSISTLOOP_AGENT_ID: z.string().optional(),
   },
 
   /**
@@ -92,6 +112,21 @@ export const env = createEnv({
     QUOTA_CRITICAL_THRESHOLD_PCT: process.env.QUOTA_CRITICAL_THRESHOLD_PCT,
     OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
+    // User Management v2
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT,
+    SMTP_SECURE: process.env.SMTP_SECURE,
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS: process.env.SMTP_PASS,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_PROVIDER_WEBHOOK_SECRET: process.env.EMAIL_PROVIDER_WEBHOOK_SECRET,
+    EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY:
+      process.env.EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY,
+    INVITATION_TOKEN_TTL_HOURS: process.env.INVITATION_TOKEN_TTL_HOURS,
+    RESET_TOKEN_TTL_HOURS: process.env.RESET_TOKEN_TTL_HOURS,
+    APP_URL: process.env.APP_URL,
+    NEXT_PUBLIC_ASSISTLOOP_AGENT_ID:
+      process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

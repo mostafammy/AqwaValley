@@ -1,0 +1,48 @@
+name: Scheduled Email Dispatch
+
+on:
+  schedule:
+    # Triggered every 5 minutes.
+    # Note: GitHub Actions does not guarantee exact minute-level precision 
+    # and dropping below 5 minutes is consistently throttled globally.
+    - cron: '*/5 * * * *'
+  
+  # Allow manual triggering from the GitHub Actions dashboard for testing
+  workflow_dispatch:
+
+jobs:
+  dispatch-emails:
+    name: Dispatch Pending Emails
+    runs-on: ubuntu-latest
+    
+    # Ensures only one instance runs concurrently to avoid race conditions. 
+    # Though your transactional outbox uses 'processing' state safeguards, 
+    # preventing double-execution at the infrastructure level is a core best practice.
+    concurrency:
+      group: dispatch-emails-group
+      cancel-in-progress: false
+
+    steps:
+      - name: Trigger Dispatcher Endpoint
+        # Using a robust curl wrapper to ensure reliability and maintainability
+        # -f: Fail fast with exit code > 0 on server errors (4xx, 5xx)
+        # -sS: Silent mode but display errors
+        # --retry: Exponential backoff retries for transient networking failures
+        # --max-time: Hard timeout to prevent hanging workflows
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "Error: APP_URL secret is not defined in GitHub."
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SECRET is not defined in GitHub."
+            exit 1
+          fi
+
+          curl -f -sS -X POST "${{ secrets.APP_URL }}/api/cron/dispatch-emails" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --retry 3 \
+            --retry-delay 5 \
+            --retry-max-time 30 \
+            --max-time 15

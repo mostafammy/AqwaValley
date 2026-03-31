@@ -1,0 +1,10 @@
+src/app/set-password/page.tsx(7,24): error TS1149: File name 'C:/Users/dell/Documents/AqwaValley/src/app/_components/ui/Button.tsx' differs from already included file name 'C:/Users/dell/Documents/AqwaValley/src/app/_components/UI/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via "~/app/_components/UI/Button" from file 'C:/Users/dell/Documents/AqwaValley/src/app/(gov)/alerts/_components/AlertsTable.tsx'
+    Imported via "~/app/_components/UI/Button" from file 'C:/Users/dell/Documents/AqwaValley/src/app/(gov)/dashboard/error.tsx'
+    Imported via "~/app/_components/UI/Button" from file 'C:/Users/dell/Documents/AqwaValley/src/app/(gov)/dashboard/_components/DemoAlertButton.tsx'
+    Matched by include pattern '**/*.tsx' in 'C:/Users/dell/Documents/AqwaValley/tsconfig.json'
+    Imported via "~/app/_components/ui/Button" from file 'C:/Users/dell/Documents/AqwaValley/src/app/set-password/page.tsx'
+src/app/set-password/page.tsx(64,54): error TS2322: Type '"outline"' is not assignable to type 'Variant | undefined'.
+src/app/set-password/page.tsx(95,70): error TS2353: Object literal may only specify known properties, and 'password' does not exist in type '{ token: string; newPassword: string; }'.
+src/app/set-password/page.tsx(97,71): error TS2353: Object literal may only specify known properties, and 'password' does not exist in type '{ token: string; newPassword: string; }'.

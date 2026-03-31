@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Cairo } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import AssistLoopLoader from "~/app/_components/AssistLoopLoader";
 
 export const metadata: Metadata = {
   title: "أكوا الوادي — نظام إدارة المياه",
@@ -23,6 +24,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
+      <AssistLoopLoader />
       <body className="antialiased">
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
