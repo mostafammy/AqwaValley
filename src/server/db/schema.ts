@@ -1607,8 +1607,10 @@ export const auditLog = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     entityType: text("entity_type").notNull(), // 'user_role' | 'farm_scope' | 'user_deactivation'
-    entityId: text("entity_id").notNull(),     // userId affected
-    actorId: text("actor_id").references(() => user.id, { onDelete: "set null" }),
+    entityId: text("entity_id").notNull(), // userId affected
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
     before: jsonb("before"),
     after: jsonb("after"),
     ipAddress: text("ip_address"),
@@ -1674,9 +1676,9 @@ export const emailAuditLog = pgTable(
     emailType: emailTypeEnum("email_type").notNull(),
     status: emailStatusEnum("status").notNull().default("queued"),
     providerMessageId: text("provider_message_id"), // SMTP/SES message ID for tracing
-    ipRequestedFrom: text("ip_requested_from"),     // Nullified after 90 days (PDPL)
+    ipRequestedFrom: text("ip_requested_from"), // Nullified after 90 days (PDPL)
     deliveredAt: timestamp("delivered_at", { withTimezone: true }), // From provider webhook
-    openedAt: timestamp("opened_at", { withTimezone: true }),       // From provider webhook
+    openedAt: timestamp("opened_at", { withTimezone: true }), // From provider webhook
     errorDetail: text("error_detail"),
     sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -1700,7 +1702,7 @@ export const outboxEvent = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     eventType: text("event_type").notNull(), // 'user.invited' | 'password.reset' | etc.
-    payload: jsonb("payload").notNull(),     // Email template variables (typed in OutboxPayload)
+    payload: jsonb("payload").notNull(), // Email template variables (typed in OutboxPayload)
     status: outboxEventStatusEnum("status").default("pending").notNull(),
     attempts: integer("attempts").default(0).notNull(),
     maxAttempts: integer("max_attempts").default(5).notNull(),
