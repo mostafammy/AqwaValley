@@ -352,21 +352,35 @@ export const usersRouter = createTRPCRouter({
         });
       }
 
-      // Mark consumed (one-time-use enforced)
-      const accepted = await issuer.accept(invitation.id);
-      if (!accepted) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Invitation already consumed or not pending",
-        });
-      }
-
-      // Set password: hash with bcrypt (12 rounds), update account record
+      // Compute password hash before touching DB so we don't burn the token
+      // if hashing fails. Then perform accept + account update atomically.
       const passwordHash = await bcryptjs.hash(input.newPassword, 12);
-      await ctx.db
-        .update(account)
-        .set({ password: passwordHash })
-        .where(eq(account.userId, invitation.userId));
+
+      await ctx.db.transaction(async (tx) => {
+        // Mark consumed (one-time-use enforced) inside the same transaction
+        const accepted = await issuer.accept(invitation.id, tx);
+        if (!accepted) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Invitation already consumed or not pending",
+          });
+        }
+
+        // Update account password; ensure a row was affected so we can
+        // surface an error and rollback the accept if not.
+        const updated = await tx
+          .update(account)
+          .set({ password: passwordHash })
+          .where(eq(account.userId, invitation.userId))
+          .returning({ id: account.id });
+
+        if (!Array.isArray(updated) || updated.length === 0) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update account password",
+          });
+        }
+      });
 
       // We lookup the user to return the email for the client to perform a seamless auto sign-in
       const userRecord = await ctx.db.query.user.findFirst({
@@ -412,20 +426,31 @@ export const usersRouter = createTRPCRouter({
         });
       }
 
-      const accepted = await issuer.accept(invitation.id);
-      if (!accepted) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Token already consumed or not pending",
-        });
-      }
-
-      // Update password
+      // Hash password before any DB side-effects
       const passwordHash = await bcryptjs.hash(input.newPassword, 12);
-      await ctx.db
-        .update(account)
-        .set({ password: passwordHash })
-        .where(eq(account.userId, invitation.userId));
+
+      await ctx.db.transaction(async (tx) => {
+        const accepted = await issuer.accept(invitation.id, tx);
+        if (!accepted) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Token already consumed or not pending",
+          });
+        }
+
+        const updated = await tx
+          .update(account)
+          .set({ password: passwordHash })
+          .where(eq(account.userId, invitation.userId))
+          .returning({ id: account.id });
+
+        if (!Array.isArray(updated) || updated.length === 0) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update account password",
+          });
+        }
+      });
 
       // Fetch user for confirmation email
       const userRecord = await ctx.db.query.user.findFirst({
