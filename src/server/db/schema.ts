@@ -1684,6 +1684,7 @@ export const emailAuditLog = pgTable(
     index("email_audit_log_user_idx").on(t.recipientUserId),
     index("email_audit_log_type_idx").on(t.emailType),
     index("email_audit_log_status_idx").on(t.status),
+    index("email_audit_log_provider_message_id_idx").on(t.providerMessageId),
     index("email_audit_log_sent_at_idx").on(t.sentAt),
   ],
 );

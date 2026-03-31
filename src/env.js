@@ -81,7 +81,9 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    // Expose AssistLoop agent id to the client when configured. Prefix with
+    // NEXT_PUBLIC_ to allow bundlers to inline the value at build/runtime.
+    NEXT_PUBLIC_ASSISTLOOP_AGENT_ID: z.string().optional(),
   },
 
   /**
@@ -122,6 +124,7 @@ export const env = createEnv({
     INVITATION_TOKEN_TTL_HOURS: process.env.INVITATION_TOKEN_TTL_HOURS,
     RESET_TOKEN_TTL_HOURS: process.env.RESET_TOKEN_TTL_HOURS,
     APP_URL: process.env.APP_URL,
+    NEXT_PUBLIC_ASSISTLOOP_AGENT_ID: process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
