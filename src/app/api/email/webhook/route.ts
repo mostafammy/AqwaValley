@@ -60,7 +60,7 @@ function parseSignatureHeader(sigHeader: string): Buffer | null {
     sig = sig.slice(eqIdx + 1);
   }
   // If multiple comma-separated values, take the first
-  if (sig.includes(",")) sig = sig.split(",")[0].trim();
+  if (sig.includes(",")) sig = sig.split(",")[0]!.trim();
 
   // Try base64 first, fall back to hex
   try {
