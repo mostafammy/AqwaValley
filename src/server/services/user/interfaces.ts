@@ -85,8 +85,8 @@ export interface IInvitationIssuer {
     farmId: string | null;
   } | null>;
 
-  accept(invitationId: string, tx?: DBConnection): Promise<void>;
-  revoke(invitationId: string, tx?: DBConnection): Promise<void>;
+  accept(invitationId: string, tx?: DBConnection): Promise<boolean>;
+  revoke(invitationId: string, tx?: DBConnection): Promise<boolean>;
   revokeAllPendingForUser(userId: string, tx?: DBConnection): Promise<void>;
 }
 
