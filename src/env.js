@@ -65,6 +65,7 @@ export const env = createEnv({
     SMTP_PASS: z.string().optional(),
     EMAIL_FROM: z.string().email().default("noreply@aqwavalley.gov.eg"),
     EMAIL_PROVIDER_WEBHOOK_SECRET: z.string().min(16).optional(),
+    EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY: z.string().optional(),
 
     // Token TTLs
     INVITATION_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(48),
@@ -117,6 +118,7 @@ export const env = createEnv({
     SMTP_PASS: process.env.SMTP_PASS,
     EMAIL_FROM: process.env.EMAIL_FROM,
     EMAIL_PROVIDER_WEBHOOK_SECRET: process.env.EMAIL_PROVIDER_WEBHOOK_SECRET,
+    EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY: process.env.EMAIL_PROVIDER_WEBHOOK_PUBLIC_KEY,
     INVITATION_TOKEN_TTL_HOURS: process.env.INVITATION_TOKEN_TTL_HOURS,
     RESET_TOKEN_TTL_HOURS: process.env.RESET_TOKEN_TTL_HOURS,
     APP_URL: process.env.APP_URL,
