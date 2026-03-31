@@ -12,7 +12,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import type { DrizzleDB } from "~/server/db/index";
+import type { DBConnection } from "~/server/db/index";
 import { auditLog, role, userRoleAssignment } from "~/server/db/schema";
 import type { IRoleAssigner } from "./interfaces";
 
@@ -24,7 +24,7 @@ type RoleType =
   | "auditor";
 
 export class RoleAssigner implements IRoleAssigner {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: DBConnection) {}
 
   async assign(
     input: {
@@ -33,7 +33,7 @@ export class RoleAssigner implements IRoleAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ roleId: string }> {
     // Resolve role record
     const roleRecord = await this.db.query.role.findFirst({
@@ -104,7 +104,7 @@ export class RoleAssigner implements IRoleAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<void> {
     const roleRecord = await this.db.query.role.findFirst({
       where: eq(role.type, input.roleType),
