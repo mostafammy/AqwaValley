@@ -31,6 +31,7 @@ import {
   userInvitation,
   userProfile,
   userRoleAssignment,
+  session,
 } from "~/server/db/schema";
 import { env } from "~/env";
 
@@ -787,7 +788,6 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const issuer = new InvitationIssuer(ctx.db);
-      const sessionInvalidator = new SessionInvalidator(ctx.db);
 
       await ctx.db.transaction(async (tx) => {
         // Deactivate profile
@@ -805,13 +805,15 @@ export const usersRouter = createTRPCRouter({
           after: { isActive: false },
           ipAddress: ctx.headers.get("x-forwarded-for") ?? null,
         });
+
+        // Revoke all pending invitations inside the same transaction so token
+        // state and deactivation are atomic.
+        await issuer.revokeAllPendingForUser(input.userId, tx);
+
+        // Revoke sessions inside the transaction so revoked users cannot have
+        // active sessions after the deactivation commit.
+        await tx.delete(session).where(eq(session.userId, input.userId));
       });
-
-      // Revoke all pending invitations
-      await issuer.revokeAllPendingForUser(input.userId);
-
-      // Observer: revoke all sessions
-      await sessionInvalidator.revokeAllSessions(input.userId);
 
       return { success: true };
     }),
