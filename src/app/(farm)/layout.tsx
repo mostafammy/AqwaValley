@@ -75,6 +75,7 @@ export default async function FarmLayout({
           userInitials={initials}
           portalLabel={currentFarm?.name ?? "مزرعتي"}
           weatherChip={weatherChip}
+          searchBar={false}
         />
         <div className="layout-content-row">
           <FarmSidebar />

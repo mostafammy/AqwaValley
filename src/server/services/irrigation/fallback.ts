@@ -110,6 +110,13 @@ export interface FallbackInput {
   readonly soilReading: Readonly<
     Record<string, { readonly humidityPct: number } | null>
   >;
+  readonly weather?: {
+    readonly daily: readonly {
+      readonly maxTemp: number;
+      readonly et0: number;
+      readonly rain: number;
+    }[];
+  };
 }
 
 export interface FallbackResult {
@@ -122,12 +129,18 @@ export interface FallbackResult {
 // Core Calculation
 // ---------------------------------------------------------------------------
 
-function calculateZoneLitres(zone: FallbackZone, humidityPct: number): number {
+function calculateZoneLitres(
+  zone: FallbackZone,
+  humidityPct: number,
+  et0: number,
+  rainForecastMm = 0,
+): number {
   const cropKey = zone.cropType.toLowerCase();
   const stageKey = zone.growthStage.toLowerCase();
 
   const Kc = KC_VALUES[cropKey]?.[stageKey] ?? DEFAULT_KC;
-  const ETc = ET0_DEFAULT * Kc;
+  // Subtract rainfall from ETc as it's free water
+  const ETc = Math.max(0, et0 * Kc - rainForecastMm);
   const efficiency = EFFICIENCY[zone.irrigationSystem] ?? DEFAULT_EFFICIENCY;
   const grossETc = ETc / efficiency;
 
@@ -135,7 +148,6 @@ function calculateZoneLitres(zone: FallbackZone, humidityPct: number): number {
   const deficitPct = Math.max(0, target - humidityPct) / 100;
 
   // litres = gross ETc (mm) × deficit fraction × area (ha) × 10,000 m²/ha × 0.001 m³/L × 1000 L/m³
-  // simplified: ETc_mm × deficit_fraction × area_ha × 10 × 1000
   const litresPerHa = grossETc * deficitPct * 10 * 1000;
   return Math.round(litresPerHa * zone.areaHectares);
 }
@@ -151,10 +163,18 @@ function calculateZoneLitres(zone: FallbackZone, humidityPct: number): number {
  * @returns A valid irrigation plan with `fallback: true`
  */
 export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
+  const currentEt0 = ctx.weather?.daily[0]?.et0 ?? ET0_DEFAULT;
+  const rainNext24h = ctx.weather?.daily[0]?.rain ?? 0;
+
   const zonePlans = ctx.zones.map((zone) => {
     const currentHumidity =
       ctx.soilReading[zone.id]?.humidityPct ?? DEFAULT_HUMIDITY;
-    const totalLitres = calculateZoneLitres(zone, currentHumidity);
+    const totalLitres = calculateZoneLitres(
+      zone,
+      currentHumidity,
+      currentEt0,
+      rainNext24h,
+    );
 
     return {
       zoneId: zone.id,
@@ -163,7 +183,7 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
       recommendedLitres: totalLitres,
       scheduledAt: DEFAULT_SCHEDULE_TIME,
       confidence: "MEDIUM" as const,
-      notes: "Rule-based ETc calculation — AI service unavailable",
+      notes: `Rule-based ETc calculation — ${ctx.weather ? "Live" : "Static"} Weather Used`,
     };
   });
 
@@ -201,7 +221,7 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
     success: true,
     fallback: true,
     recommendation: {
-      reasoning: `Rule-based FAO-56 ETc plan generated (AI unavailable). ETc = ET₀(${ET0_DEFAULT}mm/day) × Kc per crop stage.${quotaWarning ? " Plan scaled to fit remaining quota." : ""}`,
+      reasoning: `Rule-based FAO-56 ETc plan generated (AI unavailable). ETc = ET₀(${currentEt0}mm/day) × Kc per crop stage.${rainNext24h > 0 ? ` Adjusted for ${rainNext24h}mm rain.` : ""}${quotaWarning ? " Plan scaled to fit remaining quota." : ""}`,
       totalLitres: scaledTotal,
       quotaWarning,
       zones: scaledZones,

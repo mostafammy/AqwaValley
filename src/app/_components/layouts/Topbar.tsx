@@ -27,6 +27,7 @@ interface TopbarProps {
   userRole?: UserRole;
   userInitials?: string;
   portalLabel?: string;
+  searchBar?: boolean;
   weatherChip?: string; // للـ farm portal فقط
 }
 
@@ -45,6 +46,7 @@ export function Topbar({
   userRole = "GOV_ADMIN",
   userInitials = "م.أ",
   portalLabel = "نظام إدارة الموارد المائية",
+  searchBar = true,
   weatherChip,
 }: TopbarProps) {
   const isGov = userRole === "GOV_ADMIN" || userRole === "SUPER_ADMIN";
@@ -133,7 +135,7 @@ export function Topbar({
       </div>
 
       {/* ── Center: Search ── */}
-      <div className="hidden flex-1 items-center justify-center px-6 lg:flex">
+      {searchBar && <div className="hidden flex-1 items-center justify-center px-6 lg:flex">
         <form onSubmit={handleSearch} className="relative w-full max-w-sm">
           <input
             type="text"
@@ -149,7 +151,7 @@ export function Topbar({
             <Search className="text-light-text h-4 w-4 transition-colors hover:text-white" />
           </button>
         </form>
-      </div>
+      </div>}
 
       {/* ── Left side: Icons & Profile ── */}
       <div className="mr-auto flex items-center gap-4">

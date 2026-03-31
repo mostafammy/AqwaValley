@@ -42,6 +42,10 @@ const requestPlanInput = z.object({
   farmId: z.string().uuid(),
 });
 
+const activatePlanInput = z.object({
+  planId: z.string().uuid(),
+});
+
 const getLatestPlanInput = z.object({
   farmId: z.string().uuid(),
 });
@@ -194,6 +198,42 @@ export const irrigationRouter = createTRPCRouter({
     }),
 
   /**
+   * Activate an irrigation plan (mark it as the one being followed).
+   */
+  activatePlan: protectedProcedure
+    .input(activatePlanInput)
+    .mutation(async ({ ctx, input }) => {
+      // 1. Get the plan to find its farmId
+      const [planRecord] = await ctx.db
+        .select({ farmId: irrigationRecommendation.farmId })
+        .from(irrigationRecommendation)
+        .where(eq(irrigationRecommendation.id, input.planId))
+        .limit(1);
+
+      if (!planRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Irrigation plan not found",
+        });
+      }
+
+      // 2. Verify access
+      await ensureUserCanAccessFarm(ctx, planRecord.farmId);
+
+      // 3. Update status
+      const [updated] = await ctx.db
+        .update(irrigationRecommendation)
+        .set({
+          status: "ACTIVATED",
+          activatedAt: new Date(),
+        })
+        .where(eq(irrigationRecommendation.id, input.planId))
+        .returning();
+
+      return updated;
+    }),
+
+  /**
    * List irrigation plan history for a farm (paginated).
    */
   listPlans: protectedProcedure
@@ -222,6 +262,41 @@ export const irrigationRouter = createTRPCRouter({
       return plans;
     }),
 
+  /**
+   * Get live inputs for a farm (soil, quota, etc.)
+   */
+  getLiveInputs: protectedProcedure
+    .input(z.object({ farmId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      const [farmRecord] = await ctx.db
+        .select({
+          id: farm.id,
+          monthlyQuotaM3: farm.monthlyQuotaM3,
+        })
+        .from(farm)
+        .where(eq(farm.id, input.farmId))
+        .limit(1);
+
+      if (!farmRecord) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const { fetchSoilReadings, fetchQuotaContext } = await import("~/server/services/irrigation/recommend_helpers");
+      
+      const [soilReadingMap, quota] = await Promise.all([
+        fetchSoilReadings(input.farmId),
+        fetchQuotaContext(input.farmId, farmRecord.monthlyQuotaM3),
+      ]);
+
+      const readings = Object.values(soilReadingMap).filter(Boolean);
+      const avgSoilMoisture = readings.length > 0 
+        ? readings.reduce((sum, r) => sum + r!.humidityPct, 0) / readings.length
+        : null;
+
+      return {
+        avgSoilMoisture,
+        remainingQuotaLitres: quota.remainingLitres,
+      };
   activateRecommendation: protectedProcedure
     .input(activateRecommendationInput)
     .mutation(async ({ ctx, input }) => {

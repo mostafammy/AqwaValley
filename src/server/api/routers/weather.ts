@@ -64,4 +64,49 @@ export const weatherRouter = createTRPCRouter({
         formatted: `${weather.temp}°م - ${weather.description}`,
       };
     }),
+
+  getForecast: protectedProcedure
+    .input(z.object({ farmId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      // 1. Authorization check
+      const farmRecord = await ctx.db
+        .select()
+        .from(farm)
+        .where(
+          and(
+            eq(farm.id, input.farmId),
+            or(
+              eq(farm.ownerId, ctx.session?.user?.id),
+              eq(farm.farmerUserId, ctx.session?.user?.id),
+            ),
+          ),
+        )
+        .limit(1);
+
+      if (!farmRecord[0]) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not authorized for this farm",
+        });
+      }
+
+      // 2. Resolve coordinates
+      let lat = 25.4474; // Default to Kharga
+      let lon = 30.546;
+
+      const assignedWells = await ctx.db
+        .select({ lat: well.latitude, lon: well.longitude })
+        .from(farmWell)
+        .innerJoin(well, eq(farmWell.wellId, well.id))
+        .where(eq(farmWell.farmId, input.farmId))
+        .limit(1);
+
+      if (assignedWells[0]) {
+        lat = Number(assignedWells[0].lat);
+        lon = Number(assignedWells[0].lon);
+      }
+
+      const forecast = await weatherService.getForecastWithEt0(lat, lon, 3);
+      return forecast;
+    }),
 });
