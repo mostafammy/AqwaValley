@@ -17,8 +17,19 @@ export default function Page() {
   useEffect(() => {
     Sentry.logger.info("Sentry example page loaded");
     async function checkConnectivity() {
-      const result = await Sentry.diagnoseSdkConnectivity();
-      setIsConnected(result !== "sentry-unreachable");
+      try {
+        const result = await Sentry.diagnoseSdkConnectivity();
+        setIsConnected(result !== "sentry-unreachable");
+      } catch (err) {
+        // Ensure connectivity failures don't leave the UI in an optimistic state.
+        try {
+          Sentry.logger?.error?.("Sentry diagnoseSdkConnectivity failed", err);
+        } catch (e) {
+          // ignore logging errors
+        }
+        console.error("Sentry diagnoseSdkConnectivity failed", err);
+        setIsConnected(false);
+      }
     }
     void checkConnectivity();
   }, []);
