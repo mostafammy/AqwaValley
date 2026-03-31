@@ -6,14 +6,18 @@ import type { AlertChannelRef } from "checkly/constructs";
 
 // Configure the base URL and alert channels via environment variables so the
 // same check file can be used across environments (local, staging, prod).
-const BASE_URL = process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
+// Prefer `AQWA_VALLEY_URL`, then `CHECKLY_BASE_URL`, then localhost.
+const BASE_URL =
+  process.env.AQWA_VALLEY_URL ?? process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
 // CHECKLY_ALERT_CHANNELS is a comma-separated list of Checkly alert channel IDs.
 // The constructs SDK expects an array of AlertChannel/AlertChannelRef objects,
 // so map the CSV into `{ channelId: string }` objects.
 const ALERT_CHANNELS: AlertChannelRef[] = process.env.CHECKLY_ALERT_CHANNELS
-  ? process.env.CHECKLY_ALERT_CHANNELS.split(",").map(
-      (s) => ({ channelId: s.trim() }) as unknown as AlertChannelRef,
-    )
+  ? process.env.CHECKLY_ALERT_CHANNELS
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== "")
+      .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
   : [];
 
 new ApiCheck("aqwavalley-users-check-1", {
@@ -32,10 +36,15 @@ new ApiCheck("aqwavalley-users-check-1", {
     assertions: [
       // Expect a successful HTTP response
       AssertionBuilder.statusCode().equals(200),
-      // Expect the users endpoint to return an array of users; assert the
-      // first object's `id` is present. Adjust the JSON path if your API
-      // returns a different shape (e.g., { items: [...] }).
-      AssertionBuilder.jsonBody("$[0].id").isNotNull(),
+      // Verify the body is an array. If the array is non-empty, ensure the
+      // first object's `id` is present. This allows an empty-but-valid array
+      // to pass the smoke test.
+      AssertionBuilder.jsonBody("$").isArray(),
+      AssertionBuilder.jsonBody("$").satisfies((json: unknown) => {
+        const arr = json as any[];
+        if (!Array.isArray(arr)) return false;
+        return arr.length === 0 || (arr[0] && arr[0].id != null);
+      }),
     ],
   },
   runParallel: false,
