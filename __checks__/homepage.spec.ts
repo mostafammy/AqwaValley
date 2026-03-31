@@ -7,6 +7,7 @@ test('Visit webshop homepage', async ({ page }) => {
   // The baseURL for Browser checks can be set in the playwrightConfig of your checkly.config.ts
   const response = await page.goto('/')
   expect(response?.status()).toBeLessThan(400)
-  await expect(page).toHaveTitle(/Danube WebShop/)
+  // Update to match the actual app title
+  await expect(page).toHaveTitle(/AqwaValley/)
   await page.screenshot({ path: 'homepage.jpg' })
 })

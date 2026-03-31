@@ -1,17 +1,17 @@
-import { ApiCheck, AssertionBuilder } from 'checkly/constructs'
+import { ApiCheck, AssertionBuilder } from "checkly/constructs";
 
 // API checks send an HTTP request to a URL endpoint and validate the response. Read more at:
 // https://www.checklyhq.com/docs/api-checks/
 
 // Configure the base URL and alert channels via environment variables so the
 // same check file can be used across environments (local, staging, prod).
-const BASE_URL = process.env.CHECKLY_BASE_URL ?? 'http://localhost:3000'
+const BASE_URL = process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
 const ALERT_CHANNELS = process.env.CHECKLY_ALERT_CHANNELS
-  ? process.env.CHECKLY_ALERT_CHANNELS.split(',')
-  : []
+  ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
+  : [];
 
-new ApiCheck('aqwavalley-users-check-1', {
-  name: 'AqwaValley — Users API (smoke)',
+new ApiCheck("aqwavalley-users-check-1", {
+  name: "AqwaValley — Users API (smoke)",
   // Set alert channel IDs via CHECKLY_ALERT_CHANNELS env var (comma-separated)
   alertChannels: ALERT_CHANNELS,
   degradedResponseTime: 10000, // milliseconds
@@ -19,7 +19,7 @@ new ApiCheck('aqwavalley-users-check-1', {
   request: {
     // Prefer users list or a health endpoint. Override with CHECKLY_BASE_URL.
     url: `${BASE_URL}/api/users`,
-    method: 'GET',
+    method: "GET",
     followRedirects: true,
     skipSSL: false,
     assertions: [
@@ -28,8 +28,8 @@ new ApiCheck('aqwavalley-users-check-1', {
       // Expect the users endpoint to return an array of users; assert the
       // first object's `id` is present. Adjust the JSON path if your API
       // returns a different shape (e.g., { items: [...] }).
-      AssertionBuilder.jsonBody('$[0].id').isNotNull(),
+      AssertionBuilder.jsonBody("$[0].id").isNotNull(),
     ],
   },
   runParallel: false,
-})
+});
