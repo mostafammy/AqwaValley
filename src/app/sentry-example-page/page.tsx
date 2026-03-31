@@ -1,7 +1,6 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import Head from "next/head";
 import { useEffect, useState } from "react";
 
 class SentryExampleFrontendError extends Error {
@@ -26,10 +25,7 @@ export default function Page() {
 
   return (
     <div>
-      <Head>
-        <title>sentry-example-page</title>
-        <meta name="description" content="Test Sentry for your Next.js app!" />
-      </Head>
+      
 
       <main>
         <div className="flex-spacer" />
@@ -52,7 +48,7 @@ export default function Page() {
           Click the button below, and view the sample error on the Sentry{" "}
           <a
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             href="https://aqwa-valley.sentry.io/issues/?project=4511135428771920"
           >
             Issues Page
@@ -60,7 +56,7 @@ export default function Page() {
           . For more details about setting up Sentry,{" "}
           <a
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             href="https://docs.sentry.io/platforms/javascript/guides/nextjs/"
           >
             read our docs
