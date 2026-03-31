@@ -16,7 +16,7 @@ export const DEFAULT_MONTHLY_QUOTA_M3 = 10000;
  */
 export async function fetchSoilReadings(
   farmId: string,
-): Promise<Record<string, { humidityPct: number; tempCelsius: number } | null>> {
+): Promise<Record<string, { humidityPct: number | null; tempCelsius: number | null }>> {
   const farmWells = await db
     .select({ wellId: farmWell.wellId })
     .from(farmWell)
@@ -42,7 +42,7 @@ export async function fetchSoilReadings(
 
   const filtered = allLatestStates;
 
-  const resultMap: Record<string, { humidityPct: number; tempCelsius: number }> = {};
+  const resultMap: Record<string, { humidityPct: number | null; tempCelsius: number | null }> = {};
   
   filtered.forEach((s) => {
     if (!s.wellId) return;
@@ -50,7 +50,7 @@ export async function fetchSoilReadings(
     if (!Number.isFinite(val)) return;
 
     if (!resultMap[s.wellId]) {
-      resultMap[s.wellId] = { humidityPct: 0, tempCelsius: 0 };
+      resultMap[s.wellId] = { humidityPct: null, tempCelsius: null };
     }
     if (s.type === "humidity") resultMap[s.wellId]!.humidityPct = val;
     if (s.type === "temperature") resultMap[s.wellId]!.tempCelsius = val;

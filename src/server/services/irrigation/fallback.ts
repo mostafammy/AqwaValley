@@ -173,8 +173,11 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
   const rainNext24h = ctx.weather?.daily?.[0]?.rain ?? 0;
 
   const zonePlans = ctx.zones.map((zone) => {
+    const sensorMatch = ctx.soilReading[zone.id];
     const currentHumidity =
-      ctx.soilReading[zone.id]?.humidityPct ?? DEFAULT_HUMIDITY;
+      (sensorMatch && sensorMatch.humidityPct !== null) 
+        ? sensorMatch.humidityPct 
+        : DEFAULT_HUMIDITY;
     const totalLitres = calculateZoneLitres(
       zone,
       currentHumidity,

@@ -334,13 +334,16 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
     onSuccess: () => { 
       utils.irrigation.getLatestPlan.invalidate({ farmId });
       utils.irrigation.getLiveInputs.invalidate({ farmId });
+      utils.irrigation.listPlans.invalidate({ farmId });
     },
   });
 
   const activatePlan = api.irrigation.activatePlan.useMutation({
-    onSuccess: () => { utils.irrigation.getLatestPlan.invalidate({ farmId }); },
+    onSuccess: () => { 
+      utils.irrigation.getLatestPlan.invalidate({ farmId });
+      utils.irrigation.listPlans.invalidate({ farmId });
+    },
   });
-
   const plan = latestPlanRecord?.plan as any;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
   const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
@@ -358,18 +361,18 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
     <div className="space-y-10" dir="rtl">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center mb-2">
             <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-3xl">
               ✦ الذكاء الاصطناعي
             </span>
             <span className="text-sm text-slate-500 font-medium">• {farmName}</span>
           </div>
-          <h1 className="text-5xl font-semibold tracking-tight text-navy">
-            خطة الري <span className="text-teal">الذكية</span>
+          <h1 className="text-5xl font-semibold  tracking-tight text-navy">
+            خطة الري <span className="text-teal mb-2">الذكية</span>
           </h1>
-          <p className="text-slate-500 mt-2 flex items-center gap-2">
+          <p className="text-slate-500 mt-6 flex items-center gap-2">
             <span className="w-2 h-2 bg-teal rounded-full animate-pulse" />
             تعتمد على معادلات FAO-56 • خزان الحجر الرملي النوبي
           </p>
@@ -423,7 +426,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
                 {plan.quotaWarning && (
                   <div className="mt-8 flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 px-5 py-4 rounded-3xl text-sm font-medium">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 shrink-0" />
                     تم تقليص الكمية لتناسب الحصة المتبقية
                   </div>
                 )}

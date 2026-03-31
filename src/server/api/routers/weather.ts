@@ -104,8 +104,10 @@ export const weatherRouter = createTRPCRouter({
       if (assignedWells[0]) {
         const rawLat = Number(assignedWells[0].lat);
         const rawLon = Number(assignedWells[0].lon);
-        if (Number.isFinite(rawLat)) lat = rawLat;
-        if (Number.isFinite(rawLon)) lon = rawLon;
+        if (Number.isFinite(rawLat) && Number.isFinite(rawLon)) {
+          lat = rawLat;
+          lon = rawLon;
+        }
       }
 
       const forecast = await weatherService.getForecastWithEt0(lat, lon, 3);

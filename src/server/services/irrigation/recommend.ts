@@ -173,8 +173,7 @@ export async function requestIrrigationPlan(
       .limit(1),
   ]);
 
-  // Resolve coordinates: Primary Well -> District Center -> Default Kharga (25.44, 30.54)
-  // Resolve coordinates: Primary Well -> Default Kharga (25.44, 30.54)
+  // Resolve coordinates: Primary Well -> Default Kharga (25.4474, 30.546)
   const wellLat = Number(assignedWells[0]?.lat);
   const wellLon = Number(assignedWells[0]?.lon);
 
