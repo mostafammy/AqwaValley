@@ -34,7 +34,7 @@ export default function AssistLoopLoader() {
         } catch (e) {
           console.error("AssistLoop init failed:", e);
         }
-      } else if (tries > 10) {
+      } else if (tries >= 10) {
         clearInterval(iv);
       }
     }, 200);
