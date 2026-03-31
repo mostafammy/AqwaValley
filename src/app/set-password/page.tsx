@@ -56,10 +56,9 @@ function SetPasswordContent() {
     );
   }
 
-  // invalidLink drives the early-return invalid-link screen; form errors are separate
-  const invalidLink = linkInvalid || isError || (tokenData && !tokenData.valid);
-  if (invalidLink) {
-    const reason = tokenData && !tokenData.valid ? tokenData.reason : "INVALID_TOKEN";
+  // Early return for errors or invalid links
+  if (linkInvalid || isError || !tokenData || !tokenData.valid) {
+    const reason = tokenData && !tokenData.valid ? (tokenData.reason as string) : "INVALID_TOKEN";
     const messages: Record<string, string> = {
       TOKEN_EXPIRED: "This link has expired. Please request a new one.",
       TOKEN_ALREADY_USED: "This link has already been used.",
