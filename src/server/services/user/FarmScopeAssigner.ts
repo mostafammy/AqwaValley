@@ -26,62 +26,85 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
     },
     tx?: DBConnection,
   ): Promise<void> {
-    // Fetch current farm state for the audit 'before' snapshot
-    const existingFarm = await this.db.query.farm.findFirst({
-      where: eq(farm.id, input.farmId),
-      columns: { id: true, farmerUserId: true, name: true },
-    });
-
-    if (!existingFarm) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: `FarmScopeAssigner: farm ${input.farmId} not found`,
-      });
-    }
-
+    // Use the provided transaction handle when present, otherwise fall back to
+    // the instance DB connection. Read the current farm state through that
+    // handle so the 'before' snapshot is consistent with the update and only
+    // write an audit row if the update actually modified a row.
     const db = tx ?? this.db;
 
-    // If caller provided a transaction, use it; otherwise run a local transaction
+    // If caller provided a transaction, operate on that handle
     if (tx) {
-      await db
+      const existingFarm = await db.query.farm.findFirst({
+        where: eq(farm.id, input.farmId),
+        columns: { id: true, farmerUserId: true, name: true },
+      });
+
+      if (!existingFarm) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `FarmScopeAssigner: farm ${input.farmId} not found`,
+        });
+      }
+
+      // Use RETURNING to determine if the update affected a row
+      const updated = await db
         .update(farm)
         .set({ farmerUserId: input.userId })
-        .where(eq(farm.id, input.farmId));
+        .where(eq(farm.id, input.farmId))
+        .returning({ id: true });
 
-      await db.insert(auditLog).values({
-        entityType: "farm_scope",
-        entityId: input.userId,
-        actorId: input.actorId,
-        before: {
-          farmId: input.farmId,
-          farmerUserId: existingFarm.farmerUserId,
-        },
-        after: { farmId: input.farmId, farmerUserId: input.userId },
-        ipAddress: input.ipAddress ?? null,
-      });
+      if (Array.isArray(updated) && updated.length > 0) {
+        await db.insert(auditLog).values({
+          entityType: "farm_scope",
+          entityId: input.userId,
+          actorId: input.actorId,
+          before: {
+            farmId: input.farmId,
+            farmerUserId: existingFarm.farmerUserId,
+          },
+          after: { farmId: input.farmId, farmerUserId: input.userId },
+          ipAddress: input.ipAddress ?? null,
+        });
+      }
 
       return;
     }
 
-    // Command: DB mutation + audit_log write as one transaction
+    // No external transaction provided — run a local transaction and perform
+    // the select/update/audit inside it so the 'before' snapshot lines up with
+    // the committed update.
     await this.db.transaction(async (innerTx) => {
-      await innerTx
+      const existingFarm = await innerTx.query.farm.findFirst({
+        where: eq(farm.id, input.farmId),
+        columns: { id: true, farmerUserId: true, name: true },
+      });
+
+      if (!existingFarm) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `FarmScopeAssigner: farm ${input.farmId} not found`,
+        });
+      }
+
+      const updated = await innerTx
         .update(farm)
         .set({ farmerUserId: input.userId })
-        .where(eq(farm.id, input.farmId));
+        .where(eq(farm.id, input.farmId))
+        .returning({ id: true });
 
-      // Audit log — written inside the command, always
-      await innerTx.insert(auditLog).values({
-        entityType: "farm_scope",
-        entityId: input.userId,
-        actorId: input.actorId,
-        before: {
-          farmId: input.farmId,
-          farmerUserId: existingFarm.farmerUserId,
-        },
-        after: { farmId: input.farmId, farmerUserId: input.userId },
-        ipAddress: input.ipAddress ?? null,
-      });
+      if (Array.isArray(updated) && updated.length > 0) {
+        await innerTx.insert(auditLog).values({
+          entityType: "farm_scope",
+          entityId: input.userId,
+          actorId: input.actorId,
+          before: {
+            farmId: input.farmId,
+            farmerUserId: existingFarm.farmerUserId,
+          },
+          after: { farmId: input.farmId, farmerUserId: input.userId },
+          ipAddress: input.ipAddress ?? null,
+        });
+      }
     });
   }
 
