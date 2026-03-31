@@ -20,6 +20,7 @@ function SetPasswordContent() {
   // linkInvalid: controls the early-return invalid-link screen
   const [linkInvalid, setLinkInvalid] = useState(false);
   const [linkErrorMsg, setLinkErrorMsg] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Queries & Mutations
   const {
