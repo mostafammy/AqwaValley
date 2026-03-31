@@ -1,0 +1,32 @@
+≡اأ Starting User Provisioning Integration Test...
+≡اôخ Provisioning Payload:
+{
+  nationalId: 'REDACTED_NATIONAL_ID',
+  email: 'REDACTED_EMAIL',
+  fullName: 'Integration Test Farmer',
+  roleType: 'farmer'
+}
+
+ظ│ Executing provision()...
+ظ£à Provisioning Result: {
+  status: 'INVITED',
+  userId: 'REDACTED_USER_ID',
+  invitationId: 'REDACTED_INVITATION_ID'
+}
+
+≡ا¤ Verifying Database State...
+  ≡اّج User record: OK
+  ≡ا¤ّ Roles assigned: 1 (Expected 1)
+  ≡اô£ Audit logs written: 1 (Expected 1 or more for role assignment)
+  ظ£ëي╕ Outbox events queued: 1 (Expected 1 for invitation email)
+     Example Outbox Payload: {
+  eventType: 'user.invited',
+  inviteUrl: 'http://localhost:3000/set-password?token=REDACTED_TOKEN',
+  invitedByName: 'REDACTED_INVITER_ID',
+  recipientName: 'Integration Test Farmer',
+  expiresInHours: 48,
+  recipientEmail: 'REDACTED_EMAIL',
+  recipientUserId: 'REDACTED_USER_ID'
+}
+
+≡اë ALL TESTS PASSED. The mediator orchestrated the transaction securely.

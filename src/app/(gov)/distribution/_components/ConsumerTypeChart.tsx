@@ -1,13 +1,7 @@
 "use client";
 import { useIntersectionObserver } from "~/lib/hooks";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface ConsumerType {
   name: string;
@@ -23,12 +17,21 @@ const CONSUMER_TYPES: ConsumerType[] = [
   { name: "industrial", label: "المصانع", value: 15, color: "#C8A96A" },
 ];
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ConsumerType }> }) => {
-  if (active && payload && payload.length > 0 && payload[0]) {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: ConsumerType }>;
+}) => {
+  if (active && payload?.[0]) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-sm">
-        <p className="font-semibold text-gray-800" style={{ fontFamily: "Cairo" }}>
+      <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-lg">
+        <p
+          className="font-semibold text-gray-800"
+          style={{ fontFamily: "Cairo" }}
+        >
           {data.label}
         </p>
         <p className="text-gray-600" style={{ fontFamily: "Cairo" }}>
@@ -43,14 +46,14 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
 export function ConsumerTypeChart() {
   const { targetRef, isVisible } = useIntersectionObserver();
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 h-full">
-      <h3 className="text-sm font-semibold mb-4 text-right">
+    <div className="h-full rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h3 className="mb-4 text-right text-sm font-semibold">
         توزيع الاستهلاك حسب نوع المستهلك
       </h3>
-      
+
       <div className="flex flex-col items-center">
         {/* Donut Chart */}
-        <div ref={targetRef} className="w-full h-[200px]">
+        <div ref={targetRef} className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -86,15 +89,15 @@ export function ConsumerTypeChart() {
         </div>
 
         {/* Legend */}
-        <div className="w-full space-y-2 mt-2">
+        <div className="mt-2 w-full space-y-2">
           {CONSUMER_TYPES.map((type) => (
             <div
               key={type.name}
-              className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg"
+              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
             >
               <div className="flex items-center gap-2">
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="h-3 w-3 rounded-full"
                   style={{ backgroundColor: type.color }}
                 />
                 <span className="text-sm text-gray-700">{type.label}</span>

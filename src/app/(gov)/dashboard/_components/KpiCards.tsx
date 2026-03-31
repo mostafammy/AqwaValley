@@ -1,8 +1,11 @@
 import { db } from "~/server/db";
 import { well, alerts, sensorData, sensors } from "~/server/db/schema";
-import { eq, count, and, isNull, avg, sum, sql, gte } from "drizzle-orm";
+import { eq, count, and, isNull, avg, sum, gte } from "drizzle-orm";
 import { Droplets, AlertTriangle, Activity, TrendingDown } from "lucide-react";
-import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
+import {
+  KpiCardGrid,
+  type KpiCardProps,
+} from "~/app/_components/UI/KpiCardGrid";
 
 async function getKpiData() {
   const [totalWells] = await db
@@ -13,12 +16,7 @@ async function getKpiData() {
   const [criticalAlerts] = await db
     .select({ count: count() })
     .from(alerts)
-    .where(
-      and(
-        eq(alerts.severity, "critical"),
-        isNull(alerts.acknowledgedAt),
-      )
-    );
+    .where(and(eq(alerts.severity, "critical"), isNull(alerts.acknowledgedAt)));
 
   // Average Level from all wells
   const [avgLevelRes] = await db
@@ -35,7 +33,8 @@ async function getKpiData() {
     day: "2-digit",
   }).formatToParts(now);
 
-  const getPart = (type: string) => cairoTimeParts.find(p => p.type === type)?.value;
+  const getPart = (type: string) =>
+    cairoTimeParts.find((p) => p.type === type)?.value;
   const todayStr = `${getPart("year")}-${getPart("month")}-${getPart("day")}T00:00:00+02:00`;
   const today = new Date(todayStr);
 
@@ -44,14 +43,11 @@ async function getKpiData() {
     .from(sensorData)
     .innerJoin(sensors, eq(sensors.id, sensorData.sensorId))
     .where(
-      and(
-        eq(sensors.type, "flow_rate"),
-        gte(sensorData.timestamp, today)
-      )
+      and(eq(sensors.type, "flow_rate"), gte(sensorData.timestamp, today)),
     );
 
   const consumptionVal = Number(consumptionRes?.total ?? 0);
-  
+
   // Format consumption: Standardized Arabic formatting with compact notation for >= 1M
   const formatter = new Intl.NumberFormat("ar-EG", {
     notation: consumptionVal >= 1000000 ? "compact" : "standard",
@@ -61,7 +57,7 @@ async function getKpiData() {
   const formattedConsumption = formatter.format(consumptionVal);
 
   return {
-    totalWells:     totalWells?.count  ?? 0,
+    totalWells: totalWells?.count ?? 0,
     criticalAlerts: criticalAlerts?.count ?? 0,
     todayConsumption: formattedConsumption,
     avgLevel: Math.round(Number(avgLevelRes?.avg ?? 0)) + "%",

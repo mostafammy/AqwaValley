@@ -144,6 +144,82 @@ export const recommendationStatusEnum = pgEnum("recommendation_status", [
   "CANCELLED",
 ]);
 
+export const irrigationEventStatusEnum = pgEnum("irrigation_event_status", [
+  "REQUESTED",
+  "QUEUED",
+  "RUNNING",
+  "COMPLETED",
+  "DEBIT_PENDING",
+  "FAILED",
+  "CANCELLED",
+]);
+
+export const irrigationDebitStatusEnum = pgEnum("irrigation_debit_status", [
+  "PENDING",
+  "APPLIED",
+  "FAILED",
+]);
+
+export const irrigationSimulationRunStatusEnum = pgEnum(
+  "irrigation_simulation_run_status",
+  ["QUEUED", "RUNNING", "COMPLETED", "FAILED", "CANCELLED"],
+);
+
+export const irrigationModelModeEnum = pgEnum("irrigation_model_mode", [
+  "production",
+  "demo",
+]);
+
+export const irrigationTelemetrySourceEnum = pgEnum(
+  "irrigation_telemetry_source",
+  ["REAL", "SIMULATION"],
+);
+
+export const forecastRunStatusEnum = pgEnum("forecast_run_status", [
+  "queued",
+  "running",
+  "completed",
+  "failed",
+]);
+
+export const forecastScopeTypeEnum = pgEnum("forecast_scope_type", [
+  "district",
+  "well",
+]);
+
+export const forecastTargetTypeEnum = pgEnum("forecast_target_type", [
+  "aquifer_level",
+  "extraction_vs_safe_yield",
+]);
+
+export const forecastRiskLevelEnum = pgEnum("forecast_risk_level", [
+  "low",
+  "moderate",
+  "high",
+  "critical",
+]);
+
+export const forecastModelApprovalStateEnum = pgEnum(
+  "forecast_model_approval_state",
+  ["pending_review", "approved", "rejected", "expired", "superseded"],
+);
+
+export const forecastTriggerTypeEnum = pgEnum("forecast_trigger_type", [
+  "cron",
+  "manual",
+  "system",
+]);
+
+export const forecastLineageUsageTypeEnum = pgEnum(
+  "forecast_lineage_usage_type",
+  ["train", "validate", "calibrate"],
+);
+
+export const irrigationValveAuditStateEnum = pgEnum(
+  "irrigation_valve_audit_state",
+  ["CLOSED", "OPENING", "OPEN", "CLOSING"],
+);
+
 export const quotaOverrideStatusEnum = pgEnum("quota_override_status", [
   "active",
   "revoked",
@@ -730,6 +806,207 @@ export const cronSimulationRun = pgTable(
 );
 
 /**
+ * aquifer_forecast_run: Durable execution envelope for forecast jobs.
+ */
+export const aquiferForecastRun = pgTable(
+  "aquifer_forecast_run",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    runKey: text("run_key").notNull().unique(),
+    triggerType: forecastTriggerTypeEnum("trigger_type").notNull(),
+    triggeredBy: text("triggered_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeIds: text("scope_ids").array().notNull().default([]),
+    status: forecastRunStatusEnum("status").notNull().default("queued"),
+    qualityGateStatus: text("quality_gate_status"),
+    responseSummary: jsonb("response_summary"),
+    errorSummary: text("error_summary"),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    durationMs: integer("duration_ms"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_forecast_run_status_started_idx").on(t.status, t.startedAt),
+    index("aquifer_forecast_run_scope_started_idx").on(
+      t.scopeType,
+      t.startedAt,
+    ),
+  ],
+);
+
+/**
+ * aquifer_linear_regression_model: Versioned model artifact metadata.
+ */
+export const aquiferLinearRegressionModel = pgTable(
+  "aquifer_linear_regression_model",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeId: uuid("scope_id").notNull(),
+    targetType: forecastTargetTypeEnum("target_type").notNull(),
+    slope: numeric("slope", { precision: 14, scale: 6 }).notNull(),
+    intercept: numeric("intercept", { precision: 14, scale: 6 }).notNull(),
+    rSquared: numeric("r_squared", { precision: 8, scale: 6 }),
+    sampleCount: integer("sample_count").notNull(),
+    trainingWindowStart: timestamp("training_window_start", {
+      withTimezone: true,
+    }).notNull(),
+    trainingWindowEnd: timestamp("training_window_end", {
+      withTimezone: true,
+    }).notNull(),
+    dataCompletenessPct: numeric("data_completeness_pct", {
+      precision: 7,
+      scale: 4,
+    }),
+    outlierRatioPct: numeric("outlier_ratio_pct", { precision: 7, scale: 4 }),
+    approvalState: forecastModelApprovalStateEnum("approval_state")
+      .notNull()
+      .default("pending_review"),
+    approvedBy: text("approved_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    approvalExpiresAt: timestamp("approval_expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_model_scope_target_window_idx").on(
+      t.scopeType,
+      t.scopeId,
+      t.targetType,
+      t.trainingWindowEnd,
+    ),
+    index("aquifer_model_approval_state_idx").on(t.approvalState),
+    unique("aquifer_model_scope_target_unique").on(
+      t.scopeType,
+      t.scopeId,
+      t.targetType,
+      t.trainingWindowEnd,
+    ),
+  ],
+);
+
+/**
+ * aquifer_risk_flag: Persisted risk outputs for horizon and composite flags.
+ */
+export const aquiferRiskFlag = pgTable(
+  "aquifer_risk_flag",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    scopeType: forecastScopeTypeEnum("scope_type").notNull(),
+    scopeId: uuid("scope_id").notNull(),
+    targetType: forecastTargetTypeEnum("target_type").notNull(),
+    flagType: text("flag_type").notNull(),
+    riskLevel: forecastRiskLevelEnum("risk_level").notNull(),
+    pointForecast: numeric("point_forecast", { precision: 14, scale: 6 }),
+    interval80: jsonb("interval_80"),
+    interval95: jsonb("interval_95"),
+    reasonCodes: jsonb("reason_codes"),
+    plausibilityPolicyVersion: text("plausibility_policy_version").notNull(),
+    modelVersionId: uuid("model_version_id")
+      .notNull()
+      .references(() => aquiferLinearRegressionModel.id, {
+        onDelete: "restrict",
+      }),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => aquiferForecastRun.id, {
+        onDelete: "cascade",
+      }),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_risk_scope_flag_computed_idx").on(
+      t.scopeType,
+      t.scopeId,
+      t.flagType,
+      t.computedAt,
+    ),
+    index("aquifer_risk_model_idx").on(t.modelVersionId),
+  ],
+);
+
+/**
+ * aquifer_external_reference_observation: External benchmark observations.
+ */
+export const aquiferExternalReferenceObservation = pgTable(
+  "aquifer_external_reference_observation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sourceSystem: text("source_system").notNull(),
+    stationId: text("station_id").notNull(),
+    districtId: uuid("district_id").references(() => district.id, {
+      onDelete: "set null",
+    }),
+    wellId: uuid("well_id").references(() => well.id, {
+      onDelete: "set null",
+    }),
+    observedAt: timestamp("observed_at", { withTimezone: true }).notNull(),
+    metricType: text("metric_type").notNull(),
+    value: numeric("value", { precision: 16, scale: 6 }).notNull(),
+    unit: text("unit").notNull(),
+    mappingConfidence: numeric("mapping_confidence", {
+      precision: 7,
+      scale: 4,
+    }),
+    sourceSnapshotId: text("source_snapshot_id").notNull(),
+    ingestedAt: timestamp("ingested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("aquifer_ext_ref_observed_idx").on(t.observedAt),
+    index("aquifer_ext_ref_district_idx").on(t.districtId),
+    index("aquifer_ext_ref_well_idx").on(t.wellId),
+  ],
+);
+
+/**
+ * aquifer_model_reference_observation_link: Lineage links from model to source observations.
+ */
+export const aquiferModelReferenceObservationLink = pgTable(
+  "aquifer_model_reference_observation_link",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    modelVersionId: uuid("model_version_id")
+      .notNull()
+      .references(() => aquiferLinearRegressionModel.id, {
+        onDelete: "cascade",
+      }),
+    observationId: uuid("observation_id")
+      .notNull()
+      .references(() => aquiferExternalReferenceObservation.id, {
+        onDelete: "cascade",
+      }),
+    usageType: forecastLineageUsageTypeEnum("usage_type").notNull(),
+    weight: numeric("weight", { precision: 10, scale: 6 }),
+    linkedAt: timestamp("linked_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("aquifer_lineage_unique").on(
+      t.modelVersionId,
+      t.observationId,
+      t.usageType,
+    ),
+    index("aquifer_lineage_observation_idx").on(t.observationId),
+    index("aquifer_lineage_model_idx").on(t.modelVersionId),
+  ],
+);
+
+/**
  * api_keys: Hashed credentials for IoT sensor authentication.
  * Raw keys are returned once at creation and never stored in plaintext.
  */
@@ -1067,6 +1344,381 @@ export const irrigationRecommendation = pgTable(
   ],
 );
 
+/**
+ * irrigation_event: Lifecycle for farmer-triggered irrigation executions.
+ */
+export const irrigationEvent = pgTable(
+  "irrigation_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    farmId: uuid("farm_id")
+      .notNull()
+      .references(() => farm.id, { onDelete: "cascade" }),
+    recommendationId: uuid("recommendation_id").references(
+      () => irrigationRecommendation.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    triggeredByUserId: text("triggered_by_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    wellIds: uuid("well_ids").array().notNull(),
+    status: irrigationEventStatusEnum("status").notNull().default("REQUESTED"),
+    planSource: text("plan_source").notNull(),
+    durationMinutes: integer("duration_minutes").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    actualConsumptionM3: numeric("actual_consumption_m3", {
+      precision: 15,
+      scale: 4,
+    }),
+    quotaDebitM3: numeric("quota_debit_m3", {
+      precision: 15,
+      scale: 4,
+    }),
+    quotaDebitStatus: irrigationDebitStatusEnum("quota_debit_status")
+      .notNull()
+      .default("PENDING"),
+    quotaDebitAttempts: integer("quota_debit_attempts").notNull().default(0),
+    quotaDebitLastError: text("quota_debit_last_error"),
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("irrigation_event_farm_created_idx").on(t.farmId, t.createdAt),
+    index("irrigation_event_status_idx").on(t.status),
+    index("irrigation_event_triggered_by_idx").on(t.triggeredByUserId),
+  ],
+);
+
+/**
+ * well_valve_state: Immutable audit log of valve transitions per irrigation event.
+ */
+export const wellValveState = pgTable(
+  "well_valve_state",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    wellId: uuid("well_id")
+      .notNull()
+      .references(() => well.id, { onDelete: "cascade" }),
+    state: irrigationValveAuditStateEnum("state").notNull(),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    transitionedAt: timestamp("transitioned_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("well_valve_state_event_transitioned_idx").on(
+      t.irrigationEventId,
+      t.transitionedAt,
+    ),
+    index("well_valve_state_well_transitioned_idx").on(
+      t.wellId,
+      t.transitionedAt,
+    ),
+  ],
+);
+
+/**
+ * irrigation_simulation_run: Diagnostics and replay envelope metadata per run.
+ */
+export const irrigationSimulationRun = pgTable(
+  "irrigation_simulation_run",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    isPrimary: boolean("is_primary").notNull().default(true),
+    queueJobId: text("queue_job_id"),
+    runStatus: irrigationSimulationRunStatusEnum("run_status")
+      .notNull()
+      .default("QUEUED"),
+    engineVersion: text("engine_version").notNull(),
+    hydrologyModelVersion: text("hydrology_model_version").notNull(),
+    modelMode: irrigationModelModeEnum("model_mode")
+      .notNull()
+      .default("production"),
+    rngSeed: text("rng_seed"),
+    inputHash: text("input_hash"),
+    inputEnvelopeJson: jsonb("input_envelope_json"),
+    providerSnapshotHash: text("provider_snapshot_hash"),
+    providerSnapshotJson: jsonb("provider_snapshot_json"),
+    pricingSnapshotVersion: text("pricing_snapshot_version"),
+    adapterUnitVersion: text("adapter_unit_version"),
+    startTimestamp: timestamp("start_timestamp", {
+      withTimezone: true,
+    }).notNull(),
+    timezone: text("timezone").notNull().default("UTC"),
+    integrationStepCount: integer("integration_step_count")
+      .notNull()
+      .default(0),
+    phaseStepCountsJson: jsonb("phase_step_counts_json"),
+    retryCount: integer("retry_count").notNull().default(0),
+    dtMinObservedS: numeric("dt_min_observed_s", { precision: 12, scale: 4 }),
+    dtMaxObservedS: numeric("dt_max_observed_s", { precision: 12, scale: 4 }),
+    errorNormMax: doublePrecision("error_norm_max"),
+    errorNormP95: doublePrecision("error_norm_p95"),
+    numericalDivergenceCount: integer("numerical_divergence_count")
+      .notNull()
+      .default(0),
+    massDebtPeakM3: numeric("mass_debt_peak_m3", { precision: 15, scale: 4 }),
+    debtEventCount: integer("debt_event_count").notNull().default(0),
+    qualityStateCountsJson: jsonb("quality_state_counts_json"),
+    anomalyCodeCountsJson: jsonb("anomaly_code_counts_json"),
+    trajectoryHash: text("trajectory_hash"),
+    summaryHash: text("summary_hash"),
+    replayLastStatus: text("replay_last_status"),
+    replayLastOutputHash: text("replay_last_output_hash"),
+    replayLastCheckedAt: timestamp("replay_last_checked_at", {
+      withTimezone: true,
+    }),
+    replayLastError: text("replay_last_error"),
+    diffStatus: text("diff_status"),
+    diffBaseRunId: uuid("diff_base_run_id"),
+    diffMetricsJson: jsonb("diff_metrics_json"),
+    diffComputedAt: timestamp("diff_computed_at", { withTimezone: true }),
+    queueWaitTimeMs: integer("queue_wait_time_ms"),
+    executionTimeMs: integer("execution_time_ms"),
+    runCostUsd: numeric("run_cost_usd", { precision: 15, scale: 6 }),
+    runCostBreakdownJson: jsonb("run_cost_breakdown_json"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("irrigation_sim_run_event_idx").on(t.irrigationEventId),
+    index("irrigation_sim_run_event_primary_idx").on(
+      t.irrigationEventId,
+      t.isPrimary,
+    ),
+    index("irrigation_sim_run_status_created_idx").on(t.runStatus, t.createdAt),
+    index("irrigation_sim_run_hydrology_version_idx").on(
+      t.hydrologyModelVersion,
+    ),
+    index("irrigation_sim_run_model_mode_idx").on(t.modelMode),
+    unique("irrigation_sim_run_queue_job_key").on(t.queueJobId),
+  ],
+);
+
+/**
+ * sensor_data_simulation: Isolated telemetry store for synthetic readings.
+ * Keeps simulation data out of REAL operational ingest/query paths by default.
+ */
+export const sensorDataSimulation = pgTable(
+  "sensor_data_simulation",
+  {
+    sensorId: uuid("sensor_id")
+      .notNull()
+      .references(() => sensors.id, { onDelete: "cascade" }),
+    simulationRunId: uuid("simulation_run_id")
+      .notNull()
+      .references(() => irrigationSimulationRun.id, { onDelete: "cascade" }),
+    irrigationEventId: uuid("irrigation_event_id")
+      .notNull()
+      .references(() => irrigationEvent.id, { onDelete: "cascade" }),
+    source: irrigationTelemetrySourceEnum("source")
+      .notNull()
+      .default("SIMULATION"),
+    value: doublePrecision("value").notNull(),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
+    generatedAt: timestamp("generated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    generatorVersion: text("generator_version").notNull(),
+  },
+  (t) => [
+    index("sensor_data_sim_source_sensor_ts_idx").on(
+      t.source,
+      t.sensorId,
+      t.timestamp,
+    ),
+    index("sensor_data_sim_run_ts_idx").on(t.simulationRunId, t.timestamp),
+    index("sensor_data_sim_event_ts_idx").on(t.irrigationEventId, t.timestamp),
+    unique("sensor_data_sim_run_sensor_ts_key").on(
+      t.simulationRunId,
+      t.sensorId,
+      t.timestamp,
+    ),
+  ],
+);
+
+// ============================================================================
+// USER MANAGEMENT v2 — Enums
+// ============================================================================
+
+export const tokenTypeEnum = pgEnum("token_type", [
+  "invitation",
+  "password_reset",
+]);
+
+export const invitationStatusEnum = pgEnum("invitation_status", [
+  "pending",
+  "accepted",
+  "expired",
+  "revoked",
+]);
+
+export const emailTypeEnum = pgEnum("email_type", [
+  "welcome_invitation",
+  "password_reset",
+  "farm_scope_grant",
+  "password_changed_confirmation",
+]);
+
+export const emailStatusEnum = pgEnum("email_status", [
+  "queued",
+  "sent",
+  "delivered",
+  "bounced",
+  "failed",
+  "dead",
+]);
+
+export const outboxEventStatusEnum = pgEnum("outbox_event_status", [
+  "pending",
+  "processing",
+  "done",
+  "dead",
+]);
+
+// ============================================================================
+// USER MANAGEMENT v2 — Tables
+// ============================================================================
+
+/**
+ * audit_log: Immutable ledger for security-sensitive entity mutations.
+ * Every role change, farm assignment, and deactivation MUST produce a row here.
+ * Command pattern: written inside RoleAssigner and FarmScopeAssigner, never externally.
+ */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityType: text("entity_type").notNull(), // 'user_role' | 'farm_scope' | 'user_deactivation'
+    entityId: text("entity_id").notNull(), // userId affected
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    ipAddress: text("ip_address"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("audit_log_entity_type_id_idx").on(t.entityType, t.entityId),
+    index("audit_log_actor_id_idx").on(t.actorId),
+    index("audit_log_created_at_idx").on(t.createdAt),
+  ],
+);
+
+/**
+ * user_invitation: Unified token model for both first-time invitations and password resets.
+ * CRITICAL: Only SHA-256(rawToken) is stored — rawToken never touches the DB.
+ * Enforced at the type level by RawToken Value Object.
+ */
+export const userInvitation = pgTable(
+  "user_invitation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenType: tokenTypeEnum("token_type").notNull(),
+    tokenHash: text("token_hash").notNull().unique(), // SHA-256(rawToken) — NEVER raw
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    invitedBy: text("invited_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    farmId: uuid("farm_id").references(() => farm.id, { onDelete: "set null" }),
+    status: invitationStatusEnum("status").default("pending").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    ipRequestedFrom: text("ip_requested_from"), // Nullified after 90 days (PDPL)
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("user_invitation_token_hash_idx").on(t.tokenHash), // Primary lookup path
+    index("user_invitation_user_id_idx").on(t.userId),
+    index("user_invitation_status_idx").on(t.status),
+    index("user_invitation_expires_at_idx").on(t.expiresAt), // Expiry cleanup cron
+    index("user_invitation_type_status_idx").on(t.tokenType, t.status),
+  ],
+);
+
+/**
+ * email_audit_log: Legally defensible record of every email attempt.
+ * Updated by AuditingEmailTransport (Decorator pattern) — never by business logic.
+ * deliveredAt / openedAt populated by provider webhook for government compliance proof.
+ */
+export const emailAuditLog = pgTable(
+  "email_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    recipientUserId: text("recipient_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    recipientEmail: text("recipient_email").notNull(),
+    emailType: emailTypeEnum("email_type").notNull(),
+    status: emailStatusEnum("status").notNull().default("queued"),
+    providerMessageId: text("provider_message_id"), // SMTP/SES message ID for tracing
+    ipRequestedFrom: text("ip_requested_from"), // Nullified after 90 days (PDPL)
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }), // From provider webhook
+    openedAt: timestamp("opened_at", { withTimezone: true }), // From provider webhook
+    errorDetail: text("error_detail"),
+    sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("email_audit_log_user_idx").on(t.recipientUserId),
+    index("email_audit_log_type_idx").on(t.emailType),
+    index("email_audit_log_status_idx").on(t.status),
+    index("email_audit_log_provider_message_id_idx").on(t.providerMessageId),
+    index("email_audit_log_sent_at_idx").on(t.sentAt),
+  ],
+);
+
+/**
+ * outbox_event: Transactional Outbox pattern — inserted inside DB transaction.
+ * Cron job reads pending rows, dispatches email, marks processed_at.
+ * Crash-safe: if server dies between commit and send, the row survives until next cron.
+ * Exactly-once delivery guarantee. Dead-lettered at maxAttempts.
+ */
+export const outboxEvent = pgTable(
+  "outbox_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventType: text("event_type").notNull(), // 'user.invited' | 'password.reset' | etc.
+    payload: jsonb("payload").notNull(), // Email template variables (typed in OutboxPayload)
+    status: outboxEventStatusEnum("status").default("pending").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    maxAttempts: integer("max_attempts").default(5).notNull(),
+    lastError: text("last_error"),
+    nextRetryAt: timestamp("next_retry_at", { withTimezone: true }), // Exponential backoff
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("outbox_event_status_created_idx").on(t.status, t.createdAt), // Primary dispatch query
+    index("outbox_event_next_retry_idx").on(t.nextRetryAt),
+  ],
+);
+
 // ============================================================================
 // RELATIONS
 // ============================================================================
@@ -1138,6 +1790,7 @@ export const districtRelations = relations(district, ({ many }) => ({
   districtSnapshots: many(districtPeriodConsumptionSnapshot),
   quotaBreachEvents: many(quotaBreachEvent),
   quotaOverrides: many(quotaOverride),
+  externalReferenceObservations: many(aquiferExternalReferenceObservation),
 }));
 
 export const wellRelations = relations(well, ({ one, many }) => ({
@@ -1152,6 +1805,7 @@ export const wellRelations = relations(well, ({ one, many }) => ({
   alerts: many(alerts),
   latestSensorStates: many(latestSensorState),
   apiKeys: many(apiKey),
+  externalReferenceObservations: many(aquiferExternalReferenceObservation),
 }));
 
 export const sensorsRelations = relations(sensors, ({ one, many }) => ({
@@ -1371,6 +2025,72 @@ export const irrigationRecommendationRelations = relations(
     requestedByUser: one(user, {
       fields: [irrigationRecommendation.requestedBy],
       references: [user.id],
+    }),
+  }),
+);
+
+export const aquiferForecastRunRelations = relations(
+  aquiferForecastRun,
+  ({ one, many }) => ({
+    triggeredByUser: one(user, {
+      fields: [aquiferForecastRun.triggeredBy],
+      references: [user.id],
+    }),
+    riskFlags: many(aquiferRiskFlag),
+  }),
+);
+
+export const aquiferLinearRegressionModelRelations = relations(
+  aquiferLinearRegressionModel,
+  ({ one, many }) => ({
+    approvedByUser: one(user, {
+      fields: [aquiferLinearRegressionModel.approvedBy],
+      references: [user.id],
+    }),
+    riskFlags: many(aquiferRiskFlag),
+    lineageLinks: many(aquiferModelReferenceObservationLink),
+  }),
+);
+
+export const aquiferRiskFlagRelations = relations(
+  aquiferRiskFlag,
+  ({ one }) => ({
+    run: one(aquiferForecastRun, {
+      fields: [aquiferRiskFlag.runId],
+      references: [aquiferForecastRun.id],
+    }),
+    model: one(aquiferLinearRegressionModel, {
+      fields: [aquiferRiskFlag.modelVersionId],
+      references: [aquiferLinearRegressionModel.id],
+    }),
+  }),
+);
+
+export const aquiferExternalReferenceObservationRelations = relations(
+  aquiferExternalReferenceObservation,
+  ({ one, many }) => ({
+    district: one(district, {
+      fields: [aquiferExternalReferenceObservation.districtId],
+      references: [district.id],
+    }),
+    well: one(well, {
+      fields: [aquiferExternalReferenceObservation.wellId],
+      references: [well.id],
+    }),
+    lineageLinks: many(aquiferModelReferenceObservationLink),
+  }),
+);
+
+export const aquiferModelReferenceObservationLinkRelations = relations(
+  aquiferModelReferenceObservationLink,
+  ({ one }) => ({
+    model: one(aquiferLinearRegressionModel, {
+      fields: [aquiferModelReferenceObservationLink.modelVersionId],
+      references: [aquiferLinearRegressionModel.id],
+    }),
+    observation: one(aquiferExternalReferenceObservation, {
+      fields: [aquiferModelReferenceObservationLink.observationId],
+      references: [aquiferExternalReferenceObservation.id],
     }),
   }),
 );

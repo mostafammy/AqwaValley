@@ -3,7 +3,7 @@ import { Skeleton } from "~/app/_components/UI/Skeleton";
 export default function ForecastLoading() {
   return (
     <div
-      className="p-4 md:p-6 space-y-4 md:space-y-8 animate-in fade-in duration-500"
+      className="animate-in fade-in space-y-4 p-4 duration-500 md:space-y-8 md:p-6"
       dir="rtl"
       role="status"
       aria-live="polite"
@@ -18,9 +18,12 @@ export default function ForecastLoading() {
       </div>
 
       {/* Summary cards skeleton */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-xl border border-gray-200" />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton
+            key={i}
+            className="h-32 rounded-xl border border-gray-200"
+          />
         ))}
       </div>
 
@@ -28,7 +31,7 @@ export default function ForecastLoading() {
       <Skeleton className="h-16 w-full rounded-xl border border-gray-100" />
 
       {/* Charts Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Skeleton className="h-[450px] rounded-xl border border-gray-200" />
         <Skeleton className="h-[450px] rounded-xl border border-gray-200" />
       </div>

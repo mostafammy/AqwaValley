@@ -1,0 +1,176 @@
+"filename", "language", "JSON", "JSON with Comments", "Shell Script", "JavaScript", "Markdown", "TypeScript", "XML", "YAML", "TypeScript JSX", "MS SQL", "PostCSS", "comment", "blank", "total"
+"c:\Users\dell\Documents\AqwaValley\README.md", "Markdown", 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 12, 30
+"c:\Users\dell\Documents\AqwaValley\docs\ai-irrigation-plan.md", "Markdown", 0, 0, 0, 0, 723, 0, 0, 0, 0, 0, 0, 0, 193, 916
+"c:\Users\dell\Documents\AqwaValley\docs\ingest-endpoints-and-cron.md", "Markdown", 0, 0, 0, 0, 186, 0, 0, 0, 0, 0, 0, 0, 84, 270
+"c:\Users\dell\Documents\AqwaValley\docs\irrigation-trigger-simulation-production-plan.md", "Markdown", 0, 0, 0, 0, 867, 0, 0, 0, 0, 0, 0, 0, 357, 1224
+"c:\Users\dell\Documents\AqwaValley\docs\quota-service-runtime-behavior.md", "Markdown", 0, 0, 0, 0, 93, 0, 0, 0, 0, 0, 0, 0, 46, 139
+"c:\Users\dell\Documents\AqwaValley\docs\sensor-ingest-cycle.md", "Markdown", 0, 0, 0, 0, 165, 0, 0, 0, 0, 0, 0, 0, 53, 218
+"c:\Users\dell\Documents\AqwaValley\drizzle.config.ts", "TypeScript", 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 3, 13
+"c:\Users\dell\Documents\AqwaValley\drizzle\0000_conscious_gravity.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 328, 0, 22, 0, 350
+"c:\Users\dell\Documents\AqwaValley\drizzle\0001_lively_stardust.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 1, 0, 11
+"c:\Users\dell\Documents\AqwaValley\drizzle\0002_quota_foundation.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 140, 0, 21, 0, 161
+"c:\Users\dell\Documents\AqwaValley\drizzle\0003_panoramic_barracuda.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 1, 0, 22
+"c:\Users\dell\Documents\AqwaValley\drizzle\0004_irrigation_trigger_simulation.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 0, 0, 12, 116
+"c:\Users\dell\Documents\AqwaValley\drizzle\0005_replay_diff_runtime.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 2, 27
+"c:\Users\dell\Documents\AqwaValley\drizzle\0006_remarkable_killraven.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 114, 0, 4, 0, 118
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\0000_snapshot.json", "JSON", 2642, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2643
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\0001_snapshot.json", "JSON", 2914, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2914
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\0003_snapshot.json", "JSON", 4085, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4085
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\0006_snapshot.json", "JSON", 5054, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5054
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\_journal.json", "JSON", 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 56
+"c:\Users\dell\Documents\AqwaValley\eslint.config.js", "JavaScript", 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 1, 3, 62
+"c:\Users\dell\Documents\AqwaValley\next.config.js", "JavaScript", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 5, 3, 11
+"c:\Users\dell\Documents\AqwaValley\package-lock.json", "JSON", 9279, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9280
+"c:\Users\dell\Documents\AqwaValley\package.json", "JSON", 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 81
+"c:\Users\dell\Documents\AqwaValley\pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 0, 0, 0, 4786, 0, 0, 0, 0, 1226, 6012
+"c:\Users\dell\Documents\AqwaValley\postcss.config.js", "JavaScript", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"c:\Users\dell\Documents\AqwaValley\prettier.config.js", "JavaScript", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 1, 5
+"c:\Users\dell\Documents\AqwaValley\public\svg\alert-circle.svg", "XML", 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 4
+"c:\Users\dell\Documents\AqwaValley\public\svg\map-empty.svg", "XML", 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 4
+"c:\Users\dell\Documents\AqwaValley\public\svg\oasis-marker.svg", "XML", 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 1, 5
+"c:\Users\dell\Documents\AqwaValley\scripts\baseline-drizzle-migrations.ts", "TypeScript", 0, 0, 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 14, 98
+"c:\Users\dell\Documents\AqwaValley\scripts\env-loader.mjs", "JavaScript", 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"c:\Users\dell\Documents\AqwaValley\scripts\inspect-api-key.ts", "TypeScript", 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 14, 86
+"c:\Users\dell\Documents\AqwaValley\scripts\mock-simulator.ts", "TypeScript", 0, 0, 0, 0, 0, 161, 0, 0, 0, 0, 0, 37, 31, 229
+"c:\Users\dell\Documents\AqwaValley\scripts\seed.ts", "TypeScript", 0, 0, 0, 0, 0, 1102, 0, 0, 0, 0, 0, 15, 105, 1222
+"c:\Users\dell\Documents\AqwaValley\scripts\setup-timescaledb.mjs", "JavaScript", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 6, 29
+"c:\Users\dell\Documents\AqwaValley\scripts\setup-timescaledb.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 6, 9, 65
+"c:\Users\dell\Documents\AqwaValley\scripts\test-irrigation-trigger-api.ts", "TypeScript", 0, 0, 0, 0, 0, 323, 0, 0, 0, 0, 0, 10, 55, 388
+"c:\Users\dell\Documents\AqwaValley\scripts\test-irrigation.ts", "TypeScript", 0, 0, 0, 0, 0, 478, 0, 0, 0, 0, 0, 55, 71, 604
+"c:\Users\dell\Documents\AqwaValley\scripts\test-openrouter.ts", "TypeScript", 0, 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 8, 12, 86
+"c:\Users\dell\Documents\AqwaValley\scripts\test-replay-diff-wrapper.mjs", "JavaScript", 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 3, 9, 44
+"c:\Users\dell\Documents\AqwaValley\scripts\test-replay-diff.ts", "TypeScript", 0, 0, 0, 0, 0, 111, 0, 0, 0, 0, 0, 3, 19, 133
+"c:\Users\dell\Documents\AqwaValley\scripts\verify-timescaledb.mjs", "JavaScript", 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 8, 34
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 12
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 11, 4, 56
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\_components\AlertsTable.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 262, 0, 0, 17, 22, 301
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 0, 4, 5, 56
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 3, 9, 75
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\ChartsContainer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 73, 0, 0, 5, 15, 93
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\CurrentDate.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 2, 6, 26
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\DemoAlertButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 145, 0, 0, 3, 21, 169
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\DistrictMap.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 61, 0, 0, 1, 8, 70
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\KpiCards.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 106, 0, 0, 4, 13, 123
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\alerts.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 109, 0, 0, 0, 7, 116
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\charts.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 140, 0, 0, 2, 9, 151
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\map-client.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 5, 37
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\error.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 3, 36
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 1, 18
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 61, 0, 0, 4, 6, 71
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\_components\ConsumerTypeChart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 4, 9, 112
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\_components\DistributionPageClient.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 463, 0, 0, 12, 22, 497
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 6, 7, 38
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 125, 0, 0, 12, 23, 160
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\district-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 106, 0, 0, 3, 9, 118
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\scroll-to-hash.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 1, 6, 25
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\well-status-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 67, 0, 0, 4, 7, 78
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 1, 19
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 0, 16, 115
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\_components\ForecastPageClient.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 360, 0, 0, 6, 15, 381
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 29, 0, 0, 4, 4, 37
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 5, 26
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 11, 5, 56
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\_components\MapPageClient.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 141, 0, 0, 7, 17, 165
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 3, 4, 25
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 78, 0, 0, 3, 11, 92
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\readings-chart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 173, 0, 0, 3, 12, 188
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\water-drop-gauge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 91, 0, 0, 4, 14, 109
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\well-alerts.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 79, 0, 0, 0, 5, 84
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\loading.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 1, 15
+"c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 129, 0, 0, 7, 16, 152
+"c:\Users\dell\Documents\AqwaValley\src\app\_actions\auth.ts", "TypeScript", 0, 0, 0, 0, 0, 29, 0, 0, 0, 0, 0, 13, 8, 50
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 29, 0, 0, 0, 3, 32
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 3, 36
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 9, 64
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Skeleton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 2, 15
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\leaflet-map.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 154, 0, 0, 5, 24, 183
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\auth\LoginForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 132, 0, 0, 12, 11, 155
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\DashboardHeader.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 2, 20
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\FarmSidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 76, 0, 0, 0, 9, 85
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Govsidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 108, 0, 0, 3, 16, 127
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Navitem.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 28, 0, 0, 0, 4, 32
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\NotificationDropdown.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 147, 0, 0, 8, 16, 171
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\ScrollReset.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 1, 4, 16
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\SidebarProvider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 28, 0, 0, 1, 9, 38
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Topbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 197, 0, 0, 18, 18, 233
+"c:\Users\dell\Documents\AqwaValley\src\app\api\admin\cron-runs\route.ts", "TypeScript", 0, 0, 0, 0, 0, 135, 0, 0, 0, 0, 0, 0, 16, 151
+"c:\Users\dell\Documents\AqwaValley\src\app\api\admin\mock-ingest\route.ts", "TypeScript", 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0, 3, 16, 109
+"c:\Users\dell\Documents\AqwaValley\src\app\api\auth\[...all]\route.ts", "TypeScript", 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 6
+"c:\Users\dell\Documents\AqwaValley\src\app\api\cron\process-irrigation-queue\route.ts", "TypeScript", 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 13, 93
+"c:\Users\dell\Documents\AqwaValley\src\app\api\cron\simulate-ingest\route.ts", "TypeScript", 0, 0, 0, 0, 0, 193, 0, 0, 0, 0, 0, 0, 27, 220
+"c:\Users\dell\Documents\AqwaValley\src\app\api\health\route.ts", "TypeScript", 0, 0, 0, 0, 0, 38, 0, 0, 0, 0, 0, 2, 8, 48
+"c:\Users\dell\Documents\AqwaValley\src\app\api\sensors\ingest\route.ts", "TypeScript", 0, 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 8, 18, 115
+"c:\Users\dell\Documents\AqwaValley\src\app\api\trpc\[trpc]\route.ts", "TypeScript", 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 4, 5, 35
+"c:\Users\dell\Documents\AqwaValley\src\app\api\wells\[id]\metrics\route.ts", "TypeScript", 0, 0, 0, 0, 0, 166, 0, 0, 0, 0, 0, 3, 22, 191
+"c:\Users\dell\Documents\AqwaValley\src\app\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 5, 31
+"c:\Users\dell\Documents\AqwaValley\src\app\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 12, 5, 34
+"c:\Users\dell\Documents\AqwaValley\src\env.js", "JavaScript", 0, 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 22, 4, 105
+"c:\Users\dell\Documents\AqwaValley\src\lib\apiKeyAuth.ts", "TypeScript", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 20, 13, 79
+"c:\Users\dell\Documents\AqwaValley\src\lib\cronAuth.ts", "TypeScript", 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 11, 42
+"c:\Users\dell\Documents\AqwaValley\src\lib\hooks.ts", "TypeScript", 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 8, 7, 43
+"c:\Users\dell\Documents\AqwaValley\src\lib\logger.ts", "TypeScript", 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 2, 5, 22
+"c:\Users\dell\Documents\AqwaValley\src\lib\national-id.ts", "TypeScript", 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 6, 30
+"c:\Users\dell\Documents\AqwaValley\src\lib\types.ts", "TypeScript", 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 12, 3, 27
+"c:\Users\dell\Documents\AqwaValley\src\lib\utils.ts", "TypeScript", 0, 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 12, 21, 141
+"c:\Users\dell\Documents\AqwaValley\src\server\ai\openrouter-client.ts", "TypeScript", 0, 0, 0, 0, 0, 146, 0, 0, 0, 0, 0, 72, 28, 246
+"c:\Users\dell\Documents\AqwaValley\src\server\api\root.ts", "TypeScript", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 13, 5, 39
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\alerts.ts", "TypeScript", 0, 0, 0, 0, 0, 236, 0, 0, 0, 0, 0, 24, 33, 293
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\analytics.ts", "TypeScript", 0, 0, 0, 0, 0, 244, 0, 0, 0, 0, 0, 11, 16, 271
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\forecast.ts", "TypeScript", 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 2, 3, 17
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation-api-docs.md", "Markdown", 0, 0, 0, 0, 117, 0, 0, 0, 0, 0, 0, 0, 32, 149
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation-frontend-integration.md", "Markdown", 0, 0, 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 84, 266
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation.ts", "TypeScript", 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0, 38, 47, 335
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\post.ts", "TypeScript", 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 4, 3, 18
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\quotas.ts", "TypeScript", 0, 0, 0, 0, 0, 552, 0, 0, 0, 0, 0, 0, 56, 608
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\sensors.ts", "TypeScript", 0, 0, 0, 0, 0, 205, 0, 0, 0, 0, 0, 25, 33, 263
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\users.ts", "TypeScript", 0, 0, 0, 0, 0, 173, 0, 0, 0, 0, 0, 21, 22, 216
+"c:\Users\dell\Documents\AqwaValley\src\server\api\routers\wells.ts", "TypeScript", 0, 0, 0, 0, 0, 285, 0, 0, 0, 0, 0, 27, 42, 354
+"c:\Users\dell\Documents\AqwaValley\src\server\api\trpc.ts", "TypeScript", 0, 0, 0, 0, 0, 117, 0, 0, 0, 0, 0, 75, 20, 212
+"c:\Users\dell\Documents\AqwaValley\src\server\better-auth\client.ts", "TypeScript", 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 3, 9
+"c:\Users\dell\Documents\AqwaValley\src\server\better-auth\config.ts", "TypeScript", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 4, 40
+"c:\Users\dell\Documents\AqwaValley\src\server\better-auth\index.ts", "TypeScript", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 2
+"c:\Users\dell\Documents\AqwaValley\src\server\better-auth\server.ts", "TypeScript", 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 2, 8
+"c:\Users\dell\Documents\AqwaValley\src\server\db\index.ts", "TypeScript", 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 4, 5, 19
+"c:\Users\dell\Documents\AqwaValley\src\server\db\schema.ts", "TypeScript", 0, 0, 0, 0, 0, 1396, 0, 0, 0, 0, 0, 129, 93, 1618
+"c:\Users\dell\Documents\AqwaValley\src\server\db\seed.ts", "TypeScript", 0, 0, 0, 0, 0, 130, 0, 0, 0, 0, 0, 10, 24, 164
+"c:\Users\dell\Documents\AqwaValley\src\server\lib\abac.ts", "TypeScript", 0, 0, 0, 0, 0, 144, 0, 0, 0, 0, 0, 30, 26, 200
+"c:\Users\dell\Documents\AqwaValley\src\server\services\alertEvalService.ts", "TypeScript", 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 6, 10, 80
+"c:\Users\dell\Documents\AqwaValley\src\server\services\forecastService.ts", "TypeScript", 0, 0, 0, 0, 0, 125, 0, 0, 0, 0, 0, 7, 19, 151
+"c:\Users\dell\Documents\AqwaValley\src\server\services\ingestService.ts", "TypeScript", 0, 0, 0, 0, 0, 292, 0, 0, 0, 0, 0, 4, 5, 301
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\fallback.ts", "TypeScript", 0, 0, 0, 0, 0, 145, 0, 0, 0, 0, 0, 42, 24, 211
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\irrigationQueueWorker.ts", "TypeScript", 0, 0, 0, 0, 0, 518, 0, 0, 0, 0, 0, 0, 54, 572
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\prompt-builder.ts", "TypeScript", 0, 0, 0, 0, 0, 160, 0, 0, 0, 0, 0, 49, 23, 232
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\providerResolver.ts", "TypeScript", 0, 0, 0, 0, 0, 207, 0, 0, 0, 0, 0, 0, 13, 220
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\recommend.ts", "TypeScript", 0, 0, 0, 0, 0, 355, 0, 0, 0, 0, 0, 64, 58, 477
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runDiffService.ts", "TypeScript", 0, 0, 0, 0, 0, 211, 0, 0, 0, 0, 0, 0, 24, 235
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runOutputHash.ts", "TypeScript", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 3, 25
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runReplayService.ts", "TypeScript", 0, 0, 0, 0, 0, 243, 0, 0, 0, 0, 0, 0, 22, 265
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\schemas.ts", "TypeScript", 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 23, 8, 55
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\shadowIngestService.ts", "TypeScript", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 8, 54
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulateIrrigationRun.ts", "TypeScript", 0, 0, 0, 0, 0, 168, 0, 0, 0, 0, 0, 0, 9, 177
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulationHashing.ts", "TypeScript", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 1, 13, 60
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\adaptiveIntegrator.ts", "TypeScript", 0, 0, 0, 0, 0, 357, 0, 0, 0, 0, 0, 1, 45, 403
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\contracts.ts", "TypeScript", 0, 0, 0, 0, 0, 148, 0, 0, 0, 0, 0, 0, 23, 171
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\hydrologyModelV1.ts", "TypeScript", 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 16, 120
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\hydrologyResolver.ts", "TypeScript", 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 5, 33
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\index.ts", "TypeScript", 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1, 9
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\irrigationPhysicsEngine.ts", "TypeScript", 0, 0, 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 13, 135
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\lifecycle.ts", "TypeScript", 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 4, 35
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\result.ts", "TypeScript", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 7, 46
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\units.ts", "TypeScript", 0, 0, 0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 12, 87
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\triggerService.ts", "TypeScript", 0, 0, 0, 0, 0, 323, 0, 0, 0, 0, 0, 0, 34, 357
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\weather.ts", "TypeScript", 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 41, 11, 86
+"c:\Users\dell\Documents\AqwaValley\src\server\services\quotaDecisionService.md", "Markdown", 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 9, 21
+"c:\Users\dell\Documents\AqwaValley\src\server\services\quotaDecisionService.ts", "TypeScript", 0, 0, 0, 0, 0, 545, 0, 0, 0, 0, 0, 0, 60, 605
+"c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorCronIngest.ts", "TypeScript", 0, 0, 0, 0, 0, 251, 0, 0, 0, 0, 0, 0, 30, 281
+"c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorRunRegistry.ts", "TypeScript", 0, 0, 0, 0, 0, 317, 0, 0, 0, 0, 0, 1, 58, 376
+"c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorSensorDiscovery.ts", "TypeScript", 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 5, 35
+"c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorValueGenerator.ts", "TypeScript", 0, 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 13, 67
+"c:\Users\dell\Documents\AqwaValley\src\styles\globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 511, 27, 95, 633
+"c:\Users\dell\Documents\AqwaValley\src\trpc\query-client.ts", "TypeScript", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 2, 2, 26
+"c:\Users\dell\Documents\AqwaValley\src\trpc\react.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 12, 12, 79
+"c:\Users\dell\Documents\AqwaValley\src\trpc\server.ts", "TypeScript", 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 4, 7, 31
+"c:\Users\dell\Documents\AqwaValley\start-database.sh", "Shell Script", 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 14, 13, 89
+"c:\Users\dell\Documents\AqwaValley\tsconfig.json", "JSON with Comments", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 43
+"c:\Users\dell\Documents\AqwaValley\vercel.json", "JSON", 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"Total", "-", 24112, 35, 62, 249, 2363, 12635, 10, 4786, 4540, 792, 511, 1295, 4403, 55793

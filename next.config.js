@@ -3,8 +3,39 @@
  * for Docker builds.
  */
 import "./src/env.js";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {};
 
-export default config;
+// Plugin options for @sentry/webpack-plugin — passed as the 2nd arg to withSentryConfig
+const sentryWebpackPluginOptions = {
+  // For all available options, see:
+  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  org: "aqwa-valley",
+  project: "sentry-alizarin-forest",
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // Upload a larger set of source maps for prettier stack traces (increases build time)
+  widenClientFileUpload: true,
+
+  // Webpack-related tweaks that Sentry can apply
+  webpack: {
+    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+    // See the following for more information:
+    // https://docs.sentry.io/product/crons/
+    // https://vercel.com/docs/cron-jobs
+    automaticVercelMonitors: true,
+
+    // Tree-shaking options for reducing bundle size
+    treeshake: {
+      // Automatically tree-shake Sentry logger statements to reduce bundle size
+      removeDebugLogging: true,
+    },
+  },
+};
+
+export default withSentryConfig(config, sentryWebpackPluginOptions);
