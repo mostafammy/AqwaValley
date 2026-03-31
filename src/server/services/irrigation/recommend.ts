@@ -96,123 +96,10 @@ function buildZoneContexts(
   }));
 }
 
-/**
- * Fetch soil readings from the latestSensorState table for wells associated
- * with the farm. Returns humidity readings keyed by crop profile ID.
- */
-async function fetchSoilReadings(
-  farmId: string,
-): Promise<Record<string, PromptSoilReading | null>> {
-  const wellSensors = await db
-    .select({
-      sensorId: latestSensorState.sensorId,
-      value: latestSensorState.value,
-      type: latestSensorState.type,
-    })
-    .from(latestSensorState)
-    .innerJoin(sensors, eq(latestSensorState.sensorId, sensors.id))
-    .innerJoin(well, eq(sensors.wellId, well.id))
-    .innerJoin(farmWell, eq(well.id, farmWell.wellId))
-    .where(
-      and(eq(farmWell.farmId, farmId), eq(latestSensorState.type, "humidity")),
-    );
-
-  // Build a simple reading map
-  // For now, we aggregate humidity readings into a single value per farm
-  const readings: Record<string, PromptSoilReading | null> = {};
-
-  if (wellSensors.length > 0) {
-    const avgHumidity =
-      wellSensors.reduce((sum, s) => sum + s.value, 0) / wellSensors.length;
-
-    // Temperature readings
-    const tempSensors = await db
-      .select({
-        value: latestSensorState.value,
-      })
-      .from(latestSensorState)
-      .innerJoin(sensors, eq(latestSensorState.sensorId, sensors.id))
-      .innerJoin(well, eq(sensors.wellId, well.id))
-      .innerJoin(farmWell, eq(well.id, farmWell.wellId))
-      .where(
-        and(
-          eq(farmWell.farmId, farmId),
-          eq(latestSensorState.type, "temperature"),
-        ),
-      );
-
-    const avgTemp =
-      tempSensors.length > 0
-        ? tempSensors.reduce((sum, s) => sum + s.value, 0) / tempSensors.length
-        : 30; // default desert temp
-
-    // Apply same reading to all zones (one farm → shared sensors)
-    return new Proxy(
-      {},
-      {
-        get: () => ({
-          humidityPct: avgHumidity,
-          tempCelsius: avgTemp,
-        }),
-      },
-    ) as Record<string, PromptSoilReading | null>;
-  }
-
-  return readings;
-}
-
-/**
- * Fetch the current month's quota from the consumption snapshot.
- */
-async function fetchQuotaContext(
-  farmId: string,
-  monthlyQuotaM3: string | null,
-): Promise<{
-  monthlyLimit: number;
-  usedLitres: number;
-  remainingLitres: number;
-}> {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-  // Try to get from consumption snapshot
-  const [snapshot] = await db
-    .select({
-      quotaM3: farmPeriodConsumptionSnapshot.quotaM3,
-      consumptionM3: farmPeriodConsumptionSnapshot.consumptionM3,
-    })
-    .from(farmPeriodConsumptionSnapshot)
-    .where(
-      and(
-        eq(farmPeriodConsumptionSnapshot.farmId, farmId),
-        eq(farmPeriodConsumptionSnapshot.periodType, "monthly"),
-        gte(farmPeriodConsumptionSnapshot.periodStart, monthStart),
-        lte(farmPeriodConsumptionSnapshot.periodEnd, monthEnd),
-      ),
-    )
-    .orderBy(desc(farmPeriodConsumptionSnapshot.computedAt))
-    .limit(1);
-
-  if (snapshot) {
-    const quotaLitres = parseFloat(snapshot.quotaM3) * 1000; // m³ → litres
-    const usedLitres = parseFloat(snapshot.consumptionM3) * 1000;
-    return {
-      monthlyLimit: quotaLitres,
-      usedLitres,
-      remainingLitres: Math.max(0, quotaLitres - usedLitres),
-    };
-  }
-
-  // Fallback: use farm's monthly quota
-  const quotaM3 = monthlyQuotaM3 ? parseFloat(monthlyQuotaM3) : 10000;
-  const quotaLitres = quotaM3 * 1000;
-  return {
-    monthlyLimit: quotaLitres,
-    usedLitres: 0,
-    remainingLitres: quotaLitres,
-  };
-}
+import {
+  fetchSoilReadings,
+  fetchQuotaContext,
+} from "./recommend_helpers";
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -270,12 +157,27 @@ export async function requestIrrigationPlan(
   const districtName = districtRecord?.name ?? "Unknown District";
 
   // Gather remaining context in parallel
-  const [soilReading, quota] = await Promise.all([
+  const [soilReading, quota, assignedWells] = await Promise.all([
     fetchSoilReadings(farmId),
     fetchQuotaContext(farmId, farmRecord.monthlyQuotaM3),
+    db
+      .select({
+        lat: well.latitude,
+        lon: well.longitude,
+      })
+      .from(farmWell)
+      .innerJoin(well, eq(farmWell.wellId, well.id))
+      .where(eq(farmWell.farmId, farmId))
+      .limit(1),
   ]);
 
-  const weather = getWeatherForecast(farmRecord.districtId);
+  // Resolve coordinates: Primary Well -> District Center -> Default Cairo
+  const lat = assignedWells[0]
+    ? Number(assignedWells[0].lat)
+    : 25.4474; // Default to Kharga if no well/district info
+  const lon = assignedWells[0] ? Number(assignedWells[0].lon) : 30.546;
+
+  const weather = await getWeatherForecast(lat, lon);
 
   // Build zone context from crop profiles
   const zones = buildZoneContexts(cropProfiles, farmRecord.totalAreaAcres);
@@ -321,6 +223,7 @@ export async function requestIrrigationPlan(
         zones: ctx.zones,
         quota: ctx.quota,
         soilReading: ctx.soilReading,
+        weather: ctx.weather,
       });
     }
     throw err;
@@ -342,6 +245,7 @@ export async function requestIrrigationPlan(
       zones: ctx.zones,
       quota: ctx.quota,
       soilReading: ctx.soilReading,
+      weather: ctx.weather,
     });
   }
 

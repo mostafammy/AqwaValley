@@ -8,9 +8,18 @@ export type WeatherInfo = {
   city?: string;
 };
 
-// Simple in-memory cache to stay within OpenWeather free limits
+export type ForecastDay = {
+  date: string;
+  maxTemp: number;
+  minTemp: number;
+  et0: number;
+  rain: number;
+};
+
+// Simple in-memory cache to stay within OpenWeather and Open-Meteo free limits
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const weatherCache = new Map<string, { data: WeatherInfo; expires: number }>();
+const forecastCache = new Map<string, { data: ForecastDay[]; expires: number }>();
 
 export const weatherService = {
   async getCurrentWeather(lat: number, lon: number): Promise<WeatherInfo> {
@@ -63,6 +72,51 @@ export const weatherService = {
         console.error("Failed to fetch weather:", error);
       }
       return this.getFallbackWeather();
+    }
+  },
+
+  async getForecastWithEt0(lat: number, lon: number, days = 3): Promise<ForecastDay[]> {
+    const cacheKey = `fcast-${lat.toFixed(2)}-${lon.toFixed(2)}-${days}`;
+    const cached = forecastCache.get(cacheKey);
+
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    try {
+      // Use Open-Meteo for ET0 and forecast as it's free and specialized
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration,precipitation_sum&timezone=Africa%2FCairo&forecast_days=${days}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Open-Meteo returned ${response.status}`);
+
+      const data = (await response.json()) as any;
+      if (!data.daily) throw new Error("Invalid Open-Meteo response structure");
+
+      const forecast: ForecastDay[] = data.daily.time.map((date: string, i: number) => ({
+        date,
+        maxTemp: data.daily.temperature_2m_max[i] ?? 0,
+        minTemp: data.daily.temperature_2m_min[i] ?? 0,
+        et0: data.daily.et0_fao_evapotranspiration[i] ?? 0,
+        rain: data.daily.precipitation_sum[i] ?? 0,
+      }));
+
+      forecastCache.set(cacheKey, {
+        data: forecast,
+        expires: Date.now() + CACHE_TTL_MS,
+      });
+
+      return forecast;
+    } catch (error) {
+      console.error("Failed to fetch Open-Meteo forecast:", error);
+      // Return sensible desert defaults as fallback
+      return Array.from({ length: days }).map((_, i) => ({
+        date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0]!,
+        maxTemp: 35,
+        minTemp: 20,
+        et0: 7.5,
+        rain: 0,
+      }));
     }
   },
 
