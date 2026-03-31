@@ -11,8 +11,8 @@ const BASE_URL = process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
 // The constructs SDK expects an array of AlertChannel/AlertChannelRef objects,
 // so map the CSV into `{ channelId: string }` objects.
 const ALERT_CHANNELS: AlertChannelRef[] = process.env.CHECKLY_ALERT_CHANNELS
-  ? process.env.CHECKLY_ALERT_CHANNELS.split(",").map((s) =>
-      ({ channelId: s.trim() } as unknown as AlertChannelRef),
+  ? process.env.CHECKLY_ALERT_CHANNELS.split(",").map(
+      (s) => ({ channelId: s.trim() }) as unknown as AlertChannelRef,
     )
   : [];
 
