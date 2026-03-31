@@ -78,7 +78,7 @@ export class InvitationIssuer implements IInvitationIssuer {
     return row ?? null;
   }
 
-  async accept(invitationId: string, tx?: DBConnection): Promise<void> {
+  async accept(invitationId: string, tx?: DBConnection): Promise<boolean> {
     const db = tx ?? this.db;
 
     const updated = await db
