@@ -223,7 +223,14 @@ export const usersRouter = createTRPCRouter({
     .input(z.object({ invitationId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const issuer = new InvitationIssuer(ctx.db);
-      await issuer.revoke(input.invitationId);
+      const revoked = await issuer.revoke(input.invitationId);
+      if (!revoked) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invitation not pending or not found",
+        });
+      }
+
       return { success: true };
     }),
 
@@ -346,7 +353,13 @@ export const usersRouter = createTRPCRouter({
       }
 
       // Mark consumed (one-time-use enforced)
-      await issuer.accept(invitation.id);
+      const accepted = await issuer.accept(invitation.id);
+      if (!accepted) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Invitation already consumed or not pending",
+        });
+      }
 
       // Set password: hash with bcrypt (12 rounds), update account record
       const passwordHash = await bcryptjs.hash(input.newPassword, 12);
@@ -399,7 +412,13 @@ export const usersRouter = createTRPCRouter({
         });
       }
 
-      await issuer.accept(invitation.id);
+      const accepted = await issuer.accept(invitation.id);
+      if (!accepted) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Token already consumed or not pending",
+        });
+      }
 
       // Update password
       const passwordHash = await bcryptjs.hash(input.newPassword, 12);

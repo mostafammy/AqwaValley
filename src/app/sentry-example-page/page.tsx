@@ -25,8 +25,6 @@ export default function Page() {
 
   return (
     <div>
-      
-
       <main>
         <div className="flex-spacer" />
         <svg

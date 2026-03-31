@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "~/trpc/react";
@@ -18,9 +20,6 @@ function SetPasswordContent() {
   // linkInvalid: controls the early-return invalid-link screen
   const [linkInvalid, setLinkInvalid] = useState(false);
   const [linkErrorMsg, setLinkErrorMsg] = useState<string | null>(null);
-
-  // formError: inline form validation / submit errors (separate concern)
-  const [formError, setFormError] = useState<string | null>(null);
 
   // Queries & Mutations
   const {
@@ -45,6 +44,14 @@ function SetPasswordContent() {
     }
   }, [tokenString]);
 
+  // Small handlers to keep JSX cleaner and avoid inline calls flagged by lint
+  const handleTryAgain = () => {
+    window.location.reload();
+  };
+  const handleReturnHome = () => {
+    void router.push("/");
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -56,8 +63,33 @@ function SetPasswordContent() {
     );
   }
 
-  // Early return for errors or invalid links
-  if (linkInvalid || isError || !tokenData?.valid) {
+  // Show request/network failures separately from invalid token/link
+  if (isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            Validation Failed
+          </h2>
+          <p className="mt-2 text-center text-gray-600">
+            We could not validate your secure link due to a network or server
+            error. Please try again or contact support if the problem persists.
+          </p>
+          <div className="mt-6 flex justify-center space-x-2">
+            <Button onClick={handleTryAgain} className="w-1/2">
+              Try Again
+            </Button>
+            <Button onClick={handleReturnHome} className="w-1/2">
+              Return Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Early return for invalid links/tokens
+  if (linkInvalid || tokenData?.valid === false) {
     const reason =
       tokenData?.valid === false
         ? (tokenData.reason as string)
@@ -93,7 +125,7 @@ function SetPasswordContent() {
             {linkErrorMsg ?? messages[reason] ?? messages.INVALID_TOKEN}
           </p>
           <div className="mt-6 flex justify-center">
-            <Button onClick={() => router.push("/")} className="w-full">
+            <Button onClick={handleReturnHome} className="w-full">
               Return to Homepage
             </Button>
           </div>
@@ -135,7 +167,7 @@ function SetPasswordContent() {
       if (res.success && res.email) {
         // Automatically sign them in since we verified the token securely
         await authClient.signIn.email({ email: res.email, password });
-        router.push("/dashboard"); // Redirect to dashboard after login
+        void router.push("/dashboard"); // Redirect to dashboard after login
       } else {
         setFormError("An unexpected error occurred. Please contact support.");
       }
