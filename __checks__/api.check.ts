@@ -6,8 +6,13 @@ import { ApiCheck, AssertionBuilder } from "checkly/constructs";
 // Configure the base URL and alert channels via environment variables so the
 // same check file can be used across environments (local, staging, prod).
 const BASE_URL = process.env.CHECKLY_BASE_URL ?? "http://localhost:3000";
+// CHECKLY_ALERT_CHANNELS is a comma-separated list of Checkly alert channel IDs.
+// The constructs SDK expects an array of AlertChannel/AlertChannelRef objects,
+// so map the CSV into `{ channelId: string }` objects.
 const ALERT_CHANNELS = process.env.CHECKLY_ALERT_CHANNELS
-  ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
+  ? process.env.CHECKLY_ALERT_CHANNELS.split(",").map((s) => ({
+      channelId: s.trim(),
+    }))
   : [];
 
 new ApiCheck("aqwavalley-users-check-1", {
