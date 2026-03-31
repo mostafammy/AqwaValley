@@ -14,8 +14,8 @@ export interface SmtpConfig {
   host: string;
   port: number;
   secure: boolean;
-  user: string;
-  pass: string;
+  user?: string;
+  pass?: string;
   from: string;
 }
 
@@ -62,7 +62,7 @@ export class NodeMailerTransport implements IEmailTransport {
 
     for (let attempt = 0; attempt < RETRY_DELAYS_MS.length; attempt++) {
       if (attempt > 0) {
-        await sleep(RETRY_DELAYS_MS[attempt]);
+        await sleep(RETRY_DELAYS_MS[attempt]!);
       }
 
       try {
