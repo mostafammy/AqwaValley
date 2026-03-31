@@ -11,7 +11,7 @@ const config = defineConfig({
   */
   logicalId: 'AqwaValley',
   /* An optional URL to your Git repo */
-  repoUrl: 'https://github.com/checkly/checkly-cli',
+  repoUrl: 'https://github.com/mostafammy/AqwaValley',
   /* Sets default values for Checks */
   checks: {
     /* A default for how often your Check should run in minutes */
@@ -30,7 +30,9 @@ const config = defineConfig({
     playwrightConfig: {
       timeout: 30000,
       use: {
-        baseURL: 'https://www.danube-web.shop',
+        // Prefer an explicit AQWA_VALLEY_URL environment variable; fall back
+        // to CHECKLY_BASE_URL (used by checks) or localhost for local runs.
+        baseURL: process.env.AQWA_VALLEY_URL ?? process.env.CHECKLY_BASE_URL ?? 'http://localhost:3000',
         viewport: { width: 1280, height: 720 },
       }
     },
