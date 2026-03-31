@@ -57,8 +57,8 @@ function SetPasswordContent() {
   }
 
   // Early return for errors or invalid links
-  if (linkInvalid || isError || !tokenData || !tokenData.valid) {
-    const reason = tokenData && !tokenData.valid ? (tokenData.reason as string) : "INVALID_TOKEN";
+  if (linkInvalid || isError || !tokenData?.valid) {
+    const reason = tokenData?.valid === false ? (tokenData.reason as string) : "INVALID_TOKEN";
     const messages: Record<string, string> = {
       TOKEN_EXPIRED: "This link has expired. Please request a new one.",
       TOKEN_ALREADY_USED: "This link has already been used.",
