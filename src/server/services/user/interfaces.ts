@@ -9,7 +9,7 @@
  */
 
 import type { RawToken } from "../token/RawToken";
-import type { DrizzleDB } from "~/server/db/index";
+import type { DBConnection } from "~/server/db/index";
 
 // ---------------------------------------------------------------------------
 // Shared domain types
@@ -54,7 +54,7 @@ export interface IAuthUserCreator {
       nationalId: string;
       fullName: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ authUserId: string }>;
 }
 
@@ -69,12 +69,12 @@ export interface IInvitationIssuer {
       invitedBy?: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ invitationId: string; token: RawToken }>;
 
   findByTokenHash(
     tokenHash: string,
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{
     id: string;
     userId: string;
@@ -85,9 +85,9 @@ export interface IInvitationIssuer {
     farmId: string | null;
   } | null>;
 
-  accept(invitationId: string, tx?: DrizzleDB): Promise<void>;
-  revoke(invitationId: string, tx?: DrizzleDB): Promise<void>;
-  revokeAllPendingForUser(userId: string, tx?: DrizzleDB): Promise<void>;
+  accept(invitationId: string, tx?: DBConnection): Promise<void>;
+  revoke(invitationId: string, tx?: DBConnection): Promise<void>;
+  revokeAllPendingForUser(userId: string, tx?: DBConnection): Promise<void>;
 }
 
 /** Command — role mutation + audit log, one atomic unit */
@@ -104,7 +104,7 @@ export interface IRoleAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ roleId: string }>;
 
   revoke(
@@ -119,7 +119,7 @@ export interface IRoleAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<void>;
 }
 
@@ -132,7 +132,7 @@ export interface IFarmScopeAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<void>;
 }
 
@@ -143,7 +143,7 @@ export interface IOutboxEnqueuer {
       eventType: string;
       payload: Record<string, unknown>;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ eventId: string }>;
 }
 

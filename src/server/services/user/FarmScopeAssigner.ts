@@ -10,12 +10,12 @@
 
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import type { DrizzleDB } from "~/server/db/index";
+import type { DBConnection } from "~/server/db/index";
 import { auditLog, farm } from "~/server/db/schema";
 import type { IFarmScopeAssigner } from "./interfaces";
 
 export class FarmScopeAssigner implements IFarmScopeAssigner {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: DBConnection) {}
 
   async assign(
     input: {
@@ -24,7 +24,7 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
       actorId: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<void> {
     // Fetch current farm state for the audit 'before' snapshot
     const existingFarm = await this.db.query.farm.findFirst({

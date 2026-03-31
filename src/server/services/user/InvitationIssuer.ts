@@ -13,13 +13,13 @@
 
 import { and, eq, lt } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import type { DrizzleDB } from "~/server/db/index";
+import type { DBConnection } from "~/server/db/index";
 import { userInvitation } from "~/server/db/schema";
 import { RawToken } from "../token/RawToken";
 import type { IInvitationIssuer } from "./interfaces";
 
 export class InvitationIssuer implements IInvitationIssuer {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: DBConnection) {}
 
   async issue(
     input: {
@@ -30,7 +30,7 @@ export class InvitationIssuer implements IInvitationIssuer {
       invitedBy?: string;
       ipAddress?: string;
     },
-    tx?: DrizzleDB,
+    tx?: DBConnection,
   ): Promise<{ invitationId: string; token: RawToken }> {
     const token = RawToken.generate();
     const expiresAt = new Date(Date.now() + input.ttlHours * 60 * 60 * 1000);
@@ -60,7 +60,7 @@ export class InvitationIssuer implements IInvitationIssuer {
     return { invitationId: row.id, token };
   }
 
-  async findByTokenHash(tokenHash: string, tx?: DrizzleDB) {
+  async findByTokenHash(tokenHash: string, tx?: DBConnection) {
     const db = tx ?? this.db;
     const row = await db.query.userInvitation.findFirst({
       where: eq(userInvitation.tokenHash, tokenHash),
@@ -78,7 +78,7 @@ export class InvitationIssuer implements IInvitationIssuer {
     return row ?? null;
   }
 
-  async accept(invitationId: string, tx?: DrizzleDB): Promise<void> {
+  async accept(invitationId: string, tx?: DBConnection): Promise<void> {
     const db = tx ?? this.db;
     await db
       .update(userInvitation)
@@ -86,7 +86,7 @@ export class InvitationIssuer implements IInvitationIssuer {
       .where(eq(userInvitation.id, invitationId));
   }
 
-  async revoke(invitationId: string, tx?: DrizzleDB): Promise<void> {
+  async revoke(invitationId: string, tx?: DBConnection): Promise<void> {
     const db = tx ?? this.db;
     await db
       .update(userInvitation)
@@ -94,7 +94,7 @@ export class InvitationIssuer implements IInvitationIssuer {
       .where(eq(userInvitation.id, invitationId));
   }
 
-  async revokeAllPendingForUser(userId: string, tx?: DrizzleDB): Promise<void> {
+  async revokeAllPendingForUser(userId: string, tx?: DBConnection): Promise<void> {
     const db = tx ?? this.db;
     await db
       .update(userInvitation)
@@ -117,8 +117,9 @@ export class InvitationIssuer implements IInvitationIssuer {
           eq(userInvitation.status, "pending"),
           lt(userInvitation.expiresAt, new Date()),
         ),
-      );
+      )
+      .returning({ id: userInvitation.id });
 
-    return result.length ?? 0;
+    return result.length;
   }
 }

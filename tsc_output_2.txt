@@ -1,0 +1,6 @@
+
+> AqwaValley@0.1.0 typecheck C:\Users\dell\Documents\AqwaValley
+> tsc --noEmit
+
+src/server/services/user/InvitationIssuer.ts(122,12): error TS18046: 'result' is of type 'unknown'.
+ظëELIFECYCLEظë Command failed with exit code 2.

@@ -1,0 +1,4 @@
+
+> AqwaValley@0.1.0 typecheck C:\Users\dell\Documents\AqwaValley
+> tsc --noEmit
+
