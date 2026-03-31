@@ -51,7 +51,7 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
         .update(farm)
         .set({ farmerUserId: input.userId })
         .where(eq(farm.id, input.farmId))
-        .returning({ id: true });
+        .returning({ id: farm.id });
 
       if (Array.isArray(updated) && updated.length > 0) {
         await db.insert(auditLog).values({
@@ -90,7 +90,7 @@ export class FarmScopeAssigner implements IFarmScopeAssigner {
         .update(farm)
         .set({ farmerUserId: input.userId })
         .where(eq(farm.id, input.farmId))
-        .returning({ id: true });
+        .returning({ id: farm.id });
 
       if (Array.isArray(updated) && updated.length > 0) {
         await innerTx.insert(auditLog).values({
