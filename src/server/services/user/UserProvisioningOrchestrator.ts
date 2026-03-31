@@ -40,9 +40,7 @@ import type {
   ProvisionUserInput,
 } from "./interfaces";
 
-export class UserProvisioningOrchestrator
-  implements IUserProvisioningOrchestrator
-{
+export class UserProvisioningOrchestrator implements IUserProvisioningOrchestrator {
   constructor(
     private readonly db: DrizzleDB,
     private readonly authUserCreator: IAuthUserCreator,
@@ -178,7 +176,9 @@ export class UserProvisioningOrchestrator
   // bulkProvision() — processes up to 50 users with Promise.allSettled
   // ---------------------------------------------------------------------------
 
-  async bulkProvision(items: BulkProvisionItem[]): Promise<BulkProvisionResult[]> {
+  async bulkProvision(
+    items: BulkProvisionItem[],
+  ): Promise<BulkProvisionResult[]> {
     if (items.length > 50) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -198,11 +198,9 @@ export class UserProvisioningOrchestrator
         const result = settlement.value;
         return {
           nationalId: item.nationalId,
-          status:
-            result.status === "INVITED" ? "created" : "skipped",
+          status: result.status === "INVITED" ? "created" : "skipped",
           userId: result.userId,
-          reason:
-            result.status !== "INVITED" ? result.status : undefined,
+          reason: result.status !== "INVITED" ? result.status : undefined,
         };
       }
 
@@ -221,14 +219,21 @@ export class UserProvisioningOrchestrator
 
   async revokeRole(input: {
     userId: string;
-    roleType: "admin" | "district_manager" | "farm_owner" | "farmer" | "auditor";
+    roleType:
+      | "admin"
+      | "district_manager"
+      | "farm_owner"
+      | "farmer"
+      | "auditor";
     actorId: string;
     ipAddress?: string;
   }): Promise<void> {
+    // Observer: revoke all sessions first so we never leave a revoked role
+    // with active sessions. If session invalidation fails we abort and do not
+    // modify role assignments.
+    await this.sessionInvalidator.revokeAllSessions(input.userId);
+
     // Command: revoke role + write audit_log
     await this.roleAssigner.revoke(input);
-
-    // Observer: revoke all sessions immediately — no stale-role window
-    await this.sessionInvalidator.revokeAllSessions(input.userId);
   }
 }
