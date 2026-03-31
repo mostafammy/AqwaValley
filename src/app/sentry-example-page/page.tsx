@@ -24,10 +24,9 @@ export default function Page() {
         // Ensure connectivity failures don't leave the UI in an optimistic state.
         try {
           // Logger expects a record-ish object; convert unknown to a safe shape.
-          Sentry.logger?.error?.(
-            "Sentry diagnoseSdkConnectivity failed",
-            { error: String(err) },
-          );
+          Sentry.logger?.error?.("Sentry diagnoseSdkConnectivity failed", {
+            error: String(err),
+          });
         } catch (e) {
           // ignore logging errors
         }
