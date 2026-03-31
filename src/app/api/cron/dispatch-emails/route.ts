@@ -34,7 +34,7 @@ function buildEmailService(): EmailService {
   const baseTransport = isTestEnv
     ? new NullTransport()
     : new NodeMailerTransport({
-        host: env.SMTP_HOST,
+        host: env.SMTP_HOST!,
         port: env.SMTP_PORT,
         secure: env.SMTP_SECURE,
         user: env.SMTP_USER,
