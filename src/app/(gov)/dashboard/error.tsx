@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "~/app/_components/UI/Button";
 import { AlertTriangle } from "lucide-react";
 
@@ -13,6 +14,8 @@ export default function DashboardError({
 }) {
   useEffect(() => {
     console.error("[Gov Dashboard Error]:", error);
+    // Mirror the global error handler: ensure dashboard errors are sent to Sentry.
+    Sentry.captureException(error)
   }, [error]);
 
   return (
