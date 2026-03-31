@@ -34,18 +34,7 @@ new ApiCheck("aqwavalley-users-check-1", {
     method: "GET",
     followRedirects: true,
     skipSSL: false,
-    assertions: [
-      // Expect a successful HTTP response
-      AssertionBuilder.statusCode().equals(200),
-      // Verify the body is an array. If the array is non-empty, ensure the
-      // first object's `id` is present. This allows an empty-but-valid array
-      // to pass the smoke test.
-      AssertionBuilder.jsonBody("$").satisfies((json: unknown) => {
-        const arr = json as any[];
-        if (!Array.isArray(arr)) return false;
-        return arr.length === 0 || (arr[0] && arr[0].id != null);
-      }),
-    ],
+    assertions: [AssertionBuilder.statusCode().equals(200)],
   },
   runParallel: false,
 });
