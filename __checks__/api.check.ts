@@ -40,7 +40,6 @@ new ApiCheck("aqwavalley-users-check-1", {
       // Verify the body is an array. If the array is non-empty, ensure the
       // first object's `id` is present. This allows an empty-but-valid array
       // to pass the smoke test.
-      AssertionBuilder.jsonBody("$").isArray(),
       AssertionBuilder.jsonBody("$").satisfies((json: unknown) => {
         const arr = json as any[];
         if (!Array.isArray(arr)) return false;
