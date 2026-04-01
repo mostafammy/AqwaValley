@@ -57,23 +57,34 @@ export const reportScopeSchema = z
     }
   });
 
-export const reportRequestSchema = z.object({
-  reportType: z.enum(reportTypeValues),
-  formats: z.array(z.enum(reportFormatValues)).min(1),
-  generationMode: z.enum(reportGenerationModeValues).default("strict"),
-  timeRangeFrom: z.date().optional(),
-  timeRangeTo: z.date().optional(),
-  granularity: z.enum(reportGranularityValues).default("daily"),
-  scope: reportScopeSchema,
-  parameterSchemaVersion: z.string().default("report-params-v1"),
-  templateVersion: z.string().min(1),
-  policyVersion: z.string().min(1),
-  maskingRulesVersion: z.string().min(1),
-  snapshotId: z.string().min(1),
-  snapshotType: z.enum(["logical", "physical"]).default("logical"),
-  snapshotMetadata: z.record(z.unknown()).optional(),
-  parameters: z.record(z.unknown()).default({}),
-});
+export const reportRequestSchema = z
+  .object({
+    reportType: z.enum(reportTypeValues),
+    formats: z.array(z.enum(reportFormatValues)).min(1),
+    generationMode: z.enum(reportGenerationModeValues).default("strict"),
+    timeRangeFrom: z.date().optional(),
+    timeRangeTo: z.date().optional(),
+    granularity: z.enum(reportGranularityValues).default("daily"),
+    scope: reportScopeSchema,
+    parameterSchemaVersion: z.string().default("report-params-v1"),
+    templateVersion: z.string().min(1),
+    policyVersion: z.string().min(1),
+    maskingRulesVersion: z.string().min(1),
+    snapshotId: z.string().min(1),
+    snapshotType: z.enum(["logical", "physical"]).default("logical"),
+    snapshotMetadata: z.record(z.unknown()).optional(),
+    parameters: z.record(z.unknown()).default({}),
+  })
+  .refine(
+    (value) =>
+      !value.timeRangeFrom ||
+      !value.timeRangeTo ||
+      value.timeRangeFrom <= value.timeRangeTo,
+    {
+      message: "timeRangeFrom must be before or equal to timeRangeTo",
+      path: ["timeRangeFrom"],
+    },
+  );
 
 export type ReportRequestInput = z.infer<typeof reportRequestSchema>;
 
