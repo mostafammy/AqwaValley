@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 
 import {
   adminProcedure,
@@ -7,6 +8,7 @@ import {
   viewerProcedure,
 } from "~/server/api/trpc";
 import type { DrizzleDB } from "~/server/db";
+import { reportArtifact, reportJob } from "~/server/db/schema";
 import { ReportAccessPolicy } from "~/server/services/reporting/ReportAccessPolicy";
 import { ReportingOrchestrator } from "~/server/services/reporting/ReportingOrchestrator";
 import {
@@ -107,6 +109,44 @@ export const reportsRouter = createTRPCRouter({
     .input(z.object({ reportArtifactId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const deps = buildReportingDependencies(ctx.db);
+
+      const artifact = await ctx.db.query.reportArtifact.findFirst({
+        where: and(
+          eq(reportArtifact.id, input.reportArtifactId),
+          eq(reportArtifact.status, "ready"),
+        ),
+        columns: {
+          reportJobId: true,
+        },
+      });
+
+      if (!artifact) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Report artifact is not available",
+        });
+      }
+
+      const job = await ctx.db.query.reportJob.findFirst({
+        where: eq(reportJob.id, artifact.reportJobId),
+        columns: {
+          requestedBy: true,
+        },
+      });
+
+      if (!job) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Report job not found",
+        });
+      }
+
+      deps.policy.assertCanViewJob({
+        actorId: ctx.session.user.id,
+        actorRoles: ctx.userRoles,
+        requestedBy: job.requestedBy,
+      });
+
       return deps.orchestrator.resolveDownload({
         actorId: ctx.session.user.id,
         reportArtifactId: input.reportArtifactId,
