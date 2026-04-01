@@ -29,6 +29,46 @@ type OpenWeatherPayload = {
   name?: string;
 };
 
+type OpenMeteoDailyPayload = {
+  time: string[];
+  temperature_2m_max: number[];
+  temperature_2m_min: number[];
+  et0_fao_evapotranspiration: number[];
+  precipitation_sum: number[];
+};
+
+type OpenMeteoPayload = {
+  daily: OpenMeteoDailyPayload;
+};
+
+function isNumberArray(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "number")
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
+}
+
+function isOpenMeteoPayload(value: unknown): value is OpenMeteoPayload {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as { daily?: unknown };
+  if (!candidate.daily || typeof candidate.daily !== "object") return false;
+
+  const daily = candidate.daily as Record<string, unknown>;
+  return (
+    isStringArray(daily.time) &&
+    isNumberArray(daily.temperature_2m_max) &&
+    isNumberArray(daily.temperature_2m_min) &&
+    isNumberArray(daily.et0_fao_evapotranspiration) &&
+    isNumberArray(daily.precipitation_sum)
+  );
+}
+
 function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
   if (!value || typeof value !== "object") return false;
   const candidate = value as {
@@ -60,7 +100,10 @@ function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
 // Simple in-memory cache to stay within OpenWeather free limits
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const weatherCache = new Map<string, { data: WeatherInfo; expires: number }>();
-const forecastCache = new Map<string, { data: ForecastDay[]; expires: number }>();
+const forecastCache = new Map<
+  string,
+  { data: ForecastDay[]; expires: number }
+>();
 
 export const weatherService = {
   async getCurrentWeather(lat: number, lon: number): Promise<WeatherInfo> {
@@ -126,7 +169,11 @@ export const weatherService = {
     }
   },
 
-  async getForecastWithEt0(lat: number, lon: number, days = 3): Promise<ForecastDay[]> {
+  async getForecastWithEt0(
+    lat: number,
+    lon: number,
+    days = 3,
+  ): Promise<ForecastDay[]> {
     const cacheKey = `fcast-${lat.toFixed(2)}-${lon.toFixed(2)}-${days}`;
     const cached = forecastCache.get(cacheKey);
 
@@ -137,14 +184,17 @@ export const weatherService = {
     try {
       // Use Open-Meteo for ET0 and forecast as it's free and specialized
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration,precipitation_sum&timezone=Africa%2FCairo&forecast_days=${days}`;
-      
+
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`Open-Meteo returned ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Open-Meteo returned ${response.status}`);
 
-      const data = (await response.json()) as any;
-      if (!data.daily) throw new Error("Invalid Open-Meteo response structure");
+      const data: unknown = await response.json();
+      if (!isOpenMeteoPayload(data)) {
+        throw new Error("Invalid Open-Meteo response structure");
+      }
 
-      const forecast: ForecastDay[] = data.daily.time.map((date: string, i: number) => ({
+      const forecast: ForecastDay[] = data.daily.time.map((date, i) => ({
         date,
         maxTemp: data.daily.temperature_2m_max[i] ?? 0,
         minTemp: data.daily.temperature_2m_min[i] ?? 0,
