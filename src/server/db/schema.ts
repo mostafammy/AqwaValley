@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+  check,
   boolean,
   decimal,
   doublePrecision,
@@ -1813,6 +1814,18 @@ export const reportJob = pgTable(
       .notNull(),
   },
   (t) => [
+    check(
+      "report_job_scope_global_check",
+      sql`(
+        (${t.scopeType} = 'global' and ${t.scopeDistrictId} is null and ${t.scopeFarmId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'district' and ${t.scopeDistrictId} is not null and ${t.scopeFarmId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'farm' and ${t.scopeFarmId} is not null and ${t.scopeDistrictId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'user' and ${t.scopeUserId} is not null and ${t.scopeDistrictId} is null and ${t.scopeFarmId} is null)
+      )`,
+    ),
     index("report_job_status_created_idx").on(t.status, t.createdAt),
     index("report_job_requested_by_created_idx").on(t.requestedBy, t.createdAt),
     index("report_job_scope_idx").on(
@@ -1820,7 +1833,7 @@ export const reportJob = pgTable(
       t.scopeDistrictId,
       t.scopeFarmId,
     ),
-    index("report_job_fingerprint_idx").on(
+    unique("report_job_fingerprint_unique").on(
       t.reportType,
       t.normalizedParametersHash,
       t.snapshotId,
