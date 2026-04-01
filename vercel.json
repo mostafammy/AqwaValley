@@ -1,12 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/process-report-jobs",
-      "schedule": "*/2 * * * *"
-    },
-    {
-      "path": "/api/cron/dispatch-emails",
-      "schedule": "*/2 * * * *"
-    }
-  ]
-}
+{}
