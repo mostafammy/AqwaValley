@@ -6,7 +6,16 @@ import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  experimental: {
+    outputFileTracingExcludes: {
+      "*": [
+        "**/.pnpm-store/**",
+        "**/pnpm/store/**",
+      ],
+    },
+  },
+};
 
 // Plugin options for @sentry/webpack-plugin — passed as the 2nd arg to withSentryConfig
 const sentryWebpackPluginOptions = {
