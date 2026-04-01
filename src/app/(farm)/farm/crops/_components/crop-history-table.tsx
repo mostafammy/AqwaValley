@@ -78,7 +78,7 @@ export async function CropHistoryTable({
                   <td className="px-8 py-5 text-sm">
                     {row.yield ? (
                       <span className="text-teal-600 font-medium">
-                        {Number(row.yield).toLocaleString("ar-EG")} {row.yieldUnit}
+                        {Number(row.yield).toLocaleString("ar-EG")} {row.yieldUnit ?? ""}
                       </span>
                     ) : (
                       <span className="text-slate-400">—</span>

@@ -369,9 +369,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             </span>
             <span className="text-sm text-slate-500 font-medium">• {farmName}</span>
           </div>
-          <h1 className="text-5xl font-semibold  tracking-tight text-navy">
-            خطة الري <span className="text-teal mb-2">الذكية</span>
-          </h1>
+          <h1 className="text-5xl font-semibold tracking-tight text-navy">
+            خطة الري <span className="text-teal">الذكية</span>
+          </h1>          </h1>
           <p className="text-slate-500 mt-6 flex items-center gap-2">
             <span className="w-2 h-2 bg-teal rounded-full animate-pulse" />
             تعتمد على معادلات FAO-56 • خزان الحجر الرملي النوبي

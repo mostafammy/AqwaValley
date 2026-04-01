@@ -1,16 +1,19 @@
 "use server";
 
 import { db } from "~/server/db";
-import { cropProfile, cropHistory } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { cropProfile, cropHistory, farm } from "~/server/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getSession } from "~/server/better-auth/server";
 import { z } from "zod";
 
 const UpdateCropSchema = z.object({
   farmId:              z.string().uuid(),
   cropType:            z.string(),
   growthStage:         z.string(),
-  targetSoilMoisture:  z.string().transform((v) => parseFloat(v)),
+  targetSoilMoisture:  z.string()
+    .transform((v) => parseFloat(v))
+    .refine((v) => Number.isFinite(v), { message: "يجب أن يكون رقمًا صالحًا" }),
   plantedDate:         z.string().optional(),
   expectedHarvestDate: z.string().optional(),
 });
@@ -35,10 +38,26 @@ export async function updateCropProfile(
 
     const { farmId, cropType, growthStage, targetSoilMoisture, plantedDate, expectedHarvestDate } = parsed.data;
 
+    // 0. Authorization check
+    const session = await getSession();
+    if (!session?.user) {
+      return { success: false, error: "غير مصرح لك" };
+    }
+
+    const [farmRecord] = await db
+      .select({ ownerId: farm.ownerId })
+      .from(farm)
+      .where(eq(farm.id, farmId))
+      .limit(1);
+
+    if (!farmRecord || farmRecord.ownerId !== session.user.id) {
+      return { success: false, error: "غير مصرح لك بتعديل هذه المزرعة" };
+    }
+
     // Use a transaction to ensure consistency
     await db.transaction(async (tx) => {
       // 1. Update the current profile
-      await tx
+      const updatedRows = await tx
         .update(cropProfile)
         .set({
           cropType: cropType as any,
@@ -48,7 +67,12 @@ export async function updateCropProfile(
           expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
           updatedAt:             new Date(),
         })
-        .where(eq(cropProfile.farmId, farmId));
+        .where(eq(cropProfile.farmId, farmId))
+        .returning({ id: cropProfile.id });
+
+      if (updatedRows.length === 0) {
+        throw new Error("لم يتم العثور على بروفايل المحصول للمزرعة المحددة");
+      }
 
       // 2. Log this state in crop history
       await tx.insert(cropHistory).values({
@@ -57,6 +81,7 @@ export async function updateCropProfile(
         growthStage:         growthStage as any,
         targetSoilMoisturePct: String(targetSoilMoisture),
         plantedDate:           plantedDate ? new Date(plantedDate) : null,
+        expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
         harvestedDate:       growthStage === "harvest" ? new Date() : null,
         recordedAt:          new Date(),
       });

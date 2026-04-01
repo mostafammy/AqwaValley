@@ -60,11 +60,10 @@ export default async function CropsPage() {
         </div>
         <div className="lg:col-span-4">
           <WaterReqCard 
-            activeCropType={profile?.cropType ?? "wheat"} 
+            activeCropType={profile?.cropType ?? cropTypes[0]?.cropType ?? "wheat"} 
             cropTypes={cropTypes}
           />
-        </div>
-      </div>
+        </div>      </div>
 
       {/* History Table */}
       <Suspense fallback={<Skeleton className="h-80 rounded-3xl" />}>

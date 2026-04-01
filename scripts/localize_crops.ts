@@ -34,7 +34,7 @@ async function main() {
     { type: "wheat",      arabic: "قمح" },
     { type: "corn",       arabic: "ذرة" },
     { type: "vegetables", arabic: "خضروات" },
-    { type: "fruits",     arabic: "نخيل تمر" },
+    { type: "fruits",     arabic: "فواكه" },
     { type: "cotton",     arabic: "قطن" },
     { type: "sugarcane",  arabic: "قصب السكر" },
     { type: "rice",       arabic: "أرز" },

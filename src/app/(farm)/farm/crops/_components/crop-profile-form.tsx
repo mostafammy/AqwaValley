@@ -79,15 +79,18 @@ export function CropProfileForm({
     formData.append("expectedHarvestDate", harvestDate || "");
 
     startTransition(async () => {
-      const result = await updateAction(formData);
-      if (result.success) {
-        setSuccess(true);
-        router.refresh();
-      } else {
-        setError(result.error ?? "حدث خطأ ما");
+      try {
+        const result = await updateAction(formData);
+        if (result.success) {
+          setSuccess(true);
+          router.refresh();
+        } else {
+          setError(result.error ?? "حدث خطأ ما");
+        }
+      } catch {
+        setError("حدث خطأ ما");
       }
-    });
-  }
+    });  }
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
@@ -141,7 +144,9 @@ export function CropProfileForm({
               >
                 <div className="font-medium">{opt.displayName}</div>
                 {opt.description && (
-                  <div className="text-xs text-slate-400 mt-0.5">{opt.description}</div>
+                  <div className={`text-xs mt-0.5 ${growthStage === opt.stage ? "text-blue-100" : "text-slate-400"}`}>
+                    {opt.description}
+                  </div>
                 )}
               </button>
             ))}
