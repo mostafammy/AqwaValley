@@ -27,3 +27,23 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## Cron scheduling (QStash)
+
+Cron schedules are managed from source control and synchronized to QStash.
+
+- Schedule manifest: `scripts/qstash-cron.config.ts`
+- Sync command: `pnpm cron:sync:qstash`
+- Deployment workflow: `.github/workflows/sync-qstash-cron.yml`
+
+Required secrets/environment variables for sync:
+
+- `QSTASH_TOKEN`
+- `APP_URL`
+
+Required runtime environment variables for cron signature verification:
+
+- `QSTASH_CURRENT_SIGNING_KEY`
+- `QSTASH_NEXT_SIGNING_KEY`
+
+The sync process is idempotent: it creates missing schedules, updates changed schedules, and removes stale managed schedules.
