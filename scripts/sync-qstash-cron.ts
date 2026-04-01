@@ -75,7 +75,9 @@ async function qstashFetch(
   return response;
 }
 
-function buildDesiredSchedules(appUrl: string): Record<string, DesiredSchedule> {
+function buildDesiredSchedules(
+  appUrl: string,
+): Record<string, DesiredSchedule> {
   const base = new URL(appUrl);
 
   return Object.fromEntries(
@@ -84,7 +86,8 @@ function buildDesiredSchedules(appUrl: string): Record<string, DesiredSchedule> 
       destination.searchParams.set("cronKey", job.key);
 
       const method = job.method ?? "POST";
-      const body = job.body === undefined ? undefined : JSON.stringify(job.body);
+      const body =
+        job.body === undefined ? undefined : JSON.stringify(job.body);
 
       return [
         job.key,
@@ -105,16 +108,27 @@ async function listSchedules(
   token: string,
 ): Promise<QstashSchedule[]> {
   const response = await qstashFetch(apiBase, token, "/v2/schedules");
-  const payload = (await response.json()) as QstashListResponse | QstashSchedule[];
+  const payload = (await response.json()) as
+    | QstashListResponse
+    | QstashSchedule[];
 
   if (Array.isArray(payload)) return payload;
   return payload.data ?? [];
 }
 
-async function deleteSchedule(apiBase: string, token: string, scheduleId: string) {
-  await qstashFetch(apiBase, token, `/v2/schedules/${encodeURIComponent(scheduleId)}`, {
-    method: "DELETE",
-  });
+async function deleteSchedule(
+  apiBase: string,
+  token: string,
+  scheduleId: string,
+) {
+  await qstashFetch(
+    apiBase,
+    token,
+    `/v2/schedules/${encodeURIComponent(scheduleId)}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
 
 async function createSchedule(
@@ -137,7 +151,10 @@ async function createSchedule(
   });
 }
 
-function needsRecreate(current: QstashSchedule, desired: DesiredSchedule): boolean {
+function needsRecreate(
+  current: QstashSchedule,
+  desired: DesiredSchedule,
+): boolean {
   const currentCron = current.cron ?? "";
   const currentDestination = getDestination(current);
   const currentMethod = getMethod(current);
@@ -152,7 +169,9 @@ function needsRecreate(current: QstashSchedule, desired: DesiredSchedule): boole
 async function main() {
   const token = requireEnv("QSTASH_TOKEN");
   const appUrl = requireEnv("APP_URL");
-  const apiBase = (process.env.QSTASH_API_BASE ?? "https://qstash.upstash.io").replace(/\/$/, "");
+  const apiBase = (
+    process.env.QSTASH_API_BASE ?? "https://qstash.upstash.io"
+  ).replace(/\/$/, "");
 
   const desiredByKey = buildDesiredSchedules(appUrl);
   const desiredKeys = new Set(Object.keys(desiredByKey));
@@ -163,7 +182,9 @@ async function main() {
     return key !== null;
   });
 
-  console.log(`[qstash-sync] Found ${allSchedules.length} total schedules (${managed.length} managed).`);
+  console.log(
+    `[qstash-sync] Found ${allSchedules.length} total schedules (${managed.length} managed).`,
+  );
 
   let deleted = 0;
   let created = 0;
@@ -179,14 +200,18 @@ async function main() {
     if (!desired) {
       await deleteSchedule(apiBase, token, scheduleId);
       deleted += 1;
-      console.log(`[qstash-sync] Deleted stale schedule ${scheduleId} (key=${key}).`);
+      console.log(
+        `[qstash-sync] Deleted stale schedule ${scheduleId} (key=${key}).`,
+      );
       continue;
     }
 
     if (needsRecreate(schedule, desired)) {
       await deleteSchedule(apiBase, token, scheduleId);
       deleted += 1;
-      console.log(`[qstash-sync] Replacing schedule ${scheduleId} (key=${key}).`);
+      console.log(
+        `[qstash-sync] Replacing schedule ${scheduleId} (key=${key}).`,
+      );
     } else {
       unchanged += 1;
       desiredKeys.delete(key);
