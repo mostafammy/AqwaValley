@@ -30,6 +30,30 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function normalizeAppUrl(rawAppUrl: string): URL {
+  const stripped = rawAppUrl.trim().replace(/^['\"]|['\"]$/g, "");
+  const withProtocol = /^https?:\/\//i.test(stripped)
+    ? stripped
+    : `https://${stripped}`;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(withProtocol);
+  } catch {
+    throw new Error(
+      `Invalid APP_URL value. Expected an absolute URL like https://example.com, received: ${rawAppUrl}`,
+    );
+  }
+
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error(
+      `Invalid APP_URL protocol (${parsed.protocol}). Use http:// or https://.`,
+    );
+  }
+
+  return parsed;
+}
+
 function getScheduleId(schedule: QstashSchedule): string | undefined {
   return schedule.scheduleId ?? schedule.id;
 }
@@ -78,7 +102,7 @@ async function qstashFetch(
 function buildDesiredSchedules(
   appUrl: string,
 ): Record<string, DesiredSchedule> {
-  const base = new URL(appUrl);
+  const base = normalizeAppUrl(appUrl);
 
   return Object.fromEntries(
     QSTASH_CRON_JOBS.map((job) => {
