@@ -20,10 +20,14 @@ export const env = createEnv({
     LOG_LEVEL: z
       .enum(["trace", "debug", "info", "warn", "error", "fatal"])
       .default("info"),
-    CRON_SECRET:
+    QSTASH_CURRENT_SIGNING_KEY:
       process.env.NODE_ENV === "production"
-        ? z.string().min(16)
-        : z.string().min(1).optional(),
+        ? z.string().min(1)
+        : z.string().optional(),
+    QSTASH_NEXT_SIGNING_KEY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
     TIMESCALE_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
     INGEST_RATE_LIMIT_PER_MINUTE: z.coerce
       .number()
@@ -104,7 +108,8 @@ export const env = createEnv({
     OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
     LOG_LEVEL: process.env.LOG_LEVEL,
-    CRON_SECRET: process.env.CRON_SECRET,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
     TIMESCALE_RETENTION_DAYS: process.env.TIMESCALE_RETENTION_DAYS,
     INGEST_RATE_LIMIT_PER_MINUTE: process.env.INGEST_RATE_LIMIT_PER_MINUTE,
     SIM_CRON_MAX_WELLS: process.env.SIM_CRON_MAX_WELLS,
