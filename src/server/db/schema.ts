@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+  check,
   boolean,
   decimal,
   doublePrecision,
@@ -1593,6 +1594,48 @@ export const outboxEventStatusEnum = pgEnum("outbox_event_status", [
   "dead",
 ]);
 
+export const reportTypeEnum = pgEnum("report_type", [
+  "user_activity",
+  "district_governance",
+  "compliance",
+  "audit_trail",
+  "monthly_governance_pack",
+]);
+
+export const reportScopeTypeEnum = pgEnum("report_scope_type", [
+  "global",
+  "district",
+  "farm",
+  "user",
+]);
+
+export const reportJobStatusEnum = pgEnum("report_job_status", [
+  "queued",
+  "processing",
+  "completed",
+  "partial_failed",
+  "failed",
+  "cancelled",
+]);
+
+export const reportGenerationModeEnum = pgEnum("report_generation_mode", [
+  "strict",
+  "partial",
+]);
+
+export const reportFormatEnum = pgEnum("report_format", ["pdf", "csv", "xlsx"]);
+
+export const reportArtifactStatusEnum = pgEnum("report_artifact_status", [
+  "ready",
+  "failed",
+  "expired",
+]);
+
+export const reportSnapshotTypeEnum = pgEnum("report_snapshot_type", [
+  "logical",
+  "physical",
+]);
+
 // ============================================================================
 // USER MANAGEMENT v2 — Tables
 // ============================================================================
@@ -1716,6 +1759,149 @@ export const outboxEvent = pgTable(
   (t) => [
     index("outbox_event_status_created_idx").on(t.status, t.createdAt), // Primary dispatch query
     index("outbox_event_next_retry_idx").on(t.nextRetryAt),
+  ],
+);
+
+/**
+ * report_job: Report generation lifecycle envelope.
+ * Stores normalized request identity for idempotency and deterministic replay.
+ */
+export const reportJob = pgTable(
+  "report_job",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reportType: reportTypeEnum("report_type").notNull(),
+    status: reportJobStatusEnum("status").default("queued").notNull(),
+    generationMode: reportGenerationModeEnum("generation_mode")
+      .default("strict")
+      .notNull(),
+    requestedBy: text("requested_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    scopeType: reportScopeTypeEnum("scope_type").default("global").notNull(),
+    scopeDistrictId: uuid("scope_district_id").references(() => district.id, {
+      onDelete: "set null",
+    }),
+    scopeFarmId: uuid("scope_farm_id").references(() => farm.id, {
+      onDelete: "set null",
+    }),
+    scopeUserId: text("scope_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    timeRangeFrom: timestamp("time_range_from", { withTimezone: true }),
+    timeRangeTo: timestamp("time_range_to", { withTimezone: true }),
+    granularity: text("granularity").default("daily").notNull(),
+    parameterSchemaVersion: text("parameter_schema_version")
+      .default("report-params-v1")
+      .notNull(),
+    normalizedParametersHash: text("normalized_parameters_hash").notNull(),
+    snapshotId: text("snapshot_id").notNull(),
+    snapshotType: reportSnapshotTypeEnum("snapshot_type")
+      .default("logical")
+      .notNull(),
+    snapshotMetadata: jsonb("snapshot_metadata"),
+    templateVersion: text("template_version").notNull(),
+    policyVersion: text("policy_version").notNull(),
+    maskingRulesVersion: text("masking_rules_version").notNull(),
+    errorDetail: text("error_detail"),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    check(
+      "report_job_scope_global_check",
+      sql`(
+        (${t.scopeType} = 'global' and ${t.scopeDistrictId} is null and ${t.scopeFarmId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'district' and ${t.scopeDistrictId} is not null and ${t.scopeFarmId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'farm' and ${t.scopeFarmId} is not null and ${t.scopeDistrictId} is null and ${t.scopeUserId} is null)
+        or
+        (${t.scopeType} = 'user' and ${t.scopeUserId} is not null and ${t.scopeDistrictId} is null and ${t.scopeFarmId} is null)
+      )`,
+    ),
+    index("report_job_status_created_idx").on(t.status, t.createdAt),
+    index("report_job_requested_by_created_idx").on(t.requestedBy, t.createdAt),
+    index("report_job_scope_idx").on(
+      t.scopeType,
+      t.scopeDistrictId,
+      t.scopeFarmId,
+    ),
+    unique("report_job_fingerprint_unique").on(
+      t.reportType,
+      t.normalizedParametersHash,
+      t.snapshotId,
+      t.templateVersion,
+      t.policyVersion,
+    ),
+  ],
+);
+
+/**
+ * report_artifact: Generated report outputs per format.
+ */
+export const reportArtifact = pgTable(
+  "report_artifact",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reportJobId: uuid("report_job_id")
+      .notNull()
+      .references(() => reportJob.id, { onDelete: "cascade" }),
+    format: reportFormatEnum("format").notNull(),
+    status: reportArtifactStatusEnum("status").default("ready").notNull(),
+    storageKey: text("storage_key").notNull(),
+    contentType: text("content_type").notNull(),
+    fileSizeBytes: integer("file_size_bytes").notNull(),
+    outputHash: text("output_hash").notNull(),
+    metadata: jsonb("metadata"),
+    readyAt: timestamp("ready_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("report_artifact_job_format_idx").on(t.reportJobId, t.format),
+    index("report_artifact_status_idx").on(t.status),
+    index("report_artifact_expires_idx").on(t.expiresAt),
+    unique("report_artifact_job_format_unique").on(t.reportJobId, t.format),
+  ],
+);
+
+/**
+ * report_audit_log: Immutable event stream for report actions.
+ */
+export const reportAuditLog = pgTable(
+  "report_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reportJobId: uuid("report_job_id").references(() => reportJob.id, {
+      onDelete: "set null",
+    }),
+    reportArtifactId: uuid("report_artifact_id").references(
+      () => reportArtifact.id,
+      { onDelete: "set null" },
+    ),
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    actionType: text("action_type").notNull(),
+    details: jsonb("details"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("report_audit_log_job_idx").on(t.reportJobId),
+    index("report_audit_log_action_idx").on(t.actionType),
+    index("report_audit_log_actor_idx").on(t.actorId),
+    index("report_audit_log_created_idx").on(t.createdAt),
   ],
 );
 

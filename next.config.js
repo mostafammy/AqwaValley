@@ -6,7 +6,14 @@ import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  outputFileTracingExcludes: {
+    "*": [
+      "**/.pnpm-store/**",
+      "**/pnpm/store/**",
+    ],
+  },
+};
 
 // Plugin options for @sentry/webpack-plugin — passed as the 2nd arg to withSentryConfig
 const sentryWebpackPluginOptions = {
@@ -24,11 +31,8 @@ const sentryWebpackPluginOptions = {
 
   // Webpack-related tweaks that Sentry can apply
   webpack: {
-    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
+    // Cron scheduling is managed externally via QStash and synchronized from this repo.
+    automaticVercelMonitors: false,
 
     // Tree-shaking options for reducing bundle size
     treeshake: {

@@ -30,12 +30,7 @@ function errorResponse(
   );
 }
 
-async function run(request: NextRequest, limit: number): Promise<NextResponse> {
-  const authResult = validateCronRequest(request.headers);
-  if (!authResult.ok) {
-    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
-  }
-
+async function run(limit: number): Promise<NextResponse> {
   try {
     const result = await processQueuedIrrigationEvents(limit);
     return NextResponse.json(result, { status: 200 });
@@ -50,6 +45,11 @@ async function run(request: NextRequest, limit: number): Promise<NextResponse> {
 }
 
 export async function POST(request: NextRequest) {
+  const authResult = await validateCronRequest(request);
+  if (!authResult.ok) {
+    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
+  }
+
   let rawBody: unknown = {};
   try {
     const text = await request.text();
@@ -72,10 +72,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return run(request, parsed.data.limit);
+  return run(parsed.data.limit);
 }
 
 export async function GET(request: NextRequest) {
+  const authResult = await validateCronRequest(request);
+  if (!authResult.ok) {
+    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
+  }
+
   const rawQuery = Object.fromEntries(request.nextUrl.searchParams);
   const parsed = querySchema.safeParse(rawQuery);
 
@@ -88,5 +93,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return run(request, parsed.data.limit ?? 10);
+  return run(parsed.data.limit ?? 10);
 }

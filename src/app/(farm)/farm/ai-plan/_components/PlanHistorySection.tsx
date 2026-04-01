@@ -1,10 +1,9 @@
 "use client";
 
-import { Calendar, Droplets, ArrowLeft, History, Cpu, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { Calendar, Droplets, ArrowLeft, History, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { api } from "~/trpc/react";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Card, CardBody } from "~/app/_components/UI/Card";
-import { Badge } from "~/app/_components/UI/Badge"; // Assuming a Badge component exists or using the classes
 
 interface IrrigationPlanObject {
   reasoning: string;
@@ -16,22 +15,12 @@ interface IrrigationPlanObject {
   }>;
 }
 
-interface PlanItem {
-  id: string;
-  status: string;
-  createdAt: Date;
-  totalLitres: number;
-  modelUsed: string;
-  plan: unknown;
-}
-
 interface PlanHistorySectionProps {
   farmId: string;
   onActivate: (planId: string) => void;
 }
 
 export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionProps) {
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: plans, isLoading } = api.irrigation.listPlans.useQuery(
@@ -93,7 +82,7 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
               <Card 
                 key={plan.id}
                 accent={isActivated ? "teal" : undefined}
-                className={`min-w-[320px] md:min-w-[380px] snap-start border ${
+                className={`min-w-[320px] md:min-w-95 snap-start border ${
                   isActivated ? "ring-4 ring-teal/5 shadow-ok/5" : "border-gray-100"
                 } group cursor-default h-full flex flex-col`}
               >
@@ -115,7 +104,7 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
 
                   <div className="flex-1">
                     <div className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-6 font-medium italic opacity-80 group-hover:opacity-100 transition-opacity">
-                      "{planData.reasoning}"
+                      «{planData.reasoning}»
                     </div>
                   </div>
 
