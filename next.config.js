@@ -7,13 +7,11 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  experimental: {
-    outputFileTracingExcludes: {
-      "*": [
-        "**/.pnpm-store/**",
-        "**/pnpm/store/**",
-      ],
-    },
+  outputFileTracingExcludes: {
+    "*": [
+      "**/.pnpm-store/**",
+      "**/pnpm/store/**",
+    ],
   },
 };
 
