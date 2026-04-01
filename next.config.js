@@ -24,11 +24,8 @@ const sentryWebpackPluginOptions = {
 
   // Webpack-related tweaks that Sentry can apply
   webpack: {
-    // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
+    // Cron scheduling is managed externally via QStash and synchronized from this repo.
+    automaticVercelMonitors: false,
 
     // Tree-shaking options for reducing bundle size
     treeshake: {
