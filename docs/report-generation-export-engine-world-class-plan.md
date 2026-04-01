@@ -28,6 +28,10 @@ post_date: "2026-04-01"
 - Owner: Data Platform and Governance Engineering
 - Last Updated: 2026-04-01
 
+Related API Contract:
+
+- [Reporting Endpoints API Contract](report-generation-endpoints-api-contract.md)
+
 ## Executive Summary
 
 The Report Generation and Export Engine is a dedicated bounded context that converts operational user and governance data into official, auditable, and high-performance report artifacts.
