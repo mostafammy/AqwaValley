@@ -38,12 +38,17 @@ const CROP_WATER_REQUIREMENTS = [
   },
 ] as const;
 
+interface CropType {
+  type: string;
+  displayName: string;
+}
+
 export function WaterReqCard({ 
   activeCropType, 
   cropTypes 
 }: { 
   activeCropType: string,
-  cropTypes: any[]
+  cropTypes: CropType[]
 }) {
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 h-full flex flex-col">

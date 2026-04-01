@@ -302,10 +302,12 @@ export const irrigationRouter = createTRPCRouter({
         fetchQuotaContext(input.farmId, farmRecord.monthlyQuotaM3),
       ]);
 
-      const readings = Object.values(soilReadingMap).filter(Boolean);
+      const readings = Object.values(soilReadingMap).filter((r): r is { humidityPct: number; tempCelsius: number | null } => 
+        r !== null && r.humidityPct !== null
+      );
       const avgSoilMoisture =
         readings.length > 0
-          ? readings.reduce((sum, r) => sum + r!.humidityPct, 0) /
+          ? readings.reduce((sum, r) => sum + r.humidityPct, 0) /
             readings.length
           : null;
 

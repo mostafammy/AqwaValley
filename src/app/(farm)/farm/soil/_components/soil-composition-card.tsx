@@ -16,16 +16,14 @@ export function SoilCompositionCard({ clay, sand, silt }: SoilCompositionProps) 
   ];
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-[fade-in-pop_0.8s_ease-out]">
-      <style jsx>{`
-        @keyframes fade-in-pop {
-          0% { opacity: 0; transform: scale(0.98); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden animate-fade-in-pop">
       <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between">
         <h3 className="text-base font-semibold text-navy">مكونات التربة</h3>
-        <Info className="w-5 h-5 text-slate-400" />
+        <Info 
+          className="w-5 h-5 text-slate-400" 
+          aria-label="معلومات عن مكونات التربة"
+          role="img"
+        />
       </div>
       <div className="p-8">
         <div className="grid grid-cols-3 gap-4">

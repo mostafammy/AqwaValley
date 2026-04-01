@@ -147,7 +147,7 @@ function MoistureBar({
 
 const ZONE_COLORS = ["#0ea5e9", "#14b8a6", "#f59e0b", "#64748b"];
 
-function ZoneCard({ zone, idx }: { zone: any; idx: number }) {
+function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
   const color = ZONE_COLORS[idx % ZONE_COLORS.length]!;
   const inactive = !zone.recommendedLitres || zone.recommendedLitres === 0;
   const litresCubic = (zone.recommendedLitres / 1000).toFixed(1);
@@ -229,10 +229,10 @@ function InputsStrip({
   liveInputs,
   loading 
 }: { 
-  plan?: any; 
-  liveWeather?: any; 
-  liveForecast?: any; 
-  liveInputs?: any;
+  plan?: IrrigationPlan; 
+  liveWeather?: WeatherInfo; 
+  liveForecast?: ForecastDay[]; 
+  liveInputs?: LiveInputs;
   loading?: boolean;
 }) {
   const temp = liveWeather?.temp ?? plan?.temperatureC ?? "—";
@@ -332,19 +332,19 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
   const generatePlan = api.irrigation.requestPlan.useMutation({
     onSuccess: () => { 
-      utils.irrigation.getLatestPlan.invalidate({ farmId });
-      utils.irrigation.getLiveInputs.invalidate({ farmId });
-      utils.irrigation.listPlans.invalidate({ farmId });
+      void utils.irrigation.getLatestPlan.invalidate({ farmId });
+      void utils.irrigation.getLiveInputs.invalidate({ farmId });
+      void utils.irrigation.listPlans.invalidate({ farmId });
     },
   });
 
   const activatePlan = api.irrigation.activatePlan.useMutation({
     onSuccess: () => { 
-      utils.irrigation.getLatestPlan.invalidate({ farmId });
-      utils.irrigation.listPlans.invalidate({ farmId });
+      void utils.irrigation.getLatestPlan.invalidate({ farmId });
+      void utils.irrigation.listPlans.invalidate({ farmId });
     },
   });
-  const plan = latestPlanRecord?.plan as any;
+  const plan = latestPlanRecord?.plan as IrrigationPlan | undefined;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
   const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
 
@@ -411,7 +411,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                     <div className="uppercase text-xs font-semibold tracking-widest text-slate-500">ملخص الخطة</div>
                     <div className="text-2xl font-semibold text-navy mt-1">إجمالي الري اليوم</div>
                   </div>
-                  <ConfidenceRing value={plan.confidence ?? 94} />
+                  <ConfidenceRing value={plan.confidence === "HIGH" ? 94 : plan.confidence === "MEDIUM" ? 65 : 35} />
                 </div>
 
                 <div className="flex items-baseline gap-3">
@@ -499,7 +499,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {plan.zones?.map((zone: any, i: number) => (
+              {plan.zones?.map((zone, i) => (
                 <ZoneCard key={zone.zoneId ?? i} zone={zone} idx={i} />
               ))}
             </div>

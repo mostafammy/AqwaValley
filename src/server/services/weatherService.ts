@@ -145,7 +145,17 @@ export const weatherService = {
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) throw new Error(`Open-Meteo returned ${response.status}`);
 
-      const data = (await response.json()) as any;
+      interface OpenMeteoResponse {
+        daily: {
+          time: string[];
+          temperature_2m_max: (number | null)[];
+          temperature_2m_min: (number | null)[];
+          et0_fao_evapotranspiration: (number | null)[];
+          precipitation_sum: (number | null)[];
+        };
+      }
+
+      const data = (await response.json()) as OpenMeteoResponse;
       if (!data.daily) throw new Error("Invalid Open-Meteo response structure");
 
       const forecast: ForecastDay[] = data.daily.time.map((date: string, i: number) => ({

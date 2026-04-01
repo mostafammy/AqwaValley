@@ -17,17 +17,14 @@
  * @module server/services/irrigation/recommend
  */
 
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "~/server/db";
 import {
   cropProfile,
   district,
   farm,
-  farmPeriodConsumptionSnapshot,
   irrigationRecommendation,
-  latestSensorState,
-  sensors,
   well,
   farmWell,
 } from "~/server/db/schema";
@@ -37,7 +34,6 @@ import {
   buildIrrigationPrompt,
   type PromptContext,
   type PromptZoneContext,
-  type PromptSoilReading,
 } from "./prompt-builder";
 import { generateRuleBasedPlan, type FallbackResult } from "./fallback";
 import { getWeatherForecast } from "./weather";
@@ -201,7 +197,7 @@ export async function requestIrrigationPlan(
     },
     zones,
     quota,
-    soilReading,
+    soilReading: soilReading as Record<string, PromptSoilReading | null>,
     weather,
   };
 
@@ -214,7 +210,7 @@ export async function requestIrrigationPlan(
   let isFallback = false;
   let rawResponse = "";
   let modelUsed = "";
-  let plan: IrrigationPlan;
+  let plan = {} as IrrigationPlan;
 
   try {
     const result = await callIrrigationAI(systemPrompt, userMessage);

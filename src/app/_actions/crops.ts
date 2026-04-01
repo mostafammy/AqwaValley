@@ -9,8 +9,8 @@ import { z } from "zod";
 
 const UpdateCropSchema = z.object({
   farmId:              z.string().uuid(),
-  cropType:            z.string(),
-  growthStage:         z.string(),
+  cropType:            z.enum(cropTypeEnum.enumValues),
+  growthStage:         z.enum(growthStageEnum.enumValues),
   targetSoilMoisture:  z.string()
     .transform((v) => parseFloat(v))
     .refine((v) => Number.isFinite(v), { message: "يجب أن يكون رقمًا صالحًا" }),
@@ -60,8 +60,8 @@ export async function updateCropProfile(
       const updatedRows = await tx
         .update(cropProfile)
         .set({
-          cropType: cropType as typeof cropTypeEnum.enumValues[number],
-          growthStage: growthStage as typeof growthStageEnum.enumValues[number],
+          cropType: cropType,
+          growthStage: growthStage,
           targetSoilMoisturePct: String(targetSoilMoisture),
           plantedDate:           plantedDate ? new Date(plantedDate) : null,
           expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
@@ -77,8 +77,8 @@ export async function updateCropProfile(
       // 2. Log this state in crop history
       await tx.insert(cropHistory).values({
         farmId,
-        cropType:            cropType as typeof cropTypeEnum.enumValues[number],
-        growthStage:         growthStage as typeof growthStageEnum.enumValues[number],
+        cropType:            cropType,
+        growthStage:         growthStage,
         targetSoilMoisturePct: String(targetSoilMoisture),
         plantedDate:           plantedDate ? new Date(plantedDate) : null,
         expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
