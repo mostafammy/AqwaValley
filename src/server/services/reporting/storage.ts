@@ -1,11 +1,9 @@
 import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import path from "path";
-import { env } from "~/env";
 
-const REPORT_ARTIFACT_ROOT = path.resolve(
-  process.cwd(),
-  String(env.REPORT_ARTIFACT_DIR),
-);
+// Keep this path static so Next output tracing doesn't conservatively include
+// broad workspace directories for env-driven filesystem roots.
+const REPORT_ARTIFACT_ROOT = path.resolve(process.cwd(), ".reports");
 
 function sanitizeStorageKey(storageKey: string): string {
   const normalized = path.posix.normalize(storageKey).replace(/^\/+/, "");
