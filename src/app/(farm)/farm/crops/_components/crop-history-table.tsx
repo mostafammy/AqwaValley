@@ -32,7 +32,7 @@ export async function CropHistoryTable({
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between">
+      <div className="px-5 md:px-8 py-4 md:py-5 border-b border-slate-100 flex items-center justify-between">
         <h3 className="text-base font-semibold text-navy">سجل المحاصيل السابقة</h3>
         <span className="text-xs font-medium text-slate-400">آخر 10 سجلات</span>
       </div>
@@ -49,33 +49,33 @@ export async function CropHistoryTable({
           <table className="w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-8 py-4 text-right text-xs font-medium text-slate-500">المحصول</th>
-                <th className="px-8 py-4 text-right text-xs font-medium text-slate-500">المرحلة</th>
-                <th className="px-8 py-4 text-right text-xs font-medium text-slate-500">تاريخ الزراعة</th>
-                <th className="px-8 py-4 text-right text-xs font-medium text-slate-500">تاريخ الحصاد</th>
-                <th className="px-8 py-4 text-right text-xs font-medium text-slate-500">الإنتاجية</th>
+                <th className="px-4 md:px-8 py-4 text-right text-xs font-medium text-slate-500">المحصول</th>
+                <th className="px-4 md:px-8 py-4 text-right text-xs font-medium text-slate-500">المرحلة</th>
+                <th className="px-4 md:px-8 py-4 text-right text-xs font-medium text-slate-500">تاريخ الزراعة</th>
+                <th className="px-4 md:px-8 py-4 text-right text-xs font-medium text-slate-500">تاريخ الحصاد</th>
+                <th className="px-4 md:px-8 py-4 text-right text-xs font-medium text-slate-500">الإنتاجية</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {history.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-8 py-5 text-sm font-medium text-navy">
+                  <td className="px-4 md:px-8 py-3 md:py-5 text-sm font-medium text-navy">
                     {cropTypes.find(t => t.type === row.cropType)?.displayName ?? row.cropType}
                   </td>
-                  <td className="px-8 py-5 text-sm text-slate-600">
+                  <td className="px-4 md:px-8 py-3 md:py-5 text-sm text-slate-600">
                     {growthStages.find(s => s.stage === row.growthStage)?.displayName ?? row.growthStage}
                   </td>
-                  <td className="px-8 py-5 text-sm text-slate-500">
+                  <td className="px-4 md:px-8 py-3 md:py-5 text-sm text-slate-500">
                     {row.plantedDate
                       ? new Date(row.plantedDate).toLocaleDateString("ar-EG")
                       : "—"}
                   </td>
-                  <td className="px-8 py-5 text-sm text-slate-500">
+                  <td className="px-4 md:px-8 py-3 md:py-5 text-sm text-slate-500">
                     {row.harvestedDate
                       ? new Date(row.harvestedDate).toLocaleDateString("ar-EG")
                       : "—"}
                   </td>
-                  <td className="px-8 py-5 text-sm">
+                  <td className="px-4 md:px-8 py-3 md:py-5 text-sm">
                     {row.yield ? (
                       <span className="text-teal-600 font-medium">
                         {Number(row.yield).toLocaleString("ar-EG")} {row.yieldUnit ?? ""}

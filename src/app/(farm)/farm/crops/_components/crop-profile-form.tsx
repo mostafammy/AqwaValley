@@ -93,7 +93,7 @@ export function CropProfileForm({
     });  }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 md:p-8">
       <h3 className="text-base font-semibold text-navy mb-6">تعديل بروفايل المحصول</h3>
 
       <div className="space-y-8">
@@ -128,7 +128,7 @@ export function CropProfileForm({
           <label className="block text-xs font-semibold text-slate-500 mb-3">
             مرحلة النمو
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
             {growthStages.map((opt) => (
               <button
                 key={opt.stage}

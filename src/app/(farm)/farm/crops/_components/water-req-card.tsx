@@ -51,7 +51,7 @@ export function WaterReqCard({
   cropTypes: CropType[]
 }) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 h-full flex flex-col">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 md:p-8 h-full flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-8 h-8 bg-teal-50 rounded-2xl flex items-center justify-center">
           <Droplets className="w-5 h-5 text-teal-600" />

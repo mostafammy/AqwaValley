@@ -39,7 +39,7 @@ export default async function AiPlanPage() {
 
   if (!currentFarm) {
     return (
-      <div className="page h-[80vh] flex flex-col items-center justify-center p-6 text-center">
+      <div className="page h-[80vh] flex flex-col items-center justify-center p-6 text-center ">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">لم يتم العثور على مزرعة</h2>
         <p className="text-gray-500 max-w-sm">
           يجب أن تكون مرتبطاً بمزرعة لاستخدام نظام التوصيات الذكي. يرجى التواصل مع الإدارة.

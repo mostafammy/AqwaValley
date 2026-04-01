@@ -72,7 +72,7 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
   const circ = 2 * Math.PI * r;
   const offset = circ - (value / 100) * circ;
   return (
-    <div className="relative w-32 h-32 flex-shrink-0">
+    <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
       <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r={r} fill="none" stroke="#f1f5f9" strokeWidth="9" />
         <circle
@@ -91,7 +91,7 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-semibold text-navy leading-none">{value}%</span>
+        <span className="text-3xl md:text-4xl font-semibold text-navy leading-none">{value}%</span>
         <span className="text-xs font-medium tracking-widest text-slate-500 mt-1">مستوى الثقة</span>
       </div>
     </div>
@@ -250,11 +250,11 @@ function InputsStrip({
   ];
 
   return (
-    <div className={`grid grid-cols-2 lg:grid-cols-5 gap-4 ${loading ? "animate-pulse" : ""}`}>
+    <div className={`grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 ${loading ? "animate-pulse" : ""}`}>
       {inputs.map(({ icon: Icon, label, value, unit, warn, isGood }) => (
         <div
           key={label}
-          className={`rounded-3xl px-5 py-4 flex flex-col gap-2 border text-sm transition-all ${
+          className={`rounded-2xl md:rounded-3xl px-4 md:px-5 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2 border text-sm transition-all ${
             warn 
               ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm" 
               : isGood 
@@ -294,11 +294,11 @@ function InputsStrip({
 
 function EmptyState({ onGenerate, loading }: { onGenerate: () => void; loading: boolean }) {
   return (
-    <div className="bg-white border border-slate-100 rounded-3xl p-16 flex flex-col items-center justify-center text-center min-h-[420px]">
+    <div className="bg-white border border-slate-100 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center text-center min-h-[320px] md:min-h-[420px]">
       <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mb-8">
         <Droplets className="w-9 h-9 text-slate-400" />
       </div>
-      <h3 className="text-2xl font-semibold text-navy mb-3">لا توجد خطة ري حالياً</h3>
+      <h3 className="text-xl md:text-2xl font-semibold text-navy mb-3">لا توجد خطة ري حالياً</h3>
       <p className="max-w-md text-slate-600 mb-10">
         اضغط على الزر أدناه ليحلل النظام بيانات المزرعة ويولد خطة الري الأمثل لليوم بناءً على معادلات FAO-56
       </p>
@@ -358,10 +358,10 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   }
 
   return (
-    <div className="space-y-10" dir="rtl">
+    <div className=" space-y-6 md:space-y-10 w-sm md:w-full" dir="rtl">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-10">
         <div>
           <div className="flex items-center mb-2">
             <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-3xl">
@@ -369,10 +369,10 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             </span>
             <span className="text-sm text-slate-500 font-medium">• {farmName}</span>
           </div>
-          <h1 className="text-5xl font-semibold tracking-tight text-navy">
+          <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-navy">
             خطة الري <span className="text-teal">الذكية</span>
           </h1>
-          <p className="text-slate-500 mt-6 flex items-center gap-2">
+          <p className="text-sm md:text-base text-slate-500 mt-3 md:mt-6 flex items-center gap-2">
             <span className="w-2 h-2 bg-teal rounded-full animate-pulse" />
             تعتمد على معادلات FAO-56 • خزان الحجر الرملي النوبي
           </p>
@@ -399,14 +399,14 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
           loading={generatePlan.isPending}
         />
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 md:gap-8">
 
           {/* Left Column */}
-          <div className="xl:col-span-5 space-y-8">
+          <div className="xl:col-span-5 space-y-5 md:space-y-8">
             {/* Summary Card */}
             <Card>
-              <CardBody className="p-8">
-                <div className="flex justify-between mb-8">
+              <CardBody className="p-5 md:p-8">
+                <div className="flex flex-col sm:flex-row justify-between mb-6 md:mb-8 gap-4">
                   <div>
                     <div className="uppercase text-xs font-semibold tracking-widest text-slate-500">ملخص الخطة</div>
                     <div className="text-2xl font-semibold text-navy mt-1">إجمالي الري اليوم</div>
@@ -415,10 +415,10 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                 </div>
 
                 <div className="flex items-baseline gap-3">
-                  <span className="text-6xl font-semibold text-navy tabular-nums">
+                  <span className="text-4xl md:text-6xl font-semibold text-navy tabular-nums">
                     {((plan.totalLitres ?? 0) / 1000).toFixed(1)}
                   </span>
-                  <span className="text-3xl text-slate-300">م³</span>
+                  <span className="text-2xl md:text-3xl text-slate-300">م³</span>
                 </div>
                 <div className="text-slate-500 text-sm mt-1">
                   {(plan.totalLitres ?? 0).toLocaleString("ar-EG")} لتر
@@ -481,7 +481,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
           </div>
 
           {/* Right Column */}
-          <div className="xl:col-span-7 space-y-8">
+          <div className="xl:col-span-7 space-y-5 md:space-y-8">
             <InputsStrip 
               plan={plan} 
               liveWeather={liveWeather}
@@ -505,7 +505,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             </div>
 
             {/* Savings banner */}
-            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 flex items-center gap-6">
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl p-4 md:p-6 flex items-center gap-4 md:gap-6">
               <div className="flex-shrink-0 w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-200">
                 <Droplets className="w-7 h-7 text-teal" />
               </div>

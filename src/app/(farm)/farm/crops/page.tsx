@@ -40,15 +40,15 @@ export default async function CropsPage() {
   const growthStages = await db.select().from(growthStageLookup);
 
   return (
-    <div className="p-6 md:p-8 space-y-10 max-w-screen-2xl mx-auto" dir="rtl">
+    <div className="p-4 md:p-8 space-y-6 md:space-y-10 max-w-screen-2xl mx-auto" dir="rtl">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-semibold tracking-tight text-navy">بروفايل المحاصيل</h1>
-        <p className="text-slate-500 mt-2">إدارة المحاصيل المزروعة ومراحل النمو والاحتياجات المائية</p>
+        <h1 className="text-2xl md:text-4xl font-semibold tracking-tight text-navy">بروفايل المحاصيل</h1>
+        <p className="text-sm md:text-base text-slate-500 mt-1 md:mt-2">إدارة المحاصيل المزروعة ومراحل النمو والاحتياجات المائية</p>
       </div>
 
       {/* Form + Water Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
         <div className="lg:col-span-8">
           <CropProfileForm
             profile={profile ?? null}
