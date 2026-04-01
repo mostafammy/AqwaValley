@@ -3,7 +3,6 @@ post_title: "AqwaValley Report Generation and Export Engine PRD"
 author1: "AqwaValley Engineering"
 post_slug: "aqwavalley-report-generation-export-engine-prd"
 microsoft_alias: "aqwavalley"
-featured_image: "https://example.com/aqwavalley-report-engine.jpg"
 categories:
   - Engineering
   - Architecture
