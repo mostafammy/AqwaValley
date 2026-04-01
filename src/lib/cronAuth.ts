@@ -1,41 +1,51 @@
-import { createHash, timingSafeEqual } from "crypto";
+import { Receiver } from "@upstash/qstash";
 
-function digest(value: string): Buffer {
-  return createHash("sha256").update(value).digest();
+let receiver: Receiver | null = null;
+
+function getSignature(headers: Headers): string | null {
+  return headers.get("upstash-signature") ?? headers.get("Upstash-Signature");
 }
 
-function getSecretFromHeaders(headers: Headers): string | null {
-  const auth = headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) return auth.slice(7).trim();
+function getReceiver(): Receiver | null {
+  const currentSigningKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
+  const nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;
 
-  const secretHeader = headers.get("x-cron-secret");
-  if (secretHeader) return secretHeader.trim();
+  if (!currentSigningKey || !nextSigningKey) {
+    return null;
+  }
 
-  return null;
+  receiver ??= new Receiver({ currentSigningKey, nextSigningKey });
+  return receiver;
 }
 
-export function validateCronRequest(headers: Headers): {
+export async function validateCronRequest(request: Request): Promise<{
   ok: boolean;
   reason?: string;
-} {
-  const configuredSecret = process.env.CRON_SECRET;
-
-  if (!configuredSecret) {
-    return { ok: false, reason: "CRON_SECRET is not configured" };
+}> {
+  const signature = getSignature(request.headers);
+  if (!signature) {
+    return { ok: false, reason: "Missing Upstash-Signature header" };
   }
 
-  const incoming = getSecretFromHeaders(headers);
-  if (!incoming) {
-    return { ok: false, reason: "Missing cron secret" };
+  const qstashReceiver = getReceiver();
+  if (!qstashReceiver) {
+    return {
+      ok: false,
+      reason:
+        "QSTASH_CURRENT_SIGNING_KEY and QSTASH_NEXT_SIGNING_KEY must be configured",
+    };
   }
 
-  const expectedDigest = digest(configuredSecret);
-  const incomingDigest = digest(incoming);
+  const body = await request.clone().text();
 
-  const valid = timingSafeEqual(expectedDigest, incomingDigest);
-  if (!valid) {
-    return { ok: false, reason: "Invalid cron secret" };
+  try {
+    await qstashReceiver.verify({
+      signature,
+      body,
+      url: request.url,
+    });
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: "Invalid QStash signature" };
   }
-
-  return { ok: true };
 }
