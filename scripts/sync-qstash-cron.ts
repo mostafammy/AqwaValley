@@ -63,7 +63,7 @@ function normalizeAppUrl(rawAppUrl: string): URL {
 }
 
 function toManagedLabel(key: string): string {
-  return `managed:${key}`;
+  return `managed_${key}`;
 }
 
 function getScheduleId(schedule: QstashSchedule): string | undefined {
@@ -80,6 +80,12 @@ function getMethod(schedule: QstashSchedule): string {
 
 function getScheduleKey(schedule: QstashSchedule): string | null {
   const label = schedule.label ?? "";
+  if (label.startsWith("managed_")) {
+    const key = label.slice("managed_".length).trim();
+    return key.length > 0 ? key : null;
+  }
+
+  // Backward compatibility: an earlier implementation used a colon.
   if (label.startsWith("managed:")) {
     const key = label.slice("managed:".length).trim();
     return key.length > 0 ? key : null;
