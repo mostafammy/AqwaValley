@@ -1,8 +1,10 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { createReadStream } from "fs";
+import { access } from "fs/promises";
 import { Readable } from "stream";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -18,6 +20,7 @@ import { resolveArtifactAbsolutePath } from "~/server/services/reporting/storage
 export const runtime = "nodejs";
 
 type Params = { artifactId: string };
+const artifactIdSchema = z.string().uuid();
 
 export async function GET(
   request: Request,
@@ -30,6 +33,10 @@ export async function GET(
 
   const resolved = await params;
   const artifactId = resolved.artifactId;
+
+  if (!artifactIdSchema.safeParse(artifactId).success) {
+    return NextResponse.json({ error: "ARTIFACT_NOT_FOUND" }, { status: 404 });
+  }
 
   const artifact = await db.query.reportArtifact.findFirst({
     where: and(
@@ -79,18 +86,24 @@ export async function GET(
   }
 
   const sizeBytes = artifact.fileSizeBytes;
-  let webStream: ReadableStream;
-
+  const absolutePath = resolveArtifactAbsolutePath(artifact.storageKey);
   try {
-    const absolutePath = resolveArtifactAbsolutePath(artifact.storageKey);
-    const nodeStream = createReadStream(absolutePath);
-    webStream = Readable.toWeb(nodeStream) as ReadableStream;
+    await access(absolutePath);
   } catch {
     return NextResponse.json(
       { error: "ARTIFACT_STORAGE_MISSING" },
       { status: 404 },
     );
   }
+
+  const nodeStream = createReadStream(absolutePath);
+  nodeStream.once("error", () => {
+    if (!nodeStream.destroyed) {
+      nodeStream.destroy();
+    }
+  });
+
+  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
   const filename = `${artifact.id}.${artifact.format}`;
 

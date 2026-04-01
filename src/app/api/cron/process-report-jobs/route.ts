@@ -13,7 +13,7 @@ const bodySchema = z.object({
 });
 
 async function run(request: Request): Promise<NextResponse> {
-  const authResult = validateCronRequest(request.headers);
+  const authResult = await Promise.resolve(validateCronRequest(request));
   if (!authResult.ok) {
     return NextResponse.json(
       { ok: false, error: authResult.reason ?? "Unauthorized" },
@@ -22,9 +22,29 @@ async function run(request: Request): Promise<NextResponse> {
   }
 
   const contentType = request.headers.get("content-type") ?? "";
-  const parsedBody = contentType.includes("application/json")
-    ? bodySchema.safeParse(await request.json())
-    : { success: true as const, data: {} };
+  let parsedBody:
+    | ReturnType<typeof bodySchema.safeParse>
+    | { success: true; data: Record<string, never> };
+
+  if (contentType.includes("application/json")) {
+    try {
+      parsedBody = bodySchema.safeParse(await request.json());
+    } catch (error) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Invalid cron payload",
+          details:
+            error instanceof Error
+              ? { message: error.message }
+              : {},
+        },
+        { status: 400 },
+      );
+    }
+  } else {
+    parsedBody = { success: true, data: {} };
+  }
 
   if (!parsedBody.success) {
     return NextResponse.json(

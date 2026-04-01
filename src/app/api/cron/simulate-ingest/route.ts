@@ -81,11 +81,6 @@ async function runCronSimulation(
   request: NextRequest,
   data: CronRequestData,
 ): Promise<NextResponse> {
-  const authResult = validateCronRequest(request.headers);
-  if (!authResult.ok) {
-    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
-  }
-
   if (data.wellIds && data.wellIds.length > env.SIM_CRON_MAX_WELLS) {
     return errorResponse(
       400,
@@ -169,6 +164,11 @@ async function runCronSimulation(
 }
 
 export async function POST(request: NextRequest) {
+  const authResult = await validateCronRequest(request);
+  if (!authResult.ok) {
+    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
+  }
+
   let rawBody: unknown = {};
   try {
     const text = await request.text();
@@ -195,6 +195,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const authResult = await validateCronRequest(request);
+  if (!authResult.ok) {
+    return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
+  }
+
   const rawQuery = Object.fromEntries(request.nextUrl.searchParams);
   const parsed = querySchema.safeParse(rawQuery);
 

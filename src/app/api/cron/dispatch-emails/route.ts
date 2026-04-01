@@ -2,8 +2,8 @@
  * Email Dispatch Cron — Transactional Outbox Consumer
  *
  * Route: POST /api/cron/dispatch-emails
- * Schedule: every 1 minute (vercel.json)
- * Auth: CRON_SECRET bearer header (identical to all other cron routes)
+ * Schedule: managed by external scheduler (QStash sync)
+ * Auth: Native QStash signature verification (Upstash-Signature)
  *
  * Reads pending outbox_event rows, dispatches email via EmailService,
  * marks processed_at on success. Increments attempts + sets nextRetryAt on failure.
@@ -23,6 +23,7 @@ import { NullTransport } from "~/server/services/email/NullTransport";
 import { AuditingEmailTransport } from "~/server/services/email/AuditingEmailTransport";
 import { EmailService } from "~/server/services/email/EmailService";
 import type { OutboxPayload } from "~/server/services/email/interfaces";
+import { validateCronRequest } from "~/lib/cronAuth";
 
 const BATCH_SIZE = 50;
 
@@ -55,12 +56,12 @@ function buildEmailService(): EmailService {
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
-  // Verify CRON_SECRET (identical pattern to all other cron routes)
-  const authHeader = req.headers.get("authorization");
-  const expectedSecret = `Bearer ${env.CRON_SECRET ?? ""}`;
-
-  if (!authHeader || authHeader !== expectedSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authResult = await validateCronRequest(req);
+  if (!authResult.ok) {
+    return NextResponse.json(
+      { error: authResult.reason ?? "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const startedAt = Date.now();
