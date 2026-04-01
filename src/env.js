@@ -74,7 +74,12 @@ export const env = createEnv({
     // Application base URL (for building token links)
     APP_URL: z.string().url().default("http://localhost:3000"),
     REPORT_ARTIFACT_DIR: z.string().default("./.reports"),
-    REPORT_QUEUE_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(10),
+    REPORT_QUEUE_BATCH_SIZE: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(10),
   },
 
   /**
