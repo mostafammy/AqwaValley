@@ -1,5 +1,17 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { unlink } from "fs/promises";
 
 import type { DBConnection } from "~/server/db";
 import {
@@ -7,6 +19,7 @@ import {
   reportArtifact,
   reportAuditLog,
   reportJob,
+  farm,
   user,
   userProfile,
 } from "~/server/db/schema";
@@ -19,7 +32,7 @@ import {
   XlsxExportStrategy,
 } from "./exporters";
 import type { ReportData, ReportRequestInput } from "./types";
-import { persistArtifact } from "./storage";
+import { persistArtifact, resolveArtifactAbsolutePath } from "./storage";
 
 function addDays(date: Date, days: number): Date {
   const next = new Date(date);
@@ -60,32 +73,6 @@ export class ReportingOrchestrator {
       policyVersion: params.input.policyVersion,
     });
 
-    const existing = await this.db.query.reportJob.findFirst({
-      where: and(
-        eq(reportJob.reportType, params.input.reportType),
-        eq(reportJob.normalizedParametersHash, fingerprint.hash),
-        eq(reportJob.snapshotId, params.input.snapshotId),
-        eq(reportJob.templateVersion, params.input.templateVersion),
-        eq(reportJob.policyVersion, params.input.policyVersion),
-        inArray(reportJob.status, [
-          "queued",
-          "processing",
-          "completed",
-          "partial_failed",
-        ]),
-      ),
-      orderBy: [desc(reportJob.createdAt)],
-      columns: { id: true, status: true },
-    });
-
-    if (existing) {
-      return {
-        reportJobId: existing.id,
-        reused: true,
-        status: existing.status,
-      };
-    }
-
     const [created] = await this.db
       .insert(reportJob)
       .values({
@@ -114,13 +101,41 @@ export class ReportingOrchestrator {
         policyVersion: params.input.policyVersion,
         maskingRulesVersion: params.input.maskingRulesVersion,
       })
+      .onConflictDoNothing({
+        target: [
+          reportJob.reportType,
+          reportJob.normalizedParametersHash,
+          reportJob.snapshotId,
+          reportJob.templateVersion,
+          reportJob.policyVersion,
+        ],
+      })
       .returning({ id: reportJob.id, status: reportJob.status });
 
     if (!created) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create report job",
+      const existing = await this.db.query.reportJob.findFirst({
+        where: and(
+          eq(reportJob.reportType, params.input.reportType),
+          eq(reportJob.normalizedParametersHash, fingerprint.hash),
+          eq(reportJob.snapshotId, params.input.snapshotId),
+          eq(reportJob.templateVersion, params.input.templateVersion),
+          eq(reportJob.policyVersion, params.input.policyVersion),
+        ),
+        columns: { id: true, status: true },
       });
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create or resolve report job",
+        });
+      }
+
+      return {
+        reportJobId: existing.id,
+        reused: true,
+        status: existing.status,
+      };
     }
 
     await this.db.insert(reportAuditLog).values({
@@ -182,50 +197,46 @@ export class ReportingOrchestrator {
           timeRangeTo: job.timeRangeTo,
         });
 
-        const results = await this.exportEngine.exportMany({
-          formats: requestFormats,
-          data,
-          templateVersion: job.templateVersion,
-          metadata: {
-            reportJobId: job.id,
-            snapshotId: job.snapshotId,
-            policyVersion: job.policyVersion,
-            maskingRulesVersion: job.maskingRulesVersion,
-          },
-        });
-
+        const isPartialMode = job.generationMode === "partial";
         const now = new Date();
+        const successfulFormats: Array<"pdf" | "csv" | "xlsx"> = [];
+        const failedFormats: Array<{
+          format: "pdf" | "csv" | "xlsx";
+          reason: string;
+        }> = [];
 
-        for (const result of results) {
-          const storageKey = generateStorageKey({
-            jobId: job.id,
-            format: result.format,
-          });
-          const persisted = await persistArtifact({
-            storageKey,
-            payload: result.payload,
-          });
-
-          await this.db
-            .insert(reportArtifact)
-            .values({
-              reportJobId: job.id,
-              format: result.format,
-              status: "ready",
-              storageKey,
-              contentType: result.contentType,
-              fileSizeBytes: persisted.sizeBytes,
-              outputHash: result.outputHash,
+        for (const format of requestFormats) {
+          try {
+            const [result] = await this.exportEngine.exportMany({
+              formats: [format],
+              data,
+              templateVersion: job.templateVersion,
               metadata: {
-                storage: "local-file-system",
-                deterministic: true,
+                reportJobId: job.id,
+                snapshotId: job.snapshotId,
+                policyVersion: job.policyVersion,
+                maskingRulesVersion: job.maskingRulesVersion,
               },
-              readyAt: now,
-              expiresAt: addDays(now, 7),
-            })
-            .onConflictDoUpdate({
-              target: [reportArtifact.reportJobId, reportArtifact.format],
-              set: {
+            });
+
+            if (!result) {
+              throw new Error("Exporter did not return a result");
+            }
+
+            const storageKey = generateStorageKey({
+              jobId: job.id,
+              format: result.format,
+            });
+            const persisted = await persistArtifact({
+              storageKey,
+              payload: result.payload,
+            });
+
+            await this.db
+              .insert(reportArtifact)
+              .values({
+                reportJobId: job.id,
+                format: result.format,
                 status: "ready",
                 storageKey,
                 contentType: result.contentType,
@@ -237,28 +248,91 @@ export class ReportingOrchestrator {
                 },
                 readyAt: now,
                 expiresAt: addDays(now, 7),
-              },
-            });
+              })
+              .onConflictDoUpdate({
+                target: [reportArtifact.reportJobId, reportArtifact.format],
+                set: {
+                  status: "ready",
+                  storageKey,
+                  contentType: result.contentType,
+                  fileSizeBytes: persisted.sizeBytes,
+                  outputHash: result.outputHash,
+                  metadata: {
+                    storage: "local-file-system",
+                    deterministic: true,
+                  },
+                  readyAt: now,
+                  expiresAt: addDays(now, 7),
+                },
+              });
+
+            successfulFormats.push(format);
+          } catch (error) {
+            const reason =
+              error instanceof Error
+                ? error.message
+                : "Unknown artifact generation error";
+            failedFormats.push({ format, reason });
+
+            if (!isPartialMode) {
+              await this.cleanupArtifactsForJob(job.id);
+              throw new Error(
+                `Strict generation failed for format ${format}: ${reason}`,
+              );
+            }
+          }
+        }
+
+        const hasFailures = failedFormats.length > 0;
+        const hasSuccesses = successfulFormats.length > 0;
+
+        let finalStatus: "completed" | "partial_failed" | "failed" =
+          "completed";
+        let errorDetail: string | null = null;
+
+        if (hasFailures && isPartialMode && hasSuccesses) {
+          finalStatus = "partial_failed";
+          errorDetail = failedFormats
+            .map((entry) => `${entry.format}: ${entry.reason}`)
+            .join(" | ");
+        } else if (hasFailures && (!isPartialMode || !hasSuccesses)) {
+          finalStatus = "failed";
+          errorDetail = failedFormats
+            .map((entry) => `${entry.format}: ${entry.reason}`)
+            .join(" | ");
+
+          if (!isPartialMode) {
+            await this.cleanupArtifactsForJob(job.id);
+          }
         }
 
         await this.db
           .update(reportJob)
           .set({
-            status: "completed",
+            status: finalStatus,
             completedAt: new Date(),
             updatedAt: new Date(),
-            errorDetail: null,
+            errorDetail,
           })
           .where(eq(reportJob.id, job.id));
 
         await this.db.insert(reportAuditLog).values({
           reportJobId: job.id,
           actorId: params.actorId ?? null,
-          actionType: "completed",
-          details: { formats: requestFormats },
+          actionType: finalStatus === "completed" ? "completed" : finalStatus,
+          details: {
+            requestedFormats: requestFormats,
+            successfulFormats,
+            failedFormats,
+            generationMode: job.generationMode,
+          },
         });
 
-        completed += 1;
+        if (finalStatus === "failed") {
+          failed += 1;
+        } else {
+          completed += 1;
+        }
       } catch (error) {
         failed += 1;
 
@@ -293,6 +367,28 @@ export class ReportingOrchestrator {
       completed,
       failed,
     };
+  }
+
+  private async cleanupArtifactsForJob(reportJobId: string): Promise<void> {
+    const artifacts = await this.db.query.reportArtifact.findMany({
+      where: eq(reportArtifact.reportJobId, reportJobId),
+      columns: {
+        storageKey: true,
+      },
+    });
+
+    for (const artifact of artifacts) {
+      try {
+        const absolutePath = resolveArtifactAbsolutePath(artifact.storageKey);
+        await unlink(absolutePath);
+      } catch {
+        // Best-effort file cleanup; DB cleanup below is authoritative.
+      }
+    }
+
+    await this.db
+      .delete(reportArtifact)
+      .where(eq(reportArtifact.reportJobId, reportJobId));
   }
 
   async listJobs(params: {
@@ -428,6 +524,64 @@ export class ReportingOrchestrator {
     };
 
     if (input.reportType === "user_activity") {
+      const conditions: SQL[] = [];
+
+      if (input.timeRangeFrom) {
+        conditions.push(gte(auditLog.createdAt, input.timeRangeFrom));
+      }
+      if (input.timeRangeTo) {
+        conditions.push(lte(auditLog.createdAt, input.timeRangeTo));
+      }
+
+      if (input.scopeType === "user" && input.scopeUserId) {
+        conditions.push(
+          or(
+            eq(auditLog.entityId, input.scopeUserId),
+            eq(auditLog.actorId, input.scopeUserId),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "district" && input.scopeDistrictId) {
+        const districtUserIds = await this.resolveDistrictUserIds(
+          input.scopeDistrictId,
+        );
+        if (!districtUserIds.length) {
+          return {
+            reportType: "user_activity",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, districtUserIds),
+            inArray(auditLog.actorId, districtUserIds),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "farm" && input.scopeFarmId) {
+        const farmUserIds = await this.resolveFarmScopedUserIds(
+          input.scopeFarmId,
+        );
+        if (!farmUserIds.length) {
+          return {
+            reportType: "user_activity",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, farmUserIds),
+            inArray(auditLog.actorId, farmUserIds),
+          )!,
+        );
+      }
+
       const rows = await this.db
         .select({
           createdAt: auditLog.createdAt,
@@ -436,9 +590,8 @@ export class ReportingOrchestrator {
           actorId: auditLog.actorId,
         })
         .from(auditLog)
-        .orderBy(asc(auditLog.createdAt))
-        .limit(500);
-
+        .where(conditions.length ? and(...conditions) : undefined)
+        .orderBy(asc(auditLog.createdAt));
       return {
         reportType: "user_activity",
         generatedAtIso,
@@ -448,14 +601,45 @@ export class ReportingOrchestrator {
     }
 
     if (input.reportType === "district_governance") {
+      const conditions: SQL[] = [];
+
+      if (input.timeRangeFrom) {
+        conditions.push(gte(userProfile.createdAt, input.timeRangeFrom));
+      }
+      if (input.timeRangeTo) {
+        conditions.push(lte(userProfile.createdAt, input.timeRangeTo));
+      }
+
+      if (input.scopeType === "district" && input.scopeDistrictId) {
+        conditions.push(eq(userProfile.districtId, input.scopeDistrictId));
+      }
+
+      if (input.scopeType === "user" && input.scopeUserId) {
+        conditions.push(eq(userProfile.userId, input.scopeUserId));
+      }
+
+      if (input.scopeType === "farm" && input.scopeFarmId) {
+        const farmUserIds = await this.resolveFarmScopedUserIds(
+          input.scopeFarmId,
+        );
+        if (!farmUserIds.length) {
+          return {
+            reportType: "district_governance",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(inArray(userProfile.userId, farmUserIds));
+      }
+
       const rows = await this.db
         .select({
           districtId: userProfile.districtId,
           activeUsers: userProfile.isActive,
         })
         .from(userProfile)
-        .limit(1000);
-
+        .where(conditions.length ? and(...conditions) : undefined);
       return {
         reportType: "district_governance",
         generatedAtIso,
@@ -465,6 +649,70 @@ export class ReportingOrchestrator {
     }
 
     if (input.reportType === "compliance") {
+      const conditions: SQL[] = [
+        inArray(auditLog.entityType, [
+          "user_role",
+          "farm_scope",
+          "user_deactivation",
+        ]),
+      ];
+
+      if (input.timeRangeFrom) {
+        conditions.push(gte(auditLog.createdAt, input.timeRangeFrom));
+      }
+      if (input.timeRangeTo) {
+        conditions.push(lte(auditLog.createdAt, input.timeRangeTo));
+      }
+
+      if (input.scopeType === "user" && input.scopeUserId) {
+        conditions.push(
+          or(
+            eq(auditLog.entityId, input.scopeUserId),
+            eq(auditLog.actorId, input.scopeUserId),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "district" && input.scopeDistrictId) {
+        const districtUserIds = await this.resolveDistrictUserIds(
+          input.scopeDistrictId,
+        );
+        if (!districtUserIds.length) {
+          return {
+            reportType: "compliance",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, districtUserIds),
+            inArray(auditLog.actorId, districtUserIds),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "farm" && input.scopeFarmId) {
+        const farmUserIds = await this.resolveFarmScopedUserIds(
+          input.scopeFarmId,
+        );
+        if (!farmUserIds.length) {
+          return {
+            reportType: "compliance",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, farmUserIds),
+            inArray(auditLog.actorId, farmUserIds),
+          )!,
+        );
+      }
+
       const rows = await this.db
         .select({
           createdAt: auditLog.createdAt,
@@ -473,16 +721,8 @@ export class ReportingOrchestrator {
           entityId: auditLog.entityId,
         })
         .from(auditLog)
-        .where(
-          inArray(auditLog.entityType, [
-            "user_role",
-            "farm_scope",
-            "user_deactivation",
-          ]),
-        )
-        .orderBy(asc(auditLog.createdAt))
-        .limit(1000);
-
+        .where(and(...conditions))
+        .orderBy(asc(auditLog.createdAt));
       return {
         reportType: "compliance",
         generatedAtIso,
@@ -492,6 +732,64 @@ export class ReportingOrchestrator {
     }
 
     if (input.reportType === "audit_trail") {
+      const conditions: SQL[] = [];
+
+      if (input.timeRangeFrom) {
+        conditions.push(gte(auditLog.createdAt, input.timeRangeFrom));
+      }
+      if (input.timeRangeTo) {
+        conditions.push(lte(auditLog.createdAt, input.timeRangeTo));
+      }
+
+      if (input.scopeType === "user" && input.scopeUserId) {
+        conditions.push(
+          or(
+            eq(auditLog.entityId, input.scopeUserId),
+            eq(auditLog.actorId, input.scopeUserId),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "district" && input.scopeDistrictId) {
+        const districtUserIds = await this.resolveDistrictUserIds(
+          input.scopeDistrictId,
+        );
+        if (!districtUserIds.length) {
+          return {
+            reportType: "audit_trail",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, districtUserIds),
+            inArray(auditLog.actorId, districtUserIds),
+          )!,
+        );
+      }
+
+      if (input.scopeType === "farm" && input.scopeFarmId) {
+        const farmUserIds = await this.resolveFarmScopedUserIds(
+          input.scopeFarmId,
+        );
+        if (!farmUserIds.length) {
+          return {
+            reportType: "audit_trail",
+            generatedAtIso,
+            scope,
+            rows: [],
+          };
+        }
+        conditions.push(
+          or(
+            inArray(auditLog.entityId, farmUserIds),
+            inArray(auditLog.actorId, farmUserIds),
+          )!,
+        );
+      }
+
       const rows = await this.db
         .select({
           id: auditLog.id,
@@ -503,15 +801,46 @@ export class ReportingOrchestrator {
           after: auditLog.after,
         })
         .from(auditLog)
-        .orderBy(asc(auditLog.createdAt))
-        .limit(1000);
-
+        .where(conditions.length ? and(...conditions) : undefined)
+        .orderBy(asc(auditLog.createdAt));
       return {
         reportType: "audit_trail",
         generatedAtIso,
         scope,
         rows,
       };
+    }
+
+    const userConditions: SQL[] = [];
+
+    if (input.timeRangeFrom) {
+      userConditions.push(gte(user.createdAt, input.timeRangeFrom));
+    }
+    if (input.timeRangeTo) {
+      userConditions.push(lte(user.createdAt, input.timeRangeTo));
+    }
+
+    if (input.scopeType === "user" && input.scopeUserId) {
+      userConditions.push(eq(user.id, input.scopeUserId));
+    }
+
+    if (input.scopeType === "district" && input.scopeDistrictId) {
+      userConditions.push(eq(userProfile.districtId, input.scopeDistrictId));
+    }
+
+    if (input.scopeType === "farm" && input.scopeFarmId) {
+      const farmUserIds = await this.resolveFarmScopedUserIds(
+        input.scopeFarmId,
+      );
+      if (!farmUserIds.length) {
+        return {
+          reportType: "monthly_governance_pack",
+          generatedAtIso,
+          scope,
+          rows: [],
+        };
+      }
+      userConditions.push(inArray(user.id, farmUserIds));
     }
 
     const rows = await this.db
@@ -521,13 +850,47 @@ export class ReportingOrchestrator {
         displayUsername: user.displayUsername,
       })
       .from(user)
-      .limit(500);
-
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .where(userConditions.length ? and(...userConditions) : undefined);
     return {
       reportType: "monthly_governance_pack",
       generatedAtIso,
       scope,
       rows,
     };
+  }
+
+  private async resolveDistrictUserIds(districtId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ userId: userProfile.userId })
+      .from(userProfile)
+      .where(eq(userProfile.districtId, districtId));
+
+    return rows.map((row) => row.userId);
+  }
+
+  private async resolveFarmScopedUserIds(farmId: string): Promise<string[]> {
+    const farmRows = await this.db
+      .select({
+        ownerId: farm.ownerId,
+        farmerUserId: farm.farmerUserId,
+      })
+      .from(farm)
+      .where(eq(farm.id, farmId))
+      .limit(1);
+
+    const farmRow = farmRows[0];
+    if (!farmRow) {
+      return [];
+    }
+
+    return [
+      ...new Set(
+        [farmRow.ownerId, farmRow.farmerUserId].filter(
+          (value): value is string =>
+            typeof value === "string" && value.length > 0,
+        ),
+      ),
+    ];
   }
 }
