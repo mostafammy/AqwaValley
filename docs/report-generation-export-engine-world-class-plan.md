@@ -578,3 +578,89 @@ After this plan is implemented, AqwaValley gains:
 ### Priority 2
 
 - Launch explainable governance and advanced visual previews
+
+## Implementation Contract Appendix
+
+This appendix defines non-negotiable implementation contracts so delivery teams can execute without ambiguity.
+
+### A. Deterministic Export Checklist
+
+Every export strategy implementation must satisfy all checks below before release.
+
+| Check                    | Requirement                                                                | Validation Method                                |
+| ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------ |
+| Input normalization      | Normalize parameter order, default values, and null handling before render | Unit test with equivalent parameter permutations |
+| Stable ordering          | Sort all rows and nested collections with explicit sort keys               | Golden dataset byte comparison                   |
+| Fixed locale/timezone    | Use UTC and fixed locale for number/date formatting                        | Snapshot tests across environments               |
+| Deterministic formatting | Enforce fixed decimal precision, separators, and date formats              | Contract tests per format                        |
+| Metadata stability       | PDF and Excel metadata fields must be deterministic and versioned          | Binary metadata inspection test                  |
+| Timestamp control        | Exclude runtime-generated timestamps unless included in input metadata     | Output diff tests                                |
+| Hash reproducibility     | Same normalized input and versions produce same output hash                | Replay test with hash equality assertion         |
+
+Mandatory release gate:
+
+- Golden dataset test suite must pass for PDF, CSV, and Excel with byte-identical outputs or format-approved canonical-hash equivalence.
+
+### B. Snapshot Metadata Schema
+
+The following schema is the minimum metadata payload persisted for every report job and artifact.
+
+```json
+{
+  "snapshotId": "snap_2026-04-01T12:00:00Z_001",
+  "snapshotType": "logical",
+  "watermarks": {
+    "user_activity_summary_daily": "2026-04-01T11:55:00Z",
+    "district_governance_summary_daily": "2026-04-01T11:55:00Z",
+    "compliance_incident_summary_daily": "2026-04-01T11:55:00Z",
+    "audit_event_rollup_daily": "2026-04-01T11:55:00Z"
+  },
+  "templateVersion": "v1.3.0",
+  "policyVersion": "policy-2026-03-15",
+  "maskingRulesVersion": "mask-2026-03-20",
+  "parameterSchemaVersion": "report-params-v2",
+  "normalizedParametersHash": "sha256:...",
+  "generatedAt": "2026-04-01T12:00:05Z",
+  "generatorVersion": "report-worker-1.8.2"
+}
+```
+
+Schema rules:
+
+- `snapshotId` is required and immutable for reruns.
+- `watermarks` must include all read models consumed by the report.
+- `templateVersion`, `policyVersion`, and `maskingRulesVersion` are required for provenance.
+- `normalizedParametersHash` is required for idempotency and cache keying.
+- `snapshotType` allowed values: `logical`, `physical`.
+
+### C. Large-File Thresholds and Worker Limits
+
+Use the following operational thresholds as defaults. These can be tuned with capacity review but cannot be removed.
+
+| Category                         | Threshold                                           | Required Behavior                                          |
+| -------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
+| Inline artifact response         | less than or equal to 25 MB                         | Eligible for direct signed URL completion                  |
+| Medium artifact                  | greater than 25 MB and less than or equal to 250 MB | Force async packaging and chunked upload                   |
+| Large artifact                   | greater than 250 MB and less than or equal to 1 GB  | Streaming export required with chunk checkpointing         |
+| Oversized artifact               | greater than 1 GB                                   | Reject by policy unless elevated admin override is present |
+| Worker memory soft limit         | 1.5 GB                                              | Trigger streaming mode and spill-to-disk                   |
+| Worker memory hard limit         | 2 GB                                                | Abort job safely, mark retryable failure                   |
+| Max CSV rows per single artifact | 1,000,000 rows                                      | Use partitioned export or multi-part bundle                |
+| Max XLSX rows per worksheet      | 1,048,576 rows                                      | Split across sheets or files                               |
+
+Worker execution contracts:
+
+- Chunk size default: 8 MB per upload part.
+- Worker heartbeat interval: 15 seconds.
+- Job lock timeout: 5 minutes with renewal.
+- Retry backoff: 1 minute, 5 minutes, 15 minutes, 60 minutes, then dead-letter.
+- Queue classing: small, standard, large to prevent starvation.
+
+### D. Engineering Acceptance Criteria for Appendix Compliance
+
+Implementation is considered compliant only when:
+
+1. Deterministic export checklist is fully automated in CI.
+2. Snapshot metadata schema is persisted for every generated artifact.
+3. Large-file thresholds are enforced by policy guards and worker runtime.
+4. Worker memory and retry controls are observable in dashboards and alerts.
