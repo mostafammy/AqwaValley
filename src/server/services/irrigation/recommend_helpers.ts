@@ -2,7 +2,6 @@ import { and, desc, eq, gte } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
   farmWell,
-  well,
   sensors,
   latestSensorState,
   farmPeriodConsumptionSnapshot,
@@ -46,9 +45,7 @@ export async function fetchSoilReadings(
   
   filtered.forEach((s) => {
     if (!s.wellId) return;
-    if (!resultMap[s.wellId]) {
-      resultMap[s.wellId] = { humidityPct: 65, tempCelsius: 28 }; // sensible defaults
-    }
+    resultMap[s.wellId] ??= { humidityPct: 65, tempCelsius: 28 }; // sensible defaults
     if (s.type === "humidity") resultMap[s.wellId]!.humidityPct = Number(s.value);
     if (s.type === "temperature") resultMap[s.wellId]!.tempCelsius = Number(s.value);
   });
