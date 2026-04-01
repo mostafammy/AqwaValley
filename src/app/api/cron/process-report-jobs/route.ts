@@ -34,10 +34,7 @@ async function run(request: Request): Promise<NextResponse> {
         {
           ok: false,
           error: "Invalid cron payload",
-          details:
-            error instanceof Error
-              ? { message: error.message }
-              : {},
+          details: error instanceof Error ? { message: error.message } : {},
         },
         { status: 400 },
       );
