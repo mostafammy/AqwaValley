@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "~/server/db";
-import { cropProfile, cropHistory, farm } from "~/server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { cropProfile, cropHistory, farm, cropTypeEnum, growthStageEnum } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "~/server/better-auth/server";
 import { z } from "zod";
@@ -60,8 +60,8 @@ export async function updateCropProfile(
       const updatedRows = await tx
         .update(cropProfile)
         .set({
-          cropType: cropType as any,
-          growthStage: growthStage as any,
+          cropType: cropType as typeof cropTypeEnum.enumValues[number],
+          growthStage: growthStage as typeof growthStageEnum.enumValues[number],
           targetSoilMoisturePct: String(targetSoilMoisture),
           plantedDate:           plantedDate ? new Date(plantedDate) : null,
           expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
@@ -77,8 +77,8 @@ export async function updateCropProfile(
       // 2. Log this state in crop history
       await tx.insert(cropHistory).values({
         farmId,
-        cropType:            cropType as any,
-        growthStage:         growthStage as any,
+        cropType:            cropType as typeof cropTypeEnum.enumValues[number],
+        growthStage:         growthStage as typeof growthStageEnum.enumValues[number],
         targetSoilMoisturePct: String(targetSoilMoisture),
         plantedDate:           plantedDate ? new Date(plantedDate) : null,
         expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,

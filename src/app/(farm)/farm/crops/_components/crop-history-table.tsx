@@ -1,7 +1,7 @@
 import { db } from "~/server/db";
-import { cropHistory, farm } from "~/server/db/schema";
+import { cropHistory } from "~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { Calendar, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 
 type LookupEntity = {
   id: string;

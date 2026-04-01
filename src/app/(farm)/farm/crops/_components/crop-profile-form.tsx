@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Droplets, Calendar, Leaf } from "lucide-react";
+import { Calendar, Leaf } from "lucide-react";
 
 type CropType =
   | "wheat" | "rice" | "corn" | "cotton"
@@ -54,16 +54,16 @@ export function CropProfileForm({
 
   const [cropType,   setCropType]   = useState<CropType>(profile?.cropType ?? (cropTypes[0]?.type as CropType) ?? "wheat");
   const [growthStage, setGrowthStage] = useState<GrowthStage>(profile?.growthStage ?? (growthStages[0]?.stage as GrowthStage) ?? "vegetative");
-  const [moisture,   setMoisture]   = useState<string>((profile?.targetSoilMoisturePct ?? "30") || "30");
+  const [moisture,   setMoisture]   = useState<string>((profile?.targetSoilMoisturePct ?? "30"));
   const [plantedDate, setPlantedDate] = useState<string>(
     (profile?.plantedDate
       ? new Date(profile.plantedDate).toISOString().split("T")[0]
-      : "") || ""
+      : "") ?? ""
   );
   const [harvestDate, setHarvestDate] = useState<string>(
     (profile?.expectedHarvestDate
       ? new Date(profile.expectedHarvestDate).toISOString().split("T")[0]
-      : "") || ""
+      : "") ?? ""
   );
 
   function handleSubmit() {
