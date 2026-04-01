@@ -67,7 +67,12 @@ export class ReportingOrchestrator {
         eq(reportJob.snapshotId, params.input.snapshotId),
         eq(reportJob.templateVersion, params.input.templateVersion),
         eq(reportJob.policyVersion, params.input.policyVersion),
-        inArray(reportJob.status, ["queued", "processing", "completed", "partial_failed"]),
+        inArray(reportJob.status, [
+          "queued",
+          "processing",
+          "completed",
+          "partial_failed",
+        ]),
       ),
       orderBy: [desc(reportJob.createdAt)],
       columns: { id: true, status: true },
@@ -149,16 +154,23 @@ export class ReportingOrchestrator {
       try {
         const updated = await this.db
           .update(reportJob)
-          .set({ status: "processing", startedAt: new Date(), updatedAt: new Date() })
+          .set({
+            status: "processing",
+            startedAt: new Date(),
+            updatedAt: new Date(),
+          })
           .where(and(eq(reportJob.id, job.id), eq(reportJob.status, "queued")))
           .returning({ id: reportJob.id });
 
         if (!updated.length) continue;
 
-        const snapshotMetadata = (job.snapshotMetadata ?? {}) as Record<string, unknown>;
-        const requestFormats = (snapshotMetadata.requestedFormats ?? ["pdf"]) as Array<
-          "pdf" | "csv" | "xlsx"
+        const snapshotMetadata = (job.snapshotMetadata ?? {}) as Record<
+          string,
+          unknown
         >;
+        const requestFormats = (snapshotMetadata.requestedFormats ?? [
+          "pdf",
+        ]) as Array<"pdf" | "csv" | "xlsx">;
 
         const data = await this.buildReportData({
           reportType: job.reportType,
@@ -185,7 +197,10 @@ export class ReportingOrchestrator {
         const now = new Date();
 
         for (const result of results) {
-          const storageKey = generateStorageKey({ jobId: job.id, format: result.format });
+          const storageKey = generateStorageKey({
+            jobId: job.id,
+            format: result.format,
+          });
           const persisted = await persistArtifact({
             storageKey,
             payload: result.payload,
@@ -247,7 +262,10 @@ export class ReportingOrchestrator {
       } catch (error) {
         failed += 1;
 
-        const message = error instanceof Error ? error.message : "Unknown report worker error";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unknown report worker error";
 
         await this.db
           .update(reportJob)
@@ -280,7 +298,13 @@ export class ReportingOrchestrator {
   async listJobs(params: {
     actorId: string;
     actorRoles: string[];
-    status?: "queued" | "processing" | "completed" | "partial_failed" | "failed" | "cancelled";
+    status?:
+      | "queued"
+      | "processing"
+      | "completed"
+      | "partial_failed"
+      | "failed"
+      | "cancelled";
     page: number;
     pageSize: number;
   }): Promise<{ items: Array<typeof reportJob.$inferSelect>; total: number }> {
@@ -325,7 +349,10 @@ export class ReportingOrchestrator {
     });
 
     if (!job) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Report job not found" });
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report job not found",
+      });
     }
 
     const artifacts = await this.db.query.reportArtifact.findMany({
@@ -341,15 +368,24 @@ export class ReportingOrchestrator {
     reportArtifactId: string;
   }): Promise<{ signedUrl: string; expiresAt: Date; contentType: string }> {
     const artifact = await this.db.query.reportArtifact.findFirst({
-      where: and(eq(reportArtifact.id, params.reportArtifactId), eq(reportArtifact.status, "ready")),
+      where: and(
+        eq(reportArtifact.id, params.reportArtifactId),
+        eq(reportArtifact.status, "ready"),
+      ),
     });
 
     if (!artifact) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Report artifact is not available" });
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report artifact is not available",
+      });
     }
 
     if (artifact.expiresAt && artifact.expiresAt < new Date()) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Report artifact has expired" });
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Report artifact has expired",
+      });
     }
 
     await this.db.insert(reportAuditLog).values({
@@ -437,7 +473,13 @@ export class ReportingOrchestrator {
           entityId: auditLog.entityId,
         })
         .from(auditLog)
-        .where(inArray(auditLog.entityType, ["user_role", "farm_scope", "user_deactivation"]))
+        .where(
+          inArray(auditLog.entityType, [
+            "user_role",
+            "farm_scope",
+            "user_deactivation",
+          ]),
+        )
         .orderBy(asc(auditLog.createdAt))
         .limit(1000);
 

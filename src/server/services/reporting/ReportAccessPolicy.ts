@@ -9,7 +9,10 @@ import {
 import type { ReportRequestInput } from "./types";
 
 export class ReportAccessPolicy {
-  async assertCanRequest(ctx: AuthContext, input: ReportRequestInput): Promise<void> {
+  async assertCanRequest(
+    ctx: AuthContext,
+    input: ReportRequestInput,
+  ): Promise<void> {
     const scope = input.scope;
 
     if (scope.scopeType === "global") {
@@ -33,7 +36,12 @@ export class ReportAccessPolicy {
     }
 
     if (scope.scopeType === "user" && scope.userId) {
-      const canViewAnyUser = hasRole(ctx, "admin", "auditor", "district_manager");
+      const canViewAnyUser = hasRole(
+        ctx,
+        "admin",
+        "auditor",
+        "district_manager",
+      );
       if (scope.userId !== ctx.session.user.id && !canViewAnyUser) {
         throw new TRPCError({
           code: "FORBIDDEN",
