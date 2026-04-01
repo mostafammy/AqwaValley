@@ -8,6 +8,7 @@ type QstashSchedule = {
   id?: string;
   scheduleId?: string;
   cron?: string;
+  label?: string;
   message?: {
     to?: string;
     method?: string;
@@ -51,7 +52,18 @@ function normalizeAppUrl(rawAppUrl: string): URL {
     );
   }
 
+  // Catch common placeholder mistakes early in CI with a clear error message.
+  if (parsed.hostname.includes("*")) {
+    throw new Error(
+      `Invalid APP_URL hostname (${parsed.hostname}). Use your real deployed host, e.g. app.example.com.`,
+    );
+  }
+
   return parsed;
+}
+
+function toManagedLabel(key: string): string {
+  return `managed:${key}`;
 }
 
 function getScheduleId(schedule: QstashSchedule): string | undefined {
@@ -66,9 +78,16 @@ function getMethod(schedule: QstashSchedule): string {
   return (schedule.message?.method ?? "POST").toUpperCase();
 }
 
-function getCronKey(destination: string): string | null {
+function getScheduleKey(schedule: QstashSchedule): string | null {
+  const label = schedule.label ?? "";
+  if (label.startsWith("managed:")) {
+    const key = label.slice("managed:".length).trim();
+    return key.length > 0 ? key : null;
+  }
+
+  // Backward compatibility: previously we stored key in destination query.
   try {
-    const url = new URL(destination);
+    const url = new URL(getDestination(schedule));
     return url.searchParams.get("cronKey");
   } catch {
     return null;
@@ -107,7 +126,6 @@ function buildDesiredSchedules(
   return Object.fromEntries(
     QSTASH_CRON_JOBS.map((job) => {
       const destination = new URL(job.path, base);
-      destination.searchParams.set("cronKey", job.key);
 
       const method = job.method ?? "POST";
       const body =
@@ -160,15 +178,16 @@ async function createSchedule(
   token: string,
   schedule: DesiredSchedule,
 ) {
-  const encodedDestination = encodeURIComponent(schedule.destination);
-
-  await qstashFetch(apiBase, token, `/v2/schedules/${encodedDestination}`, {
+  // Destination must be passed as raw URL in the path (not URL-encoded),
+  // otherwise QStash rejects it as an invalid scheme.
+  await qstashFetch(apiBase, token, `/v2/schedules/${schedule.destination}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Upstash-Cron": schedule.cron,
       "Upstash-Method": schedule.method,
       "Upstash-Retries": "3",
+      "Upstash-Label": toManagedLabel(schedule.key),
       "Upstash-Forward-Content-Type": "application/json",
     },
     body: schedule.body ?? "{}",
@@ -202,7 +221,7 @@ async function main() {
 
   const allSchedules = await listSchedules(apiBase, token);
   const managed = allSchedules.filter((schedule) => {
-    const key = getCronKey(getDestination(schedule));
+    const key = getScheduleKey(schedule);
     return key !== null;
   });
 
@@ -216,7 +235,7 @@ async function main() {
 
   for (const schedule of managed) {
     const scheduleId = getScheduleId(schedule);
-    const key = getCronKey(getDestination(schedule));
+    const key = getScheduleKey(schedule);
 
     if (!scheduleId || !key) continue;
 
