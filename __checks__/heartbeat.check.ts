@@ -36,6 +36,6 @@ new HeartbeatMonitor("aqwavalley-simulator-heartbeat", {
     ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
         .map((s) => s.trim())
         .filter((s) => s !== "")
-      .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
+        .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
     : [],
 });
