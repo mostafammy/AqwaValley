@@ -11,7 +11,10 @@ import PageTransition from "./_components/PageTransition";
 export const metadata: Metadata = {
   title: "أكوا الوادي — نظام إدارة المياه",
   description: "Water Management System — New Valley Governorate, Egypt",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 const cairo = Cairo({
