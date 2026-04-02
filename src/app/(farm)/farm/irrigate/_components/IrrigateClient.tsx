@@ -618,9 +618,9 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               <div className="mt-0.5 text-xs text-slate-500">
                 {plan.zones?.length ?? 0} مناطق ·{" "}
                 {(totalLiters / 1000).toFixed(1)} م³ إجمالي ·{" "}
-                {plan.confidence === "HIGH"
+                {plan.zones?.[0]?.confidence === "HIGH"
                   ? "ثقة عالية"
-                  : plan.confidence === "MEDIUM"
+                  : plan.zones?.[0]?.confidence === "MEDIUM"
                     ? "ثقة متوسطة"
                     : "ثقة منخفضة"}
               </div>
