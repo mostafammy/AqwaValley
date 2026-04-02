@@ -42,6 +42,8 @@ type WeatherInfo = RouterOutputs["weather"]["getCurrent"];
 type ForecastDay = RouterOutputs["weather"]["getForecast"][number];
 
 /** Live irrigation inputs from irrigation.getLiveInputs */
+type LiveInputs = RouterOutputs["irrigation"]["getLiveInputs"];
+
 interface AiPlanClientProps {
   farmId: string;
   farmName: string;
