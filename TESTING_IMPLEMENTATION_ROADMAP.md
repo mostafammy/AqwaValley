@@ -238,19 +238,19 @@ Reproducibility and access control for exports.
 
 ## Test Summary by Invariant
 
-| Invariant                             | Layer                | File                                                      | Test Name                                          |
-| ------------------------------------- | -------------------- | --------------------------------------------------------- | -------------------------------------------------- |
-| 1. Ingest authorization sensor-scoped | Integration (domain) | `ingest-orchestration.test.ts`                            | `ingest_rejects_cross_well_api_key_use`            |
-| 2. Ingest batch boundaries            | Integration (domain) | `ingest-orchestration.test.ts`                            | `ingest_accepts_batch_49_50_51_without_off_by_one` |
-| 3. Duplicate readings idempotent      | Unit + Integration   | `deduplication.test.ts` + `ingest-orchestration.test.ts`  | `ingest_rejects_duplicate_sensorId_timestamp`      |
-| 4. Quota hard block at 100%           | Unit + Integration   | `hard-block-boundary.test.ts` + `quota-decision.test.ts`  | `quota_hard_block_at_100_percent`                  |
-| 5. Audit logs append-only             | Integration          | `audit-immutability.test.ts`                              | `audit_rejects_update_delete_operations`           |
-| 6. Role scope session-scoped          | Integration (domain) | `role-scope-enforcement.test.ts`                          | `role_reduction_invalidates_session`               |
-| 7. AI output schema-valid             | Unit + Integration   | `output-validation.test.ts` + `ai-orchestration.test.ts`  | `ai_schema_rejects_malformed_json`                 |
-| 8. Forecast scientifically plausible  | Unit + Integration   | `plausibility.test.ts` + `forecast-orchestration.test.ts` | `forecast_respects_2_year_window`                  |
-| 9. TimescaleDB aggregation correct    | Integration          | `timescaledb-aggregation.test.ts`                         | `timescaledb_bucket_groups_boundary_rows`          |
-| 10. Demo mode isolated                | Integration (domain) | `cron-simulation.test.ts`                                 | `cron_simulation_isolated_by_runId`                |
-| 11. FAO-56 ET₀ reference correct      | Unit                 | `et0-reference.test.ts`                                   | `fao56_et0_matches_reference_example`              |
+| Invariant                             | Layer                | File                                                      | Test Name                                                |
+| ------------------------------------- | -------------------- | --------------------------------------------------------- | -------------------------------------------------------- |
+| 1. Ingest authorization sensor-scoped | Integration (domain) | `ingest-orchestration.test.ts`                            | `ingest_rejects_cross_well_api_key_use`                  |
+| 2. Ingest batch boundaries            | Integration (domain) | `ingest-orchestration.test.ts`                            | `ingest_accepts_batch_49_50_51_without_off_by_one`       |
+| 3. Duplicate readings idempotent      | Unit + Integration   | `deduplication.test.ts` + `ingest-orchestration.test.ts`  | `ingest_rejects_duplicate_sensorId_timestamp`            |
+| 4. Quota hard block at 100%           | Unit + Integration   | `hard-block-boundary.test.ts` + `quota-decision.test.ts`  | `quota_hard_block_at_100_percent`                        |
+| 5. Audit logs append-only             | Integration          | `audit-immutability.test.ts`                              | `audit_rejects_update_operations`                        |
+| 6. Role scope session-scoped          | Integration (domain) | `role-scope-enforcement.test.ts`                          | `role_reduction_invalidates_session`                     |
+| 7. AI output schema-valid             | Unit + Integration   | `output-validation.test.ts` + `ai-orchestration.test.ts`  | `ai_schema_rejects_malformed_json`                       |
+| 8. Forecast scientifically plausible  | Unit + Integration   | `plausibility.test.ts` + `forecast-orchestration.test.ts` | `forecast_respects_2_year_window`                        |
+| 9. TimescaleDB aggregation correct    | Integration          | `timescaledb-aggregation.test.ts`                         | `timescaledb_time_bucket_groups_boundary_rows_correctly` |
+| 10. Demo mode isolated                | Integration (domain) | `cron-simulation.test.ts`                                 | `cron_simulation_isolated_by_runId`                      |
+| 11. FAO-56 ET₀ reference correct      | Unit                 | `et0-reference.test.ts`                                   | `fao56_et0_matches_reference_example`                    |
 
 ---
 
@@ -321,7 +321,7 @@ As tests are implemented, mark completion here:
 - [ ] Auth & Session (3 tests)
 - [ ] Ingest Authorization (4 tests)
 - [ ] Quota Enforcement (3 tests)
-- [ ] Audit Immutability (3 tests)
+- [x] Audit Immutability (3 tests)
 - [ ] Role & Scope (3 tests)
 
 ### Phase 2: AI & Forecast
@@ -332,7 +332,7 @@ As tests are implemented, mark completion here:
 
 ### Phase 3: TimescaleDB
 
-- [ ] TimescaleDB Aggregation (3 tests)
+- [x] TimescaleDB Aggregation (3 tests)
 - [ ] Ingest Pipeline Integration (3 tests)
 
 ### Phase 4: Cron & Ops
