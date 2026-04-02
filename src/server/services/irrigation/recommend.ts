@@ -93,10 +93,7 @@ function buildZoneContexts(
   }));
 }
 
-import {
-  fetchSoilReadings,
-  fetchQuotaContext,
-} from "./recommend_helpers";
+import { fetchSoilReadings, fetchQuotaContext } from "./recommend_helpers";
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -146,7 +143,7 @@ export async function requestIrrigationPlan(
 
   // Get district name for the prompt
   const [districtRecord] = await db
-    .select({ 
+    .select({
       name: district.name,
     })
     .from(district)
@@ -220,18 +217,18 @@ export async function requestIrrigationPlan(
   } catch (err: unknown) {
     if (err instanceof Error && err.message === "ALL_MODELS_EXHAUSTED") {
       logger.warn("ai.irrigation.all_models_exhausted — using fallback");
-        const fallbackResult = generateRuleBasedPlan({
-          farm: ctx.farm,
-          zones: ctx.zones,
-          quota: ctx.quota,
-          soilReading: Object.fromEntries(
-            Object.entries(ctx.soilReading).map(([wellId, reading]) => [
-              wellId,
-              reading ? { humidityPct: reading.humidityPct ?? 50 } : null,
-            ])
-          ),
-          weather: ctx.weather,
-        });
+      const fallbackResult = generateRuleBasedPlan({
+        farm: ctx.farm,
+        zones: ctx.zones,
+        quota: ctx.quota,
+        soilReading: Object.fromEntries(
+          Object.entries(ctx.soilReading).map(([wellId, reading]) => [
+            wellId,
+            reading ? { humidityPct: reading.humidityPct ?? 50 } : null,
+          ]),
+        ),
+        weather: ctx.weather,
+      });
       plan = fallbackResult.recommendation.plan;
       isFallback = true;
       rawResponse = "FALLBACK_GENERATED";
@@ -259,7 +256,7 @@ export async function requestIrrigationPlan(
           Object.entries(ctx.soilReading).map(([wellId, reading]) => [
             wellId,
             reading ? { humidityPct: reading.humidityPct ?? 50 } : null,
-          ])
+          ]),
         ),
         weather: ctx.weather,
       });
@@ -274,78 +271,78 @@ export async function requestIrrigationPlan(
   // only if not already scaled by fallback (fallback does its own scaling)
   if (!isFallback) {
     const totalRequested = plan.zones.reduce(
-    (sum, z) => sum + z.recommendedLitres,
-    0,
-  );
-
-  if (totalRequested > quota.remainingLitres) {
-    const remainingQuota = Math.max(0, Math.floor(quota.remainingLitres));
-    const scaleFactor =
-      totalRequested > 0 ? remainingQuota / totalRequested : 0;
-
-    const scaledZones = plan.zones.map((z) => ({
-      ...z,
-      recommendedLitres:
-        z.recommendedLitres > 0
-          ? Math.max(1, Math.round(z.recommendedLitres * scaleFactor))
-          : 0,
-    }));
-
-    let scaledTotal = scaledZones.reduce(
       (sum, z) => sum + z.recommendedLitres,
       0,
     );
 
-    // Reduce from largest zones first so final sum never exceeds quota.
-    if (scaledTotal > remainingQuota) {
-      let overflow = scaledTotal - remainingQuota;
-      const sortedIndexes = scaledZones
-        .map((zone, index) => ({
-          index,
-          original: plan.zones[index]?.recommendedLitres ?? 0,
-          scaled: zone.recommendedLitres,
-        }))
-        .sort((a, b) => b.scaled - a.scaled);
+    if (totalRequested > quota.remainingLitres) {
+      const remainingQuota = Math.max(0, Math.floor(quota.remainingLitres));
+      const scaleFactor =
+        totalRequested > 0 ? remainingQuota / totalRequested : 0;
 
-      // First pass: keep zones that originally needed water at a minimum of 1.
-      for (const item of sortedIndexes) {
-        if (overflow <= 0) break;
+      const scaledZones = plan.zones.map((z) => ({
+        ...z,
+        recommendedLitres:
+          z.recommendedLitres > 0
+            ? Math.max(1, Math.round(z.recommendedLitres * scaleFactor))
+            : 0,
+      }));
 
-        const current = scaledZones[item.index]?.recommendedLitres ?? 0;
-        const minAllowed = item.original > 0 ? 1 : 0;
-        const reducible = Math.max(0, current - minAllowed);
-        if (reducible === 0) continue;
+      let scaledTotal = scaledZones.reduce(
+        (sum, z) => sum + z.recommendedLitres,
+        0,
+      );
 
-        const reduceBy = Math.min(reducible, overflow);
-        const zone = scaledZones[item.index];
-        if (zone) {
-          zone.recommendedLitres = current - reduceBy;
-        }
-        overflow -= reduceBy;
-      }
+      // Reduce from largest zones first so final sum never exceeds quota.
+      if (scaledTotal > remainingQuota) {
+        let overflow = scaledTotal - remainingQuota;
+        const sortedIndexes = scaledZones
+          .map((zone, index) => ({
+            index,
+            original: plan.zones[index]?.recommendedLitres ?? 0,
+            scaled: zone.recommendedLitres,
+          }))
+          .sort((a, b) => b.scaled - a.scaled);
 
-      // Second pass: rare edge case where quota is too small to keep all positive zones at 1.
-      if (overflow > 0) {
+        // First pass: keep zones that originally needed water at a minimum of 1.
         for (const item of sortedIndexes) {
           if (overflow <= 0) break;
 
           const current = scaledZones[item.index]?.recommendedLitres ?? 0;
-          if (current <= 0) continue;
+          const minAllowed = item.original > 0 ? 1 : 0;
+          const reducible = Math.max(0, current - minAllowed);
+          if (reducible === 0) continue;
 
-          const reduceBy = Math.min(current, overflow);
+          const reduceBy = Math.min(reducible, overflow);
           const zone = scaledZones[item.index];
           if (zone) {
             zone.recommendedLitres = current - reduceBy;
           }
           overflow -= reduceBy;
         }
-      }
 
-      scaledTotal = scaledZones.reduce(
-        (sum, z) => sum + z.recommendedLitres,
-        0,
-      );
-    }
+        // Second pass: rare edge case where quota is too small to keep all positive zones at 1.
+        if (overflow > 0) {
+          for (const item of sortedIndexes) {
+            if (overflow <= 0) break;
+
+            const current = scaledZones[item.index]?.recommendedLitres ?? 0;
+            if (current <= 0) continue;
+
+            const reduceBy = Math.min(current, overflow);
+            const zone = scaledZones[item.index];
+            if (zone) {
+              zone.recommendedLitres = current - reduceBy;
+            }
+            overflow -= reduceBy;
+          }
+        }
+
+        scaledTotal = scaledZones.reduce(
+          (sum, z) => sum + z.recommendedLitres,
+          0,
+        );
+      }
 
       plan = {
         ...plan,
@@ -401,4 +398,3 @@ export async function requestIrrigationPlan(
     },
   };
 }
-
