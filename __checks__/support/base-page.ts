@@ -93,7 +93,12 @@ export class BasePageObject {
     text: string,
     exact = true,
   ) {
-    await expect(locator).toHaveText(text, { exact });
+    if (exact) {
+      await expect(locator).toHaveText(text);
+      return;
+    }
+
+    await expect(locator).toContainText(text);
   }
 
   /**
