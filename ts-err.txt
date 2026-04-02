@@ -1,0 +1,41 @@
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(46,6): error TS2300: Duplicate identifier 'LiveInputs'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(87,6): error TS2300: Duplicate identifier 'LiveInputs'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(380,43): error TS2339: Property 'temperatureC' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(381,47): error TS2339: Property 'et0' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(382,49): error TS2339: Property 'rainfallForecastMm' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(383,52): error TS2339: Property 'avgSoilMoisture' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(384,59): error TS2339: Property 'remainingQuotaLitres' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(585,47): error TS2339: Property 'confidence' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(585,81): error TS2339: Property 'confidence' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(645,23): error TS2339: Property 'nextIrrigationDate' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx(648,48): error TS2339: Property 'nextIrrigationDate' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/crops/page.tsx(63,64): error TS2339: Property 'cropType' does not exist on type '{ id: string; type: "wheat" | "rice" | "corn" | "cotton" | "sugarcane" | "vegetables" | "fruits" | "other"; displayName: string; commonName: string | null; description: string | null; }'.
+src/app/(farm)/farm/crops/page.tsx(73,11): error TS2322: Type '{ id: string; stage: "germination" | "vegetative" | "flowering" | "fruiting" | "maturity" | "harvest"; displayName: string; description: string | null; estDurationDays: number | null; }[]' is not assignable to type 'LookupEntity[]'.
+  Property 'commonName' is missing in type '{ id: string; stage: "germination" | "vegetative" | "flowering" | "fruiting" | "maturity" | "harvest"; displayName: string; description: string | null; estDurationDays: number | null; }' but required in type 'LookupEntity'.
+src/app/(farm)/farm/history/_components/history-chart.tsx(104,19): error TS2322: Type '(value: number) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: TooltipPayloadEntry, index: number, payload: TooltipPayload) => ReactNode | [...])'.
+  Type '(value: number) => [string, string]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/app/(farm)/farm/irrigate/_components/IrrigateClient.tsx(592,23): error TS2339: Property 'confidence' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/irrigate/_components/IrrigateClient.tsx(593,22): error TS2339: Property 'confidence' does not exist on type '{ totalLitres: number; reasoning: string; quotaWarning: boolean; zones: { cropType: string; growthStage: string; zoneId: string; recommendedLitres: number; scheduledAt: string; confidence: "HIGH" | "MEDIUM" | "LOW"; notes?: string | undefined; }[]; }'.
+src/app/(farm)/farm/soil/_components/soil-moisture-chart.tsx(55,13): error TS2322: Type '(value: number) => [string, undefined]' is not assignable to type 'Formatter<ValueType, NameType> & ((value: ValueType, name: NameType, item: TooltipPayloadEntry, index: number, payload: TooltipPayload) => ReactNode | [...])'.
+  Type '(value: number) => [string, undefined]' is not assignable to type 'Formatter<ValueType, NameType>'.
+    Types of parameters 'value' and 'value' are incompatible.
+      Type 'ValueType | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/server/services/irrigation/recommend.ts(200,48): error TS2304: Cannot find name 'PromptSoilReading'.
+src/server/services/irrigation/recommend.ts(226,9): error TS2322: Type 'Readonly<Record<string, PromptSoilReading | null>>' is not assignable to type 'Readonly<Record<string, { readonly humidityPct: number; } | null>>'.
+  'string' index signatures are incompatible.
+    Type 'PromptSoilReading | null' is not assignable to type '{ readonly humidityPct: number; } | null'.
+      Type 'PromptSoilReading' is not assignable to type '{ readonly humidityPct: number; }'.
+        Types of property 'humidityPct' are incompatible.
+          Type 'number | null' is not assignable to type 'number'.
+            Type 'null' is not assignable to type 'number'.
+src/server/services/irrigation/recommend.ts(252,9): error TS2322: Type 'Readonly<Record<string, PromptSoilReading | null>>' is not assignable to type 'Readonly<Record<string, { readonly humidityPct: number; } | null>>'.
+  'string' index signatures are incompatible.
+    Type 'PromptSoilReading | null' is not assignable to type '{ readonly humidityPct: number; } | null'.
+      Type 'PromptSoilReading' is not assignable to type '{ readonly humidityPct: number; }'.
+        Types of property 'humidityPct' are incompatible.
+          Type 'number | null' is not assignable to type 'number'.
+            Type 'null' is not assignable to type 'number'.

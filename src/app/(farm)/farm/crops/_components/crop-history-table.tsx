@@ -7,7 +7,7 @@ type CropTypeEntity = {
   id: string;
   type: string;
   displayName: string;
-  commonName: string | null;
+  commonName?: string | null;
   description: string | null;
 };
 

@@ -108,7 +108,7 @@ export interface FallbackInput {
     readonly remainingLitres: number;
   };
   readonly soilReading: Readonly<
-    Record<string, { readonly humidityPct: number } | null>
+    Record<string, { readonly humidityPct: number | null } | null>
   >;
   readonly weather?: {
     readonly daily: readonly {

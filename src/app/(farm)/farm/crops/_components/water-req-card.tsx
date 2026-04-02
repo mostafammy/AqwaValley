@@ -47,7 +47,7 @@ export function WaterReqCard({
   activeCropType, 
   cropTypes 
 }: { 
-  activeCropType: string,
+  activeCropType: string | undefined,
   cropTypes: CropType[]
 }) {
   return (
