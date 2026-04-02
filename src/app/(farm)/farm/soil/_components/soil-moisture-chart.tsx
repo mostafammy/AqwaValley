@@ -28,68 +28,73 @@ export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
           data={data}
           margin={{ top: 10, right: 20, left: -20, bottom: 10 }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-          <XAxis 
-            dataKey="name" 
-            stroke="#94a3b8" 
-            fontSize={13} 
-            tickLine={false} 
-            axisLine={false} 
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#f1f5f9"
+          />
+          <XAxis
+            dataKey="name"
+            stroke="#94a3b8"
+            fontSize={13}
+            tickLine={false}
+            axisLine={false}
             dy={8}
           />
-          <YAxis 
-            stroke="#94a3b8" 
-            fontSize={13} 
-            tickLine={false} 
-            axisLine={false} 
+          <YAxis
+            stroke="#94a3b8"
+            fontSize={13}
+            tickLine={false}
+            axisLine={false}
             tickFormatter={(value) => `${value}%`}
             domain={[0, 100]}
           />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: '#fff', 
-              borderRadius: '16px', 
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#fff",
+              borderRadius: "16px",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
             }}
             formatter={(value) => {
-              if (value === undefined || value === null) return ["—", undefined];
+              if (value === undefined || value === null)
+                return ["—", undefined];
               return [`${Number(value)}%`, undefined];
             }}
           />
-          <Legend 
-            verticalAlign="top" 
-            align="right" 
+          <Legend
+            verticalAlign="top"
+            align="right"
             iconType="circle"
             wrapperStyle={{ paddingBottom: 20, fontSize: 13 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="wheat" 
-            name="قمح (منطقة أ)" 
-            stroke="#D97706" 
-            strokeWidth={3} 
-            dot={{ r: 4 }} 
+          <Line
+            type="monotone"
+            dataKey="wheat"
+            name="قمح (منطقة أ)"
+            stroke="#D97706"
+            strokeWidth={3}
+            dot={{ r: 4 }}
             animationDuration={1500}
             animationBegin={0}
           />
-          <Line 
-            type="monotone" 
-            dataKey="beet" 
-            name="بنجر (منطقة ب)" 
-            stroke="#0D9E7E" 
-            strokeWidth={3} 
-            dot={{ r: 4 }} 
+          <Line
+            type="monotone"
+            dataKey="beet"
+            name="بنجر (منطقة ب)"
+            stroke="#0D9E7E"
+            strokeWidth={3}
+            dot={{ r: 4 }}
             animationDuration={1500}
             animationBegin={300}
           />
-          <Line 
-            type="monotone" 
-            dataKey="palms" 
-            name="نخيل (منطقة ج)" 
-            stroke="#1D6FA8" 
-            strokeWidth={3} 
-            dot={{ r: 4 }} 
+          <Line
+            type="monotone"
+            dataKey="palms"
+            name="نخيل (منطقة ج)"
+            stroke="#1D6FA8"
+            strokeWidth={3}
+            dot={{ r: 4 }}
             animationDuration={1500}
             animationBegin={600}
           />
