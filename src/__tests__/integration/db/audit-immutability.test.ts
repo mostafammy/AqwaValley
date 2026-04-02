@@ -27,9 +27,13 @@ function expectUpdateDeleteGuardFor(tableName: string, triggerName: string) {
 
 describe("Audit immutability DB integration contract (Invariant #5)", () => {
   it("audit_rejects_update_operations", () => {
-    expect(migrationSql).toContain("BEFORE UPDATE OR DELETE ON \"audit_log\"");
-    expect(migrationSql).toContain("BEFORE UPDATE OR DELETE ON \"report_audit_log\"");
-    expect(migrationSql).toContain("audit logs are append-only and cannot be %");
+    expect(migrationSql).toContain('BEFORE UPDATE OR DELETE ON "audit_log"');
+    expect(migrationSql).toContain(
+      'BEFORE UPDATE OR DELETE ON "report_audit_log"',
+    );
+    expect(migrationSql).toContain(
+      "audit logs are append-only and cannot be %",
+    );
     expect(migrationSql).toContain("TG_OP");
   });
 
