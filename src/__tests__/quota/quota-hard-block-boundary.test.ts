@@ -74,7 +74,7 @@ function deriveQuotaDecision(input: DecisionInput): DecisionOutput {
 
   // ===== CRITICAL QUOTA LOGIC =====
   // This is where "hard block" is enforced
-  let rawState: string = "ok";
+  let rawState = "ok";
   if (input.hasQualityIssue) rawState = "needs_review";
   else if (utilizationPct > 100)
     rawState = "exceeded"; // ← Hard block
