@@ -34,6 +34,7 @@ import {
   buildIrrigationPrompt,
   type PromptContext,
   type PromptZoneContext,
+  type PromptSoilReading,
 } from "./prompt-builder";
 import { generateRuleBasedPlan, type FallbackResult } from "./fallback";
 import { getWeatherForecast } from "./weather";
@@ -219,13 +220,18 @@ export async function requestIrrigationPlan(
   } catch (err: unknown) {
     if (err instanceof Error && err.message === "ALL_MODELS_EXHAUSTED") {
       logger.warn("ai.irrigation.all_models_exhausted — using fallback");
-      const fallbackResult = generateRuleBasedPlan({
-        farm: ctx.farm,
-        zones: ctx.zones,
-        quota: ctx.quota,
-        soilReading: ctx.soilReading,
-        weather: ctx.weather,
-      });
+        const fallbackResult = generateRuleBasedPlan({
+          farm: ctx.farm,
+          zones: ctx.zones,
+          quota: ctx.quota,
+          soilReading: Object.fromEntries(
+            Object.entries(ctx.soilReading).map(([wellId, reading]) => [
+              wellId,
+              reading ? { humidityPct: reading.humidityPct ?? 50 } : null,
+            ])
+          ),
+          weather: ctx.weather,
+        });
       plan = fallbackResult.recommendation.plan;
       isFallback = true;
       rawResponse = "FALLBACK_GENERATED";
@@ -249,7 +255,12 @@ export async function requestIrrigationPlan(
         farm: ctx.farm,
         zones: ctx.zones,
         quota: ctx.quota,
-        soilReading: ctx.soilReading,
+        soilReading: Object.fromEntries(
+          Object.entries(ctx.soilReading).map(([wellId, reading]) => [
+            wellId,
+            reading ? { humidityPct: reading.humidityPct ?? 50 } : null,
+          ])
+        ),
         weather: ctx.weather,
       });
       plan = fallbackResult.recommendation.plan;
@@ -390,3 +401,4 @@ export async function requestIrrigationPlan(
     },
   };
 }
+
