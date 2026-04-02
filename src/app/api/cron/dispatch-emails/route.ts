@@ -14,9 +14,9 @@
  */
 
 import { NextResponse } from "next/server";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "~/server/db";
-import { outboxEvent } from "~/server/db/schema";
+import { outboxEvent, userNotificationPreference } from "~/server/db/schema";
 import { env } from "~/env";
 import { NodeMailerTransport } from "~/server/services/email/NodeMailerTransport";
 import { NullTransport } from "~/server/services/email/NullTransport";
@@ -53,6 +53,22 @@ function buildEmailService(): EmailService {
   const auditedTransport = new AuditingEmailTransport(baseTransport, db);
 
   return new EmailService(auditedTransport, env.EMAIL_FROM);
+}
+
+async function isRecipientOptedOut(
+  recipientUserId: string | null,
+): Promise<boolean> {
+  if (!recipientUserId) return false;
+
+  const preference = await db.query.userNotificationPreference.findFirst({
+    where: and(
+      eq(userNotificationPreference.userId, recipientUserId),
+      eq(userNotificationPreference.emailOptOut, true),
+    ),
+    columns: { userId: true },
+  });
+
+  return Boolean(preference);
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
@@ -107,6 +123,21 @@ export async function POST(req: Request): Promise<NextResponse> {
 
           if (!recipientEmail) {
             throw new Error("Outbox event missing recipientEmail in payload");
+          }
+
+          const recipientUserId = extractRecipientUserId(payload);
+          if (await isRecipientOptedOut(recipientUserId)) {
+            await db
+              .update(outboxEvent)
+              .set({
+                status: "done",
+                processedAt: new Date(),
+                lastError: "skipped_opt_out",
+              })
+              .where(eq(outboxEvent.id, event.id));
+
+            processed++;
+            return;
           }
 
           await emailService.dispatch(recipientEmail, payload);
@@ -170,6 +201,13 @@ export async function GET(req: Request): Promise<NextResponse> {
 function extractRecipientEmail(payload: OutboxPayload): string | null {
   if ("recipientEmail" in payload) {
     return payload.recipientEmail;
+  }
+  return null;
+}
+
+function extractRecipientUserId(payload: OutboxPayload): string | null {
+  if ("recipientUserId" in payload && payload.recipientUserId) {
+    return payload.recipientUserId;
   }
   return null;
 }

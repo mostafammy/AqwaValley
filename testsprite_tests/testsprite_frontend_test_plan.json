@@ -1,0 +1,612 @@
+[
+  {
+    "id": "TC001",
+    "title": "Gov role login redirects to government dashboard",
+    "description": "Verifies a successful login for a government user lands on the government portal dashboard.",
+    "category": "User Login",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the government dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Farm role login redirects to farm dashboard",
+    "description": "Verifies a successful login for a farm user lands on the farm portal dashboard.",
+    "category": "User Login",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the farm dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Invalid credentials show login error",
+    "description": "Verifies the login form shows an error when credentials are invalid.",
+    "category": "User Login",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill 0000000000 into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill wrong-password into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a login error message is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "User without matching portal role is redirected back to login",
+    "description": "Verifies a user who cannot be routed to a portal ends up back on the unified login page after attempting login.",
+    "category": "User Login",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is on the unified login page"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Gov dashboard loads primary widgets after login",
+    "description": "Verifies the government dashboard displays its primary KPI and overview sections once authenticated.",
+    "category": "Gov Dashboard Navigation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify KPI cards are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify map and alerts overview sections are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Navigate from gov dashboard to map view and see map rendered",
+    "description": "Verifies a logged-in government user can reach the map view and the map content renders.",
+    "category": "Gov Dashboard Navigation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item to open the map view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a map of wells is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify geographic overlays or markers are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Non-gov session attempting gov dashboard is denied or redirected",
+    "description": "Verifies users without the government role cannot access the government dashboard and are redirected to the unified login page.",
+    "category": "Gov Dashboard Navigation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is on the unified login page"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Farm user lands on farm dashboard and sees primary content",
+    "description": "Verifies a farm user can access the farm dashboard and key widgets render.",
+    "category": "Farm Dashboard Navigation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the farm dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard content such as weather and KPI widgets is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Navigate from farm dashboard to quota view",
+    "description": "Verifies a farm user can navigate from the farm dashboard to the quota management view and see quota content.",
+    "category": "Farm Dashboard Navigation",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /farm/dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation item to open the quota view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the quota management view is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Session without farm assignment attempting farm dashboard is redirected",
+    "description": "Verifies users without a farm assignment cannot access the farm dashboard and are redirected to the unified login page.",
+    "category": "Farm Dashboard Navigation",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the national id field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /farm/dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is on the unified login page"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Well detail route is not directly accessible via static routes list",
+    "description": "Ensures tests do not attempt to navigate to a dynamic well detail route that is unsupported for static-route UI automation.",
+    "category": "Well Detail Rendering",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to view wells or well details if present"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify there is no way to open a specific well detail page without selecting a well id from the UI"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Government map page loads primary well map content",
+    "description": "Validates the closest static alternative to well detail rendering by ensuring the government wells map view renders its primary content after login.",
+    "category": "Well Detail Rendering",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the map view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a wells map is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify well markers or well-related map content are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Government distribution page loads primary content",
+    "description": "Confirms the government distribution view loads and shows distribution-related content after authentication.",
+    "category": "Well Detail Rendering",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the distribution view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify distribution data or a distribution table is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Government dashboard loads primary portal content",
+    "description": "Ensures the government portal dashboard loads successfully after login and shows core dashboard content.",
+    "category": "Well Detail Rendering",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the government dashboard primary content is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "AI plan page loads and can request a plan (happy path)",
+    "description": "Logs into the farm portal, requests an AI irrigation plan, and verifies a plan result is displayed with key fields visible.",
+    "category": "AI Irrigation Plan (Farm Portal)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the AI plan page"
+      },
+      {
+        "type": "action",
+        "description": "Request an irrigation plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an irrigation plan result is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify total litres and per-zone recommendations are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "AI plan request shows reasoning and traceability details",
+    "description": "Requests an AI irrigation plan and verifies the plan includes reasoning and traceability-related information visible in the UI.",
+    "category": "AI Irrigation Plan (Farm Portal)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the AI plan page"
+      },
+      {
+        "type": "action",
+        "description": "Request an irrigation plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify plan reasoning is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify prompt or traceability details are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "AI plan can be requested repeatedly and updates results",
+    "description": "Requests an irrigation plan twice and verifies that the UI updates to show a new/latest plan result without requiring a page refresh.",
+    "category": "AI Irrigation Plan (Farm Portal)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to open the AI plan page"
+      },
+      {
+        "type": "action",
+        "description": "Request an irrigation plan"
+      },
+      {
+        "type": "action",
+        "description": "Request an irrigation plan again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the irrigation plan result is displayed after the second request"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "AI plan unauthenticated access is blocked by login requirement",
+    "description": "Attempts to use the AI plan feature without being authenticated and verifies the UI requires login before allowing a request.",
+    "category": "AI Irrigation Plan (Farm Portal)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /farm/ai-plan"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to request an irrigation plan"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an unauthorized state is shown requiring the user to log in"
+      }
+    ]
+  }
+]

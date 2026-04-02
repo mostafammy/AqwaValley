@@ -1,0 +1,138 @@
+Date : 2026-04-02 20:58:16
+Directory : c:\Users\dell\Documents\AqwaValley
+Total : 62 files,  96899 codes, 477 comments, 743 blanks, all 98119 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| Log            |          2 |     94,220 |          0 |         26 |     94,246 |
+| Python         |         18 |      1,333 |        462 |        431 |      2,226 |
+| TypeScript     |         22 |        606 |         16 |         90 |        712 |
+| JSON           |          3 |        407 |          0 |          2 |        409 |
+| Markdown       |          8 |        245 |          0 |        194 |        439 |
+| TypeScript JSX |          7 |         62 |         -1 |         -5 |         56 |
+| MS SQL         |          2 |         26 |          0 |          5 |         31 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                                 | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                    |         62 |     96,899 |        477 |        743 |     98,119 |
+| . (Files)                                                                                                                            |          6 |        172 |          0 |        134 |        306 |
+| __checks__                                                                                                                           |          9 |         30 |          0 |         37 |         67 |
+| __checks__ (Files)                                                                                                                   |          5 |          6 |          0 |         36 |         42 |
+| __checks__\support                                                                                                                   |          4 |         24 |          0 |          1 |         25 |
+| drizzle                                                                                                                              |          3 |         40 |          0 |          6 |         46 |
+| drizzle (Files)                                                                                                                      |          2 |         26 |          0 |          5 |         31 |
+| drizzle\meta                                                                                                                         |          1 |         14 |          0 |          1 |         15 |
+| src                                                                                                                                  |         23 |        649 |         15 |         84 |        748 |
+| src\__tests__                                                                                                                        |         13 |        529 |         12 |         81 |        622 |
+| src\__tests__\ai                                                                                                                     |          1 |         87 |          2 |         13 |        102 |
+| src\__tests__\email                                                                                                                  |          1 |         54 |          2 |         11 |         67 |
+| src\__tests__\fao56                                                                                                                  |          1 |          2 |          0 |          0 |          2 |
+| src\__tests__\forecast                                                                                                               |          1 |         58 |          2 |         12 |         72 |
+| src\__tests__\ingest                                                                                                                 |          2 |         20 |          0 |          0 |         20 |
+| src\__tests__\integration                                                                                                            |          5 |        170 |          4 |         31 |        205 |
+| src\__tests__\integration\db                                                                                                         |          3 |        156 |          4 |         29 |        189 |
+| src\__tests__\integration\services                                                                                                   |          2 |         14 |          0 |          2 |         16 |
+| src\__tests__\quota                                                                                                                  |          1 |          2 |          0 |          0 |          2 |
+| src\__tests__\reporting                                                                                                              |          1 |        136 |          2 |         14 |        152 |
+| src\app                                                                                                                              |          8 |         94 |         -1 |          1 |         94 |
+| src\app\(farm)                                                                                                                       |          6 |         46 |         -1 |         -5 |         40 |
+| src\app\(farm)\farm                                                                                                                  |          6 |         46 |         -1 |         -5 |         40 |
+| src\app\(farm)\farm\ai-plan                                                                                                          |          1 |         -6 |         -1 |         -2 |         -9 |
+| src\app\(farm)\farm\ai-plan\_components                                                                                              |          1 |         -6 |         -1 |         -2 |         -9 |
+| src\app\(farm)\farm\crops                                                                                                            |          1 |          6 |          0 |          1 |          7 |
+| src\app\(farm)\farm\crops\_components                                                                                                |          1 |          6 |          0 |          1 |          7 |
+| src\app\(farm)\farm\history                                                                                                          |          1 |          3 |          0 |          0 |          3 |
+| src\app\(farm)\farm\history\_components                                                                                              |          1 |          3 |          0 |          0 |          3 |
+| src\app\(farm)\farm\irrigate                                                                                                         |          1 |         35 |          0 |         -4 |         31 |
+| src\app\(farm)\farm\irrigate\_components                                                                                             |          1 |         35 |          0 |         -4 |         31 |
+| src\app\(farm)\farm\quota                                                                                                            |          1 |          5 |          0 |          0 |          5 |
+| src\app\(farm)\farm\quota\_components                                                                                                |          1 |          5 |          0 |          0 |          5 |
+| src\app\(farm)\farm\soil                                                                                                             |          1 |          3 |          0 |          0 |          3 |
+| src\app\(farm)\farm\soil\_components                                                                                                 |          1 |          3 |          0 |          0 |          3 |
+| src\app\_components                                                                                                                  |          1 |         16 |          0 |          0 |         16 |
+| src\app\_components\auth                                                                                                             |          1 |         16 |          0 |          0 |         16 |
+| src\app\api                                                                                                                          |          1 |         32 |          0 |          6 |         38 |
+| src\app\api\cron                                                                                                                     |          1 |         32 |          0 |          6 |         38 |
+| src\app\api\cron\dispatch-emails                                                                                                     |          1 |         32 |          0 |          6 |         38 |
+| src\server                                                                                                                           |          2 |         26 |          4 |          2 |         32 |
+| src\server\db                                                                                                                        |          1 |         15 |          4 |          1 |         20 |
+| src\server\services                                                                                                                  |          1 |         11 |          0 |          1 |         12 |
+| src\server\services\irrigation                                                                                                       |          1 |         11 |          0 |          1 |         12 |
+| testsprite_tests                                                                                                                     |         21 |     96,008 |        462 |        482 |     96,952 |
+| testsprite_tests (Files)                                                                                                             |         18 |      1,333 |        462 |        431 |      2,226 |
+| testsprite_tests\tmp                                                                                                                 |          3 |     94,675 |          0 |         51 |     94,726 |
++--------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                                             | language       | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\dell\Documents\AqwaValley\IMPLEMENTATION_COMPLETE.md                                                                        | Markdown       |          0 |          0 |         12 |         12 |
+| c:\Users\dell\Documents\AqwaValley\PHASE1_TEST_SUMMARY.md                                                                            | Markdown       |          0 |          0 |         12 |         12 |
+| c:\Users\dell\Documents\AqwaValley\TESTING_IMPLEMENTATION_ROADMAP.md                                                                 | Markdown       |          0 |          0 |         39 |         39 |
+| c:\Users\dell\Documents\AqwaValley\TEST_EXECUTION_GUIDE.md                                                                           | Markdown       |          3 |          0 |         45 |         48 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\PATTERNS.md                                                                            | Markdown       |          8 |          0 |          0 |          8 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\QUICKSTART.md                                                                          | Markdown       |         -4 |          0 |         12 |          8 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\README.md                                                                              | Markdown       |          7 |          0 |         24 |         31 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\api.check.ts                                                                           | TypeScript     |         -3 |          0 |          0 |         -3 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\heartbeat.check.ts                                                                     | TypeScript     |         -2 |          0 |          0 |         -2 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\api-check.ts                                                                   | TypeScript     |          8 |          0 |          0 |          8 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\base-page.ts                                                                   | TypeScript     |          8 |          0 |          1 |          9 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\index.ts                                                                       | TypeScript     |          5 |          0 |          0 |          5 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\login-page.ts                                                                  | TypeScript     |          3 |          0 |          0 |          3 |
+| c:\Users\dell\Documents\AqwaValley\build-output.log                                                                                  | Log            |         66 |          0 |         26 |         92 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0013_audit_log_append_only.sql                                                            | MS SQL         |         19 |          0 |          3 |         22 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0014_user_notification_preferences.sql                                                    | MS SQL         |          7 |          0 |          2 |          9 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\_journal.json                                                                        | JSON           |         14 |          0 |          1 |         15 |
+| c:\Users\dell\Documents\AqwaValley\package.json                                                                                      | JSON           |        103 |          0 |          0 |        103 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\ai\ai-contracts.test.ts                                                             | TypeScript     |         87 |          2 |         13 |        102 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\email\email-notification-contracts.test.ts                                          | TypeScript     |         54 |          2 |         11 |         67 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\fao56\fao56-et0-calculation.test.ts                                                 | TypeScript     |          2 |          0 |          0 |          2 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\forecast\forecast-plausibility-contract.test.ts                                     | TypeScript     |         58 |          2 |         12 |         72 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\duplicate-reading-idempotency.test.ts                                        | TypeScript     |          3 |          0 |          0 |          3 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\ingest-authorization-scope.test.ts                                           | TypeScript     |         17 |          0 |          0 |         17 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\audit-immutability.test.ts                                           | TypeScript     |         60 |          2 |         11 |         73 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\demo-cron-isolation.test.ts                                          | TypeScript     |         61 |          2 |         11 |         74 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\timescale-aggregation.test.ts                                        | TypeScript     |         35 |          0 |          7 |         42 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\ingest-orchestration.test.ts                                   | TypeScript     |          8 |          0 |          1 |          9 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\quota-decision.test.ts                                         | TypeScript     |          6 |          0 |          1 |          7 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\quota\quota-hard-block-boundary.test.ts                                             | TypeScript     |          2 |          0 |          0 |          2 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\reporting\reporting-contracts.test.ts                                               | TypeScript     |        136 |          2 |         14 |        152 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\_components\AiPlanClient.tsx                                          | TypeScript JSX |         -6 |         -1 |         -2 |         -9 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\_components\crop-history-table.tsx                                      | TypeScript JSX |          6 |          0 |          1 |          7 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\_components\history-chart.tsx                                         | TypeScript JSX |          3 |          0 |          0 |          3 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\irrigate\_components\IrrigateClient.tsx                                       | TypeScript JSX |         35 |          0 |         -4 |         31 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\_components\quota-usage-chart.tsx                                       | TypeScript JSX |          5 |          0 |          0 |          5 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\soil-moisture-chart.tsx                                      | TypeScript JSX |          3 |          0 |          0 |          3 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\auth\LoginForm.tsx                                                            | TypeScript JSX |         16 |          0 |          0 |         16 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\dispatch-emails\route.ts                                                         | TypeScript     |         32 |          0 |          6 |         38 |
+| c:\Users\dell\Documents\AqwaValley\src\server\db\schema.ts                                                                           | TypeScript     |         15 |          4 |          1 |         20 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\recommend.ts                                                       | TypeScript     |         11 |          0 |          1 |         12 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC001_Gov_role_login_redirects_to_government_dashboard.py                        | Python         |         61 |         20 |         20 |        101 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC002_Farm_role_login_redirects_to_farm_dashboard.py                             | Python         |         78 |         27 |         25 |        130 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC003_Invalid_credentials_show_login_error.py                                    | Python         |         80 |         29 |         27 |        136 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC004_User_without_matching_portal_role_is_redirected_back_to_login.py           | Python         |         43 |         11 |         13 |         67 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC005_Gov_dashboard_loads_primary_widgets_after_login.py                         | Python         |         70 |         23 |         22 |        115 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC006_Navigate_from_gov_dashboard_to_map_view_and_see_map_rendered.py            | Python         |        101 |         38 |         33 |        172 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC007_Non_gov_session_attempting_gov_dashboard_is_denied_or_redirected.py        | Python         |         72 |         26 |         25 |        123 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC008_Farm_user_lands_on_farm_dashboard_and_sees_primary_content.py              | Python         |         88 |         31 |         28 |        147 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC009_Navigate_from_farm_dashboard_to_quota_view.py                              | Python         |        100 |         38 |         33 |        171 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC010_Session_without_farm_assignment_attempting_farm_dashboard_is_redirected.py | Python         |         90 |         33 |         29 |        152 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC011_Well_detail_route_is_not_directly_accessible_via_static_routes_list.py     | Python         |         51 |         15 |         16 |         82 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC012_Government_map_page_loads_primary_well_map_content.py                      | Python         |         52 |         15 |         16 |         83 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC013_Government_distribution_page_loads_primary_content.py                      | Python         |         99 |         37 |         32 |        168 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC014_Government_dashboard_loads_primary_portal_content.py                       | Python         |         51 |         15 |         16 |         82 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC015_AI_plan_page_loads_and_can_request_a_plan_happy_path.py                    | Python         |         89 |         33 |         29 |        151 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC016_AI_plan_request_shows_reasoning_and_traceability_details.py                | Python         |         79 |         27 |         25 |        131 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC017_AI_plan_can_be_requested_repeatedly_and_updates_results.py                 | Python         |         94 |         35 |         30 |        159 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC018_AI_plan_unauthenticated_access_is_blocked_by_login_requirement.py          | Python         |         35 |          9 |         12 |         56 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\mcp.log                                                                      | Log            |     94,154 |          0 |          0 |     94,154 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\raw_report.md                                                                | Markdown       |        231 |          0 |         50 |        281 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\test_results.json                                                            | JSON           |        290 |          0 |          1 |        291 |
+| Total                                                                                                                                |                |     96,899 |        477 |        743 |     98,119 |
++--------------------------------------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

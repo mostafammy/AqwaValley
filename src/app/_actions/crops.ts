@@ -1,20 +1,27 @@
 "use server";
 
 import { db } from "~/server/db";
-import { cropProfile, cropHistory, farm, cropTypeEnum, growthStageEnum } from "~/server/db/schema";
+import {
+  cropProfile,
+  cropHistory,
+  farm,
+  cropTypeEnum,
+  growthStageEnum,
+} from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "~/server/better-auth/server";
 import { z } from "zod";
 
 const UpdateCropSchema = z.object({
-  farmId:              z.string().uuid(),
-  cropType:            z.enum(cropTypeEnum.enumValues),
-  growthStage:         z.enum(growthStageEnum.enumValues),
-  targetSoilMoisture:  z.string()
+  farmId: z.string().uuid(),
+  cropType: z.enum(cropTypeEnum.enumValues),
+  growthStage: z.enum(growthStageEnum.enumValues),
+  targetSoilMoisture: z
+    .string()
     .transform((v) => parseFloat(v))
     .refine((v) => Number.isFinite(v), { message: "يجب أن يكون رقمًا صالحًا" }),
-  plantedDate:         z.string().optional(),
+  plantedDate: z.string().optional(),
   expectedHarvestDate: z.string().optional(),
 });
 
@@ -23,11 +30,11 @@ export async function updateCropProfile(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const parsed = UpdateCropSchema.safeParse({
-      farmId:              formData.get("farmId"),
-      cropType:            formData.get("cropType"),
-      growthStage:         formData.get("growthStage"),
-      targetSoilMoisture:  formData.get("targetSoilMoisture"),
-      plantedDate:         formData.get("plantedDate"),
+      farmId: formData.get("farmId"),
+      cropType: formData.get("cropType"),
+      growthStage: formData.get("growthStage"),
+      targetSoilMoisture: formData.get("targetSoilMoisture"),
+      plantedDate: formData.get("plantedDate"),
       expectedHarvestDate: formData.get("expectedHarvestDate"),
     });
 
@@ -36,7 +43,14 @@ export async function updateCropProfile(
       return { success: false, error: "بيانات غير صحيحة" };
     }
 
-    const { farmId, cropType, growthStage, targetSoilMoisture, plantedDate, expectedHarvestDate } = parsed.data;
+    const {
+      farmId,
+      cropType,
+      growthStage,
+      targetSoilMoisture,
+      plantedDate,
+      expectedHarvestDate,
+    } = parsed.data;
 
     // 0. Authorization check
     const session = await getSession();
@@ -50,7 +64,7 @@ export async function updateCropProfile(
       .where(eq(farm.id, farmId))
       .limit(1);
 
-    if (farmRecord?.ownerId !== session.user.id) {
+    if (!farmRecord?.ownerId || farmRecord.ownerId !== session.user.id) {
       return { success: false, error: "غير مصرح لك بتعديل هذه المزرعة" };
     }
 
@@ -63,9 +77,11 @@ export async function updateCropProfile(
           cropType: cropType,
           growthStage: growthStage,
           targetSoilMoisturePct: String(targetSoilMoisture),
-          plantedDate:           plantedDate ? new Date(plantedDate) : null,
-          expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
-          updatedAt:             new Date(),
+          plantedDate: plantedDate ? new Date(plantedDate) : null,
+          expectedHarvestDate: expectedHarvestDate
+            ? new Date(expectedHarvestDate)
+            : null,
+          updatedAt: new Date(),
         })
         .where(eq(cropProfile.farmId, farmId))
         .returning({ id: cropProfile.id });
@@ -77,13 +93,15 @@ export async function updateCropProfile(
       // 2. Log this state in crop history
       await tx.insert(cropHistory).values({
         farmId,
-        cropType:            cropType,
-        growthStage:         growthStage,
+        cropType: cropType,
+        growthStage: growthStage,
         targetSoilMoisturePct: String(targetSoilMoisture),
-        plantedDate:           plantedDate ? new Date(plantedDate) : null,
-        expectedHarvestDate:   expectedHarvestDate ? new Date(expectedHarvestDate) : null,
-        harvestedDate:       growthStage === "harvest" ? new Date() : null,
-        recordedAt:          new Date(),
+        plantedDate: plantedDate ? new Date(plantedDate) : null,
+        expectedHarvestDate: expectedHarvestDate
+          ? new Date(expectedHarvestDate)
+          : null,
+        harvestedDate: growthStage === "harvest" ? new Date() : null,
+        recordedAt: new Date(),
       });
     });
 

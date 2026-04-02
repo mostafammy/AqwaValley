@@ -93,7 +93,9 @@ const DEFAULT_FIELD_CAPACITY = 65;
 // ---------------------------------------------------------------------------
 
 function getCropFieldCapacity(cropType: string): number {
-  return FIELD_CAPACITY_TARGETS[cropType.toLowerCase()] ?? DEFAULT_FIELD_CAPACITY;
+  return (
+    FIELD_CAPACITY_TARGETS[cropType.toLowerCase()] ?? DEFAULT_FIELD_CAPACITY
+  );
 }
 
 /**
@@ -105,7 +107,7 @@ function calcDeficitMm(
   cropType: string,
 ): number {
   const target = getCropFieldCapacity(cropType);
-  if (soilReading?.humidityPct == null) {
+  if (!soilReading?.humidityPct) {
     // Conservative fallback: treat missing humidity as 0% so deficit = full field capacity
     return parseFloat((target * 0.1).toFixed(2));
   }
@@ -204,9 +206,11 @@ export function buildIrrigationPrompt(ctx: PromptContext): BuiltPrompt {
     )
     .join("\n");
 
-  const quotaRemainingPct = (ctx.quota.monthlyLimit > 0
-    ? (ctx.quota.remainingLitres / ctx.quota.monthlyLimit) * 100
-    : 0).toFixed(1);
+  const quotaRemainingPct = (
+    ctx.quota.monthlyLimit > 0
+      ? (ctx.quota.remainingLitres / ctx.quota.monthlyLimit) * 100
+      : 0
+  ).toFixed(1);
 
   const userMessage = `
 FARM DETAILS:

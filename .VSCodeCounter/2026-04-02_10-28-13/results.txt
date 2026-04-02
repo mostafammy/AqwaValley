@@ -1,0 +1,547 @@
+Date : 2026-04-02 10:28:13
+Directory : c:\Users\dell\Documents\AqwaValley
+Total : 359 files,  100180 codes, 2863 comments, 11419 blanks, all 114462 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JSON               |         12 |     38,885 |          0 |          7 |     38,892 |
+| TypeScript         |        175 |     23,285 |      2,282 |      3,406 |     28,973 |
+| Markdown           |         34 |     12,019 |          0 |      4,395 |     16,414 |
+| TypeScript JSX     |         96 |      9,729 |        406 |        984 |     11,119 |
+| YAML               |          3 |      9,167 |          0 |      2,371 |     11,538 |
+| Log                |          4 |      4,380 |          0 |          4 |      4,384 |
+| MS SQL             |         15 |      1,303 |         74 |         58 |      1,435 |
+| PostCSS            |          1 |        531 |         29 |         98 |        658 |
+| HTML               |          4 |        457 |          7 |         29 |        493 |
+| JavaScript         |          9 |        314 |         47 |         47 |        408 |
+| Shell Script       |          1 |         62 |         14 |         13 |         89 |
+| JSON with Comments |          1 |         35 |          4 |          4 |         43 |
+| XML                |          3 |         10 |          0 |          3 |         13 |
+| CSV                |          1 |          3 |          0 |          0 |          3 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                              | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                 |        359 |    100,180 |      2,863 |     11,419 |    114,462 |
+| . (Files)                                                                                                                         |         25 |     26,762 |         76 |      2,817 |     29,655 |
+| .github                                                                                                                           |          1 |         43 |          0 |         11 |         54 |
+| .github\workflows                                                                                                                 |          1 |         43 |          0 |         11 |         54 |
+| .reports                                                                                                                          |          1 |          3 |          0 |          0 |          3 |
+| .reports\reports                                                                                                                  |          1 |          3 |          0 |          0 |          3 |
+| .reports\reports\b88835cc-b34e-4143-aacb-0e2145b41763                                                                             |          1 |          3 |          0 |          0 |          3 |
+| __checks__                                                                                                                        |         16 |      1,684 |        329 |        441 |      2,454 |
+| __checks__ (Files)                                                                                                                |          8 |      1,152 |        136 |        328 |      1,616 |
+| __checks__\support                                                                                                                |          8 |        532 |        193 |        113 |        838 |
+| docs                                                                                                                              |         11 |      4,827 |          0 |      1,798 |      6,625 |
+| drizzle                                                                                                                           |         20 |     22,842 |         68 |         50 |     22,960 |
+| drizzle (Files)                                                                                                                   |         14 |      1,253 |         68 |         49 |      1,370 |
+| drizzle\meta                                                                                                                      |          6 |     21,589 |          0 |          1 |     21,590 |
+| public                                                                                                                            |          3 |         10 |          0 |          3 |         13 |
+| public\svg                                                                                                                        |          3 |         10 |          0 |          3 |         13 |
+| scripts                                                                                                                           |         21 |      3,576 |        165 |        536 |      4,277 |
+| src                                                                                                                               |        245 |     30,185 |      2,225 |      3,959 |     36,369 |
+| src (Files)                                                                                                                       |          3 |        142 |         40 |         20 |        202 |
+| src\__tests__                                                                                                                     |          7 |      1,307 |        331 |        290 |      1,928 |
+| src\__tests__\auth                                                                                                                |          1 |        274 |         88 |         65 |        427 |
+| src\__tests__\fao56                                                                                                               |          1 |        141 |        103 |         43 |        287 |
+| src\__tests__\ingest                                                                                                              |          2 |        441 |        106 |         90 |        637 |
+| src\__tests__\integration                                                                                                         |          2 |        287 |          0 |         58 |        345 |
+| src\__tests__\integration\services                                                                                                |          2 |        287 |          0 |         58 |        345 |
+| src\__tests__\quota                                                                                                               |          1 |        164 |         34 |         34 |        232 |
+| src\app                                                                                                                           |        112 |     11,174 |        490 |      1,228 |     12,892 |
+| src\app (Files)                                                                                                                   |          3 |         70 |         16 |         15 |        101 |
+| src\app\(farm)                                                                                                                    |         35 |      4,172 |        172 |        403 |      4,747 |
+| src\app\(farm) (Files)                                                                                                            |          1 |         67 |         13 |          8 |         88 |
+| src\app\(farm)\farm                                                                                                               |         34 |      4,105 |        159 |        395 |      4,659 |
+| src\app\(farm)\farm\ai-plan                                                                                                       |          5 |        883 |         53 |        108 |      1,044 |
+| src\app\(farm)\farm\ai-plan (Files)                                                                                               |          2 |         75 |          9 |         13 |         97 |
+| src\app\(farm)\farm\ai-plan\_components                                                                                           |          3 |        808 |         44 |         95 |        947 |
+| src\app\(farm)\farm\crops                                                                                                         |          5 |        473 |          9 |         41 |        523 |
+| src\app\(farm)\farm\crops (Files)                                                                                                 |          2 |         79 |          3 |         10 |         92 |
+| src\app\(farm)\farm\crops\_components                                                                                             |          3 |        394 |          6 |         31 |        431 |
+| src\app\(farm)\farm\dashboard                                                                                                     |          7 |        684 |         24 |         62 |        770 |
+| src\app\(farm)\farm\dashboard (Files)                                                                                             |          2 |        188 |         15 |         27 |        230 |
+| src\app\(farm)\farm\dashboard\_components                                                                                         |          5 |        496 |          9 |         35 |        540 |
+| src\app\(farm)\farm\history                                                                                                       |          4 |        487 |         13 |         32 |        532 |
+| src\app\(farm)\farm\history (Files)                                                                                               |          2 |        177 |         11 |         17 |        205 |
+| src\app\(farm)\farm\history\_components                                                                                           |          2 |        310 |          2 |         15 |        327 |
+| src\app\(farm)\farm\irrigate                                                                                                      |          3 |        621 |         33 |         69 |        723 |
+| src\app\(farm)\farm\irrigate (Files)                                                                                              |          2 |        100 |          3 |         11 |        114 |
+| src\app\(farm)\farm\irrigate\_components                                                                                          |          1 |        521 |         30 |         58 |        609 |
+| src\app\(farm)\farm\quota                                                                                                         |          5 |        559 |         19 |         45 |        623 |
+| src\app\(farm)\farm\quota (Files)                                                                                                 |          2 |        214 |         15 |         19 |        248 |
+| src\app\(farm)\farm\quota\_components                                                                                             |          3 |        345 |          4 |         26 |        375 |
+| src\app\(farm)\farm\soil                                                                                                          |          5 |        398 |          8 |         38 |        444 |
+| src\app\(farm)\farm\soil (Files)                                                                                                  |          1 |        170 |          8 |         20 |        198 |
+| src\app\(farm)\farm\soil\_components                                                                                              |          4 |        228 |          0 |         18 |        246 |
+| src\app\(gov)                                                                                                                     |         36 |      3,790 |        143 |        375 |      4,308 |
+| src\app\(gov) (Files)                                                                                                             |          1 |         40 |         11 |          5 |         56 |
+| src\app\(gov)\alerts                                                                                                              |          3 |        374 |         24 |         36 |        434 |
+| src\app\(gov)\alerts (Files)                                                                                                      |          2 |        112 |          7 |         14 |        133 |
+| src\app\(gov)\alerts\_components                                                                                                  |          1 |        262 |         17 |         22 |        301 |
+| src\app\(gov)\dashboard                                                                                                           |         11 |        782 |         22 |         97 |        901 |
+| src\app\(gov)\dashboard (Files)                                                                                                   |          3 |        114 |          5 |         13 |        132 |
+| src\app\(gov)\dashboard\_components                                                                                               |          8 |        668 |         17 |         84 |        769 |
+| src\app\(gov)\distribution                                                                                                        |          4 |        715 |         33 |         60 |        808 |
+| src\app\(gov)\distribution (Files)                                                                                                |          2 |        150 |         17 |         29 |        196 |
+| src\app\(gov)\distribution\_components                                                                                            |          2 |        565 |         16 |         31 |        612 |
+| src\app\(gov)\districts                                                                                                           |          5 |        308 |          8 |         39 |        355 |
+| src\app\(gov)\districts (Files)                                                                                                   |          2 |        117 |          0 |         17 |        134 |
+| src\app\(gov)\districts\_components                                                                                               |          3 |        191 |          8 |         22 |        221 |
+| src\app\(gov)\forecast                                                                                                            |          3 |        412 |         10 |         26 |        448 |
+| src\app\(gov)\forecast (Files)                                                                                                    |          2 |         52 |          4 |         11 |         67 |
+| src\app\(gov)\forecast\_components                                                                                                |          1 |        360 |          6 |         15 |        381 |
+| src\app\(gov)\map                                                                                                                 |          3 |        237 |         13 |         32 |        282 |
+| src\app\(gov)\map (Files)                                                                                                         |          2 |         96 |          6 |         15 |        117 |
+| src\app\(gov)\map\_components                                                                                                     |          1 |        141 |          7 |         17 |        165 |
+| src\app\(gov)\users                                                                                                               |          1 |        434 |          8 |         30 |        472 |
+| src\app\(gov)\wells                                                                                                               |          5 |        488 |         14 |         50 |        552 |
+| src\app\(gov)\wells\[wellId]                                                                                                      |          5 |        488 |         14 |         50 |        552 |
+| src\app\(gov)\wells\[wellId] (Files)                                                                                              |          2 |        145 |          7 |         19 |        171 |
+| src\app\(gov)\wells\[wellId]\_components                                                                                          |          3 |        343 |          7 |         31 |        381 |
+| src\app\_actions                                                                                                                  |          2 |        110 |         17 |         20 |        147 |
+| src\app\_components                                                                                                               |         18 |      1,144 |         51 |        145 |      1,340 |
+| src\app\_components (Files)                                                                                                       |          3 |         66 |          3 |         12 |         81 |
+| src\app\_components\UI                                                                                                            |          6 |        320 |          5 |         44 |        369 |
+| src\app\_components\auth                                                                                                          |          1 |        142 |         12 |         11 |        165 |
+| src\app\_components\layouts                                                                                                       |          8 |        616 |         31 |         78 |        725 |
+| src\app\api                                                                                                                       |         15 |      1,390 |         79 |        236 |      1,705 |
+| src\app\api\admin                                                                                                                 |          2 |        225 |          3 |         32 |        260 |
+| src\app\api\admin\cron-runs                                                                                                       |          1 |        135 |          0 |         16 |        151 |
+| src\app\api\admin\mock-ingest                                                                                                     |          1 |         90 |          3 |         16 |        109 |
+| src\app\api\auth                                                                                                                  |          1 |          3 |          0 |          3 |          6 |
+| src\app\api\auth\[...all]                                                                                                         |          1 |          3 |          0 |          3 |          6 |
+| src\app\api\cron                                                                                                                  |          5 |        566 |         24 |         96 |        686 |
+| src\app\api\cron\aquifer-forecast                                                                                                 |          1 |         96 |          0 |         14 |        110 |
+| src\app\api\cron\dispatch-emails                                                                                                  |          1 |        125 |         24 |         27 |        176 |
+| src\app\api\cron\process-irrigation-queue                                                                                         |          1 |         84 |          0 |         14 |         98 |
+| src\app\api\cron\process-report-jobs                                                                                              |          1 |         64 |          0 |         13 |         77 |
+| src\app\api\cron\simulate-ingest                                                                                                  |          1 |        197 |          0 |         28 |        225 |
+| src\app\api\email                                                                                                                 |          1 |        147 |         27 |         28 |        202 |
+| src\app\api\email\webhook                                                                                                         |          1 |        147 |         27 |         28 |        202 |
+| src\app\api\health                                                                                                                |          1 |         38 |          2 |          8 |         48 |
+| src\app\api\reports                                                                                                               |          1 |        101 |          0 |         19 |        120 |
+| src\app\api\reports\download                                                                                                      |          1 |        101 |          0 |         19 |        120 |
+| src\app\api\reports\download\[artifactId]                                                                                         |          1 |        101 |          0 |         19 |        120 |
+| src\app\api\sensors                                                                                                               |          1 |         89 |          8 |         18 |        115 |
+| src\app\api\sensors\ingest                                                                                                        |          1 |         89 |          8 |         18 |        115 |
+| src\app\api\sentry-example-api                                                                                                    |          1 |         29 |          8 |          5 |         42 |
+| src\app\api\trpc                                                                                                                  |          1 |         26 |          4 |          5 |         35 |
+| src\app\api\trpc\[trpc]                                                                                                           |          1 |         26 |          4 |          5 |         35 |
+| src\app\api\wells                                                                                                                 |          1 |        166 |          3 |         22 |        191 |
+| src\app\api\wells\[id]                                                                                                            |          1 |        166 |          3 |         22 |        191 |
+| src\app\api\wells\[id]\metrics                                                                                                    |          1 |        166 |          3 |         22 |        191 |
+| src\app\sentry-example-page                                                                                                       |          2 |        242 |          3 |         12 |        257 |
+| src\app\set-password                                                                                                              |          1 |        256 |          9 |         22 |        287 |
+| src\lib                                                                                                                           |          8 |        301 |         54 |         75 |        430 |
+| src\server                                                                                                                        |        110 |     16,622 |      1,260 |      2,223 |     20,105 |
+| src\server\ai                                                                                                                     |          1 |        146 |         72 |         28 |        246 |
+| src\server\api                                                                                                                    |         15 |      3,352 |        367 |        552 |      4,271 |
+| src\server\api (Files)                                                                                                            |          2 |        142 |         88 |         25 |        255 |
+| src\server\api\routers                                                                                                            |         13 |      3,210 |        279 |        527 |      4,016 |
+| src\server\better-auth                                                                                                            |          4 |         49 |          0 |         10 |         59 |
+| src\server\db                                                                                                                     |          3 |      2,149 |        203 |        166 |      2,518 |
+| src\server\lib                                                                                                                    |          1 |        144 |         30 |         26 |        200 |
+| src\server\services                                                                                                               |         86 |     10,782 |        588 |      1,441 |     12,811 |
+| src\server\services (Files)                                                                                                       |         10 |      1,899 |         22 |        247 |      2,168 |
+| src\server\services\email                                                                                                         |          9 |        853 |        113 |        105 |      1,071 |
+| src\server\services\email (Files)                                                                                                 |          5 |        396 |        106 |         76 |        578 |
+| src\server\services\email\templates                                                                                               |          4 |        457 |          7 |         29 |        493 |
+| src\server\services\forecast                                                                                                      |         27 |      2,206 |         11 |        310 |      2,527 |
+| src\server\services\forecast (Files)                                                                                              |          6 |        528 |          0 |         65 |        593 |
+| src\server\services\forecast\adapters                                                                                             |          4 |        176 |          0 |         32 |        208 |
+| src\server\services\forecast\core                                                                                                 |         12 |        943 |         11 |        161 |      1,115 |
+| src\server\services\forecast\core (Files)                                                                                         |          2 |        221 |          1 |         38 |        260 |
+| src\server\services\forecast\core\interval                                                                                        |          4 |        171 |          0 |         36 |        207 |
+| src\server\services\forecast\core\pipeline                                                                                        |          1 |        250 |          7 |         39 |        296 |
+| src\server\services\forecast\core\plausibility                                                                                    |          3 |        194 |          3 |         30 |        227 |
+| src\server\services\forecast\core\plausibility (Files)                                                                            |          2 |         58 |          3 |         10 |         71 |
+| src\server\services\forecast\core\plausibility\rules                                                                              |          1 |        136 |          0 |         20 |        156 |
+| src\server\services\forecast\core\risk                                                                                            |          2 |        107 |          0 |         18 |        125 |
+| src\server\services\forecast\policy                                                                                               |          1 |         24 |          0 |          2 |         26 |
+| src\server\services\forecast\repositories                                                                                         |          4 |        535 |          0 |         50 |        585 |
+| src\server\services\irrigation                                                                                                    |         24 |      3,774 |        205 |        480 |      4,459 |
+| src\server\services\irrigation (Files)                                                                                            |         15 |      2,853 |        204 |        352 |      3,409 |
+| src\server\services\irrigation\simulation                                                                                         |          9 |        921 |          1 |        128 |      1,050 |
+| src\server\services\reporting                                                                                                     |          6 |      1,251 |          3 |        162 |      1,416 |
+| src\server\services\token                                                                                                         |          2 |         44 |         48 |         15 |        107 |
+| src\server\services\user                                                                                                          |          8 |        755 |        186 |        122 |      1,063 |
+| src\styles                                                                                                                        |          1 |        531 |         29 |         98 |        658 |
+| src\trpc                                                                                                                          |          3 |         97 |         18 |         21 |        136 |
+| src\types                                                                                                                         |          1 |         11 |          3 |          4 |         18 |
+| testsprite_tests                                                                                                                  |         16 |     10,248 |          0 |      1,804 |     12,052 |
+| testsprite_tests (Files)                                                                                                          |          2 |        881 |          0 |          2 |        883 |
+| testsprite_tests\tmp                                                                                                              |         14 |      9,367 |          0 |      1,802 |     11,169 |
+| testsprite_tests\tmp (Files)                                                                                                      |          3 |      4,540 |          0 |          4 |      4,544 |
+| testsprite_tests\tmp\prd_files                                                                                                    |         11 |      4,827 |          0 |      1,798 |      6,625 |
++-----------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                                          | language           | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\Users\dell\Documents\AqwaValley\.github\workflows\sync-qstash-cron.yml                                                         | YAML               |         43 |          0 |         11 |         54 |
+| c:\Users\dell\Documents\AqwaValley\.reports\reports\b88835cc-b34e-4143-aacb-0e2145b41763\b88835cc-b34e-4143-aacb-0e2145b41763.csv | CSV                |          3 |          0 |          0 |          3 |
+| c:\Users\dell\Documents\AqwaValley\IMPLEMENTATION_COMPLETE.md                                                                     | Markdown           |        217 |          0 |         72 |        289 |
+| c:\Users\dell\Documents\AqwaValley\PHASE1_TEST_SUMMARY.md                                                                         | Markdown           |        206 |          0 |         74 |        280 |
+| c:\Users\dell\Documents\AqwaValley\README.md                                                                                      | Markdown           |         30 |          0 |         20 |         50 |
+| c:\Users\dell\Documents\AqwaValley\START_HERE.md                                                                                  | Markdown           |        219 |          0 |        103 |        322 |
+| c:\Users\dell\Documents\AqwaValley\TESTING_IMPLEMENTATION_ROADMAP.md                                                              | Markdown           |        240 |          0 |         72 |        312 |
+| c:\Users\dell\Documents\AqwaValley\TEST_EXECUTION_GUIDE.md                                                                        | Markdown           |        206 |          0 |         58 |        264 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\PATTERNS.md                                                                         | Markdown           |        360 |          0 |         98 |        458 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\QUICKSTART.md                                                                       | Markdown           |        201 |          0 |         66 |        267 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\README.md                                                                           | Markdown           |        375 |          0 |        111 |        486 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\api.check.ts                                                                        | TypeScript         |         33 |         30 |          5 |         68 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\heartbeat.check.ts                                                                  | TypeScript         |         18 |         23 |          3 |         44 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\homepage.spec.ts                                                                    | TypeScript         |         36 |         21 |         12 |         69 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\login.spec.ts                                                                       | TypeScript         |        105 |         41 |         29 |        175 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\api-check.ts                                                                | TypeScript         |        119 |         44 |         21 |        184 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\assertions.ts                                                               | TypeScript         |         80 |         26 |         17 |        123 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\base-page.ts                                                                | TypeScript         |         56 |         58 |         14 |        128 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\env.ts                                                                      | TypeScript         |         11 |          0 |          2 |         13 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\index.ts                                                                    | TypeScript         |         14 |          0 |          1 |         15 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\login-page.ts                                                               | TypeScript         |         71 |         32 |         18 |        121 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\login-scenario.ts                                                           | TypeScript         |         49 |          0 |         10 |         59 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\support\test-data.ts                                                                | TypeScript         |        132 |         33 |         30 |        195 |
+| c:\Users\dell\Documents\AqwaValley\__checks__\url.check.ts                                                                        | TypeScript         |         24 |         21 |          4 |         49 |
+| c:\Users\dell\Documents\AqwaValley\checkly.config.ts                                                                              | TypeScript         |         39 |         27 |          3 |         69 |
+| c:\Users\dell\Documents\AqwaValley\docs\ai-irrigation-plan.md                                                                     | Markdown           |        723 |          0 |        193 |        916 |
+| c:\Users\dell\Documents\AqwaValley\docs\aquifer-forecast-engine-engineering-spec.md                                               | Markdown           |        259 |          0 |         81 |        340 |
+| c:\Users\dell\Documents\AqwaValley\docs\aquifer-forecast-engine-professional-plan.md                                              | Markdown           |        474 |          0 |        175 |        649 |
+| c:\Users\dell\Documents\AqwaValley\docs\ingest-endpoints-and-cron.md                                                              | Markdown           |        186 |          0 |         84 |        270 |
+| c:\Users\dell\Documents\AqwaValley\docs\irrigation-trigger-simulation-production-plan.md                                          | Markdown           |        867 |          0 |        357 |      1,224 |
+| c:\Users\dell\Documents\AqwaValley\docs\quota-service-runtime-behavior.md                                                         | Markdown           |         93 |          0 |         46 |        139 |
+| c:\Users\dell\Documents\AqwaValley\docs\report-generation-endpoints-api-contract.md                                               | Markdown           |        362 |          0 |        126 |        488 |
+| c:\Users\dell\Documents\AqwaValley\docs\report-generation-export-engine-world-class-plan.md                                       | Markdown           |        478 |          0 |        192 |        670 |
+| c:\Users\dell\Documents\AqwaValley\docs\sensor-ingest-cycle.md                                                                    | Markdown           |        165 |          0 |         53 |        218 |
+| c:\Users\dell\Documents\AqwaValley\docs\testing-strategy-world-class-plan.md                                                      | Markdown           |        732 |          0 |        286 |      1,018 |
+| c:\Users\dell\Documents\AqwaValley\docs\users-management-api-world-class-prd-and-implementation-plan.md                           | Markdown           |        488 |          0 |        205 |        693 |
+| c:\Users\dell\Documents\AqwaValley\drizzle.config.ts                                                                              | TypeScript         |         10 |          0 |          3 |         13 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0000_conscious_gravity.sql                                                             | MS SQL             |        328 |         22 |          0 |        350 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0001_lively_stardust.sql                                                               | MS SQL             |         10 |          1 |          0 |         11 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0002_quota_foundation.sql                                                              | MS SQL             |        140 |         21 |          0 |        161 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0003_panoramic_barracuda.sql                                                           | MS SQL             |         21 |          1 |          0 |         22 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0004_irrigation_trigger_simulation.sql                                                 | MS SQL             |        104 |          0 |         12 |        116 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0005_replay_diff_runtime.sql                                                           | MS SQL             |         25 |          0 |          2 |         27 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0006_remarkable_killraven.sql                                                          | MS SQL             |        114 |          4 |          0 |        118 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0007_groovy_run_discriminator.sql                                                      | MS SQL             |          4 |          0 |          1 |          5 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0008_aquifer_forecast_foundation.sql                                                   | MS SQL             |        187 |          0 |         21 |        208 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0009_aquifer_lineage_and_eligibility.sql                                               | MS SQL             |          6 |          0 |          1 |          7 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0010_email_audit_provider_message_id_index.sql                                         | MS SQL             |          1 |          0 |          1 |          2 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0011_irrigation_session.sql                                                            | MS SQL             |         15 |          1 |          1 |         17 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0011_reporting_engine_foundation.sql                                                   | MS SQL             |        103 |          0 |         10 |        113 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\0012_melted_marten_broadcloak.sql                                                      | MS SQL             |        195 |         18 |          0 |        213 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\0000_snapshot.json                                                                | JSON               |      2,642 |          0 |          1 |      2,643 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\0001_snapshot.json                                                                | JSON               |      2,914 |          0 |          0 |      2,914 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\0003_snapshot.json                                                                | JSON               |      4,085 |          0 |          0 |      4,085 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\0006_snapshot.json                                                                | JSON               |      5,054 |          0 |          0 |      5,054 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\0012_snapshot.json                                                                | JSON               |      6,797 |          0 |          0 |      6,797 |
+| c:\Users\dell\Documents\AqwaValley\drizzle\meta\_journal.json                                                                     | JSON               |         97 |          0 |          0 |         97 |
+| c:\Users\dell\Documents\AqwaValley\eslint.config.js                                                                               | JavaScript         |         58 |          1 |          3 |         62 |
+| c:\Users\dell\Documents\AqwaValley\next.config.js                                                                                 | JavaScript         |         23 |         14 |          9 |         46 |
+| c:\Users\dell\Documents\AqwaValley\package-lock.json                                                                              | JSON               |     16,393 |          0 |          1 |     16,394 |
+| c:\Users\dell\Documents\AqwaValley\package.json                                                                                   | JSON               |          1 |          0 |          1 |          2 |
+| c:\Users\dell\Documents\AqwaValley\playwright.config.ts                                                                           | TypeScript         |          7 |          0 |          2 |          9 |
+| c:\Users\dell\Documents\AqwaValley\pnpm-lock.yaml                                                                                 | YAML               |      8,984 |          0 |      2,358 |     11,342 |
+| c:\Users\dell\Documents\AqwaValley\postcss.config.js                                                                              | JavaScript         |          5 |          0 |          1 |          6 |
+| c:\Users\dell\Documents\AqwaValley\prettier.config.js                                                                             | JavaScript         |          3 |          1 |          1 |          5 |
+| c:\Users\dell\Documents\AqwaValley\public\svg\alert-circle.svg                                                                    | XML                |          3 |          0 |          1 |          4 |
+| c:\Users\dell\Documents\AqwaValley\public\svg\map-empty.svg                                                                       | XML                |          3 |          0 |          1 |          4 |
+| c:\Users\dell\Documents\AqwaValley\public\svg\oasis-marker.svg                                                                    | XML                |          4 |          0 |          1 |          5 |
+| c:\Users\dell\Documents\AqwaValley\scripts\backfill-quotas.ts                                                                     | TypeScript         |         70 |          3 |         12 |         85 |
+| c:\Users\dell\Documents\AqwaValley\scripts\baseline-drizzle-migrations.ts                                                         | TypeScript         |         84 |          0 |         14 |         98 |
+| c:\Users\dell\Documents\AqwaValley\scripts\env-loader.mjs                                                                         | JavaScript         |         23 |          0 |          3 |         26 |
+| c:\Users\dell\Documents\AqwaValley\scripts\inspect-api-key.ts                                                                     | TypeScript         |         72 |          0 |         14 |         86 |
+| c:\Users\dell\Documents\AqwaValley\scripts\inspect-crops-db.ts                                                                    | TypeScript         |         47 |          2 |          9 |         58 |
+| c:\Users\dell\Documents\AqwaValley\scripts\localize_crops.ts                                                                      | TypeScript         |         61 |          3 |         11 |         75 |
+| c:\Users\dell\Documents\AqwaValley\scripts\mock-simulator.ts                                                                      | TypeScript         |        161 |         37 |         31 |        229 |
+| c:\Users\dell\Documents\AqwaValley\scripts\qstash-cron.config.ts                                                                  | TypeScript         |         21 |          0 |          2 |         23 |
+| c:\Users\dell\Documents\AqwaValley\scripts\seed.ts                                                                                | TypeScript         |      1,102 |         15 |        105 |      1,222 |
+| c:\Users\dell\Documents\AqwaValley\scripts\setup-timescaledb.mjs                                                                  | JavaScript         |         23 |          0 |          6 |         29 |
+| c:\Users\dell\Documents\AqwaValley\scripts\setup-timescaledb.sql                                                                  | MS SQL             |         50 |          6 |          9 |         65 |
+| c:\Users\dell\Documents\AqwaValley\scripts\sync-qstash-cron.ts                                                                    | TypeScript         |        240 |          5 |         43 |        288 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-forecast-integration.ts                                                           | TypeScript         |        310 |          6 |         51 |        367 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-irrigation-trigger-api.ts                                                         | TypeScript         |        323 |         10 |         55 |        388 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-irrigation.ts                                                                     | TypeScript         |        478 |         55 |         71 |        604 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-openrouter.ts                                                                     | TypeScript         |         66 |          8 |         12 |         86 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-replay-diff-wrapper.mjs                                                           | JavaScript         |         32 |          3 |          9 |         44 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-replay-diff.ts                                                                    | TypeScript         |        111 |          3 |         19 |        133 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-reporting-integration.ts                                                          | TypeScript         |        178 |          1 |         35 |        214 |
+| c:\Users\dell\Documents\AqwaValley\scripts\test-user-provisioning.ts                                                              | TypeScript         |         98 |          8 |         17 |        123 |
+| c:\Users\dell\Documents\AqwaValley\scripts\verify-timescaledb.mjs                                                                 | JavaScript         |         26 |          0 |          8 |         34 |
+| c:\Users\dell\Documents\AqwaValley\sentry-wizard-installation-error-1774904850189.log                                             | Log                |          0 |          0 |          1 |          1 |
+| c:\Users\dell\Documents\AqwaValley\sentry-wizard-installation-error-1774905198753.log                                             | Log                |          0 |          0 |          1 |          1 |
+| c:\Users\dell\Documents\AqwaValley\sentry-wizard-installation-error-1774905551874.log                                             | Log                |          0 |          0 |          1 |          1 |
+| c:\Users\dell\Documents\AqwaValley\sentry.edge.config.ts                                                                          | TypeScript         |          7 |          8 |          6 |         21 |
+| c:\Users\dell\Documents\AqwaValley\sentry.server.config.ts                                                                        | TypeScript         |          7 |          7 |          6 |         20 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\auth\role-scope-enforcement.test.ts                                              | TypeScript         |        274 |         88 |         65 |        427 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\fao56\fao56-et0-calculation.test.ts                                              | TypeScript         |        141 |        103 |         43 |        287 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\duplicate-reading-idempotency.test.ts                                     | TypeScript         |        179 |         56 |         45 |        280 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\ingest-authorization-scope.test.ts                                        | TypeScript         |        262 |         50 |         45 |        357 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\ingest-orchestration.test.ts                                | TypeScript         |        135 |          0 |         35 |        170 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\quota-decision.test.ts                                      | TypeScript         |        152 |          0 |         23 |        175 |
+| c:\Users\dell\Documents\AqwaValley\src\__tests__\quota\quota-hard-block-boundary.test.ts                                          | TypeScript         |        164 |         34 |         34 |        232 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\_components\AiNeuralPulse.tsx                                      | TypeScript JSX     |         58 |          5 |         13 |         76 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\_components\AiPlanClient.tsx                                       | TypeScript JSX     |        617 |         39 |         67 |        723 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\_components\PlanHistorySection.tsx                                 | TypeScript JSX     |        133 |          0 |         15 |        148 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\loading.tsx                                                        | TypeScript JSX     |         36 |          3 |          6 |         45 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\page.tsx                                                           | TypeScript JSX     |         39 |          6 |          7 |         52 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\_components\crop-history-table.tsx                                   | TypeScript JSX     |         90 |          0 |          5 |         95 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\_components\crop-profile-form.tsx                                    | TypeScript JSX     |        211 |          6 |         21 |        238 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\_components\water-req-card.tsx                                       | TypeScript JSX     |         93 |          0 |          5 |         98 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\loading.tsx                                                          | TypeScript JSX     |         13 |          0 |          1 |         14 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\page.tsx                                                             | TypeScript JSX     |         66 |          3 |          9 |         78 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\_components\AiRecommendationCard.tsx                             | TypeScript JSX     |         58 |          1 |          5 |         64 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\_components\KpiCards.tsx                                         | TypeScript JSX     |        166 |          4 |          9 |        179 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\_components\QuotaBarCard.tsx                                     | TypeScript JSX     |        102 |          3 |          9 |        114 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\_components\SoilHumidityCard.tsx                                 | TypeScript JSX     |         48 |          0 |          4 |         52 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\_components\WeeklyTrendCard.tsx                                  | TypeScript JSX     |        122 |          1 |          8 |        131 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\loading.tsx                                                      | TypeScript JSX     |         26 |          4 |          6 |         36 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\dashboard\page.tsx                                                         | TypeScript JSX     |        162 |         11 |         21 |        194 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\_components\history-chart.tsx                                      | TypeScript JSX     |        116 |          0 |          8 |        124 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\_components\irrigation-history-table.tsx                           | TypeScript JSX     |        194 |          2 |          7 |        203 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\loading.tsx                                                        | TypeScript JSX     |         66 |          3 |          3 |         72 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\page.tsx                                                           | TypeScript JSX     |        111 |          8 |         14 |        133 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\irrigate\_components\IrrigateClient.tsx                                    | TypeScript JSX     |        521 |         30 |         58 |        609 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\irrigate\loading.tsx                                                       | TypeScript JSX     |         41 |          3 |          3 |         47 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\irrigate\page.tsx                                                          | TypeScript JSX     |         59 |          0 |          8 |         67 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\_components\quota-history-table.tsx                                  | TypeScript JSX     |         98 |          1 |          8 |        107 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\_components\quota-kpis.tsx                                           | TypeScript JSX     |         97 |          0 |          5 |        102 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\_components\quota-usage-chart.tsx                                    | TypeScript JSX     |        150 |          3 |         13 |        166 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\loading.tsx                                                          | TypeScript JSX     |         91 |          6 |          5 |        102 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\page.tsx                                                             | TypeScript JSX     |        123 |          9 |         14 |        146 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\refresh-button.tsx                                        | TypeScript JSX     |         22 |          0 |          3 |         25 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\soil-composition-card.tsx                                 | TypeScript JSX     |         43 |          0 |          5 |         48 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\soil-gauge.tsx                                            | TypeScript JSX     |         69 |          0 |          7 |         76 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\soil-moisture-chart.tsx                                   | TypeScript JSX     |         94 |          0 |          3 |         97 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\page.tsx                                                              | TypeScript JSX     |        170 |          8 |         20 |        198 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(farm)\layout.tsx                                                                      | TypeScript JSX     |         67 |         13 |          8 |         88 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\_components\AlertsTable.tsx                                               | TypeScript JSX     |        262 |         17 |         22 |        301 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\loading.tsx                                                               | TypeScript JSX     |         49 |          4 |          5 |         58 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\alerts\page.tsx                                                                  | TypeScript JSX     |         63 |          3 |          9 |         75 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\ChartsContainer.tsx                                        | TypeScript JSX     |         73 |          5 |         15 |         93 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\CurrentDate.tsx                                            | TypeScript JSX     |         18 |          2 |          6 |         26 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\DemoAlertButton.tsx                                        | TypeScript JSX     |        145 |          3 |         21 |        169 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\DistrictMap.tsx                                            | TypeScript JSX     |         61 |          1 |          8 |         70 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\KpiCards.tsx                                               | TypeScript JSX     |         90 |          4 |         13 |        107 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\alerts.tsx                                                 | TypeScript JSX     |        109 |          0 |          7 |        116 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\charts.tsx                                                 | TypeScript JSX     |        140 |          2 |          9 |        151 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\_components\map-client.tsx                                             | TypeScript JSX     |         32 |          0 |          5 |         37 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\error.tsx                                                              | TypeScript JSX     |         32 |          1 |          4 |         37 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\loading.tsx                                                            | TypeScript JSX     |         21 |          0 |          3 |         24 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\dashboard\page.tsx                                                               | TypeScript JSX     |         61 |          4 |          6 |         71 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\_components\ConsumerTypeChart.tsx                                   | TypeScript JSX     |        102 |          4 |          9 |        115 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\_components\DistributionPageClient.tsx                              | TypeScript JSX     |        463 |         12 |         22 |        497 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\loading.tsx                                                         | TypeScript JSX     |         25 |          5 |          6 |         36 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\distribution\page.tsx                                                            | TypeScript JSX     |        125 |         12 |         23 |        160 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\district-card.tsx                                          | TypeScript JSX     |        106 |          3 |          9 |        118 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\scroll-to-hash.tsx                                         | TypeScript JSX     |         18 |          1 |          6 |         25 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\_components\well-status-card.tsx                                       | TypeScript JSX     |         67 |          4 |          7 |         78 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\loading.tsx                                                            | TypeScript JSX     |         18 |          0 |          1 |         19 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\districts\page.tsx                                                               | TypeScript JSX     |         99 |          0 |         16 |        115 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\_components\ForecastPageClient.tsx                                      | TypeScript JSX     |        360 |          6 |         15 |        381 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\loading.tsx                                                             | TypeScript JSX     |         31 |          4 |          6 |         41 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\forecast\page.tsx                                                                | TypeScript JSX     |         21 |          0 |          5 |         26 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\layout.tsx                                                                       | TypeScript JSX     |         40 |         11 |          5 |         56 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\_components\MapPageClient.tsx                                                | TypeScript JSX     |        141 |          7 |         17 |        165 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\loading.tsx                                                                  | TypeScript JSX     |         18 |          3 |          4 |         25 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\map\page.tsx                                                                     | TypeScript JSX     |         78 |          3 |         11 |         92 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\users\page.tsx                                                                   | TypeScript JSX     |        434 |          8 |         30 |        472 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\readings-chart.tsx                                    | TypeScript JSX     |        173 |          3 |         12 |        188 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\water-drop-gauge.tsx                                  | TypeScript JSX     |         91 |          4 |         14 |        109 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\_components\well-alerts.tsx                                       | TypeScript JSX     |         79 |          0 |          5 |         84 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\loading.tsx                                                       | TypeScript JSX     |         16 |          0 |          3 |         19 |
+| c:\Users\dell\Documents\AqwaValley\src\app\(gov)\wells\[wellId]\page.tsx                                                          | TypeScript JSX     |        129 |          7 |         16 |        152 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_actions\auth.ts                                                                       | TypeScript         |         29 |         13 |          8 |         50 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_actions\crops.ts                                                                      | TypeScript         |         81 |          4 |         12 |         97 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\AssistLoopLoader.tsx                                                       | TypeScript JSX     |         28 |          0 |          7 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\NavigationProgressBar.tsx                                                  | TypeScript JSX     |         19 |          2 |          2 |         23 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\PageTransition.tsx                                                         | TypeScript JSX     |         19 |          1 |          3 |         23 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Badge.tsx                                                               | TypeScript JSX     |         29 |          0 |          3 |         32 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Button.tsx                                                              | TypeScript JSX     |         33 |          0 |          3 |         36 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Card.tsx                                                                | TypeScript JSX     |         55 |          0 |          9 |         64 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\KpiCardGrid.tsx                                                         | TypeScript JSX     |         36 |          0 |          3 |         39 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\Skeleton.tsx                                                            | TypeScript JSX     |         13 |          0 |          2 |         15 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\UI\leaflet-map.tsx                                                         | TypeScript JSX     |        154 |          5 |         24 |        183 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\auth\LoginForm.tsx                                                         | TypeScript JSX     |        142 |         12 |         11 |        165 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\DashboardHeader.tsx                                                | TypeScript JSX     |         18 |          0 |          2 |         20 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\FarmSidebar.tsx                                                    | TypeScript JSX     |         76 |          0 |          9 |         85 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Govsidebar.tsx                                                     | TypeScript JSX     |        108 |          3 |         16 |        127 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Navitem.tsx                                                        | TypeScript JSX     |         29 |          0 |          4 |         33 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\NotificationDropdown.tsx                                           | TypeScript JSX     |        147 |          8 |         16 |        171 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\ScrollReset.tsx                                                    | TypeScript JSX     |         11 |          1 |          4 |         16 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\SidebarProvider.tsx                                                | TypeScript JSX     |         28 |          1 |          9 |         38 |
+| c:\Users\dell\Documents\AqwaValley\src\app\_components\layouts\Topbar.tsx                                                         | TypeScript JSX     |        199 |         18 |         18 |        235 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\admin\cron-runs\route.ts                                                           | TypeScript         |        135 |          0 |         16 |        151 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\admin\mock-ingest\route.ts                                                         | TypeScript         |         90 |          3 |         16 |        109 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\auth\[...all]\route.ts                                                             | TypeScript         |          3 |          0 |          3 |          6 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\aquifer-forecast\route.ts                                                     | TypeScript         |         96 |          0 |         14 |        110 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\dispatch-emails\route.ts                                                      | TypeScript         |        125 |         24 |         27 |        176 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\process-irrigation-queue\route.ts                                             | TypeScript         |         84 |          0 |         14 |         98 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\process-report-jobs\route.ts                                                  | TypeScript         |         64 |          0 |         13 |         77 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\cron\simulate-ingest\route.ts                                                      | TypeScript         |        197 |          0 |         28 |        225 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\email\webhook\route.ts                                                             | TypeScript         |        147 |         27 |         28 |        202 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\health\route.ts                                                                    | TypeScript         |         38 |          2 |          8 |         48 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\reports\download\[artifactId]\route.ts                                             | TypeScript         |        101 |          0 |         19 |        120 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\sensors\ingest\route.ts                                                            | TypeScript         |         89 |          8 |         18 |        115 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\sentry-example-api\route.ts                                                        | TypeScript         |         29 |          8 |          5 |         42 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\trpc\[trpc]\route.ts                                                               | TypeScript         |         26 |          4 |          5 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\app\api\wells\[id]\metrics\route.ts                                                        | TypeScript         |        166 |          3 |         22 |        191 |
+| c:\Users\dell\Documents\AqwaValley\src\app\global-error.tsx                                                                       | TypeScript JSX     |         20 |          4 |          4 |         28 |
+| c:\Users\dell\Documents\AqwaValley\src\app\layout.tsx                                                                             | TypeScript JSX     |         33 |          0 |          6 |         39 |
+| c:\Users\dell\Documents\AqwaValley\src\app\page.tsx                                                                               | TypeScript JSX     |         17 |         12 |          5 |         34 |
+| c:\Users\dell\Documents\AqwaValley\src\app\sentry-example-page\head.tsx                                                           | TypeScript JSX     |          8 |          0 |          1 |          9 |
+| c:\Users\dell\Documents\AqwaValley\src\app\sentry-example-page\page.tsx                                                           | TypeScript JSX     |        234 |          3 |         11 |        248 |
+| c:\Users\dell\Documents\AqwaValley\src\app\set-password\page.tsx                                                                  | TypeScript JSX     |        256 |          9 |         22 |        287 |
+| c:\Users\dell\Documents\AqwaValley\src\env.js                                                                                     | JavaScript         |        121 |         28 |          7 |        156 |
+| c:\Users\dell\Documents\AqwaValley\src\instrumentation-client.ts                                                                  | TypeScript         |         11 |         12 |          9 |         32 |
+| c:\Users\dell\Documents\AqwaValley\src\instrumentation.ts                                                                         | TypeScript         |         10 |          0 |          4 |         14 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\apiKeyAuth.ts                                                                          | TypeScript         |         46 |         20 |         13 |         79 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\cronAuth.ts                                                                            | TypeScript         |         42 |          0 |         10 |         52 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\hooks.ts                                                                               | TypeScript         |         28 |          8 |          8 |         44 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\logger.ts                                                                              | TypeScript         |         15 |          2 |          5 |         22 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\national-id.ts                                                                         | TypeScript         |         24 |          0 |          6 |         30 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\types.ts                                                                               | TypeScript         |         12 |         12 |          3 |         27 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\use-count-up.ts                                                                        | TypeScript         |         26 |          0 |          9 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\lib\utils.ts                                                                               | TypeScript         |        108 |         12 |         21 |        141 |
+| c:\Users\dell\Documents\AqwaValley\src\server\ai\openrouter-client.ts                                                             | TypeScript         |        146 |         72 |         28 |        246 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\root.ts                                                                         | TypeScript         |         25 |         13 |          5 |         43 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\alerts.ts                                                               | TypeScript         |        236 |         24 |         33 |        293 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\analytics.ts                                                            | TypeScript         |        244 |         11 |         16 |        271 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\forecast.ts                                                             | TypeScript         |         43 |          2 |          7 |         52 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation-api-docs.md                                                  | Markdown           |        117 |          0 |         32 |        149 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation-frontend-integration.md                                      | Markdown           |        182 |          0 |         84 |        266 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\irrigation.ts                                                           | TypeScript         |        410 |         53 |         73 |        536 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\post.ts                                                                 | TypeScript         |         11 |          4 |          3 |         18 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\quotas.ts                                                               | TypeScript         |        552 |          0 |         56 |        608 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\reports.ts                                                              | TypeScript         |        204 |          0 |         29 |        233 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\sensors.ts                                                              | TypeScript         |        205 |         25 |         33 |        263 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\users.ts                                                                | TypeScript         |        623 |        129 |        104 |        856 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\weather.ts                                                              | TypeScript         |         98 |          4 |         15 |        117 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\routers\wells.ts                                                                | TypeScript         |        285 |         27 |         42 |        354 |
+| c:\Users\dell\Documents\AqwaValley\src\server\api\trpc.ts                                                                         | TypeScript         |        117 |         75 |         20 |        212 |
+| c:\Users\dell\Documents\AqwaValley\src\server\better-auth\client.ts                                                               | TypeScript         |          6 |          0 |          3 |          9 |
+| c:\Users\dell\Documents\AqwaValley\src\server\better-auth\config.ts                                                               | TypeScript         |         36 |          0 |          4 |         40 |
+| c:\Users\dell\Documents\AqwaValley\src\server\better-auth\index.ts                                                                | TypeScript         |          1 |          0 |          1 |          2 |
+| c:\Users\dell\Documents\AqwaValley\src\server\better-auth\server.ts                                                               | TypeScript         |          6 |          0 |          2 |          8 |
+| c:\Users\dell\Documents\AqwaValley\src\server\db\index.ts                                                                         | TypeScript         |         19 |          7 |         10 |         36 |
+| c:\Users\dell\Documents\AqwaValley\src\server\db\schema.ts                                                                        | TypeScript         |      2,000 |        186 |        132 |      2,318 |
+| c:\Users\dell\Documents\AqwaValley\src\server\db\seed.ts                                                                          | TypeScript         |        130 |         10 |         24 |        164 |
+| c:\Users\dell\Documents\AqwaValley\src\server\lib\abac.ts                                                                         | TypeScript         |        144 |         30 |         26 |        200 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\alertEvalService.ts                                                        | TypeScript         |         64 |          6 |         10 |         80 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\AuditingEmailTransport.ts                                            | TypeScript         |         66 |         30 |         12 |        108 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\EmailService.ts                                                      | TypeScript         |        158 |         29 |         26 |        213 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\NodeMailerTransport.ts                                               | TypeScript         |         87 |         11 |         18 |        116 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\NullTransport.ts                                                     | TypeScript         |         30 |         17 |          9 |         56 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\interfaces.ts                                                        | TypeScript         |         55 |         19 |         11 |         85 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\templates\farm-scope-grant.html                                      | HTML               |         74 |          0 |          6 |         80 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\templates\password-changed.html                                      | HTML               |         88 |          0 |          6 |         94 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\templates\password-reset.html                                        | HTML               |        130 |          0 |          9 |        139 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\email\templates\welcome-invitation.html                                    | HTML               |        165 |          7 |          8 |        180 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecastService.ts                                                         | TypeScript         |        125 |          7 |         19 |        151 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\ForecastRunFactory.ts                                             | TypeScript         |         52 |          0 |          6 |         58 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\ForecastRunOrchestrator.ts                                        | TypeScript         |        278 |          0 |         33 |        311 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\HistoricalDataLoader.ts                                           | TypeScript         |         38 |          0 |          5 |         43 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\adapters\CEDAREAdapter.ts                                         | TypeScript         |         35 |          0 |          7 |         42 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\adapters\DataSourceAdapter.ts                                     | TypeScript         |         21 |          0 |          5 |         26 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\adapters\PostgresAdapter.ts                                       | TypeScript         |         91 |          0 |         14 |        105 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\adapters\TimescaleAdapter.ts                                      | TypeScript         |         29 |          0 |          6 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\FeaturePipeline.ts                                           | TypeScript         |        118 |          1 |         20 |        139 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\LinearRegressionTrainer.ts                                   | TypeScript         |        103 |          0 |         18 |        121 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\interval\BootstrapIntervalEstimator.ts                       | TypeScript         |         84 |          0 |         17 |        101 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\interval\ClosedFormIntervalEstimator.ts                      | TypeScript         |         45 |          0 |         10 |         55 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\interval\IIntervalEstimator.ts                               | TypeScript         |         17 |          0 |          5 |         22 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\interval\IntervalEstimatorSelector.ts                        | TypeScript         |         25 |          0 |          4 |         29 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\pipeline\handlers.ts                                         | TypeScript         |        250 |          7 |         39 |        296 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\plausibility\IPlausibilityRule.ts                            | TypeScript         |         28 |          3 |          4 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\plausibility\PhysicalPlausibilityValidator.ts                | TypeScript         |         30 |          0 |          6 |         36 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\plausibility\rules\V0PlausibilityRules.ts                    | TypeScript         |        136 |          0 |         20 |        156 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\risk\IRiskEvaluator.ts                                       | TypeScript         |         27 |          0 |          6 |         33 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\core\risk\SQ13RiskEvaluator.ts                                    | TypeScript         |         80 |          0 |         12 |         92 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\index.ts                                                          | TypeScript         |         26 |          0 |          1 |         27 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\policy\forecastPolicy.ts                                          | TypeScript         |         24 |          0 |          2 |         26 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\repositories\ForecastArtifactRepository.ts                        | TypeScript         |         37 |          0 |          5 |         42 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\repositories\ModelVersionRepository.ts                            | TypeScript         |         60 |          0 |          7 |         67 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\repositories\RiskFlagRepository.ts                                | TypeScript         |         28 |          0 |          4 |         32 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\repositories\drizzleRepositories.ts                               | TypeScript         |        410 |          0 |         34 |        444 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\runtime.ts                                                        | TypeScript         |         83 |          0 |         11 |         94 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\forecast\types.ts                                                          | TypeScript         |         51 |          0 |          9 |         60 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\ingestService.ts                                                           | TypeScript         |        292 |          4 |          5 |        301 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\fallback.ts                                                     | TypeScript         |        179 |         42 |         26 |        247 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\irrigationQueueWorker.ts                                        | TypeScript         |        667 |          1 |         72 |        740 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\prompt-builder.ts                                               | TypeScript         |        162 |         50 |         23 |        235 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\providerResolver.ts                                             | TypeScript         |        219 |          0 |         17 |        236 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\recommend.ts                                                    | TypeScript         |        292 |         53 |         48 |        393 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\recommend_helpers.ts                                            | TypeScript         |         84 |          9 |         14 |        107 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runDiffService.ts                                               | TypeScript         |        211 |          0 |         24 |        235 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runOutputHash.ts                                                | TypeScript         |         22 |          0 |          3 |         25 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\runReplayService.ts                                             | TypeScript         |        324 |          0 |         36 |        360 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\schemas.ts                                                      | TypeScript         |         24 |         23 |          8 |         55 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\shadowIngestService.ts                                          | TypeScript         |         49 |          0 |          8 |         57 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulateIrrigationRun.ts                                        | TypeScript         |        172 |          0 |          9 |        181 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulationHashing.ts                                            | TypeScript         |         46 |          1 |         13 |         60 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\adaptiveIntegrator.ts                                | TypeScript         |        366 |          1 |         47 |        414 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\contracts.ts                                         | TypeScript         |        148 |          0 |         23 |        171 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\hydrologyModelV1.ts                                  | TypeScript         |        104 |          0 |         16 |        120 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\hydrologyResolver.ts                                 | TypeScript         |         28 |          0 |          5 |         33 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\index.ts                                             | TypeScript         |          8 |          0 |          1 |          9 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\irrigationPhysicsEngine.ts                           | TypeScript         |        122 |          0 |         13 |        135 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\lifecycle.ts                                         | TypeScript         |         31 |          0 |          4 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\result.ts                                            | TypeScript         |         39 |          0 |          7 |         46 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\simulation\units.ts                                             | TypeScript         |         75 |          0 |         12 |         87 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\triggerService.ts                                               | TypeScript         |        370 |          1 |         43 |        414 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\weather.ts                                                      | TypeScript         |         32 |         24 |          8 |         64 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\quotaDecisionService.md                                                    | Markdown           |         12 |          0 |          9 |         21 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\quotaDecisionService.ts                                                    | TypeScript         |        545 |          0 |         60 |        605 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\ReportAccessPolicy.ts                                            | TypeScript         |         62 |          0 |          9 |         71 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\ReportingOrchestrator.ts                                         | TypeScript         |        803 |          1 |         93 |        897 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\exporters.ts                                                     | TypeScript         |        215 |          0 |         33 |        248 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\normalization.ts                                                 | TypeScript         |         46 |          0 |          8 |         54 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\storage.ts                                                       | TypeScript         |         31 |          2 |          7 |         40 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\reporting\types.ts                                                         | TypeScript         |         94 |          0 |         12 |        106 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorCronIngest.ts                                                     | TypeScript         |        251 |          0 |         30 |        281 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorRunRegistry.ts                                                    | TypeScript         |        317 |          1 |         58 |        376 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorSensorDiscovery.ts                                                | TypeScript         |         30 |          0 |          5 |         35 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\simulatorValueGenerator.ts                                                 | TypeScript         |         54 |          0 |         13 |         67 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\token\InvitationValidator.ts                                               | TypeScript         |         25 |         18 |          7 |         50 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\token\RawToken.ts                                                          | TypeScript         |         19 |         30 |          8 |         57 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\AuthUserCreator.ts                                                    | TypeScript         |         59 |         19 |         10 |         88 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\FarmScopeAssigner.ts                                                  | TypeScript         |         87 |         19 |         14 |        120 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\InvitationIssuer.ts                                                   | TypeScript         |        117 |         17 |         18 |        152 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\OutboxEnqueuer.ts                                                     | TypeScript         |         47 |         22 |          9 |         78 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\RoleAssigner.ts                                                       | TypeScript         |        140 |         22 |         23 |        185 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\SessionInvalidator.ts                                                 | TypeScript         |         16 |         20 |          4 |         40 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\UserProvisioningOrchestrator.ts                                       | TypeScript         |        169 |         45 |         26 |        240 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\user\interfaces.ts                                                         | TypeScript         |        120 |         22 |         18 |        160 |
+| c:\Users\dell\Documents\AqwaValley\src\server\services\weatherService.ts                                                          | TypeScript         |        209 |          4 |         38 |        251 |
+| c:\Users\dell\Documents\AqwaValley\src\styles\globals.css                                                                         | PostCSS            |        531 |         29 |         98 |        658 |
+| c:\Users\dell\Documents\AqwaValley\src\trpc\query-client.ts                                                                       | TypeScript         |         22 |          2 |          2 |         26 |
+| c:\Users\dell\Documents\AqwaValley\src\trpc\react.tsx                                                                             | TypeScript JSX     |         55 |         12 |         12 |         79 |
+| c:\Users\dell\Documents\AqwaValley\src\trpc\server.ts                                                                             | TypeScript         |         20 |          4 |          7 |         31 |
+| c:\Users\dell\Documents\AqwaValley\src\types\css.d.ts                                                                             | TypeScript         |         11 |          3 |          4 |         18 |
+| c:\Users\dell\Documents\AqwaValley\start-database.sh                                                                              | Shell Script       |         62 |         14 |         13 |         89 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\standard_prd.json                                                             | JSON               |        269 |          0 |          1 |        270 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\testsprite_frontend_test_plan.json                                            | JSON               |        612 |          0 |          1 |        613 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\code_summary.yaml                                                         | YAML               |        140 |          0 |          2 |        142 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\config.json                                                               | JSON               |         20 |          0 |          1 |         21 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\mcp.log                                                                   | Log                |      4,380 |          0 |          1 |      4,381 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\ai-irrigation-plan.md                                           | Markdown           |        723 |          0 |        193 |        916 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\aquifer-forecast-engine-engineering-spec.md                     | Markdown           |        259 |          0 |         81 |        340 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\aquifer-forecast-engine-professional-plan.md                    | Markdown           |        474 |          0 |        175 |        649 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\ingest-endpoints-and-cron.md                                    | Markdown           |        186 |          0 |         84 |        270 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\irrigation-trigger-simulation-production-plan.md                | Markdown           |        867 |          0 |        357 |      1,224 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\quota-service-runtime-behavior.md                               | Markdown           |         93 |          0 |         46 |        139 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\report-generation-endpoints-api-contract.md                     | Markdown           |        362 |          0 |        126 |        488 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\report-generation-export-engine-world-class-plan.md             | Markdown           |        478 |          0 |        192 |        670 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\sensor-ingest-cycle.md                                          | Markdown           |        165 |          0 |         53 |        218 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\testing-strategy-world-class-plan.md                            | Markdown           |        732 |          0 |        286 |      1,018 |
+| c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\prd_files\users-management-api-world-class-prd-and-implementation-plan.md | Markdown           |        488 |          0 |        205 |        693 |
+| c:\Users\dell\Documents\AqwaValley\tsconfig.json                                                                                  | JSON with Comments |         35 |          4 |          4 |         43 |
+| c:\Users\dell\Documents\AqwaValley\vercel.json                                                                                    | JSON               |          1 |          0 |          1 |          2 |
+| c:\Users\dell\Documents\AqwaValley\vitest.config.ts                                                                               | TypeScript         |          9 |          0 |          3 |         12 |
+| Total                                                                                                                             |                    |    100,180 |      2,863 |     11,419 |    114,462 |
++-----------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

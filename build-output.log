@@ -1,0 +1,91 @@
+
+> AqwaValley@0.1.0 build C:\Users\dell\Documents\AqwaValley
+> next build
+
+   ظû▓ Next.js 15.5.12
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ┬╖ clientTraceMetadata
+
+   Creating an optimized production build ...
+ ظ£ô Compiled successfully in 77s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx
+72:6  Warning: 'LiveWeather' is defined but never used.  @typescript-eslint/no-unused-vars
+73:6  Warning: 'LiveForecastDay' is defined but never used.  @typescript-eslint/no-unused-vars
+126:10  Warning: 'parsePlan' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(farm)/farm/dashboard/_components/AiRecommendationCard.tsx
+10:40  Warning: 'farmId' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./src/app/(farm)/farm/history/page.tsx
+96:33  Error: Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.  @typescript-eslint/prefer-nullish-coalescing
+
+./src/app/(farm)/farm/history/_components/irrigation-history-table.tsx
+5:10  Warning: 'Button' is defined but never used.  @typescript-eslint/no-unused-vars
+80:64  Error: Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.  @typescript-eslint/prefer-nullish-coalescing
+81:49  Error: Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.  @typescript-eslint/prefer-nullish-coalescing
+164:68  Error: Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.  @typescript-eslint/prefer-nullish-coalescing
+165:53  Error: Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.  @typescript-eslint/prefer-nullish-coalescing
+
+./src/app/(farm)/farm/irrigate/_components/IrrigateClient.tsx
+278:9  Warning: 'utils' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+346:6  Warning: React Hook useEffect has a missing dependency: 'saveSession'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(farm)/farm/quota/_components/quota-usage-chart.tsx
+6:3  Warning: 'BarChart' is defined but never used.  @typescript-eslint/no-unused-vars
+100:52  Error: Unsafe argument of type `any` assigned to a parameter of type `number`.  @typescript-eslint/no-unsafe-argument
+
+./src/app/_actions/crops.ts
+53:9  Error: Prefer using an optional chain expression instead, as it's more concise and easier to read.  @typescript-eslint/prefer-optional-chain
+
+./src/server/api/routers/irrigation.ts
+529:34  Error: This assertion is unnecessary since it does not change the type of the expression.  @typescript-eslint/no-unnecessary-type-assertion
+
+./src/server/services/irrigation/prompt-builder.ts
+108:7  Error: Prefer using an optional chain expression instead, as it's more concise and easier to read.  @typescript-eslint/prefer-optional-chain
+
+./src/server/services/weatherService.ts
+56:10  Warning: 'isOpenMeteoPayload' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/__tests__/ai/ai-contracts.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+./src/__tests__/auth/role-scope-enforcement.test.ts
+167:9  Warning: 'farmerInFarmY' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/__tests__/email/email-notification-contracts.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+./src/__tests__/fao56/fao56-et0-calculation.test.ts
+54:3  Error: Type number trivially inferred from a number literal, remove type annotation.  @typescript-eslint/no-inferrable-types
+
+./src/__tests__/forecast/forecast-plausibility-contract.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+./src/__tests__/ingest/ingest-authorization-scope.test.ts
+98:9  Error: The generic type arguments should be specified as part of the constructor type arguments.  @typescript-eslint/consistent-generic-constructors
+
+./src/__tests__/integration/db/audit-immutability.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+./src/__tests__/integration/db/demo-cron-isolation.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+./src/__tests__/quota/quota-hard-block-boundary.test.ts
+77:7  Error: Type string trivially inferred from a string literal, remove type annotation.  @typescript-eslint/no-inferrable-types
+
+./src/__tests__/reporting/reporting-contracts.test.ts
+1:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-call').
+2:1  Warning: Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unsafe-member-access').
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+ظëELIFECYCLEظë Command failed with exit code 1.

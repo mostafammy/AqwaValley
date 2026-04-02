@@ -658,7 +658,9 @@ export const cropHistory = pgTable(
       scale: 2,
     }),
     plantedDate: timestamp("planted_date", { withTimezone: true }),
-    expectedHarvestDate: timestamp("expected_harvest_date", { withTimezone: true }),
+    expectedHarvestDate: timestamp("expected_harvest_date", {
+      withTimezone: true,
+    }),
     harvestedDate: timestamp("harvested_date", { withTimezone: true }),
     yield: numeric("yield", { precision: 10, scale: 2 }),
     yieldUnit: text("yield_unit").default("kg_per_acre"),
@@ -1736,6 +1738,24 @@ export const userInvitation = pgTable(
     index("user_invitation_expires_at_idx").on(t.expiresAt), // Expiry cleanup cron
     index("user_invitation_type_status_idx").on(t.tokenType, t.status),
   ],
+);
+
+/**
+ * user_notification_preference: per-user notification delivery preferences.
+ * emailOptOut=true means transactional outbox dispatch must skip delivery.
+ */
+export const userNotificationPreference = pgTable(
+  "user_notification_preference",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    emailOptOut: boolean("email_opt_out").default(false).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("user_notification_pref_opt_out_idx").on(t.emailOptOut)],
 );
 
 /**

@@ -51,13 +51,13 @@ export function HistoryChart({ data }: HistoryChartProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <BarChartIcon className="h-5 w-5 text-blue-500 shrink-0" />
+          <BarChartIcon className="h-5 w-5 flex-shrink-0 text-blue-500" />
           <span className="text-base font-semibold text-gray-800">
             ملخص الاستهلاك الشهري (آخر 6 أشهر)
           </span>
         </div>
       </CardHeader>
-      <CardBody className="pt-3 -mx-6 md:mx-0">
+      <CardBody className="-mx-6 pt-3 md:mx-0">
         <div ref={targetRef} className="h-48 sm:h-64 md:h-80">
           {chartData.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-gray-400">
@@ -91,7 +91,9 @@ export function HistoryChart({ data }: HistoryChartProps) {
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 12, fill: "#8AA0B8" }}
-                  tickFormatter={(value: number) => `${Math.round(value).toLocaleString("ar-EG")}`}
+                  tickFormatter={(value: number) =>
+                    `${Math.round(value).toLocaleString("ar-EG")}`
+                  }
                   width={50}
                 />
                 <Tooltip
@@ -102,7 +104,14 @@ export function HistoryChart({ data }: HistoryChartProps) {
                     fontSize: "13px",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                   }}
-                  formatter={(value: any) => [`${Number(value).toLocaleString("ar-EG")} م³`, "الاستهلاك"]}
+                  formatter={(value) => {
+                    if (value === undefined || value === null)
+                      return ["—", "الاستهلاك"];
+                    return [
+                      `${Number(value).toLocaleString("ar-EG")} م³`,
+                      "الاستهلاك",
+                    ];
+                  }}
                   labelStyle={{ color: "#5A7090" }}
                 />
                 <Area
