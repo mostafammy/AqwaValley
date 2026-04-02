@@ -526,7 +526,7 @@ export const irrigationRouter = createTRPCRouter({
         farmId: session.farmId,
         planId: session.planId,
         frameCount: session.frameCount,
-        litersPumped: parseFloat(session.litersPumped as string),
+        litersPumped: parseFloat(String(session.litersPumped)),
         done: session.done,
         running: session.running,
         updatedAt: session.updatedAt,
