@@ -38,7 +38,10 @@ function createIngestDbDouble(options: {
     latestStateInsertValues: [] as Row[],
   };
 
-  const selectQueue: Row[][] = [options.sensorsResult, options.rulesResult ?? []];
+  const selectQueue: Row[][] = [
+    options.sensorsResult,
+    options.rulesResult ?? [],
+  ];
 
   const makeInsert = () => ({
     values: (values: Row[] | Row) => {
@@ -75,11 +78,7 @@ function createIngestDbDouble(options: {
   return { db, writes };
 }
 
-const {
-  mockEvaluateRules,
-  mockLogger,
-  activeDbHolder,
-} = vi.hoisted(() => ({
+const { mockEvaluateRules, mockLogger, activeDbHolder } = vi.hoisted(() => ({
   mockEvaluateRules: vi.fn(() => []),
   mockLogger: { info: vi.fn() },
   activeDbHolder: { db: undefined as unknown },
@@ -99,7 +98,10 @@ vi.mock("~/server/services/alertEvalService", () => ({
 
 vi.mock("~/lib/logger", () => ({ logger: mockLogger }));
 
-import { ingestReadings, type IngestReading } from "~/server/services/ingestService";
+import {
+  ingestReadings,
+  type IngestReading,
+} from "~/server/services/ingestService";
 
 describe("Ingest orchestration service integration (Invariant #2)", () => {
   beforeEach(() => {
