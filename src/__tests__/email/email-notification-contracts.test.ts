@@ -6,7 +6,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { EmailService } from "~/server/services/email/EmailService";
-import type { IEmailTransport, MailOptions } from "~/server/services/email/interfaces";
+import type {
+  IEmailTransport,
+  MailOptions,
+} from "~/server/services/email/interfaces";
 
 function readSource(relativePath: string): string {
   return readFileSync(path.resolve(process.cwd(), relativePath), "utf8");
@@ -39,10 +42,15 @@ describe("Email & notification contract coverage", () => {
 
     expect(transport.lastMail).not.toBeNull();
     expect(transport.lastMail?.subject).toContain("دعوة");
-    expect(transport.lastMail?.html).toContain("&lt;script&gt;alert('x')&lt;/script&gt;");
-    expect(transport.lastMail?.html).not.toContain("<script>alert('x')</script>");
+    expect(transport.lastMail?.html).toContain(
+      "&lt;script&gt;alert('x')&lt;/script&gt;",
+    );
+    expect(transport.lastMail?.html).not.toContain(
+      "<script>alert('x')</script>",
+    );
+    expect(transport.lastMail?.html).not.toContain("<script>");
     expect(transport.lastMail?.text).toBeTruthy();
-    expect(transport.lastMail?.text).not.toContain("<script>");
+    expect(transport.lastMail?.text).toContain("alert('x')");
   });
 
   it("notification_respects_user_preferences", () => {

@@ -1,0 +1,20 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "loginUser": "30606151600913",
+  "loginPassword": "Aa123456789@#",
+  "executionArgs": {
+    "projectName": "AqwaValley",
+    "projectPath": "C:\\Users\\dell\\Documents\\AqwaValley",
+    "testIds": [],
+    "additionalInstruction": "If navigation to the start URL fails, retry with a longer timeout (30s) and wait for DOMContentLoaded. The app is Next.js on http://localhost:3000. Login page is /. Use data-testids: national-id-input, password-input, login-submit.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-R3VEp-sYC97Jc5QIlMvfLG4Tvm3NrlpFAyyUVq2iPGrONvPnAegwqATjttFA0jRcq14V0MiYsFHOpGmo2N71sErPRSa9EuBW1EcadLUfX9FJZTByMIkKuYu9O4oCNOih7P4"
+    }
+  },
+  "serverPort": 59521,
+  "proxy": "http://24e9c3a3-1b45-404f-ad45-197a9adff3aa:uBdFy6jxztLzqQONykmcnAH3rl6ZjvI1@tun.testsprite.com:8080"
+}

@@ -658,7 +658,9 @@ export const cropHistory = pgTable(
       scale: 2,
     }),
     plantedDate: timestamp("planted_date", { withTimezone: true }),
-    expectedHarvestDate: timestamp("expected_harvest_date", { withTimezone: true }),
+    expectedHarvestDate: timestamp("expected_harvest_date", {
+      withTimezone: true,
+    }),
     harvestedDate: timestamp("harvested_date", { withTimezone: true }),
     yield: numeric("yield", { precision: 10, scale: 2 }),
     yieldUnit: text("yield_unit").default("kg_per_acre"),

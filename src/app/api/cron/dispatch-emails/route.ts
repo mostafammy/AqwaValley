@@ -55,7 +55,9 @@ function buildEmailService(): EmailService {
   return new EmailService(auditedTransport, env.EMAIL_FROM);
 }
 
-async function isRecipientOptedOut(recipientUserId: string | null): Promise<boolean> {
+async function isRecipientOptedOut(
+  recipientUserId: string | null,
+): Promise<boolean> {
   if (!recipientUserId) return false;
 
   const preference = await db.query.userNotificationPreference.findFirst({

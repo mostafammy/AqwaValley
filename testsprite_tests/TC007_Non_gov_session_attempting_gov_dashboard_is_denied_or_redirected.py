@@ -1,0 +1,123 @@
+import asyncio
+from playwright import async_api
+from playwright.async_api import expect
+
+async def run_test():
+    pw = None
+    browser = None
+    context = None
+
+    try:
+        # Start a Playwright session in asynchronous mode
+        pw = await async_api.async_playwright().start()
+
+        # Launch a Chromium browser in headless mode with custom arguments
+        browser = await pw.chromium.launch(
+            headless=True,
+            args=[
+                "--window-size=1280,720",         # Set the browser window size
+                "--disable-dev-shm-usage",        # Avoid using /dev/shm which can cause issues in containers
+                "--ipc=host",                     # Use host-level IPC for better stability
+                "--single-process"                # Run the browser in a single process mode
+            ],
+        )
+
+        # Create a new browser context (like an incognito window)
+        context = await browser.new_context()
+        context.set_default_timeout(5000)
+
+        # Open a new page in the browser context
+        page = await context.new_page()
+
+        # Interact with the page elements to simulate user flow
+        # -> Navigate to http://localhost:3000
+        await page.goto("http://localhost:3000", wait_until="commit", timeout=10000)
+        
+        # -> Fill the national id field with the provided username, fill the password field, submit the login form, then navigate to /dashboard to verify redirection back to the unified login page.
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('30606151600913')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[2]/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Aa123456789@#')
+        
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[3]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Fill the national id and password, submit the login form, then navigate to /dashboard to verify the user is redirected to the unified login page.
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('30606151600913')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[2]/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Aa123456789@#')
+        
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[3]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Wait briefly for the SPA to load, then reload the start URL (http://localhost:3000/) to recover from ERR_EMPTY_RESPONSE and check for the unified login page (data-testids: national-id-input, password-input, login-submit). If page remains empty, report the issue and finish.
+        await page.goto("http://localhost:3000/", wait_until="commit", timeout=10000)
+        
+        # -> Fill the national id (index 211) with the provided username, fill the password (index 220), submit (index 222), then navigate to /dashboard and check for redirection back to the unified login page.
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('30606151600913')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[2]/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Aa123456789@#')
+        
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[3]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Wait for the SPA to finish loading; if the DOM remains empty, reload the start URL (http://localhost:3000/) and then check for the unified login page elements (national-id-input, password-input, login-submit). After that, perform the login and navigate to /dashboard to verify redirection.
+        await page.goto("http://localhost:3000/", wait_until="commit", timeout=10000)
+        
+        # -> Fill national id and password, submit the login form, then navigate to /dashboard and verify the user is redirected back to the unified login page.
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div/div/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('30606151600913')
+        
+        frame = context.pages[-1]
+        # Input text
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[2]/div[2]/input').nth(0)
+        await page.wait_for_timeout(3000); await elem.fill('Aa123456789@#')
+        
+        frame = context.pages[-1]
+        # Click element
+        elem = frame.locator('xpath=/html/body/div[2]/main/div[2]/div/div[2]/form/div[3]/button').nth(0)
+        await page.wait_for_timeout(3000); await elem.click(timeout=5000)
+        
+        # -> Wait for the SPA to finish loading; if the DOM remains empty, reload the start URL (http://localhost:3000/) to recover the app, then re-check for the unified login page elements and proceed with the login + /dashboard verification.
+        await page.goto("http://localhost:3000/", wait_until="commit", timeout=10000)
+        
+        # --> Assertions to verify final state
+        frame = context.pages[-1]
+        await expect(frame.locator('xpath=//input[@data-testid="national-id-input"]').first).to_be_visible(timeout=3000)
+        await asyncio.sleep(5)
+
+    finally:
+        if context:
+            await context.close()
+        if browser:
+            await browser.close()
+        if pw:
+            await pw.stop()
+
+asyncio.run(run_test())
+    

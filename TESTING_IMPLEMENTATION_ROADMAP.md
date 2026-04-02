@@ -89,7 +89,7 @@ Reproducibility and access control for exports.
   - `report_deterministic_exports` — Same SHA-256 hash for same inputs
   - `report_download_link_expiry` — Time-limited access
 
-- [ ] **Email & Notification Workflows**
+- [x] **Email & Notification Workflows**
   - `notification_respects_user_preferences` — Opt-out handling
   - `email_template_renders_correctly` — No rendering errors
 

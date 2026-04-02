@@ -1,0 +1,141 @@
+version: "2"
+type: frontend
+tech_stack:
+  - TypeScript
+  - Next.js (App Router / React)
+  - Tailwind CSS
+  - tRPC
+  - Leaflet (maps)
+routes:
+  - path: /
+    file: src/app/page.tsx
+    auth_required: false
+    description: Unified login page (renders LoginForm)
+  - path: /set-password
+    file: src/app/set-password/page.tsx
+    auth_required: false
+    description: Set/reset password via secure token (validates token with tRPC)
+  - path: /dashboard
+    file: src/app/(gov)/dashboard/page.tsx
+    auth_required: true
+    description: Government admin portal dashboard
+  - path: /alerts
+    file: src/app/(gov)/alerts/page.tsx
+    auth_required: true
+    description: Government alerts feed/table
+  - path: /distribution
+    file: src/app/(gov)/distribution/page.tsx
+    auth_required: true
+    description: Government distribution view
+  - path: /districts
+    file: src/app/(gov)/districts/page.tsx
+    auth_required: true
+    description: Districts list and navigation
+  - path: /forecast
+    file: src/app/(gov)/forecast/page.tsx
+    auth_required: true
+    description: Forecast view
+  - path: /map
+    file: src/app/(gov)/map/page.tsx
+    auth_required: true
+    description: Map of wells (requires gov layout auth)
+  - path: /users
+    file: src/app/(gov)/users/page.tsx
+    auth_required: true
+    description: Users management page (gov layout auth)
+  - path: /farm/ai-plan
+    file: src/app/(farm)/farm/ai-plan/page.tsx
+    auth_required: true
+    description: AI planning page (farm portal)
+  - path: /farm/crops
+    file: src/app/(farm)/farm/crops/page.tsx
+    auth_required: true
+    description: Crops page (farm portal)
+  - path: /farm/dashboard
+    file: src/app/(farm)/farm/dashboard/page.tsx
+    auth_required: true
+    description: Farm owner dashboard (farm layout + session redirect)
+  - path: /farm/history
+    file: src/app/(farm)/farm/history/page.tsx
+    auth_required: true
+    description: Irrigation history (farm portal)
+  - path: /farm/irrigate
+    file: src/app/(farm)/farm/irrigate/page.tsx
+    auth_required: true
+    description: Irrigation controls (farm portal)
+  - path: /farm/quota
+    file: src/app/(farm)/farm/quota/page.tsx
+    auth_required: true
+    description: Quota management view (farm portal)
+  - path: /farm/soil
+    file: src/app/(farm)/farm/soil/page.tsx
+    auth_required: true
+    description: Soil data view (farm portal)
+  - path: /sentry-example-page
+    file: src/app/sentry-example-page/page.tsx
+    auth_required: false
+    description: Example page used for Sentry integration testing
+  - path: /wells/{wellId}
+    file: src/app/(gov)/wells/[wellId]/page.tsx
+    auth_required: true
+    description: Well details page (gov layout auth + DB-backed rendering)
+features:
+  - name: User Login
+    description: Authenticate using the unified login form and be redirected to the correct portal by role.
+    files:
+      - src/app/page.tsx
+      - src/app/_components/auth/LoginForm.tsx
+      - src/app/_actions/auth.ts
+    entry_route: /
+    user_interactions:
+      - Visit the root URL /
+      - Fill data-testid="national-id-input" with the configured username
+      - Fill data-testid="password-input" with the configured password
+      - Click the data-testid="login-submit" button
+      - Verify the app redirects to either /dashboard or /farm/dashboard
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/sign-in/username
+  - name: Gov Dashboard Navigation
+    description: Load gov portal pages after login and verify main widgets render.
+    files:
+      - src/app/(gov)/layout.tsx
+      - src/app/(gov)/dashboard/page.tsx
+      - src/app/(gov)/map/page.tsx
+    entry_route: /dashboard
+    user_interactions:
+      - Login via /
+      - Navigate to /dashboard (or verify the redirect target)
+      - Confirm KPI cards and map/alerts sections are visible
+      - Optionally open /map from the gov sidebar
+    api_calls: []
+  - name: Farm Dashboard Navigation
+    description: Load the farm portal for farmers/farm owners and verify the dashboard loads for the assigned farm.
+    files:
+      - src/app/(farm)/layout.tsx
+      - src/app/(farm)/farm/dashboard/page.tsx
+    entry_route: /farm/dashboard
+    user_interactions:
+      - Login via /
+      - Verify redirect to /farm/dashboard
+      - Confirm the dashboard content renders (weather chip, KPI cards)
+      - Optionally navigate to /farm/quota
+    api_calls: []
+  - name: Well Detail Rendering
+    description: Render a specific well detail page with charts and status.
+    files:
+      - src/app/(gov)/wells/[wellId]/page.tsx
+    entry_route: /wells/{wellId}
+    user_interactions:
+      - Login via /
+      - Navigate to /wells/{wellId} using an existing well id in the UI
+      - Verify well status header and charts are visible
+    api_calls: []
+known_limitations:
+  - issue: Portal access is enforced by route-group layouts ((gov) and (farm)) and may redirect back to / if the logged-in user does not have the matching role.
+    location: src/app/(gov)/layout.tsx, src/app/(farm)/layout.tsx
+    impact: TestSprite login may succeed but subsequent steps may redirect if DB role assignments are missing.
+  - issue: /wells/{wellId} and most dashboards are DB-backed; if the DB has no seeded wells/farms for the test user, pages may render empty or hit notFound().
+    location: src/app/(gov)/wells/[wellId]/page.tsx, src/app/(farm)/farm/dashboard/page.tsx
+    impact: Some E2E flows may be flaky when DB seed state changes.
+
