@@ -76,10 +76,16 @@ export function LoginForm() {
             <Droplets className="h-6 w-6 text-white" strokeWidth={2} />
           </div>
         </div>
-        <h1 className="relative mb-1 text-xl font-bold text-white" data-testid="login-title">
+        <h1
+          className="relative mb-1 text-xl font-bold text-white"
+          data-testid="login-title"
+        >
           أكوا الوادي
         </h1>
-        <p className="text-light-text relative text-sm" data-testid="login-subtitle">
+        <p
+          className="text-light-text relative text-sm"
+          data-testid="login-subtitle"
+        >
           بوابة الدخول الموحدة
         </p>
       </div>
@@ -98,9 +104,16 @@ export function LoginForm() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
+        <form
+          onSubmit={handleLogin}
+          className="space-y-4"
+          data-testid="login-form"
+        >
           <div className="space-y-1.5">
-            <label className="text-text mb-3 block text-xs font-bold" htmlFor="national-id-input">
+            <label
+              className="text-text mb-3 block text-xs font-bold"
+              htmlFor="national-id-input"
+            >
               الرقم القومي
             </label>
             <div className="relative">
@@ -122,7 +135,10 @@ export function LoginForm() {
 
           <div className="space-y-1.5">
             <div className="mb-3 flex items-center justify-between">
-              <label className="text-text block text-xs font-bold" htmlFor="password-input">
+              <label
+                className="text-text block text-xs font-bold"
+                htmlFor="password-input"
+              >
                 كلمة المرور
               </label>
             </div>
