@@ -84,14 +84,18 @@ describe("AI irrigation contract coverage (Invariant #7)", () => {
   });
 
   it("ai_persists_model_used_and_recommendation_traceability", () => {
-    const recommendSource = readSource("src/server/services/irrigation/recommend.ts");
+    const recommendSource = readSource(
+      "src/server/services/irrigation/recommend.ts",
+    );
 
     expect(recommendSource).toContain("modelUsed");
     expect(recommendSource).toContain("rawResponse");
     expect(recommendSource).toContain("systemPrompt");
     expect(recommendSource).toContain("userMessage");
     expect(recommendSource).toContain("fallback");
-    expect(recommendSource).toContain("irrigationPlanSchema.parse(JSON.parse(cleaned))");
-    expect(recommendSource).toContain("modelUsed = \"rule-based-engine\"");
+    expect(recommendSource).toContain(
+      "irrigationPlanSchema.parse(JSON.parse(cleaned))",
+    );
+    expect(recommendSource).toContain('modelUsed = "rule-based-engine"');
   });
 });
