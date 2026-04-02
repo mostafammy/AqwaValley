@@ -84,7 +84,7 @@ Scheduled jobs must be idempotent and observable.
 
 Reproducibility and access control for exports.
 
-- [ ] **Report Generation**
+- [x] **Report Generation**
   - `report_parameter_validation` — Reject invalid inputs
   - `report_deterministic_exports` — Same SHA-256 hash for same inputs
   - `report_download_link_expiry` — Time-limited access
