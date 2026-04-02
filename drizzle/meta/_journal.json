@@ -92,6 +92,13 @@
       "when": 1775098229771,
       "tag": "0012_melted_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1775100000000,
+      "tag": "0013_audit_log_append_only",
+      "breakpoints": true
     }
   ]
 }
