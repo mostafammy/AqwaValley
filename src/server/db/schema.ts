@@ -1739,6 +1739,24 @@ export const userInvitation = pgTable(
 );
 
 /**
+ * user_notification_preference: per-user notification delivery preferences.
+ * emailOptOut=true means transactional outbox dispatch must skip delivery.
+ */
+export const userNotificationPreference = pgTable(
+  "user_notification_preference",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    emailOptOut: boolean("email_opt_out").default(false).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("user_notification_pref_opt_out_idx").on(t.emailOptOut)],
+);
+
+/**
  * email_audit_log: Legally defensible record of every email attempt.
  * Updated by AuditingEmailTransport (Decorator pattern) — never by business logic.
  * deliveredAt / openedAt populated by provider webhook for government compliance proof.
