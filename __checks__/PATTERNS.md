@@ -27,13 +27,25 @@ test("shows error on invalid login", async ({ page }) => {
 ```typescript
 // GOOD: Selectors in one place (LoginPage)
 class LoginPage extends BasePageObject {
-  nationalIdInput() { return this.page.getByTestId("national-id-input"); }
-  passwordInput() { return this.page.getByTestId("password-input"); }
-  submitButton() { return this.page.getByTestId("login-submit"); }
-  
-  async fillNationalId(id: string) { await this.fillInput(this.nationalIdInput(), id); }
-  async fillPassword(pwd: string) { await this.fillInput(this.passwordInput(), pwd); }
-  async submit() { await this.clickButton(this.submitButton()); }
+  nationalIdInput() {
+    return this.page.getByTestId("national-id-input");
+  }
+  passwordInput() {
+    return this.page.getByTestId("password-input");
+  }
+  submitButton() {
+    return this.page.getByTestId("login-submit");
+  }
+
+  async fillNationalId(id: string) {
+    await this.fillInput(this.nationalIdInput(), id);
+  }
+  async fillPassword(pwd: string) {
+    await this.fillInput(this.passwordInput(), pwd);
+  }
+  async submit() {
+    await this.clickButton(this.submitButton());
+  }
 }
 
 // Now tests aren't coupled to selectors
@@ -83,9 +95,7 @@ test("admin can approve sensors", async ({ page }) => {
 
 ```typescript
 // GOOD: Single source of truth with builders
-const scenario = testLoginScenario()
-  .asAdminUser()
-  .build();
+const scenario = testLoginScenario().asAdminUser().build();
 
 test("admin can view all users", async ({ page }) => {
   const login = new LoginPage(page);
@@ -101,9 +111,7 @@ test("admin can approve sensors", async ({ page }) => {
 
 // Customize a single scenario without affecting others
 test("guest user sees limited dashboard", async ({ page }) => {
-  const guestScenario = testLoginScenario()
-    .withUser({ role: "guest" })
-    .build();
+  const guestScenario = testLoginScenario().withUser({ role: "guest" }).build();
   // Each test defines only what it cares about ✅
 });
 ```
@@ -116,13 +124,13 @@ test("guest user sees limited dashboard", async ({ page }) => {
 // BAD: Timing-based waits (flaky!)
 test("form submission works", async ({ page }) => {
   await page.getByTestId("submit-button").click();
-  
+
   // Magic number: assumes the page takes 500ms to navigate
-  await new Promise(resolve => setTimeout(resolve, 500)); // ❌ Flaky!
-  
+  await new Promise((resolve) => setTimeout(resolve, 500)); // ❌ Flaky!
+
   // What if the page takes 600ms? Test fails randomly.
   // What if the page takes 100ms? Test wastes 400ms unnecessarily.
-  
+
   await expect(page).toHaveURL("/dashboard");
 });
 ```
@@ -137,7 +145,7 @@ class BasePageObject {
     await locator.clear();
     await locator.fill(value); // Playwright auto-waits to type
   }
-  
+
   async clickButton(locator) {
     await this.waitForElement(locator);
     await locator.click(); // Playwright auto-waits until clickable
@@ -146,12 +154,12 @@ class BasePageObject {
 
 test("form submission works", async ({ page }) => {
   const form = new LoginPage(page);
-  
+
   // These auto-wait:
-  await form.fillNationalId("123");  // Waits for input visible
-  await form.fillPassword("pwd");    // Waits for input visible
-  await form.submit();               // Waits for button clickable
-  
+  await form.fillNationalId("123"); // Waits for input visible
+  await form.fillPassword("pwd"); // Waits for input visible
+  await form.submit(); // Waits for button clickable
+
   // Auto-retry: Playwright waits up to 30s for the URL to match
   await expect(page).toHaveURL("/dashboard");
   // ✅ No flakiness, no wasted time
@@ -166,15 +174,15 @@ test("form submission works", async ({ page }) => {
 // BAD: Unclear what we're testing
 test("dashboard loads", async ({ page }) => {
   await page.goto("/dashboard");
-  
+
   // Is the page actually loaded? What defines "loaded"?
   const hasContent = await page.content();
   expect(hasContent.length).toBeGreaterThan(100); // Vague! ❌
-  
+
   // Did the right page load or just any page with content?
   const heading = await page.locator("h1");
   expect(heading).toBeDefined(); // Defined or visible? ❌
-  
+
   // This test would pass even if the page failed to render
 });
 ```
@@ -185,18 +193,18 @@ test("dashboard loads", async ({ page }) => {
 // GOOD: Clear, specific assertions
 test("dashboard loads with user info", async ({ page }) => {
   await page.goto("/dashboard");
-  
+
   // Assert specific content, not just "something loaded"
   await assertPage(page)
-    .loadedWithURL("/dashboard")           // Right page
-    .loadedWithTitle(/Dashboard/)          // Right title
-    .containsText("Welcome, Admin");       // Expected content
-  
+    .loadedWithURL("/dashboard") // Right page
+    .loadedWithTitle(/Dashboard/) // Right title
+    .containsText("Welcome, Admin"); // Expected content
+
   // Assert specific elements are in the right state
   const farmList = page.getByTestId("farm-list");
-  await expect(farmList).toBeVisible();    // Visible, not just defined
+  await expect(farmList).toBeVisible(); // Visible, not just defined
   await expect(farmList).toContainText("Farm A"); // Has data
-  
+
   // If dashboard fails to load, test fails immediately with clear message ✅
 });
 ```
@@ -213,7 +221,7 @@ test("can create a farm", async ({ page }) => {
   await page.goto("/farms/new");
   await page.getByLabel("Farm Name").fill("Test Farm");
   await page.getByRole("button", { name: "Create" }).click();
-  
+
   // Extracting data from the page (brittle!)
   const farmElement = await page.getByTestId("farm-created");
   createdFarmId = await farmElement.getAttribute("data-farm-id");
@@ -222,7 +230,7 @@ test("can create a farm", async ({ page }) => {
 test("can update the farm", async ({ page }) => {
   // This test REQUIRES the previous test to run first! ❌
   if (!createdFarmId) throw new Error("Setup failed");
-  
+
   await page.goto(`/farms/${createdFarmId}/edit`);
   // ...
 });
@@ -239,12 +247,12 @@ test("can delete the farm", async ({ page }) => {
 // GOOD: Each test is self-contained
 test("can create a farm", async ({ page }) => {
   const scenario = testFarmScenario().build();
-  
+
   // Fresh scenario for each test
   await page.goto("/farms/new");
   await page.getByLabel("Farm Name").fill(scenario.farm.name);
   await page.getByRole("button", { name: "Create" }).click();
-  
+
   // Assert the result inline
   await expect(page).toHaveURL(/\/farms\/\d+$/);
 });
@@ -252,15 +260,15 @@ test("can create a farm", async ({ page }) => {
 test("can update a farm", async ({ page }) => {
   // This test doesn't depend on the previous one
   const scenario = testFarmScenario().build();
-  
+
   // Assume the farm exists (mock/seed the backend)
   // Or create it within this test
   const farmId = await seedFarm(scenario.farm);
-  
+
   await page.goto(`/farms/${farmId}/edit`);
   await page.getByLabel("Farm Name").fill("Updated Name");
   await page.getByRole("button", { name: "Save" }).click();
-  
+
   await expect(page).toHaveURL(`/farms/${farmId}`);
 });
 
@@ -268,11 +276,11 @@ test("can delete a farm", async ({ page }) => {
   // Also independent
   const scenario = testFarmScenario().build();
   const farmId = await seedFarm(scenario.farm);
-  
+
   await page.goto(`/farms/${farmId}`);
   await page.getByRole("button", { name: "Delete" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
-  
+
   await expect(page).toHaveURL("/farms");
 });
 
@@ -287,19 +295,19 @@ test("can delete a farm", async ({ page }) => {
 // BAD: Test intent is hard to follow
 test("login flow", async ({ page }) => {
   await page.goto("/");
-  
+
   // What are we setting up?
   const nationalId = "29901011234567";
   const password = "TestPassword123";
-  
+
   // What action are we performing?
   await page.getByTestId("national-id-input").fill(nationalId);
   await page.getByTestId("password-input").fill(password);
-  
+
   // What's the assertion testing?
   await page.getByTestId("login-submit").click();
   await page.waitForNavigation();
-  
+
   // Is this success or failure? What role was the user?
   const urlAfterLogin = page.url();
   expect(urlAfterLogin).toContain("/dashboard");
@@ -404,11 +412,11 @@ test("debug failing test", async ({ page }) => {
   await test.step("When I perform an action", async () => {
     // Use pause() to open DevTools and inspect
     await page.pause();
-    
+
     // Once you understand the state, remove pause() and fix the test
     const button = page.getByTestId("submit");
-    console.log(await button.isVisible());  // true/false
-    console.log(await button.isEnabled());  // true/false
+    console.log(await button.isVisible()); // true/false
+    console.log(await button.isEnabled()); // true/false
     console.log(await button.textContent()); // actual text
   });
 });
@@ -442,15 +450,15 @@ npx playwright show-trace trace.zip
 
 ## Summary: Key Takeaways
 
-| Principle | Anti-Pattern | Pattern |
-|-----------|--------------|---------|
-| **DRY** | Selectors scattered in tests | Centralized in POM |
-| **Data** | Hard-coded values | Builders with defaults |
-| **Waiting** | setTimeout(500) | Auto-waiting + expect() |
-| **Assertions** | expect(something > 100) | expect(element).toHaveText(...) |
-| **Isolation** | Shared state between tests | Independent, self-contained tests |
-| **Intent** | Linear sequence of steps | Given-When-Then narrative |
-| **Monitoring** | Hard-coded URLs | Environment configuration |
+| Principle      | Anti-Pattern                 | Pattern                           |
+| -------------- | ---------------------------- | --------------------------------- |
+| **DRY**        | Selectors scattered in tests | Centralized in POM                |
+| **Data**       | Hard-coded values            | Builders with defaults            |
+| **Waiting**    | setTimeout(500)              | Auto-waiting + expect()           |
+| **Assertions** | expect(something > 100)      | expect(element).toHaveText(...)   |
+| **Isolation**  | Shared state between tests   | Independent, self-contained tests |
+| **Intent**     | Linear sequence of steps     | Given-When-Then narrative         |
+| **Monitoring** | Hard-coded URLs              | Environment configuration         |
 
 ---
 
