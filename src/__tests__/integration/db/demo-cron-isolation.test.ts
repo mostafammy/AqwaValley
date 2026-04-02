@@ -12,16 +12,24 @@ function readSource(relativePath: string): string {
 describe("Demo mode and cron isolation contract (Invariant #10)", () => {
   it("cron_simulation_isolated_by_run_identifier", () => {
     const cronRoute = readSource("src/app/api/cron/simulate-ingest/route.ts");
-    const simulatorService = readSource("src/server/services/simulatorCronIngest.ts");
+    const simulatorService = readSource(
+      "src/server/services/simulatorCronIngest.ts",
+    );
     const registry = readSource("src/server/services/simulatorRunRegistry.ts");
 
-    expect(cronRoute).toContain("beginRun(runKey, env.SIM_RUN_STALE_TIMEOUT_SECONDS)");
+    expect(cronRoute).toContain(
+      "beginRun(runKey, env.SIM_RUN_STALE_TIMEOUT_SECONDS)",
+    );
     expect(cronRoute).toContain("runId: runKey");
     expect(cronRoute).toContain("completeRun(runKey, attemptToken, result)");
     expect(cronRoute).toContain("failRun(runKey, attemptToken, message)");
-    expect(simulatorService).toContain("const runId = options.runId ?? randomUUID();");
+    expect(simulatorService).toContain(
+      "const runId = options.runId ?? randomUUID();",
+    );
     expect(simulatorService).toContain("id: `cron-${params.runId}`");
-    expect(registry).toContain("INSERT INTO cron_simulation_run (run_key, status, attempt_token)");
+    expect(registry).toContain(
+      "INSERT INTO cron_simulation_run (run_key, status, attempt_token)",
+    );
     expect(registry).toContain("ON CONFLICT (run_key) DO NOTHING");
   });
 
@@ -46,11 +54,13 @@ describe("Demo mode and cron isolation contract (Invariant #10)", () => {
     expect(heartbeatCheck).toContain("AqwaValley — Simulator Heartbeat");
     expect(heartbeatCheck).toContain("activated: false");
     expect(cronRoute).toContain("failRun(runKey, attemptToken, message)");
-    expect(cronRoute).toContain("console.error(\"[cron_simulate_ingest_error]\"");
+    expect(cronRoute).toContain('console.error("[cron_simulate_ingest_error]"');
   });
 
   it("demo_fixtures_do_not_pollute_integration_database", () => {
-    const simulatorService = readSource("src/server/services/simulatorCronIngest.ts");
+    const simulatorService = readSource(
+      "src/server/services/simulatorCronIngest.ts",
+    );
     const registry = readSource("src/server/services/simulatorRunRegistry.ts");
 
     expect(simulatorService).toContain("discoverSimulatorSensors({");
