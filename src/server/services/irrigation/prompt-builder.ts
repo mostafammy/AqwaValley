@@ -93,7 +93,9 @@ const DEFAULT_FIELD_CAPACITY = 65;
 // ---------------------------------------------------------------------------
 
 function getCropFieldCapacity(cropType: string): number {
-  return FIELD_CAPACITY_TARGETS[cropType.toLowerCase()] ?? DEFAULT_FIELD_CAPACITY;
+  return (
+    FIELD_CAPACITY_TARGETS[cropType.toLowerCase()] ?? DEFAULT_FIELD_CAPACITY
+  );
 }
 
 /**
@@ -204,9 +206,11 @@ export function buildIrrigationPrompt(ctx: PromptContext): BuiltPrompt {
     )
     .join("\n");
 
-  const quotaRemainingPct = (ctx.quota.monthlyLimit > 0
-    ? (ctx.quota.remainingLitres / ctx.quota.monthlyLimit) * 100
-    : 0).toFixed(1);
+  const quotaRemainingPct = (
+    ctx.quota.monthlyLimit > 0
+      ? (ctx.quota.remainingLitres / ctx.quota.monthlyLimit) * 100
+      : 0
+  ).toFixed(1);
 
   const userMessage = `
 FARM DETAILS:
