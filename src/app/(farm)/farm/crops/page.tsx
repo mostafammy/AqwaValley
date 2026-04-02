@@ -60,7 +60,7 @@ export default async function CropsPage() {
         </div>
         <div className="lg:col-span-4">
           <WaterReqCard 
-            activeCropType={profile?.cropType ?? cropTypes[0]?.cropType ?? undefined} 
+            activeCropType={profile?.cropType ?? cropTypes[0]?.type ?? "wheat"} 
             cropTypes={cropTypes}
           />
         </div>      </div>
