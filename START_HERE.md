@@ -34,9 +34,9 @@ src/__tests__/
 - **TESTING_IMPLEMENTATION_ROADMAP.md** — Full Phase 1-5 plan
 - **PHASE1_TEST_SUMMARY.md** — Metrics & next steps
 - **TEST_EXECUTION_GUIDE.md** — How to run tests
-- ****checks**/README.md** — Framework documentation
-- ****checks**/PATTERNS.md** — Anti-pattern guide
-- ****checks**/QUICKSTART.md** — 5-min onboarding
+- \***\*checks**/README.md\*\* — Framework documentation
+- \***\*checks**/PATTERNS.md\*\* — Anti-pattern guide
+- \***\*checks**/QUICKSTART.md\*\* — 5-min onboarding
 
 ---
 
@@ -133,7 +133,7 @@ The roadmap for Phases 2-5 is detailed in **TESTING_IMPLEMENTATION_ROADMAP.md**.
 4. **Add test cases** following the same pattern
 5. **Run**: `pnpm test -- --watch`
 
-See ****checks**/QUICKSTART.md** for the exact template.
+See \***\*checks**/QUICKSTART.md\*\* for the exact template.
 
 ### For Your First Integration Test
 
