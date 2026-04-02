@@ -10,5 +10,10 @@ export {
   testFarm,
   testLoginScenario,
 } from "./test-data";
-export { assertForm, assertPage, assertResponse, assertJsonResponse } from "./assertions";
+export {
+  assertForm,
+  assertPage,
+  assertResponse,
+  assertJsonResponse,
+} from "./assertions";
 export { type APIResponse, apiCheck } from "./api-check";
