@@ -197,8 +197,12 @@ describe("FAO-56 ET₀ Calculation (Invariant #11)", () => {
       CROP_COEFFICIENTS.development,
     );
     expect(getCropCoefficient("mid season")).toBe(CROP_COEFFICIENTS.midSeason);
-    expect(getCropCoefficient("late dRy")).toBe(CROP_COEFFICIENTS.lateSeasonDry); // Case insensitive
-    expect(getCropCoefficient("late wet")).toBe(CROP_COEFFICIENTS.lateSeasonWet);
+    expect(getCropCoefficient("late dRy")).toBe(
+      CROP_COEFFICIENTS.lateSeasonDry,
+    ); // Case insensitive
+    expect(getCropCoefficient("late wet")).toBe(
+      CROP_COEFFICIENTS.lateSeasonWet,
+    );
   });
 
   it("should remain plausible for New Valley annual cycle", () => {
@@ -216,10 +220,8 @@ describe("FAO-56 ET₀ Calculation (Invariant #11)", () => {
 
     // Estimated annual water need (simplified)
     const annualWaterNeed =
-      winterDays *
-        calculateCropEvapotranspiration(winterET0, avgKc, 1) +
-      summerDays *
-        calculateCropEvapotranspiration(summerET0, avgKc, 1);
+      winterDays * calculateCropEvapotranspiration(winterET0, avgKc, 1) +
+      summerDays * calculateCropEvapotranspiration(summerET0, avgKc, 1);
 
     // For New Valley irrigation (typically 1000-1500mm annual):
     // - Conservative estimate: 60d×4×0.65 + 60d×10×0.65 = 156+390 = 546mm
