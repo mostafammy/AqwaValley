@@ -59,7 +59,9 @@ export default async function HistoryPage() {
       <div className="p-6 md:p-8">
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-6 text-6xl opacity-10">🌾</div>
-          <p className="text-lg text-gray-500">لم يتم العثور على مزرعة مرتبطة بحسابك.</p>
+          <p className="text-lg text-gray-500">
+            لم يتم العثور على مزرعة مرتبطة بحسابك.
+          </p>
         </div>
       </div>
     );
@@ -87,7 +89,6 @@ export default async function HistoryPage() {
     }),
   ]);
 
-
   // Transform plans into irrigation history format
   const plansAsHistory = plans.map((plan) => ({
     id: plan.id,
@@ -113,12 +114,12 @@ export default async function HistoryPage() {
         <div className="flex items-center gap-2 text-xs font-medium text-gray-400 md:text-sm">
           <span>المزرعة</span>
           <span className="text-gray-300">/</span>
-          <span className="text-blue-600 font-medium">سجل الري</span>
+          <span className="font-medium text-blue-600">سجل الري</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
           سجل الري
         </h1>
-        <p className="text-sm md:text-base text-gray-500">
+        <p className="text-sm text-gray-500 md:text-base">
           جميع جلسات الري والخطط المنفذة في {currentFarm.name}
         </p>
       </div>
