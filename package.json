@@ -22,7 +22,7 @@
     "mock:simulator": "tsx --tsconfig tsconfig.json scripts/mock-simulator.ts",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "cron:sync:qstash": "tsx --tsconfig tsconfig.json scripts/sync-qstash-cron.ts",
     "test": "vitest run src/__tests__",
     "test:watch": "vitest src/__tests__",
