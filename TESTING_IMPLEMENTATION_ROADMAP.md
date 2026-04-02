@@ -71,12 +71,12 @@ Critical for correctness of analytics and alerting.
 
 Scheduled jobs must be idempotent and observable.
 
-- [ ] **Cron Idempotency**
+- [x] **Cron Idempotency**
   - `cron_simulation_isolated_by_runId` — No cross-contamination
   - `cron_same_runId_prevents_double_ingest` — Idempotency
   - `simulator_heartbeat_failure_distinct_from_cron_failure` — Observability
 
-- [ ] **Demo Mode Isolation**
+- [x] **Demo Mode Isolation**
   - `demo_mode_reads_dont_write_production` — Fixture safety
   - `demo_fixtures_dont_pollute_integration_db` — Cleanup
 
