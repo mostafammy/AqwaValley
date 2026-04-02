@@ -24,7 +24,7 @@ export function SoilGauge({
   color = "#0D9E7E",
   className,
 }: SoilGaugeProps) {
-  const pct = Math.min(100, Math.max(0, percentage));
+  const pct = Math.round(Math.min(100, Math.max(0, percentage)));
 
   return (
     <div 
@@ -33,7 +33,14 @@ export function SoilGauge({
         className
       )}
     >
-      <div className="relative w-28 h-28 mx-auto">
+      <div 
+        className="relative w-28 h-28 mx-auto"
+        role="meter"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={label}
+      >
         <div
           className="absolute inset-0 rounded-full"
           style={{

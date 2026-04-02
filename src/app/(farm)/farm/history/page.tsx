@@ -29,6 +29,7 @@ export default async function HistoryPage() {
         eq(farm.ownerId, session.user.id),
       ),
     )
+    .orderBy(farm.createdAt)
     .limit(1);
 
   let currentFarm = farmRows[0];

@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { BarChart as BarChartIcon } from "lucide-react";
 import {
   Area,
@@ -27,16 +28,20 @@ type HistoryChartProps = {
 
 export function HistoryChart({ data }: HistoryChartProps) {
   const { targetRef, isVisible } = useIntersectionObserver();
+  const gradientId = useId();
 
   const chartData = data.map((item) => {
     const consumption = Number(item.consumptionM3);
     const dateObj = new Date(item.periodStart);
+    const isValidDate = Number.isFinite(dateObj.getTime());
 
     return {
-      name: dateObj.toLocaleDateString("ar-EG", {
-        month: "short",
-        year: "2-digit",
-      }),
+      name: isValidDate
+        ? dateObj.toLocaleDateString("ar-EG", {
+            month: "short",
+            year: "2-digit",
+          })
+        : "—",
       consumption: Number.isFinite(consumption) ? consumption : 0,
     };
   });
@@ -51,8 +56,8 @@ export function HistoryChart({ data }: HistoryChartProps) {
           </span>
         </div>
       </CardHeader>
-      <CardBody className="pt-3">
-        <div ref={targetRef} className="h-64 md:h-80">
+      <CardBody className="pt-3 -mx-6 md:mx-0">
+        <div ref={targetRef} className="h-48 sm:h-64 md:h-80">
           {chartData.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm text-gray-400">
               لا تتوافر بيانات استهلاك حالياً
@@ -61,10 +66,10 @@ export function HistoryChart({ data }: HistoryChartProps) {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={isVisible ? chartData : []}
-                margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                margin={{ top: 10, right: 10, left: -20, bottom: 10 }}
               >
                 <defs>
-                  <linearGradient id="colorConsumption" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#1D6FA8" stopOpacity={0.25} />
                     <stop offset="95%" stopColor="#1D6FA8" stopOpacity={0.03} />
                   </linearGradient>
@@ -105,7 +110,7 @@ export function HistoryChart({ data }: HistoryChartProps) {
                   stroke="#1D6FA8"
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#colorConsumption)"
+                  fill={`url(#${gradientId})`}
                   isAnimationActive={isVisible}
                   animationDuration={1000}
                 />

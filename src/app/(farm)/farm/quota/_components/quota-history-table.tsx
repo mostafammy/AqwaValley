@@ -14,9 +14,11 @@ type QuotaHistoryTableProps = {
 };
 
 export function QuotaHistoryTable({ history }: QuotaHistoryTableProps) {
-  // Sort history by date descending
+  // Sort history by date descending, handling NaN dates
   const sortedHistory = [...history].sort((a, b) => {
-    return new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime();
+    const aTime = new Date(a.periodStart).getTime();
+    const bTime = new Date(b.periodStart).getTime();
+    return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   });
 
   return (

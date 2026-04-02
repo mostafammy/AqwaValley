@@ -45,9 +45,9 @@ export async function fetchSoilReadings(
   
   filtered.forEach((s) => {
     if (!s.wellId) return;
+    if (s.value == null) return;
     const val = Number(s.value);
     if (!Number.isFinite(val)) return;
-
     resultMap[s.wellId] ??= { humidityPct: null, tempCelsius: null };
     if (s.type === "humidity") resultMap[s.wellId]!.humidityPct = val;
     if (s.type === "temperature") resultMap[s.wellId]!.tempCelsius = val;

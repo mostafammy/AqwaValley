@@ -61,15 +61,16 @@ export default async function SoilPage() {
   }
 
   const hasLiveSensors = humiditySensors.length > 0;
+  const pctValue = hasLiveSensors ? Math.round(humiditySensors[0]?.value ?? 43) : 43;
 
   const zones = [
     { 
       id: 'a', 
       name: `${activeCropName} — منطقة أ`, 
-      pct: hasLiveSensors ? Math.round(humiditySensors[0]?.value ?? 43) : 43, 
+      pct: pctValue, 
       target: Number(profile?.targetSoilMoisturePct ?? 60), 
       color: '#D97706',
-      hint: (hasLiveSensors ? Math.round(humiditySensors[0]?.value ?? 43) : 43) < (Number(profile?.targetSoilMoisturePct ?? 60) - 10) 
+      hint: pctValue < (Number(profile?.targetSoilMoisturePct ?? 60) - 10) 
         ? 'تحتاج ري فوراً' 
         : 'حالة مستقرة'
     },
@@ -93,6 +94,8 @@ export default async function SoilPage() {
   
   const refreshKey = Date.now();
 
+  // TODO: Replace hardcoded chartData with actual historical sensor readings
+  // For now, use live sensor data for the latest entry
   const chartData = [
     { name: 'سبت', wheat: 65, beet: 70, palms: 55 },
     { name: 'أحد', wheat: 60, beet: 68, palms: 53 },
@@ -100,7 +103,7 @@ export default async function SoilPage() {
     { name: 'ثلا', wheat: 50, beet: 66, palms: 56 },
     { name: 'أرب', wheat: 48, beet: 67, palms: 55 },
     { name: 'خمس', wheat: 45, beet: 69, palms: 57 },
-    { name: 'جمع', wheat: hasLiveSensors ? Math.round(humiditySensors[0]?.value ?? 43) : 43, beet: 68, palms: 55 },
+    { name: 'جمع', wheat: pctValue, beet: 68, palms: 55 },
   ];
 
   return (
@@ -165,6 +168,7 @@ export default async function SoilPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-6">
+          {/* TODO: Wire SoilCompositionCard to real soil data from API or database */}
           <SoilCompositionCard clay={32} sand={48} silt={20} />
 
           <div className="bg-navy rounded-3xl p-8 text-white">
@@ -174,6 +178,7 @@ export default async function SoilPage() {
               </div>
               <div className="text-base font-semibold">حرارة التربة</div>
             </div>
+            {/* TODO: Replace hardcoded values with real soil temperature, evaporation, and drainage data */}
             <div className="text-5xl font-semibold tabular-nums mb-8">26°م</div>
             <div className="grid grid-cols-2 gap-6 border-t border-white/10 pt-6">
               <div>

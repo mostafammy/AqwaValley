@@ -55,17 +55,19 @@ export function CropProfileForm({
   const [cropType,   setCropType]   = useState<CropType>(profile?.cropType ?? (cropTypes[0]?.type as CropType) ?? "wheat");
   const [growthStage, setGrowthStage] = useState<GrowthStage>(profile?.growthStage ?? (growthStages[0]?.stage as GrowthStage) ?? "vegetative");
   const [moisture,   setMoisture]   = useState<string>((profile?.targetSoilMoisturePct ?? "30"));
-  const [plantedDate, setPlantedDate] = useState<string>(
-    (profile?.plantedDate
-      ? new Date(profile.plantedDate).toISOString().split("T")[0]
-      : "") ?? ""
-  );
-  const [harvestDate, setHarvestDate] = useState<string>(
-    (profile?.expectedHarvestDate
-      ? new Date(profile.expectedHarvestDate).toISOString().split("T")[0]
-      : "") ?? ""
-  );
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
+const [plantedDate, setPlantedDate] = useState<string>(
+  profile?.plantedDate ? formatDateLocal(new Date(profile.plantedDate)) : ""
+);
+const [harvestDate, setHarvestDate] = useState<string>(
+  profile?.expectedHarvestDate ? formatDateLocal(new Date(profile.expectedHarvestDate)) : ""
+);
   function handleSubmit() {
     setError(null);
     setSuccess(false);

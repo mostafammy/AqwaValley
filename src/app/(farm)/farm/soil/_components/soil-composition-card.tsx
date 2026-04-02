@@ -21,8 +21,7 @@ export function SoilCompositionCard({ clay, sand, silt }: SoilCompositionProps) 
         <h3 className="text-base font-semibold text-navy">مكونات التربة</h3>
         <Info 
           className="w-5 h-5 text-slate-400" 
-          aria-label="معلومات عن مكونات التربة"
-          role="img"
+          aria-hidden="true"
         />
       </div>
       <div className="p-8">
