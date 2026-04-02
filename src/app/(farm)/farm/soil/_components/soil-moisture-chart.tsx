@@ -52,7 +52,10 @@ export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
               border: '1px solid #e2e8f0',
               boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
             }}
-            formatter={(value: number) => [`${value}%`, undefined]}
+            formatter={(value) => {
+              if (value === undefined || value === null) return ["—", undefined];
+              return [`${Number(value)}%`, undefined];
+            }}
           />
           <Legend 
             verticalAlign="top" 
