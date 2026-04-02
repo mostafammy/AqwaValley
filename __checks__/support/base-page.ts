@@ -88,7 +88,11 @@ export class BasePageObject {
    * Assert that an element has specific text.
    * Uses exact matching by default; set `exact: false` for substring matching.
    */
-  async expectText(locator: ReturnType<Page["locator"]>, text: string, exact = true) {
+  async expectText(
+    locator: ReturnType<Page["locator"]>,
+    text: string,
+    exact = true,
+  ) {
     await expect(locator).toHaveText(text, { exact });
   }
 
@@ -112,7 +116,7 @@ export class BasePageObject {
   async expectAttribute(
     locator: ReturnType<Page["locator"]>,
     attribute: string,
-    value: string
+    value: string,
   ) {
     await expect(locator).toHaveAttribute(attribute, value);
   }
