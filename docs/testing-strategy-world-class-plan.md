@@ -55,7 +55,7 @@ than duplicated:
 
 - Playwright configuration in [playwright.config.ts](../playwright.config.ts)
 - Checkly configuration in [checkly.config.ts](../checkly.config.ts)
-- Existing end-to-end checks in [**checks**/](../__checks__)
+- Existing end-to-end checks in [__checks__/](../__checks__)
 - Scenario scripts in [scripts/](../scripts)
 - Domain documentation for ingest, quotas, reporting, and user management in
   [docs/](../docs)
@@ -69,55 +69,50 @@ to real production risk.
 Every item in this registry must have at least one named automated test.
 
 1. Ingest authorization must be sensor-scoped.
-
 - Given an API key attached to well A, a payload for sensor on well B must be
   rejected and must not write a reading, quota event, or alert.
 
 2. Ingest batch boundaries must be explicit.
-
 - Given batch sizes of 49, 50, 51, and 1,312 readings, the ingest pipeline must
   preserve correctness and respect the deployment runtime envelope.
 
 3. Duplicate readings must be idempotent.
-
 - Given the same sensorId and timestamp, the system must not create duplicate
   persisted readings or duplicate downstream alerts.
 
 4. Quota hard block must remain enforceable.
-
 - Given a farm or district at or above 100 percent utilization, the policy gate
   must produce a blocked or exceeded decision and preserve prior balances.
 
 5. Audit logs must be append-only.
-
 - Given any attempt to UPDATE or DELETE audit records, the database must reject
   the mutation and the application must surface a compliance failure.
 
 6. Role scope must remain session-scoped.
-
 - Given a user with access to farm X, manipulated farmId or districtId payloads
   must not cross into farm Y or another district.
 
 7. AI output must be schema-valid and traceable.
-
 - Given a successful irrigation recommendation, the response must satisfy the
   Zod contract, store modelUsed, preserve reasoning, and be reproducible at
   temperature 0 for the same inputs.
 
 8. Forecast outputs must remain scientifically plausible.
-
 - Given known historical depletion anchors, the forecast engine must stay
-  within accepted error and cannot generate physically impossible trajectories.
+  within a plus or minus 2 year window of the Kharga critical-depth reference
+  projection and cannot generate physically impossible trajectories.
 
 9. TimescaleDB aggregation must be time-bucket correct.
-
 - Given boundary timestamps and chunk edges, queries must group into the correct
   bucket and never drop or double count boundary rows.
 
 10. Demo and production simulation modes must remain isolated.
-
 - Given SimulatorHeartbeat or cron-driven simulation traffic, test runs must not
   contaminate production-like fixtures and vice versa.
+
+11. FAO-56 ET₀ calculation must match reference outputs.
+- Given the published FAO-56 reference inputs, the ET₀ calculation must match
+  the expected output within accepted precision for agronomic decision-making.
 
 ## Core Principles
 
@@ -207,6 +202,7 @@ Targets:
 - validators
 - policy engines
 - quota calculations
+- FAO-56 ET₀ calculation
 - alert threshold evaluation
 - report formatting logic
 - date and time boundary logic
@@ -264,6 +260,8 @@ Rules:
 - Seed with minimal, realistic fixtures
 - Reset state between runs
 - Prefer repeatable data builders over ad hoc inserts
+- Use stubbed or recorded OpenRouter responses in CI integration tests; reserve
+  live model calls for a dedicated smoke lane.
 
 ### Layer 4: Browser and E2E Tests
 
@@ -336,6 +334,7 @@ Required named assertions:
 - `ingest_rejects_duplicate_sensorId_timestamp_pairs`
 - `ingest_rotates_and_revokes_api_keys_without_reusing_old_keys`
 - `ingest_enforces_rate_limit_on_api_ingest_path`
+- `ingest_warning_auto_escalates_to_critical_after_2h_unacknowledged`
 - `ingest_preserves_alert_deduplication_window`
 - `cron_simulation_isolated_from_demo_mode_and_production_mode`
 
@@ -353,6 +352,8 @@ Assertion details:
   must succeed.
 - Given rate-limit saturation, /api/sensors/ingest must return 429 and avoid
   partial writes.
+- Given a warning remains unacknowledged for 2 hours, the system must
+  auto-escalate the alert to critical or the next configured severity tier.
 
 ### 2. AI Irrigation Engine Contract
 
@@ -380,6 +381,9 @@ Assertion details:
   repeatable plan and the stored recommendation should match the same schema.
 - Given a recommendation that exceeds the available quota balance, the system
   must either scale down safely or reject the output before persistence.
+- Integration tests must use a recorded HTTP fixture or in-process stub for
+  OpenRouter. Live OpenRouter calls are allowed only in a separate smoke suite
+  with a dedicated test key and explicit rate-limit guardrails.
 
 Model cascade to enforce in tests:
 
@@ -403,12 +407,16 @@ Required named assertions:
 Assertion details:
 
 - Given validated historical depletion anchors, the forecast output must remain
-  within the accepted scientific tolerance band.
+  within a plus or minus 2 year window of the Kharga critical-depth reference
+  projection and cannot generate physically impossible trajectories.
 - Given UPDATE or DELETE attempts against audit logs, the DB user must receive
   a hard rejection and the application must treat it as a compliance failure.
-- Given a retention policy that requires deletion or masking, the policy test
-  must prove the platform honors the retention rule instead of keeping data
-  indefinitely.
+- For this strategy, forbidden retention means personal or operational records
+  that are no longer required for the active farmer or staff relationship,
+  including recommendation history, audit references, and linked identifiers,
+  persisted beyond the policy-defined retention window or outside approved legal
+  hold scope. The test must verify that deletion, masking, or archival occurs
+  for expired records and that only explicitly retained data remains queryable.
 
 ### 4. TimescaleDB Contract
 
@@ -544,6 +552,7 @@ What to test:
 - auth failure states and audit events
 - JWT expiry enforcement after privilege changes
 - cross-district admin access rejection
+- BetterAuth-to-Lucia migration compatibility if the auth layer changes
 
 Concrete assertions:
 
@@ -606,7 +615,7 @@ What to test:
 Concrete assertions:
 
 - Given the same snapshotId and template version, export artifacts must be
-  reproducible and yield the same integrity hash.
+  reproducible and yield the same SHA-256 integrity hash.
 - Given a download after expiry, the link must fail and the access event must
   still be auditable.
 
@@ -859,6 +868,8 @@ Use this checklist in order when turning the strategy into delivery work.
 - Assign a test owner to each invariant.
 - Create or update a test file for every Tier 0 invariant.
 - Exit when each invariant has at least one named automated test.
+- Entry criteria: the repository must have a working local dev environment, a
+  documented test database path, and access to the fixture harness PR.
 
 ### 2. Build the shared harness
 
@@ -866,6 +877,8 @@ Use this checklist in order when turning the strategy into delivery work.
 - Add isolated databases or schemas for integration and simulation tests.
 - Standardize seed names and run identifiers.
 - Exit when every critical scenario can be reproduced from fixtures alone.
+- Local prerequisites: Docker Compose with TimescaleDB and PostgreSQL, the
+  documented `.env.local` values, and a clean seeded test database.
 
 ### 3. Lock down ingest behavior
 
@@ -899,7 +912,7 @@ Use this checklist in order when turning the strategy into delivery work.
 - Add time-bucket and chunk-boundary tests.
 - Add continuous aggregate staleness checks.
 - Add compression-semantic checks.
-- Add report snapshot reproducibility and integrity hash tests.
+- Add report snapshot reproducibility and SHA-256 integrity hash tests.
 - Exit when analytical reads and exports are deterministic.
 
 ### 7. Cover cron, observability, and demo isolation
@@ -925,17 +938,17 @@ Use this checklist in order when turning the strategy into delivery work.
 
 ## QA Test Matrix By Subsystem
 
-| Subsystem                   | Primary invariants                                                                       | Test layers                  | Evidence                                             |
-| --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- | ---------------------------------------------------- |
-| Authentication and Identity | Session expiry, JWT invalidation, cross-district denial, step-up auth                    | Unit, integration, E2E       | Router tests, screenshots, auth logs                 |
-| Ingest and Time-Series Data | Sensor-scoped auth, 49/50/51 boundaries, idempotency, alert timing                       | Unit, integration, synthetic | Seed names, rate-limit logs, alert rows              |
-| Quotas and Governance       | Hard block at 100 percent, ABAC, audit completeness                                      | Unit, integration, E2E       | Snapshot rows, denial traces, policy results         |
-| AI Irrigation Engine        | Model cascade fallback, schema validity, temp 0 determinism, prompt injection resistance | Unit, integration            | Stored modelUsed, AI JSON trace, validation errors   |
-| Forecast and Compliance     | Depletion anchor regression, plausibility, audit immutability, PDPL retention            | Unit, integration            | Forecast baselines, DB rejection evidence            |
-| TimescaleDB                 | Bucket correctness, chunk boundaries, compression semantics, aggregate staleness         | Integration, performance     | Query results, query plans, freshness timestamps     |
-| Reporting                   | Snapshot reproducibility, artifact integrity, signed link expiry                         | Integration, E2E             | Integrity hashes, download traces, artifact metadata |
-| Cron and Simulator          | Run isolation, ingestion_log assertions, retry safety, demo separation                   | Integration, synthetic       | Run IDs, logs, failure classes                       |
-| Frontend and UX             | Role routing, validation states, mobile layout, accessibility                            | E2E, synthetic               | Screenshots, accessibility traces, browser logs      |
+| Subsystem | Primary invariants | Test layers | Evidence |
+| --- | --- | --- | --- |
+| Authentication and Identity | Session expiry, JWT invalidation, cross-district denial, step-up auth, auth provider migration compatibility | Unit, integration, E2E | Router tests, screenshots, auth logs |
+| Ingest and Time-Series Data | Sensor-scoped auth, 49/50/51 boundaries, idempotency, alert timing, 2h escalation | Unit, integration, synthetic | Seed names, rate-limit logs, alert rows |
+| Quotas and Governance | Hard block at 100 percent, ABAC, audit completeness | Unit, integration, E2E | Snapshot rows, denial traces, policy results |
+| AI Irrigation Engine | Model cascade fallback, schema validity, temp 0 determinism, prompt injection resistance | Unit, integration | Stored modelUsed, AI JSON trace, validation errors |
+| Forecast and Compliance | Depletion anchor regression, plausibility, audit immutability, PDPL retention | Unit, integration | Forecast baselines, DB rejection evidence |
+| TimescaleDB | Bucket correctness, chunk boundaries, compression semantics, aggregate staleness | Integration, performance | Query results, query plans, freshness timestamps |
+| Reporting | Snapshot reproducibility, artifact integrity, signed link expiry | Integration, E2E | Integrity hashes, download traces, artifact metadata |
+| Cron and Simulator | Run isolation, ingestion_log assertions, retry safety, demo separation | Integration, synthetic | Run IDs, logs, failure classes |
+| Frontend and UX | Role routing, validation states, mobile layout, accessibility | E2E, synthetic | Screenshots, accessibility traces, browser logs |
 
 ### Matrix Notes
 
