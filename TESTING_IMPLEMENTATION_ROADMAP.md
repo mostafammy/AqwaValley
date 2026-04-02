@@ -246,8 +246,8 @@ Reproducibility and access control for exports.
 | 4. Quota hard block at 100%           | Unit + Integration   | `hard-block-boundary.test.ts` + `quota-decision.test.ts`  | `quota_hard_block_at_100_percent`                        |
 | 5. Audit logs append-only             | Integration          | `audit-immutability.test.ts`                              | `audit_rejects_update_operations`                        |
 | 6. Role scope session-scoped          | Integration (domain) | `role-scope-enforcement.test.ts`                          | `role_reduction_invalidates_session`                     |
-| 7. AI output schema-valid             | Unit + Integration   | `output-validation.test.ts` + `ai-orchestration.test.ts`  | `ai_schema_rejects_malformed_json`                       |
-| 8. Forecast scientifically plausible  | Unit + Integration   | `plausibility.test.ts` + `forecast-orchestration.test.ts` | `forecast_respects_2_year_window`                        |
+| 7. AI output schema-valid             | Unit + Integration   | `ai-contracts.test.ts`                                    | `ai_schema_rejects_malformed_json_and_missing_fields`    |
+| 8. Forecast scientifically plausible  | Unit + Integration   | `forecast-plausibility-contract.test.ts`                  | `forecast_rejects_physically_impossible_trajectory`      |
 | 9. TimescaleDB aggregation correct    | Integration          | `timescaledb-aggregation.test.ts`                         | `timescaledb_time_bucket_groups_boundary_rows_correctly` |
 | 10. Demo mode isolated                | Integration (domain) | `cron-simulation.test.ts`                                 | `cron_simulation_isolated_by_runId`                      |
 | 11. FAO-56 ET₀ reference correct      | Unit                 | `et0-reference.test.ts`                                   | `fao56_et0_matches_reference_example`                    |
@@ -326,9 +326,9 @@ As tests are implemented, mark completion here:
 
 ### Phase 2: AI & Forecast
 
-- [ ] AI Cascade (3 tests)
-- [ ] AI Output Validation (3 tests)
-- [ ] Forecast Plausibility (2 tests)
+- [x] AI Cascade (3 tests)
+- [x] AI Output Validation (3 tests)
+- [x] Forecast Plausibility (2 tests)
 
 ### Phase 3: TimescaleDB
 
