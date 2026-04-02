@@ -19,6 +19,7 @@ export type TriggeredAlert = {
   message: string;
   value: number;
   threshold: number;
+  createdByUserId: string;
 };
 
 function evaluateOperator(
@@ -71,6 +72,7 @@ export function evaluateRules(
         message: `${reading.type} value ${reading.value} ${rule.operator} ${threshold} (rule: ${rule.id})`,
         value: reading.value,
         threshold,
+        createdByUserId: rule.createdByUserId,
       });
     }
   }
