@@ -145,7 +145,9 @@ export async function requestIrrigationPlan(
 
   // Get district name for the prompt
   const [districtRecord] = await db
-    .select({ name: district.name })
+    .select({ 
+      name: district.name,
+    })
     .from(district)
     .where(eq(district.id, farmRecord.districtId))
     .limit(1);
@@ -167,11 +169,12 @@ export async function requestIrrigationPlan(
       .limit(1),
   ]);
 
-  // Resolve coordinates: Primary Well -> District Center -> Default Cairo
-  const lat = assignedWells[0]
-    ? Number(assignedWells[0].lat)
-    : 25.4474; // Default to Kharga if no well/district info
-  const lon = assignedWells[0] ? Number(assignedWells[0].lon) : 30.546;
+  // Resolve coordinates: Primary Well -> Default Kharga (25.4474, 30.546)
+  const wellLat = Number(assignedWells[0]?.lat);
+  const wellLon = Number(assignedWells[0]?.lon);
+
+  const lat = Number.isFinite(wellLat) ? wellLat : 25.4474;
+  const lon = Number.isFinite(wellLon) ? wellLon : 30.546;
 
   const weather = await getWeatherForecast(lat, lon);
 
@@ -194,7 +197,7 @@ export async function requestIrrigationPlan(
     },
     zones,
     quota,
-    soilReading,
+    soilReading: soilReading as Record<string, PromptSoilReading | null>,
     weather,
   };
 
@@ -204,8 +207,10 @@ export async function requestIrrigationPlan(
 
   // ── 3. Call AI with model cascade ──────────────────────────────────────
 
-  let rawResponse: string;
-  let modelUsed: string;
+  let isFallback = false;
+  let rawResponse = "";
+  let modelUsed = "";
+  let plan = {} as IrrigationPlan;
 
   try {
     const result = await callIrrigationAI(systemPrompt, userMessage);
@@ -214,40 +219,50 @@ export async function requestIrrigationPlan(
   } catch (err: unknown) {
     if (err instanceof Error && err.message === "ALL_MODELS_EXHAUSTED") {
       logger.warn("ai.irrigation.all_models_exhausted — using fallback");
-      return generateRuleBasedPlan({
+      const fallbackResult = generateRuleBasedPlan({
         farm: ctx.farm,
         zones: ctx.zones,
         quota: ctx.quota,
         soilReading: ctx.soilReading,
         weather: ctx.weather,
       });
+      plan = fallbackResult.recommendation.plan;
+      isFallback = true;
+      rawResponse = "FALLBACK_GENERATED";
+      modelUsed = "rule-based-engine";
+    } else {
+      throw err;
     }
-    throw err;
   }
 
   // ── 4. Parse + validate — never trust raw AI output ───────────────────
-
-  let plan: IrrigationPlan;
-  try {
-    const cleaned = rawResponse.replace(/```json|```/g, "").trim();
-    plan = irrigationPlanSchema.parse(JSON.parse(cleaned));
-  } catch (parseErr) {
-    logger.error(
-      { error: parseErr },
-      "ai.irrigation.parse_failed — using fallback",
-    );
-    return generateRuleBasedPlan({
-      farm: ctx.farm,
-      zones: ctx.zones,
-      quota: ctx.quota,
-      soilReading: ctx.soilReading,
-      weather: ctx.weather,
-    });
+  if (!isFallback) {
+    try {
+      const cleaned = rawResponse.replace(/```json|```/g, "").trim();
+      plan = irrigationPlanSchema.parse(JSON.parse(cleaned));
+    } catch (parseErr) {
+      logger.error(
+        { error: parseErr },
+        "ai.irrigation.parse_failed — using fallback",
+      );
+      const fallbackResult = generateRuleBasedPlan({
+        farm: ctx.farm,
+        zones: ctx.zones,
+        quota: ctx.quota,
+        soilReading: ctx.soilReading,
+        weather: ctx.weather,
+      });
+      plan = fallbackResult.recommendation.plan;
+      isFallback = true;
+      rawResponse = "FALLBACK_PARSING_ERROR";
+      modelUsed = "rule-based-engine";
+    }
   }
 
   // ── 5. Hard quota enforcement — AI cannot override the database ───────
-
-  const totalRequested = plan.zones.reduce(
+  // only if not already scaled by fallback (fallback does its own scaling)
+  if (!isFallback) {
+    const totalRequested = plan.zones.reduce(
     (sum, z) => sum + z.recommendedLitres,
     0,
   );
@@ -321,12 +336,13 @@ export async function requestIrrigationPlan(
       );
     }
 
-    plan = {
-      ...plan,
-      quotaWarning: true,
-      totalLitres: scaledTotal,
-      zones: scaledZones,
-    };
+      plan = {
+        ...plan,
+        quotaWarning: true,
+        totalLitres: scaledTotal,
+        zones: scaledZones,
+      };
+    }
   }
 
   // ── 6. Persist — store full traceability record ────────────────────────
@@ -342,7 +358,7 @@ export async function requestIrrigationPlan(
       plan: plan as unknown as Record<string, unknown>,
       totalLitres: plan.totalLitres,
       modelUsed,
-      fallback: false,
+      fallback: isFallback,
       status: "PENDING",
     })
     .returning();
@@ -363,12 +379,12 @@ export async function requestIrrigationPlan(
 
   return {
     success: true,
-    fallback: false,
+    fallback: isFallback,
     recommendation: {
       id: recommendation.id,
       plan,
       modelUsed,
-      fallback: false,
+      fallback: isFallback,
       status: recommendation.status,
       createdAt: recommendation.createdAt,
     },

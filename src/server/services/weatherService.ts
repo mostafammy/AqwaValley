@@ -184,15 +184,26 @@ export const weatherService = {
     try {
       // Use Open-Meteo for ET0 and forecast as it's free and specialized
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration,precipitation_sum&timezone=Africa%2FCairo&forecast_days=${days}`;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-      const response = await fetch(url);
-      if (!response.ok)
-        throw new Error(`Open-Meteo returned ${response.status}`);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Open-Meteo returned ${response.status}`);
 
-      const data: unknown = await response.json();
-      if (!isOpenMeteoPayload(data)) {
-        throw new Error("Invalid Open-Meteo response structure");
+      interface OpenMeteoResponse {
+        daily: {
+          time: string[];
+          temperature_2m_max: (number | null)[];
+          temperature_2m_min: (number | null)[];
+          et0_fao_evapotranspiration: (number | null)[];
+          precipitation_sum: (number | null)[];
+        };
       }
+
+      const data = (await response.json()) as OpenMeteoResponse;
+      if (!data.daily) throw new Error("Invalid Open-Meteo response structure");
 
       const forecast: ForecastDay[] = data.daily.time.map((date, i) => ({
         date,
@@ -208,18 +219,25 @@ export const weatherService = {
       });
 
       return forecast;
-    } catch (error) {
-      console.error("Failed to fetch Open-Meteo forecast:", error);
-      // Return sensible desert defaults as fallback
-      return Array.from({ length: days }).map((_, i) => ({
-        date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0]!,
-        maxTemp: 35,
-        minTemp: 20,
-        et0: 7.5,
-        rain: 0,
-      }));
+    } finally {
+      clearTimeout(timeoutId);
     }
-  },
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("Open-Meteo forecast request timed out after 10s");
+    } else {
+      console.error("Failed to fetch Open-Meteo forecast:", error);
+    }
+    // Return sensible desert defaults as fallback
+    return Array.from({ length: days }).map((_, i) => ({
+      date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0]!,
+      maxTemp: 35,
+      minTemp: 20,
+      et0: 7.5,
+      rain: 0,
+    }));
+  }
+},
 
   getFallbackWeather(): WeatherInfo {
     return {

@@ -18,18 +18,32 @@ import {
   Leaf,
 } from "lucide-react";
 import { api } from "~/trpc/react";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  CardTitle,
-} from "~/app/_components/UI/Card";
+import { type RouterOutputs } from "~/trpc/react";
+import { Card, CardBody, CardHeader, CardTitle } from "~/app/_components/UI/Card";
 import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
+import { Button } from "~/app/_components/UI/Button";
+import type { IrrigationPlan, IrrigationZone } from "~/server/services/irrigation/schemas";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** A single zone in the irrigation plan */
+type ZonePlan = IrrigationZone & {
+  soilMoistureNow?: number;
+  targetMoisture?: number;
+};
+
+/** Live weather snapshot from weather.getCurrent */
+type WeatherInfo = RouterOutputs["weather"]["getCurrent"];
+
+/** Single forecast day from weather.getForecast */
+type ForecastDay = RouterOutputs["weather"]["getForecast"][number];
+
+/** Live irrigation inputs from irrigation.getLiveInputs */
+type LiveInputs = RouterOutputs["irrigation"]["getLiveInputs"];
 
 interface AiPlanClientProps {
   farmId: string;
@@ -181,16 +195,9 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
   const circ = 2 * Math.PI * r;
   const offset = circ - (value / 100) * circ;
   return (
-    <div className="relative h-32 w-32 shrink-0">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-        <circle
-          cx="50"
-          cy="50"
-          r={r}
-          fill="none"
-          stroke="#f1f5f9"
-          strokeWidth="9"
-        />
+    <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r={r} fill="none" stroke="#f1f5f9" strokeWidth="9" />
         <circle
           cx="50"
           cy="50"
@@ -213,12 +220,8 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-navy text-4xl leading-none font-semibold">
-          {value}%
-        </span>
-        <span className="mt-1 text-xs font-medium tracking-widest text-slate-500">
-          مستوى الثقة
-        </span>
+        <span className="text-3xl md:text-4xl font-semibold text-navy leading-none">{value}%</span>
+        <span className="text-xs font-medium tracking-widest text-slate-500 mt-1">مستوى الثقة</span>
       </div>
     </div>
   );
@@ -273,7 +276,7 @@ function MoistureBar({
 
 const ZONE_COLORS = ["#0ea5e9", "#14b8a6", "#f59e0b", "#64748b"];
 
-function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
+function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
   const color = ZONE_COLORS[idx % ZONE_COLORS.length]!;
   const recommendedLitres = zone.recommendedLitres ?? 0;
   const inactive = recommendedLitres === 0;
@@ -366,11 +369,11 @@ function InputsStrip({
   liveWeather,
   liveForecast,
   liveInputs,
-  loading,
-}: {
-  plan?: PlanView;
-  liveWeather?: LiveWeather;
-  liveForecast?: LiveForecastDay[];
+  loading 
+}: { 
+  plan?: IrrigationPlan; 
+  liveWeather?: WeatherInfo; 
+  liveForecast?: ForecastDay[]; 
   liveInputs?: LiveInputs;
   loading?: boolean;
 }) {
@@ -381,56 +384,24 @@ function InputsStrip({
   const quota = liveInputs?.remainingQuotaLitres ?? plan?.remainingQuotaLitres;
 
   const inputs = [
-    {
-      icon: ThermometerSun,
-      label: "الحرارة",
-      value: temp,
-      unit: "°م",
-      warn: Number(temp) > 32,
-    },
-    {
-      icon: Wind,
-      label: "ET₀",
-      value: et0,
-      unit: "mm/يوم",
-      warn: Number(et0) > 8,
-    },
-    {
-      icon: FlaskConical,
-      label: "رطوبة التربة",
-      value: typeof hmd === "number" ? Math.round(hmd) : hmd,
-      unit: "%",
-      warn: (Number(hmd) ?? 100) < 50,
-    },
-    {
-      icon: CloudRain,
-      label: "أمطار",
-      value: rain,
-      unit: "mm",
-      isGood: Number(rain) > 0,
-    },
-    {
-      icon: Gauge,
-      label: "الحصة المتبقية",
-      value: quota ? (quota / 1000).toFixed(1) : "—",
-      unit: "م³",
-      warn: (quota ?? 99999) < 10000,
-    },
+    { icon: ThermometerSun, label: "الحرارة", value: temp, unit: "°م", warn: Number(temp) > 32 },
+    { icon: Wind,           label: "ET₀",     value: et0, unit: "mm/يوم", warn: Number(et0) > 8 },
+    { icon: FlaskConical,   label: "رطوبة التربة", value: typeof hmd === 'number' ? Math.round(hmd) : hmd, unit: "%", warn: Number(hmd ?? 100) < 50 },
+    { icon: CloudRain,      label: "أمطار",   value: rain, unit: "mm", isGood: Number(rain) > 0 },
+    { icon: Gauge,          label: "الحصة المتبقية", value: quota ? (quota / 1000).toFixed(1) : "—", unit: "م³", warn: (quota ?? 99999) < 10000 },
   ];
 
   return (
-    <div
-      className={`grid grid-cols-2 gap-4 lg:grid-cols-5 ${loading ? "animate-pulse" : ""}`}
-    >
+    <div className={`grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 ${loading ? "animate-pulse" : ""}`}>
       {inputs.map(({ icon: Icon, label, value, unit, warn, isGood }) => (
         <div
           key={label}
-          className={`flex flex-col gap-2 rounded-3xl border px-5 py-4 text-sm transition-all ${
-            warn
-              ? "border-amber-200 bg-amber-50 text-amber-700 shadow-sm"
-              : isGood
-                ? "border-blue-200 bg-blue-50 text-blue-700 shadow-sm"
-                : "border-slate-100 bg-white shadow-sm hover:shadow-md"
+          className={`rounded-2xl md:rounded-3xl px-4 md:px-5 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2 border text-sm transition-all ${
+            warn 
+              ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm" 
+              : isGood 
+                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+                : "bg-white border-slate-100 shadow-sm hover:shadow-md"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -482,16 +453,13 @@ function EmptyState({
   loading: boolean;
 }) {
   return (
-    <div className="flex min-h-105 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-16 text-center">
-      <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
-        <Droplets className="h-9 w-9 text-slate-400" />
+    <div className="bg-white border border-slate-100 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center text-center min-h-[320px] md:min-h-[420px]">
+      <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mb-8">
+        <Droplets className="w-9 h-9 text-slate-400" />
       </div>
-      <h3 className="text-navy mb-3 text-2xl font-semibold">
-        لا توجد خطة ري حالياً
-      </h3>
-      <p className="mb-10 max-w-md text-slate-600">
-        اضغط على الزر أدناه ليحلل النظام بيانات المزرعة ويولد خطة الري الأمثل
-        لليوم بناءً على معادلات FAO-56
+      <h3 className="text-xl md:text-2xl font-semibold text-navy mb-3">لا توجد خطة ري حالياً</h3>
+      <p className="max-w-md text-slate-600 mb-10">
+        اضغط على الزر أدناه ليحلل النظام بيانات المزرعة ويولد خطة الري الأمثل لليوم بناءً على معادلات FAO-56
       </p>
       <button
         onClick={onGenerate}
@@ -511,6 +479,7 @@ function EmptyState({
 
 export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   const utils = api.useUtils();
+  const router = useRouter();
 
   const { data: latestPlanRecord, isLoading } =
     api.irrigation.getLatestPlan.useQuery(
@@ -518,27 +487,29 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
       { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 },
     );
 
-  const { data: liveWeather } = api.weather.getCurrent.useQuery({ farmId });
-  const { data: liveForecast } = api.weather.getForecast.useQuery({ farmId });
-  const { data: liveInputs } = api.irrigation.getLiveInputs.useQuery({
-    farmId,
-  });
+  const { data: liveWeather, isLoading: weatherLoading } = api.weather.getCurrent.useQuery({ farmId });
+  const { data: liveForecast, isLoading: forecastLoading } = api.weather.getForecast.useQuery({ farmId });
+  const { data: liveInputs, isLoading: inputsLoading } = api.irrigation.getLiveInputs.useQuery({ farmId });
 
   const generatePlan = api.irrigation.requestPlan.useMutation({
-    onSuccess: () => {
+    onSuccess: () => { 
       void utils.irrigation.getLatestPlan.invalidate({ farmId });
       void utils.irrigation.getLiveInputs.invalidate({ farmId });
+      void utils.irrigation.listPlans.invalidate({ farmId });
     },
   });
 
   const activatePlan = api.irrigation.activatePlan.useMutation({
     onSuccess: () => {
       void utils.irrigation.getLatestPlan.invalidate({ farmId });
+      void utils.irrigation.listPlans.invalidate({ farmId });
+      // Redirect to irrigate page and auto-start
+      router.push("/farm/irrigate?auto=1");
     },
   });
-
-  const plan = parsePlan(latestPlanRecord?.plan);
+  const plan = latestPlanRecord?.plan as IrrigationPlan | undefined;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
+  const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
 
   if (isLoading) {
     return (
@@ -550,38 +521,39 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   }
 
   return (
-    <div className="space-y-10" dir="rtl">
+    <div className=" space-y-6 md:space-y-10 w-sm md:w-full" dir="rtl">
+
       {/* Header */}
-      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-10">
         <div>
-          <div className="mb-2 flex items-center gap-3">
-            <span className="inline-flex items-center rounded-3xl bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+          <div className="flex items-center mb-2">
+            <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-3xl">
               ✦ الذكاء الاصطناعي
             </span>
             <span className="text-sm font-medium text-slate-500">
               • {farmName}
             </span>
           </div>
-          <h1 className="text-navy text-5xl font-semibold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-navy">
             خطة الري <span className="text-teal">الذكية</span>
           </h1>
-          <p className="mt-2 flex items-center gap-2 text-slate-500">
-            <span className="bg-teal h-2 w-2 animate-pulse rounded-full" />
+          <p className="text-sm md:text-base text-slate-500 mt-3 md:mt-6 flex items-center gap-2">
+            <span className="w-2 h-2 bg-teal rounded-full animate-pulse" />
             تعتمد على معادلات FAO-56 • خزان الحجر الرملي النوبي
           </p>
         </div>
 
         <div className="flex items-center gap-6">
-          <button
+          <Button
             onClick={() => generatePlan.mutate({ farmId })}
             disabled={generatePlan.isPending}
-            className="btn btn-primary flex items-center gap-3 px-7"
+            className="btn btn-primary flex items-center gap-3"
           >
             <Cpu
               className={`h-4 w-4 ${generatePlan.isPending ? "animate-spin" : ""}`}
             />
             {generatePlan.isPending ? "جاري التوليد..." : "خطة جديدة"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -594,13 +566,14 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
           loading={generatePlan.isPending}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 md:gap-8">
+
           {/* Left Column */}
-          <div className="space-y-8 xl:col-span-5">
+          <div className="xl:col-span-5 space-y-5 md:space-y-8">
             {/* Summary Card */}
             <Card>
-              <CardBody className="p-8">
-                <div className="mb-8 flex justify-between">
+              <CardBody className="p-5 md:p-8">
+                <div className="flex flex-col sm:flex-row justify-between mb-6 md:mb-8 gap-4">
                   <div>
                     <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
                       ملخص الخطة
@@ -609,22 +582,22 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                       إجمالي الري اليوم
                     </div>
                   </div>
-                  <ConfidenceRing value={plan.confidence ?? 94} />
+                  <ConfidenceRing value={plan.confidence === "HIGH" ? 94 : plan.confidence === "MEDIUM" ? 65 : 35} />
                 </div>
 
                 <div className="flex items-baseline gap-3">
-                  <span className="text-navy text-6xl font-semibold tabular-nums">
+                  <span className="text-4xl md:text-6xl font-semibold text-navy tabular-nums">
                     {((plan.totalLitres ?? 0) / 1000).toFixed(1)}
                   </span>
-                  <span className="text-3xl text-slate-300">م³</span>
+                  <span className="text-2xl md:text-3xl text-slate-300">م³</span>
                 </div>
-                <div className="mt-1 text-sm text-slate-500">
+                <div className="text-slate-500 text-sm mt-1">
                   {(plan.totalLitres ?? 0).toLocaleString("ar-EG")} لتر
                 </div>
 
                 {plan.quotaWarning && (
-                  <div className="mt-8 flex items-center gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
-                    <AlertCircle className="h-5 w-5 shrink-0" />
+                  <div className="mt-8 flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-700 px-5 py-4 rounded-3xl text-sm font-medium">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
                     تم تقليص الكمية لتناسب الحصة المتبقية
                   </div>
                 )}
@@ -695,13 +668,13 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-8 xl:col-span-7">
-            <InputsStrip
-              plan={plan}
+          <div className="xl:col-span-7 space-y-5 md:space-y-8">
+            <InputsStrip 
+              plan={plan} 
               liveWeather={liveWeather}
               liveForecast={liveForecast}
               liveInputs={liveInputs}
-              loading={isLoading}
+              loading={isDataLoading}
             />
 
             <div className="flex items-center justify-between">
@@ -714,16 +687,16 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {plan.zones?.map((zone, i) => (
                 <ZoneCard key={zone.zoneId ?? i} zone={zone} idx={i} />
               ))}
             </div>
 
             {/* Savings banner */}
-            <div className="flex items-center gap-6 rounded-3xl border border-slate-100 bg-slate-50 p-6">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-                <Droplets className="text-teal h-7 w-7" />
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl p-4 md:p-6 flex items-center gap-4 md:gap-6">
+              <div className="flex-shrink-0 w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-200">
+                <Droplets className="w-7 h-7 text-teal" />
               </div>
               <div className="flex-1">
                 <div className="font-semibold">توفير مياه بنسبة ~15%</div>

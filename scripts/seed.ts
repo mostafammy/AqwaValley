@@ -435,56 +435,56 @@ const CROP_TYPE_LOOKUPS: Array<{
 }> = [
   {
     type: "wheat",
-    displayName: "Wheat",
+    displayName: "قمح",
     commonName: "Bread wheat",
     description:
       "Strategic winter cereal crop widely cultivated in New Valley reclamation zones.",
   },
   {
     type: "rice",
-    displayName: "Rice",
+    displayName: "أرز",
     commonName: "Rice",
     description:
       "Included for catalog completeness; not a primary crop in New Valley due to water intensity.",
   },
   {
     type: "corn",
-    displayName: "Corn",
+    displayName: "ذرة",
     commonName: "Maize",
     description:
       "Summer cereal used for grain and fodder production in oasis agriculture.",
   },
   {
     type: "cotton",
-    displayName: "Cotton",
+    displayName: "قطن",
     commonName: "Cotton",
     description:
       "Legacy field crop available in catalog for expansion scenarios.",
   },
   {
     type: "sugarcane",
-    displayName: "Sugarcane",
+    displayName: "قصب السكر",
     commonName: "Sugarcane",
     description:
       "Catalog option; not a preferred crop for New Valley groundwater management.",
   },
   {
     type: "vegetables",
-    displayName: "Vegetables",
+    displayName: "خضروات",
     commonName: "Onion, tomato, pepper, potato",
     description:
       "High-value horticulture under irrigated oasis production systems.",
   },
   {
     type: "fruits",
-    displayName: "Fruits",
+    displayName: "نخيل تمر",
     commonName: "Date palms, citrus, pomegranate",
     description:
       "Represents perennial orchard systems, especially date palms across the governorate.",
   },
   {
     type: "other",
-    displayName: "Other",
+    displayName: "أخرى",
     commonName: "Alfalfa and fodder crops",
     description:
       "Used for fodder systems such as alfalfa where no dedicated enum exists.",
@@ -499,38 +499,38 @@ const GROWTH_STAGE_LOOKUPS: Array<{
 }> = [
   {
     stage: "germination",
-    displayName: "Germination",
+    displayName: "الإنبات",
     description: "Emergence and establishment stage.",
     estDurationDays: 14,
   },
   {
     stage: "vegetative",
-    displayName: "Vegetative",
+    displayName: "النمو الخضري",
     description: "Leaf and canopy expansion stage.",
     estDurationDays: 35,
   },
   {
     stage: "flowering",
-    displayName: "Flowering",
+    displayName: "الإزهار",
     description: "Reproductive transition and bloom stage.",
     estDurationDays: 20,
   },
   {
     stage: "fruiting",
-    displayName: "Fruiting",
+    displayName: "الإثمار",
     description:
       "Fruit set and development stage for orchard and horticulture crops.",
     estDurationDays: 60,
   },
   {
     stage: "maturity",
-    displayName: "Maturity",
+    displayName: "النضج",
     description: "Final grain or fruit fill before harvest.",
     estDurationDays: 25,
   },
   {
     stage: "harvest",
-    displayName: "Harvest",
+    displayName: "الحصاد",
     description: "Ready for harvest or post-harvest completion state.",
     estDurationDays: 7,
   },

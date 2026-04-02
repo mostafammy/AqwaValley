@@ -38,8 +38,8 @@ export function AiNeuralPulse() {
         
         {/* center icon container */}
         <div className="relative z-10 w-24 h-24 bg-white rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.2)] border border-blue-100 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-white" />
-          <ActiveIcon className="w-10 h-10 text-blue relative z-10 animate-bounce transition-all duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white" />
+          <ActiveIcon className="w-10 h-10 text-blue-500 relative z-10 animate-bounce transition-all duration-500" />
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export function AiNeuralPulse() {
       <div className="space-y-6 text-center max-w-sm w-full">
         <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden mb-8">
            <div 
-             className="h-full bg-blue-600 transition-all duration-4500 ease-linear"
+             className="h-full bg-blue-600 transition-all duration-[4500ms] ease-linear"
              style={{ width: `${((currentStage + 1) / STAGES.length) * 100}%` }}
            />
         </div>

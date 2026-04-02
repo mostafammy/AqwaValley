@@ -116,6 +116,14 @@
   /* ── Layout ── */
   --sidebar-width:       220px;
   --topbar-height:       54px;
+
+  /* ── Animations ── */
+  --animate-fade-in-pop: fade-in-pop 0.8s ease-out;
+
+  @keyframes fade-in-pop {
+    0% { opacity: 0; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+  }
 }
 
 /* ── Base Styles ── */
@@ -629,4 +637,20 @@
 
 .leaflet-tooltip-top:before {
   border-top-color: #0A1628 !important;
+}
+
+/* ── Custom Scrollbars ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(26, 48, 80, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 48, 80, 0.2);
 }

@@ -122,7 +122,12 @@ export interface FallbackInput {
 export interface FallbackResult {
   readonly success: true;
   readonly fallback: true;
-  readonly recommendation: IrrigationPlan;
+  readonly recommendation: {
+    readonly plan: IrrigationPlan;
+    readonly fallback: true;
+    readonly totalLitres: number;
+    readonly quotaWarning: boolean;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -163,12 +168,16 @@ function calculateZoneLitres(
  * @returns A valid irrigation plan with `fallback: true`
  */
 export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
-  const currentEt0 = ctx.weather?.daily[0]?.et0 ?? ET0_DEFAULT;
-  const rainNext24h = ctx.weather?.daily[0]?.rain ?? 0;
+  const hasLiveWeather = !!ctx.weather?.daily?.[0];
+  const currentEt0 = ctx.weather?.daily?.[0]?.et0 ?? ET0_DEFAULT;
+  const rainNext24h = ctx.weather?.daily?.[0]?.rain ?? 0;
 
   const zonePlans = ctx.zones.map((zone) => {
+    const sensorMatch = ctx.soilReading[zone.id];
     const currentHumidity =
-      ctx.soilReading[zone.id]?.humidityPct ?? DEFAULT_HUMIDITY;
+      (sensorMatch && sensorMatch.humidityPct !== null) 
+        ? sensorMatch.humidityPct 
+        : DEFAULT_HUMIDITY;
     const totalLitres = calculateZoneLitres(
       zone,
       currentHumidity,
@@ -183,7 +192,7 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
       recommendedLitres: totalLitres,
       scheduledAt: DEFAULT_SCHEDULE_TIME,
       confidence: "MEDIUM" as const,
-      notes: `Rule-based ETc calculation — ${ctx.weather ? "Live" : "Static"} Weather Used`,
+      notes: `Rule-based ETc calculation — ${hasLiveWeather ? "Live" : "Static"} Weather Used`,
     };
   });
 
@@ -217,14 +226,21 @@ export function generateRuleBasedPlan(ctx: FallbackInput): FallbackResult {
     0,
   );
 
+  const plan: IrrigationPlan = {
+    reasoning: `Rule-based FAO-56 ETc plan generated (AI unavailable). ETc = ET₀(${currentEt0}mm/day) × Kc per crop stage.${rainNext24h > 0 ? ` Adjusted for ${rainNext24h}mm rain.` : ""}${quotaWarning ? " Plan scaled to fit remaining quota." : ""} (${hasLiveWeather ? "Live" : "Static"} weather source).`,
+    totalLitres: scaledTotal,
+    quotaWarning,
+    zones: scaledZones,
+  };
+
   return {
     success: true,
     fallback: true,
     recommendation: {
-      reasoning: `Rule-based FAO-56 ETc plan generated (AI unavailable). ETc = ET₀(${currentEt0}mm/day) × Kc per crop stage.${rainNext24h > 0 ? ` Adjusted for ${rainNext24h}mm rain.` : ""}${quotaWarning ? " Plan scaled to fit remaining quota." : ""}`,
+      plan,
+      fallback: true,
       totalLitres: scaledTotal,
       quotaWarning,
-      zones: scaledZones,
     },
   };
 }
