@@ -3,19 +3,26 @@ import { cropHistory } from "~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Leaf } from "lucide-react";
 
-type LookupEntity = {
+type CropTypeEntity = {
   id: string;
-  type?: string;
-  stage?: string;
+  type: string;
   displayName: string;
   commonName: string | null;
   description: string | null;
 };
 
+type GrowthStageEntity = {
+  id: string;
+  stage: string;
+  displayName: string;
+  description: string | null;
+  estDurationDays: number | null;
+};
+
 interface CropHistoryTableProps {
   farmId: string;
-  cropTypes: LookupEntity[];
-  growthStages: LookupEntity[];
+  cropTypes: CropTypeEntity[];
+  growthStages: GrowthStageEntity[];
 }
 
 export async function CropHistoryTable({ 
