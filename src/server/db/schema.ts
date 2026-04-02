@@ -1555,6 +1555,40 @@ export const sensorDataSimulation = pgTable(
   ],
 );
 
+/**
+ * irrigation_session: Temporary session state for live pump animations.
+ * Stores frame count and liters pumped during active irrigation preview/setup.
+ * Gets cleaned up after session completes or expires.
+ */
+export const irrigationSession = pgTable(
+  "irrigation_session",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    farmId: uuid("farm_id")
+      .notNull()
+      .references(() => farm.id, { onDelete: "cascade" }),
+    planId: uuid("plan_id").references(() => irrigationRecommendation.id, {
+      onDelete: "cascade",
+    }),
+    frameCount: integer("frame_count").notNull().default(0),
+    litersPumped: numeric("liters_pumped", { precision: 15, scale: 4 })
+      .notNull()
+      .default("0"),
+    done: boolean("done").notNull().default(false),
+    running: boolean("running").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("irrigation_session_farm_plan_idx").on(t.farmId, t.planId),
+    index("irrigation_session_updated_at_idx").on(t.updatedAt),
+  ],
+);
+
 // ============================================================================
 // USER MANAGEMENT v2 — Enums
 // ============================================================================

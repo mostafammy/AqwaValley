@@ -71,6 +71,27 @@
       "when": 1774818600000,
       "tag": "0009_aquifer_lineage_and_eligibility",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774819200000,
+      "tag": "0010_email_audit_provider_message_id_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774819800000,
+      "tag": "0011_irrigation_session",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1775098229771,
+      "tag": "0012_melted_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }

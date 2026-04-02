@@ -21,6 +21,7 @@ import {
   farm,
   irrigationEvent,
   irrigationRecommendation,
+  irrigationSession,
   irrigationSimulationRun,
 } from "~/server/db/schema";
 import { evaluateAndPersistRunDiff } from "~/server/services/irrigation/runDiffService";
@@ -92,6 +93,20 @@ const replaySimulationRunInput = z.object({
 const diffSimulationRunsInput = z.object({
   baseRunId: z.string().uuid(),
   candidateRunId: z.string().uuid(),
+});
+
+const saveSessionInput = z.object({
+  farmId: z.string().uuid(),
+  planId: z.string().uuid().nullable(),
+  frameCount: z.number().int().min(0),
+  litersPumped: z.number().nonnegative(),
+  done: z.boolean(),
+  running: z.boolean(),
+});
+
+const getSessionInput = z.object({
+  farmId: z.string().uuid(),
+  planId: z.string().uuid().nullable(),
 });
 
 // ---------------------------------------------------------------------------
@@ -425,5 +440,86 @@ export const irrigationRouter = createTRPCRouter({
       }
 
       return diffResult.value;
+    }),
+
+  saveSession: protectedProcedure
+    .input(saveSessionInput)
+    .mutation(async ({ ctx, input }) => {
+      // Verify access to the farm
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      // Check if session already exists
+      const [existing] = await ctx.db
+        .select()
+        .from(irrigationSession)
+        .where(
+          input.planId
+            ? eq(irrigationSession.farmId, input.farmId)
+            : eq(irrigationSession.farmId, input.farmId)
+        )
+        .limit(1);
+
+      if (existing) {
+        // Update existing session
+        const [updated] = await ctx.db
+          .update(irrigationSession)
+          .set({
+            planId: input.planId,
+            frameCount: input.frameCount,
+            litersPumped: input.litersPumped.toString(),
+            done: input.done,
+            running: input.running,
+            updatedAt: new Date(),
+          })
+          .where(eq(irrigationSession.id, existing.id))
+          .returning();
+
+        return updated;
+      }
+
+      // Create new session
+      const [newSession] = await ctx.db
+        .insert(irrigationSession)
+        .values({
+          farmId: input.farmId,
+          planId: input.planId,
+          frameCount: input.frameCount,
+          litersPumped: input.litersPumped.toString(),
+          done: input.done,
+          running: input.running,
+        })
+        .returning();
+
+      return newSession;
+    }),
+
+  getSession: protectedProcedure
+    .input(getSessionInput)
+    .query(async ({ ctx, input }) => {
+      // Verify access to the farm
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      // Get the most recent session for this farm
+      const [session] = await ctx.db
+        .select()
+        .from(irrigationSession)
+        .where(eq(irrigationSession.farmId, input.farmId))
+        .orderBy(desc(irrigationSession.updatedAt))
+        .limit(1);
+
+      if (!session) {
+        return null;
+      }
+
+      return {
+        id: session.id,
+        farmId: session.farmId,
+        planId: session.planId,
+        frameCount: session.frameCount,
+        litersPumped: parseFloat(session.litersPumped as string),
+        done: session.done,
+        running: session.running,
+        updatedAt: session.updatedAt,
+      };
     }),
 });

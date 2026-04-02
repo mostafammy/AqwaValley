@@ -40,3 +40,4 @@ export function useIntersectionObserver(options: IntersectionObserverInit = { th
 
   return { targetRef, isVisible };
 }
+

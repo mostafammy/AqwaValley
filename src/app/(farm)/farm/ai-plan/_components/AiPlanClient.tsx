@@ -27,6 +27,7 @@ import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
 import { Button } from "~/app/_components/UI/Button";
 import type { IrrigationPlan, IrrigationZone } from "~/server/services/irrigation/schemas";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -337,6 +338,7 @@ function EmptyState({ onGenerate, loading }: { onGenerate: () => void; loading: 
 
 export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   const utils = api.useUtils();
+  const router = useRouter();
 
   const { data: latestPlanRecord, isLoading } = api.irrigation.getLatestPlan.useQuery(
     { farmId },
@@ -356,9 +358,11 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   });
 
   const activatePlan = api.irrigation.activatePlan.useMutation({
-    onSuccess: () => { 
+    onSuccess: () => {
       void utils.irrigation.getLatestPlan.invalidate({ farmId });
       void utils.irrigation.listPlans.invalidate({ farmId });
+      // Redirect to irrigate page and auto-start
+      router.push("/farm/irrigate?auto=1");
     },
   });
   const plan = latestPlanRecord?.plan as IrrigationPlan | undefined;
