@@ -35,9 +35,6 @@ const ALERT_CHANNELS: AlertChannelRef[] = process.env.CHECKLY_ALERT_CHANNELS
 
 new ApiCheck("aqwavalley-users-api-smoke", {
   name: "AqwaValley — Users API (smoke check)",
-  description:
-    "Validates that the users list API is available and responding within SLA. " +
-    "This is a Tier 0 smoke check that runs after every deployment.",
   alertChannels: ALERT_CHANNELS,
   // SLA thresholds: if response > 10s, degrade; if response > 20s, critical alert
   degradedResponseTime: 10000, // milliseconds
@@ -52,7 +49,7 @@ new ApiCheck("aqwavalley-users-api-smoke", {
       // Must return HTTP 200 OK
       AssertionBuilder.statusCode().equals(200),
       // Response must include content-type header
-      AssertionBuilder.header("content-type").contains("application/json"),
+      AssertionBuilder.headers("content-type").contains("application/json"),
     ],
   },
   // Run sequentially with other checks to avoid rate limit issues
