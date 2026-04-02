@@ -76,8 +76,10 @@ function deriveQuotaDecision(input: DecisionInput): DecisionOutput {
   // This is where "hard block" is enforced
   let rawState: string = "ok";
   if (input.hasQualityIssue) rawState = "needs_review";
-  else if (utilizationPct > 100) rawState = "exceeded"; // ← Hard block
-  else if (utilizationPct >= 80) rawState = "critical"; // Default threshold
+  else if (utilizationPct > 100)
+    rawState = "exceeded"; // ← Hard block
+  else if (utilizationPct >= 80)
+    rawState = "critical"; // Default threshold
   else if (utilizationPct >= 60) rawState = "warning"; // Default threshold
 
   reasons.push(`utilization_${rawState}`);
