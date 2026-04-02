@@ -94,7 +94,7 @@ vi.mock("~/server/db", () => ({
 }));
 
 vi.mock("~/server/services/alertEvalService", () => ({
-  evaluateRules: (...args: unknown[]) => mockEvaluateRules(...args),
+  evaluateRules: mockEvaluateRules,
 }));
 
 vi.mock("~/lib/logger", () => ({ logger: mockLogger }));
@@ -137,7 +137,7 @@ describe("Ingest orchestration service integration (Invariant #2)", () => {
     activeDbHolder.db = activeDbDouble.db;
 
     const result = await ingestReadings(
-      { apiKeyId: "api-k", role: "farm", wellId },
+      { id: "api-k", name: "integration-test-key", wellId },
       readings,
     );
 
