@@ -25,7 +25,8 @@ const BASE_URL = resolveBaseUrl();
 
 new UrlMonitor("aqwavalley-users-api-url-monitor", {
   name: "AqwaValley — Users API URL Monitor",
-  description: "Synthetic monitor for the users API endpoint availability and response time.",
+  description:
+    "Synthetic monitor for the users API endpoint availability and response time.",
   activated: true,
   maxResponseTime: 10000, // Critical alert if response > 10 seconds
   degradedResponseTime: 5000, // Warn if response > 5 seconds but < 10 seconds

@@ -65,7 +65,11 @@ export class APICheckHelper {
   /**
    * Perform a POST request with a JSON body.
    */
-  async post(path: string, payload: unknown, options?: RequestInit): Promise<APIResponse> {
+  async post(
+    path: string,
+    payload: unknown,
+    options?: RequestInit,
+  ): Promise<APIResponse> {
     const url = new URL(path, this.baseUrl).toString();
     const startTime = Date.now();
 
@@ -108,7 +112,7 @@ export class APICheckHelper {
   assertStatus(response: APIResponse, expectedStatus: number) {
     if (response.status !== expectedStatus) {
       throw new Error(
-        `Expected status ${expectedStatus}, got ${response.status}. Body: ${response.body}`
+        `Expected status ${expectedStatus}, got ${response.status}. Body: ${response.body}`,
       );
     }
   }
@@ -116,14 +120,18 @@ export class APICheckHelper {
   /**
    * Assert that a response header is present and has a specific value.
    */
-  assertHeader(response: APIResponse, headerName: string, expectedValue: string) {
+  assertHeader(
+    response: APIResponse,
+    headerName: string,
+    expectedValue: string,
+  ) {
     const actualValue = response.headers[headerName.toLowerCase()];
     if (!actualValue) {
       throw new Error(`Expected header '${headerName}' not found in response.`);
     }
     if (!actualValue.includes(expectedValue)) {
       throw new Error(
-        `Expected header '${headerName}' to include '${expectedValue}', got '${actualValue}'`
+        `Expected header '${headerName}' to include '${expectedValue}', got '${actualValue}'`,
       );
     }
   }
@@ -140,7 +148,7 @@ export class APICheckHelper {
     for (const field of requiredFields) {
       if (!(field in json)) {
         throw new Error(
-          `Expected JSON field '${field}' not found. Available fields: ${Object.keys(json).join(", ")}`
+          `Expected JSON field '${field}' not found. Available fields: ${Object.keys(json).join(", ")}`,
         );
       }
     }
@@ -152,7 +160,7 @@ export class APICheckHelper {
   assertResponseTime(response: APIResponse, maxMilliseconds: number) {
     if (response.duration > maxMilliseconds) {
       throw new Error(
-        `Response took ${response.duration}ms, expected to complete within ${maxMilliseconds}ms`
+        `Response took ${response.duration}ms, expected to complete within ${maxMilliseconds}ms`,
       );
     }
   }
