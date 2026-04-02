@@ -343,9 +343,21 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     ];
 
     // When: Running validation multiple times
-    const result1 = validateSensorOwnership(apiKeyCtx, readings, sensorRegistry);
-    const result2 = validateSensorOwnership(apiKeyCtx, readings, sensorRegistry);
-    const result3 = validateSensorOwnership(apiKeyCtx, readings, sensorRegistry);
+    const result1 = validateSensorOwnership(
+      apiKeyCtx,
+      readings,
+      sensorRegistry,
+    );
+    const result2 = validateSensorOwnership(
+      apiKeyCtx,
+      readings,
+      sensorRegistry,
+    );
+    const result3 = validateSensorOwnership(
+      apiKeyCtx,
+      readings,
+      sensorRegistry,
+    );
 
     // Then: Results are identical every time
     expect(result1.valid.length).toBe(result2.valid.length);
