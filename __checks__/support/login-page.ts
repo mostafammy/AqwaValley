@@ -65,7 +65,10 @@ export class LoginPage extends BasePageObject {
 
   async expectControls(scenario: LoginScenario) {
     await expect(this.form()).toBeVisible();
-    await expect(this.nationalIdInput()).toHaveAttribute("id", "national-id-input");
+    await expect(this.nationalIdInput()).toHaveAttribute(
+      "id",
+      "national-id-input",
+    );
     await expect(this.passwordInput()).toHaveAttribute("id", "password-input");
     await expect(this.nationalIdInput()).toHaveAttribute("required", "");
     await expect(this.passwordInput()).toHaveAttribute("required", "");
