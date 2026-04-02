@@ -367,11 +367,11 @@ async function main() {
   });
 
   printInfo(`Fallback flag: ${fallbackResult.fallback}`);
-  printInfo(`Total litres: ${fallbackResult.recommendation.totalLitres}`);
+  printInfo(`Total litres: ${fallbackResult.recommendation.plan.totalLitres}`);
   printInfo(`Quota warning: ${fallbackResult.recommendation.quotaWarning}`);
-  printInfo(`Zones: ${fallbackResult.recommendation.zones.length}`);
+  printInfo(`Zones: ${fallbackResult.recommendation.plan.zones.length}`);
 
-  for (const zone of fallbackResult.recommendation.zones) {
+  for (const zone of fallbackResult.recommendation.plan.zones) {
     console.log(
       `    ${zone.cropType} (${zone.growthStage}): ${zone.recommendedLitres}L @ ${zone.scheduledAt} [${zone.confidence}]`,
     );
@@ -379,7 +379,7 @@ async function main() {
 
   // Validate the fallback plan against our Zod schema
   const fallbackValidation = irrigationPlanSchema.safeParse(
-    fallbackResult.recommendation,
+    fallbackResult.recommendation.plan,
   );
   if (fallbackValidation.success) {
     printSuccess("Fallback plan passes Zod validation");
@@ -410,7 +410,7 @@ async function main() {
   });
 
   printInfo(
-    `Total litres (tight): ${tightQuotaResult.recommendation.totalLitres}`,
+    `Total litres (tight): ${tightQuotaResult.recommendation.plan.totalLitres}`,
   );
   printInfo(`Quota warning: ${tightQuotaResult.recommendation.quotaWarning}`);
 
@@ -420,11 +420,11 @@ async function main() {
     printError("Quota warning NOT triggered — should have been");
   }
 
-  if (tightQuotaResult.recommendation.totalLitres <= 10_000) {
+  if (tightQuotaResult.recommendation.plan.totalLitres <= 10_000) {
     printSuccess("Plan correctly scaled down to fit remaining quota");
   } else {
     printError(
-      `Plan exceeds remaining quota: ${tightQuotaResult.recommendation.totalLitres} > 10000`,
+      `Plan exceeds remaining quota: ${tightQuotaResult.recommendation.plan.totalLitres} > 10000`,
     );
   }
 
