@@ -51,7 +51,7 @@ const ET0_NEW_VALLEY_DEFAULT = 7.5;
 function calculateCropEvapotranspiration(
   et0: number,
   kc: number,
-  precision: number = 2,
+    precision = 2,
 ): number {
   const result = et0 * kc;
   // Round to specified decimal places
