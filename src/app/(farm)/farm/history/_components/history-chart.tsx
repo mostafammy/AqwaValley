@@ -101,7 +101,10 @@ export function HistoryChart({ data }: HistoryChartProps) {
                     fontSize: "13px",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                   }}
-                  formatter={(value: number) => [`${value.toLocaleString("ar-EG")} م³`, "الاستهلاك"]}
+                  formatter={(value) => {
+                    if (value === undefined || value === null) return ["—", "الاستهلاك"];
+                    return [`${Number(value).toLocaleString("ar-EG")} م³`, "الاستهلاك"];
+                  }}
                   labelStyle={{ color: "#5A7090" }}
                 />
                 <Area
