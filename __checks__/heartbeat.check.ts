@@ -1,4 +1,5 @@
 import { HeartbeatMonitor } from "checkly/constructs";
+import type { AlertChannelRef } from "checkly/constructs";
 
 /**
  * Heartbeat Monitor for Scheduled Jobs
@@ -26,9 +27,6 @@ import { HeartbeatMonitor } from "checkly/constructs";
 
 new HeartbeatMonitor("aqwavalley-simulator-heartbeat", {
   name: "AqwaValley — Simulator Heartbeat",
-  description:
-    "Validates that the simulator cron job is running on schedule. " +
-    "Alerts if no heartbeat pings are received within the grace period.",
   activated: false, // Deactivated until the ping URL is configured in the cron job
   period: 1,
   periodUnit: "hours", // Expect a ping every 1 hour
@@ -38,6 +36,6 @@ new HeartbeatMonitor("aqwavalley-simulator-heartbeat", {
     ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
         .map((s) => s.trim())
         .filter((s) => s !== "")
-        .map((s) => ({ channelId: s }))
+      .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
     : [],
 });
