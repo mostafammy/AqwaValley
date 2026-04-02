@@ -87,17 +87,17 @@ export default async function HistoryPage() {
     }),
   ]);
 
+
   // Transform plans into irrigation history format
   const plansAsHistory = plans.map((plan) => ({
     id: plan.id,
     status: plan.status === "ACTIVATED" ? "ACTIVATED" : "PENDING",
-    durationMinutes: Math.round(Number(plan.totalLitres) / 100) || 60,
+    durationMinutes: Math.round(Number(plan.totalLitres) / 100) ?? 60,
     createdAt: plan.createdAt,
-    startedAt: plan.activatedAt || null,
+    startedAt: plan.activatedAt ?? null,
     endedAt: null,
     quotaDebitStatus: plan.status === "ACTIVATED" ? "APPLIED" : "PENDING",
   }));
-
   // Combine real events with plans
   const finalIrrigationHistory =
     irrigationEventHistory.length > 0 ? irrigationEventHistory : plansAsHistory;
