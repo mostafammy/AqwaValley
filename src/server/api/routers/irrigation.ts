@@ -248,7 +248,8 @@ export const irrigationRouter = createTRPCRouter({
       if (!updated) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Could not activate plan: recommendation not found or deleted.",
+          message:
+            "Could not activate plan: recommendation not found or deleted.",
         });
       }
 
@@ -308,17 +309,17 @@ export const irrigationRouter = createTRPCRouter({
         });
       }
 
-      const { fetchSoilReadings, fetchQuotaContext } = await import(
-        "~/server/services/irrigation/recommend_helpers"
-      );
+      const { fetchSoilReadings, fetchQuotaContext } =
+        await import("~/server/services/irrigation/recommend_helpers");
 
       const [soilReadingMap, quota] = await Promise.all([
         fetchSoilReadings(input.farmId),
         fetchQuotaContext(input.farmId, farmRecord.monthlyQuotaM3),
       ]);
 
-      const readings = Object.values(soilReadingMap).filter((r): r is { humidityPct: number; tempCelsius: number | null } => 
-        r !== null && r.humidityPct !== null
+      const readings = Object.values(soilReadingMap).filter(
+        (r): r is { humidityPct: number; tempCelsius: number | null } =>
+          r !== null && r.humidityPct !== null,
       );
       const avgSoilMoisture =
         readings.length > 0
