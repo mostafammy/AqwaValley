@@ -77,8 +77,8 @@ export function IrrigationHistoryTable({ history }: IrrigationHistoryTableProps)
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-gray-500">الحالة</span>
-                  <Badge variant={statusVariants[event.status] || "gray"}>
-                    {statusLabels[event.status] || event.status}
+                  <Badge variant={statusVariants[event.status] ?? "gray"}>
+                    {statusLabels[event.status] ?? event.status}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -161,8 +161,8 @@ export function IrrigationHistoryTable({ history }: IrrigationHistoryTableProps)
                         : "—"}
                     </td>
                     <td className="py-4 pr-4">
-                      <Badge variant={statusVariants[event.status] || "gray"}>
-                        {statusLabels[event.status] || event.status}
+                      <Badge variant={statusVariants[event.status] ?? "gray"}>
+                        {statusLabels[event.status] ?? event.status}
                       </Badge>
                     </td>
                     <td className="py-4 pr-4">
