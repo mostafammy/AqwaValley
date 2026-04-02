@@ -1,4 +1,4 @@
-import { and, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 
 import { db } from "~/server/db";
 import {
@@ -7,6 +7,8 @@ import {
   latestSensorState,
   sensorData,
   sensors,
+  well,
+  wellStatusHistory,
 } from "~/server/db/schema";
 import { type ApiKeyContext } from "~/lib/apiKeyAuth";
 import {
@@ -283,6 +285,57 @@ export async function ingestReadings(
           { count: alertsToInsert.length, wellIds },
           "alerts.inserted",
         );
+
+        // Auto-status logic for critical/warning alerts
+        const criticalAlerts = alertsToInsert.filter((a) => a.severity === "critical");
+        const warningAlerts = alertsToInsert.filter((a) => a.severity === "warning");
+
+        const historyToInsert: { wellId: string, toStatus: "offline" | "restricted", changedBy: string, reason: string }[] = [];
+        const wellsToOffline = new Set<string>();
+        const wellsToRestrict = new Set<string>();
+
+        // Process criticals first (highest priority)
+        for (const a of criticalAlerts) {
+          if (!wellsToOffline.has(a.wellId)) {
+            wellsToOffline.add(a.wellId);
+            historyToInsert.push({
+              wellId: a.wellId,
+              toStatus: "offline",
+              changedBy: a.createdByUserId,
+              reason: `Auto-offline due to critical sensor breach (${a.type})`
+            });
+          }
+        }
+
+        // Process warnings
+        for (const a of warningAlerts) {
+          // Skip if already marked for offline
+          if (!wellsToOffline.has(a.wellId) && !wellsToRestrict.has(a.wellId)) {
+            wellsToRestrict.add(a.wellId);
+            historyToInsert.push({
+              wellId: a.wellId,
+              toStatus: "restricted",
+              changedBy: a.createdByUserId,
+              reason: `Auto-restricted due to warning sensor breach (${a.type})`
+            });
+          }
+        }
+
+        if (wellsToOffline.size > 0) {
+          await tx.update(well).set({ status: "offline" }).where(inArray(well.id, Array.from(wellsToOffline)));
+        }
+
+        if (wellsToRestrict.size > 0) {
+          await tx.update(well).set({ status: "restricted" }).where(inArray(well.id, Array.from(wellsToRestrict)));
+        }
+
+        if (historyToInsert.length > 0) {
+          await tx.insert(wellStatusHistory).values(historyToInsert);
+          logger.info(
+            { offline: wellsToOffline.size, restricted: wellsToRestrict.size },
+            "wells.auto_status_updated"
+          );
+        }
       }
     }
   });

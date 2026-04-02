@@ -11,7 +11,7 @@
  * Every procedure delegates to a service that owns the concern.
  */
 
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createHash } from "crypto";
@@ -32,6 +32,7 @@ import {
   userProfile,
   userRoleAssignment,
   session,
+  farm,
 } from "~/server/db/schema";
 import { env } from "~/env";
 
@@ -843,6 +844,57 @@ export const usersRouter = createTRPCRouter({
           .select({ count: sql<number>`count(*)` })
           .from(auditLog)
           .where(eq(auditLog.entityId, input.userId)),
+      ]);
+
+      return {
+        items,
+        total: Number(countResult[0]?.count ?? 0),
+        page: input.page,
+        pageSize: input.pageSize,
+      };
+    }),
+
+  /**
+   * listAll — paginated list of all users, with roles, email, and farm details.
+   */
+  listAll: adminProcedure
+    .input(
+      z.object({
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(1).max(100).default(50),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const offset = (input.page - 1) * input.pageSize;
+
+      const [items, countResult] = await Promise.all([
+        ctx.db
+          .select({
+            userId: userProfile.userId,
+            nationalId: userProfile.nationalId,
+            fullName: userProfile.fullName,
+            phoneNumber: userProfile.phoneNumber,
+            isActive: userProfile.isActive,
+            createdAt: userProfile.createdAt,
+            email: user.email,
+            roleType: role.type,
+            roleDisplayName: role.displayName,
+            farmId: farm.id,
+            farmName: farm.name,
+            farmArea: farm.totalAreaAcres,
+            farmQuota: farm.annualQuotaM3,
+          })
+          .from(userProfile)
+          .leftJoin(user, eq(userProfile.userId, user.id))
+          .leftJoin(userRoleAssignment, eq(userProfile.userId, userRoleAssignment.userId))
+          .leftJoin(role, eq(userRoleAssignment.roleId, role.id))
+          .leftJoin(farm, or(eq(userProfile.userId, farm.farmerUserId), eq(userProfile.userId, farm.ownerId)))
+          .limit(input.pageSize)
+          .offset(offset)
+          .orderBy(desc(userProfile.createdAt)),
+        ctx.db
+          .select({ count: sql<number>`count(*)` })
+          .from(userProfile),
       ]);
 
       return {

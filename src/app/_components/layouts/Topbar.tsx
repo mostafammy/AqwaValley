@@ -27,7 +27,6 @@ interface TopbarProps {
   userRole?: UserRole;
   userInitials?: string;
   portalLabel?: string;
-  searchBar?: boolean;
   weatherChip?: string; // للـ farm portal فقط
 }
 
@@ -46,12 +45,10 @@ export function Topbar({
   userRole = "GOV_ADMIN",
   userInitials = "م.أ",
   portalLabel = "نظام إدارة الموارد المائية",
-  searchBar = true,
   weatherChip,
 }: TopbarProps) {
   const isGov = userRole === "GOV_ADMIN" || userRole === "SUPER_ADMIN";
   const { toggleMobile } = useSidebar();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -75,11 +72,6 @@ export function Topbar({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Searching for:", searchTerm);
-  };
 
   const handleSignOut = async () => {
     try {
@@ -105,7 +97,7 @@ export function Topbar({
     setIsProfileOpen(false);
     // TODO: Implement actual settings navigation or modal
     console.log("Navigating to settings...");
-    // router.push("/settings");
+    router.push("/settings");
   };
 
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
@@ -133,25 +125,6 @@ export function Topbar({
           <p className="topbar-subtitle">{portalLabel}</p>
         </div>
       </div>
-
-      {/* ── Center: Search ── */}
-      {searchBar && <div className="hidden flex-1 items-center justify-center px-6 lg:flex">
-        <form onSubmit={handleSearch} className="relative w-full max-w-sm">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="بحث عن بئر أو منطقة..."
-            className="topbar-search-input"
-          />
-          <button
-            type="submit"
-            className="pointer-events-auto absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer border-none bg-transparent"
-          >
-            <Search className="text-light-text h-4 w-4 transition-colors hover:text-white" />
-          </button>
-        </form>
-      </div>}
 
       {/* ── Left side: Icons & Profile ── */}
       <div className="mr-auto flex items-center gap-4">

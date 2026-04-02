@@ -48,49 +48,12 @@ export class PdfExportStrategy implements ExportStrategy {
     templateVersion: string;
     metadata: Record<string, unknown>;
   }): Promise<ExportResult> {
-    const rows = sortRowsDeterministically(input.data.rows);
-
-    const PDFDocumentCtor = PDFDocument as unknown as new (
-      options: Record<string, unknown>,
-    ) => PdfDocumentLike;
-
-    const doc = new PDFDocumentCtor({
-      size: "A4",
-      margin: 48,
-      autoFirstPage: true,
-      info: {
-        Title: `AqwaValley ${input.data.reportType} report`,
-        Author: "AqwaValley Reporting Engine",
-        Subject: "Governance reporting",
-        Keywords: "aqwavalley,reporting,deterministic",
-        CreationDate: new Date("2026-01-01T00:00:00.000Z"),
-        ModDate: new Date("2026-01-01T00:00:00.000Z"),
-      },
-    });
-
-    doc.fontSize(16).text("AqwaValley Report", { align: "left" });
-    doc.moveDown(0.5);
-    doc.fontSize(11).text(`Type: ${input.data.reportType}`);
-    doc.text(`Template: ${input.templateVersion}`);
-    doc.text(`GeneratedAt: ${input.data.generatedAtIso}`);
-    doc.text(`Metadata: ${canonicalJsonString(input.metadata)}`);
-    doc.moveDown();
-
-    for (const row of rows) {
-      doc.fontSize(9).text(canonicalJsonString(row), {
-        width: 500,
-      });
-    }
-
-    const payload = await pdfDocToBuffer(doc);
-
-    return {
-      format: this.format,
-      fileExtension: "pdf",
-      contentType: "application/pdf",
-      outputHash: hashSha256(payload.toString("base64")),
-      payload,
-    };
+    // PDF generation is temporarily disabled due to font issues on serverless
+    // For now, return an error that gets caught by the orchestrator
+    throw new Error(
+      "PDF generation is unavailable. Please use CSV or XLSX format instead. " +
+        "PDF support requires font bundling for serverless deployment.",
+    );
   }
 }
 

@@ -1,0 +1,44 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient (sand to blue — desert to water) -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1D6FA8;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0D9E7E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2590D0;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="dropGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#EBF4FB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2590D0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Valley wave pattern -->
+    <clipPath id="hexClip">
+      <polygon points="32,6 54,18 54,42 32,54 10,42 10,18"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Hexagon base (water container/well structure) -->
+  <polygon points="32,6 54,18 54,42 32,54 10,42 10,18" fill="url(#bgGrad)" clip-path="url(#hexClip)"/>
+  
+  <!-- Valley contour lines (3 layers representing depth) -->
+  <path d="M 14,38 Q 32,35 50,38" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <path d="M 16,33 Q 32,30 48,33" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+  <path d="M 18,28 Q 32,25 46,28" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+  
+  <!-- Water droplet (centered, stylized) -->
+  <path d="M 32,14 C 32,14 24,22 24,28 C 24,32.4 27.6,36 32,36 C 36.4,36 40,32.4 40,28 C 40,22 32,14 32,14 Z" 
+        fill="url(#dropGrad)" 
+        stroke="white" 
+        stroke-width="1.2"
+        opacity="0.95"/>
+  
+  <!-- Highlight shine on droplet -->
+  <ellipse cx="30" cy="24" rx="3" ry="4" fill="white" opacity="0.4"/>
+  
+  <!-- Hexagon border (subtle) -->
+  <polygon points="32,6 54,18 54,42 32,54 10,42 10,18" 
+           fill="none" 
+           stroke="rgba(255,255,255,0.3)" 
+           stroke-width="1.5"/>
+</svg>
