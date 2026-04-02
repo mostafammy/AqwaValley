@@ -97,7 +97,12 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
                 tick={{ fontSize: 11, fill: "#8AA0B8" }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(val) => Math.round(val).toLocaleString("ar-EG")}
+                tickFormatter={(val) => {
+                  const numeric = Number(val);
+                  return Number.isFinite(numeric)
+                    ? Math.round(numeric).toLocaleString("ar-EG")
+                    : "0";
+                }}
                 width={50}
               />
               <Tooltip
