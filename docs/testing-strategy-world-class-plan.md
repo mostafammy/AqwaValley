@@ -55,7 +55,7 @@ than duplicated:
 
 - Playwright configuration in [playwright.config.ts](../playwright.config.ts)
 - Checkly configuration in [checkly.config.ts](../checkly.config.ts)
-- Existing end-to-end checks in [__checks__/](../__checks__)
+- Existing end-to-end checks in [**checks**/](../__checks__)
 - Scenario scripts in [scripts/](../scripts)
 - Domain documentation for ingest, quotas, reporting, and user management in
   [docs/](../docs)
@@ -69,43 +69,53 @@ to real production risk.
 Every item in this registry must have at least one named automated test.
 
 1. Ingest authorization must be sensor-scoped.
+
 - Given an API key attached to well A, a payload for sensor on well B must be
   rejected and must not write a reading, quota event, or alert.
 
 2. Ingest batch boundaries must be explicit.
+
 - Given batch sizes of 49, 50, 51, and 1,312 readings, the ingest pipeline must
   preserve correctness and respect the deployment runtime envelope.
 
 3. Duplicate readings must be idempotent.
+
 - Given the same sensorId and timestamp, the system must not create duplicate
   persisted readings or duplicate downstream alerts.
 
 4. Quota hard block must remain enforceable.
+
 - Given a farm or district at or above 100 percent utilization, the policy gate
   must produce a blocked or exceeded decision and preserve prior balances.
 
 5. Audit logs must be append-only.
+
 - Given any attempt to UPDATE or DELETE audit records, the database must reject
   the mutation and the application must surface a compliance failure.
 
 6. Role scope must remain session-scoped.
+
 - Given a user with access to farm X, manipulated farmId or districtId payloads
   must not cross into farm Y or another district.
 
 7. AI output must be schema-valid and traceable.
+
 - Given a successful irrigation recommendation, the response must satisfy the
   Zod contract, store modelUsed, preserve reasoning, and be reproducible at
   temperature 0 for the same inputs.
 
 8. Forecast outputs must remain scientifically plausible.
+
 - Given known historical depletion anchors, the forecast engine must stay
   within accepted error and cannot generate physically impossible trajectories.
 
 9. TimescaleDB aggregation must be time-bucket correct.
+
 - Given boundary timestamps and chunk edges, queries must group into the correct
   bucket and never drop or double count boundary rows.
 
 10. Demo and production simulation modes must remain isolated.
+
 - Given SimulatorHeartbeat or cron-driven simulation traffic, test runs must not
   contaminate production-like fixtures and vice versa.
 
@@ -915,17 +925,17 @@ Use this checklist in order when turning the strategy into delivery work.
 
 ## QA Test Matrix By Subsystem
 
-| Subsystem | Primary invariants | Test layers | Evidence |
-| --- | --- | --- | --- |
-| Authentication and Identity | Session expiry, JWT invalidation, cross-district denial, step-up auth | Unit, integration, E2E | Router tests, screenshots, auth logs |
-| Ingest and Time-Series Data | Sensor-scoped auth, 49/50/51 boundaries, idempotency, alert timing | Unit, integration, synthetic | Seed names, rate-limit logs, alert rows |
-| Quotas and Governance | Hard block at 100 percent, ABAC, audit completeness | Unit, integration, E2E | Snapshot rows, denial traces, policy results |
-| AI Irrigation Engine | Model cascade fallback, schema validity, temp 0 determinism, prompt injection resistance | Unit, integration | Stored modelUsed, AI JSON trace, validation errors |
-| Forecast and Compliance | Depletion anchor regression, plausibility, audit immutability, PDPL retention | Unit, integration | Forecast baselines, DB rejection evidence |
-| TimescaleDB | Bucket correctness, chunk boundaries, compression semantics, aggregate staleness | Integration, performance | Query results, query plans, freshness timestamps |
-| Reporting | Snapshot reproducibility, artifact integrity, signed link expiry | Integration, E2E | Integrity hashes, download traces, artifact metadata |
-| Cron and Simulator | Run isolation, ingestion_log assertions, retry safety, demo separation | Integration, synthetic | Run IDs, logs, failure classes |
-| Frontend and UX | Role routing, validation states, mobile layout, accessibility | E2E, synthetic | Screenshots, accessibility traces, browser logs |
+| Subsystem                   | Primary invariants                                                                       | Test layers                  | Evidence                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- | ---------------------------------------------------- |
+| Authentication and Identity | Session expiry, JWT invalidation, cross-district denial, step-up auth                    | Unit, integration, E2E       | Router tests, screenshots, auth logs                 |
+| Ingest and Time-Series Data | Sensor-scoped auth, 49/50/51 boundaries, idempotency, alert timing                       | Unit, integration, synthetic | Seed names, rate-limit logs, alert rows              |
+| Quotas and Governance       | Hard block at 100 percent, ABAC, audit completeness                                      | Unit, integration, E2E       | Snapshot rows, denial traces, policy results         |
+| AI Irrigation Engine        | Model cascade fallback, schema validity, temp 0 determinism, prompt injection resistance | Unit, integration            | Stored modelUsed, AI JSON trace, validation errors   |
+| Forecast and Compliance     | Depletion anchor regression, plausibility, audit immutability, PDPL retention            | Unit, integration            | Forecast baselines, DB rejection evidence            |
+| TimescaleDB                 | Bucket correctness, chunk boundaries, compression semantics, aggregate staleness         | Integration, performance     | Query results, query plans, freshness timestamps     |
+| Reporting                   | Snapshot reproducibility, artifact integrity, signed link expiry                         | Integration, E2E             | Integrity hashes, download traces, artifact metadata |
+| Cron and Simulator          | Run isolation, ingestion_log assertions, retry safety, demo separation                   | Integration, synthetic       | Run IDs, logs, failure classes                       |
+| Frontend and UX             | Role routing, validation states, mobile layout, accessibility                            | E2E, synthetic               | Screenshots, accessibility traces, browser logs      |
 
 ### Matrix Notes
 
