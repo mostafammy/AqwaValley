@@ -9,11 +9,13 @@ The AqwaValley testing implementation has been **successfully initialized** with
 ## 📊 What's Been Delivered
 
 ### 1. **Comprehensive Testing Strategy** ✅
+
 - **File**: `docs/testing-strategy-world-class-plan.md`
 - **Content**: 11 named invariants, 5 subsystem contracts, quality gates, test layers
 - **Status**: Production-ready (v1)
 
 ### 2. **Test Framework Infrastructure** ✅
+
 - **Location**: `__checks__/`
 - **Components**:
   - Base page object (11 inherited methods)
@@ -24,6 +26,7 @@ The AqwaValley testing implementation has been **successfully initialized** with
 - **Documentation**: README.md, PATTERNS.md, QUICKSTART.md
 
 ### 3. **Phase 1 Unit Tests** ✅
+
 - **Location**: `src/__tests__/`
 - **Coverage**: 52 test cases across 5 invariants
 - **Files**:
@@ -37,26 +40,28 @@ The AqwaValley testing implementation has been **successfully initialized** with
   ```
 
 ### 4. **Implementation Roadmap** ✅
+
 - **File**: `TESTING_IMPLEMENTATION_ROADMAP.md`
 - **Scope**: Complete test matrix for all 11 invariants + 5 subsystems
 - **Phases**: 5-phase implementation plan with timing
 
 ### 5. **Execution & Operations Guides** ✅
+
 - **Test Execution**: `TEST_EXECUTION_GUIDE.md`
 - **Phase 1 Summary**: `PHASE1_TEST_SUMMARY.md`
-- **Quick Start**: [__checks__/QUICKSTART.md](__checks__/QUICKSTART.md)
+- **Quick Start**: [**checks**/QUICKSTART.md](__checks__/QUICKSTART.md)
 
 ---
 
 ## 🔐 Invariants Covered (Phase 1)
 
-| # | Invariant | Test File | Tests | Coverage |
-|---|-----------|-----------|-------|----------|
-| 1 | Ingest authorization sensor-scoped | `ingest-authorization-scope.test.ts` | 7 | ✅ Full |
-| 3 | Duplicate readings idempotent | `duplicate-reading-idempotency.test.ts` | 11 | ✅ Full |
-| 4 | Quota hard block enforceable | `quota-hard-block-boundary.test.ts` | 9 | ✅ Full |
-| 6 | Role scope session-scoped | `role-scope-enforcement.test.ts` | 11 | ✅ Full |
-| 11 | FAO-56 ET₀ reference valid | `fao56-et0-calculation.test.ts` | 14 | ✅ Full |
+| #   | Invariant                          | Test File                               | Tests | Coverage |
+| --- | ---------------------------------- | --------------------------------------- | ----- | -------- |
+| 1   | Ingest authorization sensor-scoped | `ingest-authorization-scope.test.ts`    | 7     | ✅ Full  |
+| 3   | Duplicate readings idempotent      | `duplicate-reading-idempotency.test.ts` | 11    | ✅ Full  |
+| 4   | Quota hard block enforceable       | `quota-hard-block-boundary.test.ts`     | 9     | ✅ Full  |
+| 6   | Role scope session-scoped          | `role-scope-enforcement.test.ts`        | 11    | ✅ Full  |
+| 11  | FAO-56 ET₀ reference valid         | `fao56-et0-calculation.test.ts`         | 14    | ✅ Full  |
 
 ---
 
@@ -89,13 +94,13 @@ The AqwaValley testing implementation has been **successfully initialized** with
 
 ### Test Layer Strategy
 
-| Layer | Location | Focus | Status |
-|-------|----------|-------|--------|
-| Unit | `src/__tests__/` | Pure logic, deterministic | ✅ 52 tests |
-| Domain Service | Integration/ | Business rules with fakes | 🔲 Phase 2 |
-| Integration | Integration/ | Real DB, real wiring | 🔲 Phase 2 |
-| Browser E2E | `__checks__/*.spec.ts` | UI workflows, Playwright | ✅ Foundation |
-| Synthetic | `__checks__/*.check.ts` | Production monitoring | ✅ Foundation |
+| Layer          | Location                | Focus                     | Status        |
+| -------------- | ----------------------- | ------------------------- | ------------- |
+| Unit           | `src/__tests__/`        | Pure logic, deterministic | ✅ 52 tests   |
+| Domain Service | Integration/            | Business rules with fakes | 🔲 Phase 2    |
+| Integration    | Integration/            | Real DB, real wiring      | 🔲 Phase 2    |
+| Browser E2E    | `__checks__/*.spec.ts`  | UI workflows, Playwright  | ✅ Foundation |
+| Synthetic      | `__checks__/*.check.ts` | Production monitoring     | ✅ Foundation |
 
 ---
 
@@ -107,7 +112,7 @@ The AqwaValley testing implementation has been **successfully initialized** with
 ✅ **Isolated** — Pure functions, no dependencies  
 ✅ **Repeatable** — Deterministic, same input = same output  
 ✅ **Self-Checking** — Explicit assertions, clear messages  
-✅ **Timely** — Written at strategy stage, before implementation  
+✅ **Timely** — Written at strategy stage, before implementation
 
 ### Production-Grade Qualities
 
@@ -115,14 +120,14 @@ The AqwaValley testing implementation has been **successfully initialized** with
 ✅ **Edge Case Comprehensive** — Boundaries, off-by-one, ties  
 ✅ **Security-Focused** — Cross-well rejection, privilege escalation  
 ✅ **Determinism Verified** — Each test validates consistency  
-✅ **Well-Documented** — Invariant numbers, requirements, architecture  
+✅ **Well-Documented** — Invariant numbers, requirements, architecture
 
 ### Easy to Extend
 
 ✅ **Clear Naming** — Test names describe behavior, not implementation  
 ✅ **Pattern Examples** — Copy/paste templates in existing tests  
 ✅ **Consistent Style** — All tests follow same structure  
-✅ **DRY Helpers** — Reusable functions in each test file  
+✅ **DRY Helpers** — Reusable functions in each test file
 
 ---
 
@@ -163,32 +168,35 @@ Time: 3.245s Ran all test suites.
 ## 📋 Next Steps (Phase 2: Integration Tests)
 
 ### Immediate (This Week)
+
 1. Create test database with isolated schema
 2. Implement ingest orchestration integration tests
 3. Implement quota decision service tests
 4. Implement audit immutability DB tests
 
 ### By Next Week
+
 1. tRPC router tests for critical endpoints
 2. TimescaleDB aggregation boundary tests
 3. Cron idempotency and simulation tests
 
 ### Detailed Roadmap
+
 See [TESTING_IMPLEMENTATION_ROADMAP.md](TESTING_IMPLEMENTATION_ROADMAP.md) for complete Phase 2-5 plan
 
 ---
 
 ## 📚 Documentation Hub
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **Testing Strategy** | What to test, why, and quality gates | `docs/testing-strategy-world-class-plan.md` |
-| **Implementation Roadmap** | Complete test matrix, phases, timeline | `TESTING_IMPLEMENTATION_ROADMAP.md` |
-| **Phase 1 Summary** | Unit test completion, metrics, next phase | `PHASE1_TEST_SUMMARY.md` |
-| **Test Execution Guide** | How to run tests, troubleshoot | `TEST_EXECUTION_GUIDE.md` |
-| **Framework Documentation** | POM, builders, patterns, examples | `__checks__/README.md` |
-| **Pattern Guide** | Before/after code examples | `__checks__/PATTERNS.md` |
-| **Quick Start** | 5-minute onboarding for new tests | `__checks__/QUICKSTART.md` |
+| Document                    | Purpose                                   | Location                                    |
+| --------------------------- | ----------------------------------------- | ------------------------------------------- |
+| **Testing Strategy**        | What to test, why, and quality gates      | `docs/testing-strategy-world-class-plan.md` |
+| **Implementation Roadmap**  | Complete test matrix, phases, timeline    | `TESTING_IMPLEMENTATION_ROADMAP.md`         |
+| **Phase 1 Summary**         | Unit test completion, metrics, next phase | `PHASE1_TEST_SUMMARY.md`                    |
+| **Test Execution Guide**    | How to run tests, troubleshoot            | `TEST_EXECUTION_GUIDE.md`                   |
+| **Framework Documentation** | POM, builders, patterns, examples         | `__checks__/README.md`                      |
+| **Pattern Guide**           | Before/after code examples                | `__checks__/PATTERNS.md`                    |
+| **Quick Start**             | 5-minute onboarding for new tests         | `__checks__/QUICKSTART.md`                  |
 
 ---
 
@@ -211,8 +219,8 @@ See [TESTING_IMPLEMENTATION_ROADMAP.md](TESTING_IMPLEMENTATION_ROADMAP.md) for c
 
 ### For Adding E2E Tests
 
-1. **Read** [__checks__/README.md](__checks__/README.md) (15 min)
-2. **Study** [__checks__/login.spec.ts](__checks__/login.spec.ts) (10 min)
+1. **Read** [**checks**/README.md](__checks__/README.md) (15 min)
+2. **Study** [**checks**/login.spec.ts](__checks__/login.spec.ts) (10 min)
 3. **Create** new POM extending BasePageObject
 4. **Write** test using Given-When-Then structure
 
@@ -222,30 +230,33 @@ See [TESTING_IMPLEMENTATION_ROADMAP.md](TESTING_IMPLEMENTATION_ROADMAP.md) for c
 
 ### Test Quality Indicators
 
-| Metric | Target | Phase 1 | Status |
-|--------|--------|---------|--------|
-| Tier 0 Invariants Covered | 100% | 45% (5/11) | 🟡 On Track |
-| Unit Test Count | 40+ | 52 | ✅ Exceeded |
-| Edge Case Coverage | 100% | 95% | 🟢 Strong |
-| Test Execution Time | < 10s | ~3s | ✅ Fast |
-| Flaky Test Budget | 0 | 0 | ✅ Zero |
-| F.I.R.S.T. Compliance | 100% | 100% | ✅ Perfect |
+| Metric                    | Target | Phase 1    | Status      |
+| ------------------------- | ------ | ---------- | ----------- |
+| Tier 0 Invariants Covered | 100%   | 45% (5/11) | 🟡 On Track |
+| Unit Test Count           | 40+    | 52         | ✅ Exceeded |
+| Edge Case Coverage        | 100%   | 95%        | 🟢 Strong   |
+| Test Execution Time       | < 10s  | ~3s        | ✅ Fast     |
+| Flaky Test Budget         | 0      | 0          | ✅ Zero     |
+| F.I.R.S.T. Compliance     | 100%   | 100%       | ✅ Perfect  |
 
 ---
 
 ## 🔄 CI/CD Integration Ready
 
 ### Pre-Commit
+
 ```bash
 pnpm test -- --testPathPattern="__tests__" --bail
 ```
 
 ### Pre-Push
+
 ```bash
 pnpm test && pnpm exec playwright test
 ```
 
 ### Pre-Release
+
 ```bash
 pnpm test -- --coverage
 pnpm exec playwright test --project=chromium,firefox,webkit
@@ -266,6 +277,7 @@ npx checkly trigger
 - ✅ Production-grade code quality standards
 
 **The team can now confidently:**
+
 - Run tests early and often
 - Detect regressions before users do
 - Onboard new engineers with clear examples
@@ -279,7 +291,7 @@ npx checkly trigger
 - **Questions**: See relevant documentation in links above
 - **Issues**: Check [PATTERNS.md](__checks__/PATTERNS.md) for ❌ anti-patterns
 - **New Tests**: Follow template in existing Phase 1 tests
-- **Framework**: Consult [__checks__/README.md](__checks__/README.md)
+- **Framework**: Consult [**checks**/README.md](__checks__/README.md)
 
 ---
 
