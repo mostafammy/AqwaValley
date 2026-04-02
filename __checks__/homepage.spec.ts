@@ -29,10 +29,10 @@ test("renders the AqwaValley login surface with all controls stable", async ({
 
   await test.step("When the page loads", async () => {
     // Assert basic page identity
-    await assertPage(page)
-      .loadedWithURL(scenario.path)
-      .loadedWithTitle(scenario.titlePattern)
-      .containsText(scenario.brandHeading);
+    const pageAssert = assertPage(page);
+    await pageAssert.loadedWithURL(scenario.path);
+    await pageAssert.loadedWithTitle(scenario.titlePattern);
+    await pageAssert.containsText(scenario.brandHeading);
   });
 
   await test.step("Then the login card and title are visible", async () => {
@@ -42,13 +42,13 @@ test("renders the AqwaValley login surface with all controls stable", async ({
 
   await test.step("And all form controls are present and actionable", async () => {
     // Assert that inputs have stable IDs and are required
-    await assertForm(page)
-      .isVisible()
-      .hasLabel(scenario.nationalIdLabel)
-      .hasLabel(scenario.passwordLabel)
-      .hasInput("national-id-input")
-      .hasInput("password-input")
-      .hasButton("login-submit", scenario.submitLabel);
+    const formAssert = assertForm(page);
+    await formAssert.isVisible();
+    await formAssert.hasLabel(scenario.nationalIdLabel);
+    await formAssert.hasLabel(scenario.passwordLabel);
+    await formAssert.hasInput("national-id-input");
+    await formAssert.hasInput("password-input");
+    await formAssert.hasButton("login-submit", scenario.submitLabel);
 
     // Use the POM to assert form stability
     await loginPage.expectControls(scenario);
