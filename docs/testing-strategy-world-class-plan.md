@@ -124,6 +124,8 @@ Every item in this registry must have at least one named automated test.
 
 - Given the published FAO-56 reference inputs, the ET₀ calculation must match
   the expected output within accepted precision for agronomic decision-making.
+- This belongs in the Unit Test layer and should use a published worked example
+  with an explicit expected value.
 
 ## Core Principles
 
@@ -214,6 +216,7 @@ Targets:
 - policy engines
 - quota calculations
 - FAO-56 ET₀ calculation
+- FAO-56 ET₀ reference example verification
 - alert threshold evaluation
 - report formatting logic
 - date and time boundary logic
@@ -225,6 +228,12 @@ Rules:
 - No real database dependency
 - No UI rendering unless a component is truly pure
 - Use table-driven cases for boundary conditions
+
+Unit-test guidance for AI-adjacent math:
+
+- The FAO-56 ET₀ function must be tested against a published reference input
+  and the asserted output should be exact to the chosen precision, typically
+  two decimal places.
 
 ### Layer 2: Domain Service Tests
 
@@ -392,9 +401,10 @@ Assertion details:
   repeatable plan and the stored recommendation should match the same schema.
 - Given a recommendation that exceeds the available quota balance, the system
   must either scale down safely or reject the output before persistence.
-- Integration tests must use a recorded HTTP fixture or in-process stub for
-  OpenRouter. Live OpenRouter calls are allowed only in a separate smoke suite
-  with a dedicated test key and explicit rate-limit guardrails.
+- Test-layer boundary: unit and domain tests should use in-process stubs;
+  integration tests must use a recorded HTTP fixture or stubbed transport for
+  OpenRouter; only a separate smoke suite may hit the live OpenRouter API, and
+  that suite must use a dedicated test key with explicit rate-limit guards.
 
 Model cascade to enforce in tests:
 
@@ -419,15 +429,17 @@ Assertion details:
 
 - Given validated historical depletion anchors, the forecast output must remain
   within a plus or minus 2 year window of the Kharga critical-depth reference
-  projection and cannot generate physically impossible trajectories.
+  projection, targeting the 65m critical-depth threshold, and cannot generate
+  physically impossible trajectories.
 - Given UPDATE or DELETE attempts against audit logs, the DB user must receive
   a hard rejection and the application must treat it as a compliance failure.
 - For this strategy, forbidden retention means personal or operational records
-  that are no longer required for the active farmer or staff relationship,
-  including recommendation history, audit references, and linked identifiers,
-  persisted beyond the policy-defined retention window or outside approved legal
-  hold scope. The test must verify that deletion, masking, or archival occurs
-  for expired records and that only explicitly retained data remains queryable.
+  that are no longer required for the active farmer or staff relationship and
+  are retained more than 36 months after that relationship ends, unless an
+  approved legal hold applies. That includes recommendation history, audit
+  references, and linked identifiers. The test must verify that deletion,
+  masking, or archival occurs for expired records and that only explicitly
+  retained data remains queryable.
 
 ### 4. TimescaleDB Contract
 
@@ -868,6 +880,23 @@ Before merging a risky change or releasing to production:
 7. The team can reproduce the change locally.
 8. Tier 0 invariant tests pass for the impacted subsystem.
 9. Mutation and negative-case checks exist for the changed policy logic.
+
+## Local Development Prerequisites
+
+Before an engineer starts the implementation checklist, the local environment
+must be able to run the same core services that CI uses for integration tests:
+
+- Docker Compose with the TimescaleDB and PostgreSQL services required by the
+  repository
+- A populated `.env.local` file with the documented non-secret development
+  values
+- A clean seeded test database or disposable schema for integration runs
+- Access to the fixture harness pull request or branch that owns shared test
+  builders
+
+If a feature introduces an extra emulator, queue, or sandbox dependency, that
+dependency must also be documented before the corresponding checklist step can
+start.
 
 ## Team Implementation Checklist
 
