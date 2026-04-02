@@ -20,10 +20,14 @@ export const env = createEnv({
     LOG_LEVEL: z
       .enum(["trace", "debug", "info", "warn", "error", "fatal"])
       .default("info"),
-    CRON_SECRET:
+    QSTASH_CURRENT_SIGNING_KEY:
       process.env.NODE_ENV === "production"
-        ? z.string().min(16)
-        : z.string().min(1).optional(),
+        ? z.string().min(1)
+        : z.string().optional(),
+    QSTASH_NEXT_SIGNING_KEY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
     TIMESCALE_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
     INGEST_RATE_LIMIT_PER_MINUTE: z.coerce
       .number()
@@ -73,6 +77,13 @@ export const env = createEnv({
 
     // Application base URL (for building token links)
     APP_URL: z.string().url().default("http://localhost:3000"),
+    REPORT_ARTIFACT_DIR: z.string().default("./.reports"),
+    REPORT_QUEUE_BATCH_SIZE: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(10),
   },
 
   /**
@@ -97,7 +108,8 @@ export const env = createEnv({
     OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
     LOG_LEVEL: process.env.LOG_LEVEL,
-    CRON_SECRET: process.env.CRON_SECRET,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
     TIMESCALE_RETENTION_DAYS: process.env.TIMESCALE_RETENTION_DAYS,
     INGEST_RATE_LIMIT_PER_MINUTE: process.env.INGEST_RATE_LIMIT_PER_MINUTE,
     SIM_CRON_MAX_WELLS: process.env.SIM_CRON_MAX_WELLS,
@@ -125,6 +137,8 @@ export const env = createEnv({
     INVITATION_TOKEN_TTL_HOURS: process.env.INVITATION_TOKEN_TTL_HOURS,
     RESET_TOKEN_TTL_HOURS: process.env.RESET_TOKEN_TTL_HOURS,
     APP_URL: process.env.APP_URL,
+    REPORT_ARTIFACT_DIR: process.env.REPORT_ARTIFACT_DIR,
+    REPORT_QUEUE_BATCH_SIZE: process.env.REPORT_QUEUE_BATCH_SIZE,
     NEXT_PUBLIC_ASSISTLOOP_AGENT_ID:
       process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID,
   },

@@ -27,7 +27,7 @@ export default function Page() {
           Sentry.logger?.error?.("Sentry diagnoseSdkConnectivity failed", {
             error: String(err),
           });
-        } catch (e) {
+        } catch {
           // ignore logging errors
         }
         console.error("Sentry diagnoseSdkConnectivity failed", err);

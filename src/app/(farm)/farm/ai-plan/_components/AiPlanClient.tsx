@@ -3,7 +3,6 @@
 import {
   Sparkles,
   Droplets,
-  History,
   CheckCircle,
   AlertCircle,
   Cpu,
@@ -15,10 +14,8 @@ import {
   FlaskConical,
   Gauge,
   Zap,
-  ChevronDown,
   Play,
   Leaf,
-  CloudSun,
 } from "lucide-react";
 import { api } from "~/trpc/react";
 import { type RouterOutputs } from "~/trpc/react";
@@ -53,6 +50,114 @@ interface AiPlanClientProps {
   farmName: string;
 }
 
+type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW";
+
+type PlanZone = {
+  zoneId?: string | number;
+  cropType: string;
+  growthStage: string;
+  confidence?: ConfidenceLevel;
+  recommendedLitres?: number;
+  soilMoistureNow?: number;
+  targetMoisture?: number;
+  scheduledAt?: string;
+  notes?: string;
+};
+
+type PlanView = {
+  confidence?: number;
+  totalLitres: number;
+  quotaWarning?: boolean;
+  reasoning?: string;
+  nextIrrigationDate?: string;
+  zones?: PlanZone[];
+  temperatureC?: number;
+  et0?: number;
+  rainfallForecastMm?: number;
+  avgSoilMoisture?: number;
+  remainingQuotaLitres?: number;
+};
+
+type LiveWeather = { temp?: number; temperatureC?: number };
+type LiveForecastDay = {
+  et0?: number;
+  rain?: number;
+  rainfallForecastMm?: number;
+};
+type LiveInputs = {
+  avgSoilMoisture?: number | null;
+  remainingQuotaLitres?: number | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function asNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function asConfidence(value: unknown): ConfidenceLevel | undefined {
+  return value === "HIGH" || value === "MEDIUM" || value === "LOW"
+    ? value
+    : undefined;
+}
+
+function parsePlanZone(value: unknown): PlanZone | null {
+  if (!isRecord(value)) return null;
+
+  const cropType = asString(value.cropType);
+  const growthStage = asString(value.growthStage);
+  if (!cropType || !growthStage) return null;
+
+  return {
+    zoneId:
+      typeof value.zoneId === "string" || typeof value.zoneId === "number"
+        ? value.zoneId
+        : undefined,
+    cropType,
+    growthStage,
+    confidence: asConfidence(value.confidence),
+    recommendedLitres: asNumber(value.recommendedLitres),
+    soilMoistureNow: asNumber(value.soilMoistureNow),
+    targetMoisture: asNumber(value.targetMoisture),
+    scheduledAt: asString(value.scheduledAt),
+    notes: asString(value.notes),
+  };
+}
+
+function parsePlan(value: unknown): PlanView | undefined {
+  if (!isRecord(value)) return undefined;
+
+  const totalLitres = asNumber(value.totalLitres);
+  if (totalLitres === undefined) return undefined;
+
+  const rawZones = Array.isArray(value.zones) ? value.zones : [];
+  const zones = rawZones
+    .map(parsePlanZone)
+    .filter((z): z is PlanZone => z !== null);
+
+  return {
+    confidence: asNumber(value.confidence),
+    totalLitres,
+    quotaWarning: value.quotaWarning === true,
+    reasoning: asString(value.reasoning),
+    nextIrrigationDate: asString(value.nextIrrigationDate),
+    zones,
+    temperatureC: asNumber(value.temperatureC),
+    et0: asNumber(value.et0),
+    rainfallForecastMm: asNumber(value.rainfallForecastMm),
+    avgSoilMoisture: asNumber(value.avgSoilMoisture),
+    remainingQuotaLitres: asNumber(value.remainingQuotaLitres),
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,9 +174,9 @@ function formatDate(d: Date | string) {
 
 function ConfidenceBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
   const cfg = {
-    HIGH:   { label: "عالية",   bg: "badge-ok",   dot: "bg-teal"   },
-    MEDIUM: { label: "متوسطة", bg: "badge-warn", dot: "bg-sand"   },
-    LOW:    { label: "منخفضة", bg: "badge-danger", dot: "bg-danger" },
+    HIGH: { label: "عالية", bg: "badge-ok", dot: "bg-teal" },
+    MEDIUM: { label: "متوسطة", bg: "badge-warn", dot: "bg-sand" },
+    LOW: { label: "منخفضة", bg: "badge-danger", dot: "bg-danger" },
   }[level];
   return (
     <span className={`badge ${cfg.bg} px-4 py-1 text-sm font-semibold`}>
@@ -94,12 +199,18 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
       <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r={r} fill="none" stroke="#f1f5f9" strokeWidth="9" />
         <circle
-          cx="50" cy="50" r={r} fill="none"
-          stroke="url(#pro-ring)" strokeWidth="9"
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          stroke="url(#pro-ring)"
+          strokeWidth="9"
           strokeLinecap="round"
           strokeDashoffset={offset}
           strokeDasharray={circ}
-          style={{ transition: "stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1)" }}
+          style={{
+            transition: "stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
         />
         <defs>
           <linearGradient id="pro-ring" x1="0" y1="0" x2="1" y2="1">
@@ -167,25 +278,30 @@ const ZONE_COLORS = ["#0ea5e9", "#14b8a6", "#f59e0b", "#64748b"];
 
 function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
   const color = ZONE_COLORS[idx % ZONE_COLORS.length]!;
-  const inactive = !zone.recommendedLitres || zone.recommendedLitres === 0;
-  const litresCubic = (zone.recommendedLitres / 1000).toFixed(1);
+  const recommendedLitres = zone.recommendedLitres ?? 0;
+  const inactive = recommendedLitres === 0;
+  const litresCubic = (recommendedLitres / 1000).toFixed(1);
 
   return (
-    <Card className={`overflow-hidden transition-all hover:shadow-md ${inactive ? "opacity-60" : ""}`}>
+    <Card
+      className={`overflow-hidden transition-all hover:shadow-md ${inactive ? "opacity-60" : ""}`}
+    >
       <CardBody className="p-6">
-        <div className="flex items-start justify-between mb-4">
+        <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div 
-              className="w-9 h-9 rounded-2xl flex items-center justify-center"
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-2xl"
               style={{ backgroundColor: `${color}15` }}
             >
-              <Leaf className="w-5 h-5" style={{ color }} />
+              <Leaf className="h-5 w-5" style={{ color }} />
             </div>
             <div>
               <div className="text-xs font-semibold tracking-widest text-slate-500">
                 منطقة {zone.zoneId ?? idx + 1}
               </div>
-              <div className="font-semibold text-lg text-navy leading-tight">{zone.cropType}</div>
+              <div className="text-navy text-lg leading-tight font-semibold">
+                {zone.cropType}
+              </div>
               <div className="text-sm text-slate-500">{zone.growthStage}</div>
             </div>
           </div>
@@ -195,12 +311,17 @@ function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
         {!inactive ? (
           <>
             <div className="my-6 flex items-baseline gap-2 border-y border-slate-100 py-4">
-              <span className="text-4xl font-semibold tabular-nums" style={{ color }}>{litresCubic}</span>
+              <span
+                className="text-4xl font-semibold tabular-nums"
+                style={{ color }}
+              >
+                {litresCubic}
+              </span>
               <span className="text-xl font-medium text-slate-400">م³</span>
               <span className="mr-auto text-sm text-slate-400">
-                ({zone.recommendedLitres?.toLocaleString("ar-EG")} ل)
+                ({recommendedLitres.toLocaleString("ar-EG")} ل)
               </span>
-              <Droplets className="w-8 h-8 flex-shrink-0" style={{ color }} />
+              <Droplets className="h-8 w-8 shrink-0" style={{ color }} />
             </div>
 
             {zone.soilMoistureNow !== undefined && (
@@ -213,19 +334,22 @@ function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
             )}
           </>
         ) : (
-          <div className="my-8 py-6 text-center border border-dashed border-slate-200 rounded-2xl text-slate-400 font-medium">
+          <div className="my-8 rounded-2xl border border-dashed border-slate-200 py-6 text-center font-medium text-slate-400">
             لا يحتاج ري اليوم
           </div>
         )}
 
         {!inactive && (
-          <div className="flex items-center justify-between text-sm mt-6 pt-4 border-t border-slate-100">
+          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
             <div className="flex items-center gap-2 text-slate-500">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="h-4 w-4" />
               {zone.scheduledAt ?? "—"}
             </div>
             {zone.notes && (
-              <div className="text-sm text-slate-500 max-w-[48%] text-right truncate" title={zone.notes}>
+              <div
+                className="max-w-[48%] truncate text-right text-sm text-slate-500"
+                title={zone.notes}
+              >
                 {zone.notes}
               </div>
             )}
@@ -240,10 +364,10 @@ function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
 // Input metrics - clean professional strip
 // ─────────────────────────────────────────────────────────────────────────────
 
-function InputsStrip({ 
-  plan, 
-  liveWeather, 
-  liveForecast, 
+function InputsStrip({
+  plan,
+  liveWeather,
+  liveForecast,
   liveInputs,
   loading 
 }: { 
@@ -281,23 +405,34 @@ function InputsStrip({
           }`}
         >
           <div className="flex items-center justify-between">
-            <Icon className={`w-5 h-5 ${warn ? "text-amber-500" : isGood ? "text-blue-500" : "text-slate-400"}`} />
-            {(liveWeather || liveForecast || liveInputs) && (
-              <span className={`w-1.5 h-1.5 rounded-full ${isGood ? "bg-blue-400" : "bg-teal"} shadow-sm`} />
+            <Icon
+              className={`h-5 w-5 ${warn ? "text-amber-500" : isGood ? "text-blue-500" : "text-slate-400"}`}
+            />
+            {Boolean(liveWeather ?? liveForecast ?? liveInputs) && (
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${isGood ? "bg-blue-400" : "bg-teal"} shadow-sm`}
+              />
             )}
           </div>
           <div>
-            <div className="font-bold text-navy text-xl tabular-nums">
-              {value} <span className="text-xs font-semibold text-slate-400">{unit}</span>
+            <div className="text-navy text-xl font-bold tabular-nums">
+              {value}{" "}
+              <span className="text-xs font-semibold text-slate-400">
+                {unit}
+              </span>
             </div>
-            <div className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-wider">
+            <div className="mt-1 text-[10px] font-medium tracking-wider text-slate-500 uppercase">
               {label === "أمطار" ? (
                 Number(value) > 0 ? (
-                  <span className="text-blue-600 font-bold">أمطار متوقعة اليوم</span>
+                  <span className="font-bold text-blue-600">
+                    أمطار متوقعة اليوم
+                  </span>
                 ) : (
                   <span>سماء صافية</span>
                 )
-              ) : label}
+              ) : (
+                label
+              )}
             </div>
           </div>
         </div>
@@ -310,7 +445,13 @@ function InputsStrip({
 // Empty state - clean & professional
 // ─────────────────────────────────────────────────────────────────────────────
 
-function EmptyState({ onGenerate, loading }: { onGenerate: () => void; loading: boolean }) {
+function EmptyState({
+  onGenerate,
+  loading,
+}: {
+  onGenerate: () => void;
+  loading: boolean;
+}) {
   return (
     <div className="bg-white border border-slate-100 rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center text-center min-h-[320px] md:min-h-[420px]">
       <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mb-8">
@@ -323,9 +464,9 @@ function EmptyState({ onGenerate, loading }: { onGenerate: () => void; loading: 
       <button
         onClick={onGenerate}
         disabled={loading}
-        className="btn btn-primary px-10 py-4 rounded-3xl flex items-center gap-3 text-base font-semibold"
+        className="btn btn-primary flex items-center gap-3 rounded-3xl px-10 py-4 text-base font-semibold"
       >
-        <Zap className="w-5 h-5" />
+        <Zap className="h-5 w-5" />
         {loading ? "جاري التوليد..." : "توليد خطة الري الذكية"}
       </button>
     </div>
@@ -340,10 +481,11 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   const utils = api.useUtils();
   const router = useRouter();
 
-  const { data: latestPlanRecord, isLoading } = api.irrigation.getLatestPlan.useQuery(
-    { farmId },
-    { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 }
-  );
+  const { data: latestPlanRecord, isLoading } =
+    api.irrigation.getLatestPlan.useQuery(
+      { farmId },
+      { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 },
+    );
 
   const { data: liveWeather, isLoading: weatherLoading } = api.weather.getCurrent.useQuery({ farmId });
   const { data: liveForecast, isLoading: forecastLoading } = api.weather.getForecast.useQuery({ farmId });
@@ -371,9 +513,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Cpu className="w-10 h-10 text-slate-400 animate-spin" />
-        <p className="text-slate-500 font-medium">جاري تحميل خطة الري...</p>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
+        <Cpu className="h-10 w-10 animate-spin text-slate-400" />
+        <p className="font-medium text-slate-500">جاري تحميل خطة الري...</p>
       </div>
     );
   }
@@ -388,7 +530,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded-3xl">
               ✦ الذكاء الاصطناعي
             </span>
-            <span className="text-sm text-slate-500 font-medium">• {farmName}</span>
+            <span className="text-sm font-medium text-slate-500">
+              • {farmName}
+            </span>
           </div>
           <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-navy">
             خطة الري <span className="text-teal">الذكية</span>
@@ -405,7 +549,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             disabled={generatePlan.isPending}
             className="btn btn-primary flex items-center gap-3"
           >
-            <Cpu className={`w-4 h-4 ${generatePlan.isPending ? "animate-spin" : ""}`} />
+            <Cpu
+              className={`h-4 w-4 ${generatePlan.isPending ? "animate-spin" : ""}`}
+            />
             {generatePlan.isPending ? "جاري التوليد..." : "خطة جديدة"}
           </Button>
         </div>
@@ -429,8 +575,12 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               <CardBody className="p-5 md:p-8">
                 <div className="flex flex-col sm:flex-row justify-between mb-6 md:mb-8 gap-4">
                   <div>
-                    <div className="uppercase text-xs font-semibold tracking-widest text-slate-500">ملخص الخطة</div>
-                    <div className="text-2xl font-semibold text-navy mt-1">إجمالي الري اليوم</div>
+                    <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
+                      ملخص الخطة
+                    </div>
+                    <div className="text-navy mt-1 text-2xl font-semibold">
+                      إجمالي الري اليوم
+                    </div>
                   </div>
                   <ConfidenceRing value={plan.confidence === "HIGH" ? 94 : plan.confidence === "MEDIUM" ? 65 : 35} />
                 </div>
@@ -452,16 +602,26 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                   </div>
                 )}
 
-                <div className="mt-10 flex items-center justify-between text-sm border-t pt-6">
+                <div className="mt-10 flex items-center justify-between border-t pt-6 text-sm">
                   <div>
                     <div className="text-xs text-slate-400">تاريخ التوليد</div>
-                    <div className="font-medium text-navy">{formatDate(latestPlanRecord!.createdAt)}</div>
+                    <div className="text-navy font-medium">
+                      {formatDate(latestPlanRecord!.createdAt)}
+                    </div>
                   </div>
 
-                  <div className={`px-5 py-2 rounded-3xl flex items-center gap-2 text-sm font-medium ${
-                    isActivated ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                  }`}>
-                    {isActivated ? <CheckCircle className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
+                  <div
+                    className={`flex items-center gap-2 rounded-3xl px-5 py-2 text-sm font-medium ${
+                      isActivated
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {isActivated ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                    )}
                     {isActivated ? "مُفعّلة" : "قيد المراجعة"}
                   </div>
                 </div>
@@ -472,17 +632,19 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-teal-50 rounded-2xl flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-teal" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-teal-50">
+                    <Sparkles className="text-teal h-4 w-4" />
                   </div>
                   <CardTitle>تحليل المهندس الزراعي</CardTitle>
                 </div>
               </CardHeader>
               <CardBody className="pt-2">
-                <p className="text-slate-600 leading-relaxed">“{plan.reasoning}”</p>
+                <p className="leading-relaxed text-slate-600">
+                  “{plan.reasoning ?? "—"}”
+                </p>
                 {plan.nextIrrigationDate && (
-                  <div className="mt-6 flex items-center gap-2 text-teal text-sm font-medium">
-                    <Calendar className="w-4 h-4" />
+                  <div className="text-teal mt-6 flex items-center gap-2 text-sm font-medium">
+                    <Calendar className="h-4 w-4" />
                     الري القادم المقترح: {plan.nextIrrigationDate}
                   </div>
                 )}
@@ -491,12 +653,16 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
             {!isActivated && (
               <button
-                onClick={() => activatePlan.mutate({ planId: latestPlanRecord!.id })}
+                onClick={() =>
+                  activatePlan.mutate({ planId: latestPlanRecord!.id })
+                }
                 disabled={activatePlan.isPending}
                 className="btn btn-primary w-full py-5 text-base font-semibold"
               >
-                <Play className="w-5 h-5" />
-                {activatePlan.isPending ? "جاري الاعتماد..." : "اعتماد وتفعيل الخطة"}
+                <Play className="h-5 w-5" />
+                {activatePlan.isPending
+                  ? "جاري الاعتماد..."
+                  : "اعتماد وتفعيل الخطة"}
               </button>
             )}
           </div>
@@ -512,9 +678,11 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             />
 
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-navy">توزيع الري حسب المناطق</h2>
-              <div className="flex items-center gap-2 text-xs uppercase font-medium text-slate-400">
-                <Cpu className="w-3.5 h-3.5" />
+              <h2 className="text-navy text-2xl font-semibold">
+                توزيع الري حسب المناطق
+              </h2>
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase">
+                <Cpu className="h-3.5 w-3.5" />
                 {latestPlanRecord?.modelUsed ?? "claude-sonnet"}
               </div>
             </div>
@@ -533,23 +701,22 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               <div className="flex-1">
                 <div className="font-semibold">توفير مياه بنسبة ~15%</div>
                 <div className="text-sm text-slate-600">
-                  مقارنة بالري التقليدي • بناءً على معادلات FAO-56 المخصصة لمناخ الصحراء الغربية
+                  مقارنة بالري التقليدي • بناءً على معادلات FAO-56 المخصصة لمناخ
+                  الصحراء الغربية
                 </div>
               </div>
-              <ArrowLeft className="w-5 h-5 text-slate-400 flex-shrink-0" />
+              <ArrowLeft className="h-5 w-5 shrink-0 text-slate-400" />
             </div>
           </div>
         </div>
       )}
 
-
-        <div className="pt-8 border-t">
-          <PlanHistorySection
-            farmId={farmId}
-            onActivate={(planId) => activatePlan.mutate({ planId })}
-          />
-        </div>
-      
+      <div className="border-t pt-8">
+        <PlanHistorySection
+          farmId={farmId}
+          onActivate={(planId) => activatePlan.mutate({ planId })}
+        />
+      </div>
     </div>
   );
 }

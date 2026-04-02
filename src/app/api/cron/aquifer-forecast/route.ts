@@ -30,7 +30,7 @@ function errorResponse(
 }
 
 export async function POST(request: NextRequest) {
-  const authResult = validateCronRequest(request.headers);
+  const authResult = await validateCronRequest(request);
   if (!authResult.ok) {
     return errorResponse(401, "CRON_UNAUTHORIZED", "Unauthorized cron request");
   }

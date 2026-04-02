@@ -34,7 +34,6 @@ import {
   buildIrrigationPrompt,
   type PromptContext,
   type PromptZoneContext,
-  type PromptSoilReading,
 } from "./prompt-builder";
 import { generateRuleBasedPlan, type FallbackResult } from "./fallback";
 import { getWeatherForecast } from "./weather";

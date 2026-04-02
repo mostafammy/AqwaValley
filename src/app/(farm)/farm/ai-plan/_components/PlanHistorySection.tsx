@@ -2,7 +2,7 @@
 
 import { Calendar, Droplets, ArrowLeft, History, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { api } from "~/trpc/react";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Card, CardBody } from "~/app/_components/UI/Card";
 
 interface IrrigationPlanObject {
@@ -84,7 +84,7 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
               <Card 
                 key={plan.id}
                 accent={isActivated ? "teal" : undefined}
-                className={`min-w-[320px] md:min-w-[380px] snap-start border ${
+                className={`min-w-[320px] md:min-w-95 snap-start border ${
                   isActivated ? "ring-4 ring-teal/5 shadow-ok/5" : "border-gray-100"
                 } group cursor-default h-full flex flex-col`}
               >

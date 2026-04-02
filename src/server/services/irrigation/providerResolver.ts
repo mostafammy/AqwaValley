@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { db } from "~/server/db";
-import { cropProfile } from "~/server/db/schema";
+import { cropProfile, well } from "~/server/db/schema";
 import { getWeatherForecast } from "./weather";
 import { createDomainError, err, ok, type Result } from "./simulation";
 
@@ -130,6 +130,8 @@ function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
 
+const DEFAULT_DESERT_COORDS = { lat: 25.4515, lon: 30.5464 };
+
 export async function resolveProviderInputsForRun(params: {
   farmId: string;
   districtId: string;
@@ -173,7 +175,21 @@ export async function resolveProviderInputsForRun(params: {
   }
 
   const soil = SOIL_BY_CROP[profile.cropType] ?? SOIL_BY_CROP.other!;
-  const weather = getWeatherForecast(params.districtId);
+
+  const [districtWell] = await db
+    .select({ latitude: well.latitude, longitude: well.longitude })
+    .from(well)
+    .where(eq(well.districtId, params.districtId))
+    .limit(1);
+
+  const lat = districtWell?.latitude
+    ? Number.parseFloat(String(districtWell.latitude))
+    : DEFAULT_DESERT_COORDS.lat;
+  const lon = districtWell?.longitude
+    ? Number.parseFloat(String(districtWell.longitude))
+    : DEFAULT_DESERT_COORDS.lon;
+
+  const weather = await getWeatherForecast(lat, lon);
   const et0MmDay = weather.daily[0]?.et0 ?? 6;
   const et0DepthRateMps = et0MmDay / 1000 / 86400;
   const targetSoilMoisturePct = Number.parseFloat(

@@ -159,7 +159,7 @@ async function main() {
   // ═══════════════════════════════════════════════════════════════════════
   printHeader("TEST 1: Weather Forecast Stub");
 
-  const forecast = getWeatherForecast("some-district-id");
+  const forecast = await getWeatherForecast(25.4515, 30.5464);
   printInfo(`Returned ${forecast.daily.length} forecast days`);
 
   for (const [i, day] of forecast.daily.entries()) {
