@@ -13,7 +13,7 @@
  */
 
 import { z } from "zod";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
@@ -454,8 +454,11 @@ export const irrigationRouter = createTRPCRouter({
         .from(irrigationSession)
         .where(
           input.planId
-            ? eq(irrigationSession.farmId, input.farmId)
-            : eq(irrigationSession.farmId, input.farmId)
+            ? and(
+                eq(irrigationSession.farmId, input.farmId),
+                eq(irrigationSession.planId, input.planId),
+              )
+            : eq(irrigationSession.farmId, input.farmId),
         )
         .limit(1);
 
@@ -499,11 +502,18 @@ export const irrigationRouter = createTRPCRouter({
       // Verify access to the farm
       await ensureUserCanAccessFarm(ctx, input.farmId);
 
-      // Get the most recent session for this farm
+      // Get the most recent session for this farm (filtered by planId if provided)
       const [session] = await ctx.db
         .select()
         .from(irrigationSession)
-        .where(eq(irrigationSession.farmId, input.farmId))
+        .where(
+          input.planId
+            ? and(
+                eq(irrigationSession.farmId, input.farmId),
+                eq(irrigationSession.planId, input.planId),
+              )
+            : eq(irrigationSession.farmId, input.farmId),
+        )
         .orderBy(desc(irrigationSession.updatedAt))
         .limit(1);
 

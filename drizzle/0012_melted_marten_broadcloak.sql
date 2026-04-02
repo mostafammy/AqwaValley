@@ -102,6 +102,14 @@ CREATE TABLE "audit_log" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+-- NOTE: email_audit_log stores PII (recipient_email, ip_requested_from, recipient_user_id)
+-- COMPLIANCE REQUIREMENT: Implement a retention policy with automatic purge/anonymization
+-- after the configured retention period (e.g., 90 days). This requires:
+-- 1. A scheduled cron job that runs DELETE/UPDATE with anonymization for rows older than retention_period
+-- 2. Integration with data subject access requests (DSR) flow - ensure eraseUserData function handles email_audit_log
+-- 3. Verification in user deletion cascade that recipient_user_id is properly cascaded or nullified
+-- 4. Audit logging of anonymization operations
+-- TODO: Implement data-retention-cleanup cron job and wire into deleteUserDataCompletely flow
 CREATE TABLE "email_audit_log" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"recipient_user_id" text,
@@ -125,7 +133,10 @@ CREATE TABLE "irrigation_session" (
 	"done" boolean DEFAULT false NOT NULL,
 	"running" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "irrigation_session_farm_id_fk" FOREIGN KEY ("farm_id") REFERENCES "farm"("id") ON DELETE cascade,
+	CONSTRAINT "irrigation_session_plan_id_fk" FOREIGN KEY ("plan_id") REFERENCES "irrigation_recommendation"("id") ON DELETE cascade,
+	CONSTRAINT "irrigation_session_state_check" CHECK (NOT (done = true AND running = true))
 );
 --> statement-breakpoint
 CREATE TABLE "outbox_event" (
@@ -178,7 +189,6 @@ CREATE INDEX "aquifer_ext_ref_district_idx" ON "aquifer_external_reference_obser
 CREATE INDEX "aquifer_ext_ref_well_idx" ON "aquifer_external_reference_observation" USING btree ("well_id");--> statement-breakpoint
 CREATE INDEX "aquifer_forecast_run_status_started_idx" ON "aquifer_forecast_run" USING btree ("status","started_at");--> statement-breakpoint
 CREATE INDEX "aquifer_forecast_run_scope_started_idx" ON "aquifer_forecast_run" USING btree ("scope_type","started_at");--> statement-breakpoint
-CREATE INDEX "aquifer_model_scope_target_window_idx" ON "aquifer_linear_regression_model" USING btree ("scope_type","scope_id","target_type","training_window_end");--> statement-breakpoint
 CREATE INDEX "aquifer_model_approval_state_idx" ON "aquifer_linear_regression_model" USING btree ("approval_state");--> statement-breakpoint
 CREATE INDEX "aquifer_lineage_observation_idx" ON "aquifer_model_reference_observation_link" USING btree ("observation_id");--> statement-breakpoint
 CREATE INDEX "aquifer_lineage_model_idx" ON "aquifer_model_reference_observation_link" USING btree ("model_version_id");--> statement-breakpoint
@@ -196,8 +206,7 @@ CREATE INDEX "irrigation_session_farm_plan_idx" ON "irrigation_session" USING bt
 CREATE INDEX "irrigation_session_updated_at_idx" ON "irrigation_session" USING btree ("updated_at");--> statement-breakpoint
 CREATE INDEX "outbox_event_status_created_idx" ON "outbox_event" USING btree ("status","created_at");--> statement-breakpoint
 CREATE INDEX "outbox_event_next_retry_idx" ON "outbox_event" USING btree ("next_retry_at");--> statement-breakpoint
-CREATE INDEX "user_invitation_token_hash_idx" ON "user_invitation" USING btree ("token_hash");--> statement-breakpoint
-CREATE INDEX "user_invitation_user_id_idx" ON "user_invitation" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "outbox_event_status_created_idx" ON "outbox_event" USING btree ("status","created_at");--> statement-breakpoint
 CREATE INDEX "user_invitation_status_idx" ON "user_invitation" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "user_invitation_expires_at_idx" ON "user_invitation" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "user_invitation_type_status_idx" ON "user_invitation" USING btree ("token_type","status");--> statement-breakpoint

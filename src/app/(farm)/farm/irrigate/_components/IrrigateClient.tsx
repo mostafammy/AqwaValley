@@ -330,14 +330,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
     const literPerFrame = totalLiters / totalFrames;
 
     const tick = setInterval(() => {
-      setFrameCount((f) => {
-        const nextFrame = f + 1;
-        if (nextFrame * frameRate >= totalDurationMs) {
-          setRunning(false);
-          setDone(true);
-        }
-        return nextFrame;
-      });
+      setFrameCount((f) => f + 1);
       
       setLitersPumped((prev) => {
         const next = prev + literPerFrame;
@@ -350,6 +343,17 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
     
     return () => clearInterval(tick);
   }, [running, totalLiters, frameRate]);
+
+  // Check for completion and stop animation when duration is reached
+  useEffect(() => {
+    const totalDurationMs = 10 * 60 * 1000;
+    const frameTimeMs = frameCount * frameRate;
+    
+    if (running && frameTimeMs >= totalDurationMs) {
+      setRunning(false);
+      setDone(true);
+    }
+  }, [frameCount, running, frameRate]);
 
   // Auto-start from AI plan page (reset restoration flag so we don't restore over auto-start)
   useEffect(() => {

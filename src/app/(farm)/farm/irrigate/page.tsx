@@ -46,7 +46,7 @@ export default async function IrrigatePage() {
 
   if (!currentFarm) {
     return (
-      <div className="p-6 md:p-8">
+      <div className="p-6 md:p-8" dir="rtl">
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-6 text-6xl opacity-10">🌾</div>
           <p className="text-lg text-gray-500">لم يتم العثور على مزرعة مرتبطة بحسابك.</p>

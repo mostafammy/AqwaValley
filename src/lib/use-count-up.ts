@@ -12,6 +12,7 @@ export function useCountUp(target: number, duration = 800) {
     if (diff === 0) return;
 
     const startTime = performance.now();
+    let rafId: number | null = null;
 
     const tick = (now: number) => {
       const elapsed  = now - startTime;
@@ -19,11 +20,15 @@ export function useCountUp(target: number, duration = 800) {
       const eased    = 1 - Math.pow(1 - progress, 3); // ease out cubic
       setValue(Math.round(start + diff * eased));
 
-      if (progress < 1) requestAnimationFrame(tick);
+      if (progress < 1) rafId = requestAnimationFrame(tick);
       else prev.current = target;
     };
 
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [target, duration]);
 
   return value;
