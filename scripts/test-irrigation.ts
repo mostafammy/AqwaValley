@@ -366,16 +366,16 @@ async function main() {
     soilReading: testContext.soilReading,
   });
 
-  printInfo(`Fallback flag: ${fallbackResult.fallback}`);
-  printInfo(`Total litres: ${fallbackResult.recommendation.totalLitres}`);
-  printInfo(`Quota warning: ${fallbackResult.recommendation.quotaWarning}`);
-  printInfo(`Zones: ${fallbackResult.recommendation.zones.length}`);
+  // printInfo(`Fallback flag: ${fallbackResult.fallback}`);
+  // printInfo(`Total litres: ${fallbackResult.recommendation.totalLitres}`);
+  // printInfo(`Quota warning: ${fallbackResult.recommendation.quotaWarning}`);
+  // printInfo(`Zones: ${fallbackResult.recommendation.zones.length}`);
 
-  for (const zone of fallbackResult.recommendation.zones) {
-    console.log(
-      `    ${zone.cropType} (${zone.growthStage}): ${zone.recommendedLitres}L @ ${zone.scheduledAt} [${zone.confidence}]`,
-    );
-  }
+  // for (const zone of fallbackResult.recommendation.zones) {
+  //   console.log(
+  //     `    ${zone.cropType} (${zone.growthStage}): ${zone.recommendedLitres}L @ ${zone.scheduledAt} [${zone.confidence}]`,
+  //   );
+  // }
 
   // Validate the fallback plan against our Zod schema
   const fallbackValidation = irrigationPlanSchema.safeParse(

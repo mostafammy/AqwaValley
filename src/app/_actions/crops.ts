@@ -50,7 +50,7 @@ export async function updateCropProfile(
       .where(eq(farm.id, farmId))
       .limit(1);
 
-    if (!farmRecord || farmRecord.ownerId !== session.user.id) {
+    if (farmRecord?.ownerId !== session.user.id) {
       return { success: false, error: "غير مصرح لك بتعديل هذه المزرعة" };
     }
 

@@ -8,7 +8,7 @@ type LookupEntity = {
   type?: string;
   stage?: string;
   displayName: string;
-  commonName: string | null;
+  commonName?: string | null;
   description: string | null;
 };
 
