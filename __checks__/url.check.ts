@@ -1,4 +1,5 @@
 import { UrlAssertionBuilder, UrlMonitor } from "checkly/constructs";
+import type { AlertChannelRef } from "checkly/constructs";
 import { resolveBaseUrl } from "./support";
 
 /**
@@ -25,8 +26,6 @@ const BASE_URL = resolveBaseUrl();
 
 new UrlMonitor("aqwavalley-users-api-url-monitor", {
   name: "AqwaValley — Users API URL Monitor",
-  description:
-    "Synthetic monitor for the users API endpoint availability and response time.",
   activated: true,
   maxResponseTime: 10000, // Critical alert if response > 10 seconds
   degradedResponseTime: 5000, // Warn if response > 5 seconds but < 10 seconds
@@ -44,6 +43,6 @@ new UrlMonitor("aqwavalley-users-api-url-monitor", {
     ? process.env.CHECKLY_ALERT_CHANNELS.split(",")
         .map((s) => s.trim())
         .filter((s) => s !== "")
-        .map((s) => ({ channelId: s }))
+      .map((s) => ({ channelId: s }) as unknown as AlertChannelRef)
     : [],
 });
