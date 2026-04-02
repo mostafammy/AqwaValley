@@ -119,7 +119,9 @@ describe("Reporting contract coverage (Invariant #9)", () => {
     });
 
     expect(first.outputHash).toBe(second.outputHash);
-    expect(first.payload.toString("utf8")).toBe(second.payload.toString("utf8"));
+    expect(first.payload.toString("utf8")).toBe(
+      second.payload.toString("utf8"),
+    );
     expect(first.contentType).toBe("text/csv; charset=utf-8");
   });
 
