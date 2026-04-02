@@ -95,7 +95,7 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
   const sensorA2 = "sensor-a2-uuid";
   const sensorB1 = "sensor-b1-uuid";
 
-  const sensorRegistry: Map<string, Sensor> = new Map([
+  const sensorRegistry = new Map<string, Sensor>([
     [
       sensorA1,
       {
@@ -156,8 +156,9 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     // Then: All readings are accepted
     expect(result.valid).toHaveLength(2);
     expect(result.rejected).toHaveLength(0);
-    expect(result.valid[0].sensorId).toBe(sensorA1);
-    expect(result.valid[0].wellId).toBe(wellA);
+    expect(result.valid[0]).toBeDefined();
+    expect(result.valid[0]!.sensorId).toBe(sensorA1);
+    expect(result.valid[0]!.wellId).toBe(wellA);
   });
 
   it("should reject readings from sensors in a different well", () => {
@@ -183,7 +184,8 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     // Then: The reading is REJECTED with clear reason
     expect(result.valid).toHaveLength(0);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0].reason).toBe(
+    expect(result.rejected[0]).toBeDefined();
+    expect(result.rejected[0]!.reason).toBe(
       "Sensor does not belong to the authorized well",
     );
     // CRITICAL: No reading should be persisted
@@ -224,7 +226,8 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     expect(result.valid).toHaveLength(2);
     expect(result.rejected).toHaveLength(1);
     expect(result.valid.map((r) => r.sensorId)).toEqual([sensorA1, sensorA2]);
-    expect(result.rejected[0].sensorId).toBe(sensorB1);
+    expect(result.rejected[0]).toBeDefined();
+    expect(result.rejected[0]!.sensorId).toBe(sensorB1);
   });
 
   it("should reject readings from inactive sensors", () => {
@@ -262,7 +265,8 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     // Then: Reading is rejected
     expect(result.valid).toHaveLength(0);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0].reason).toBe("Sensor is inactive");
+    expect(result.rejected[0]).toBeDefined();
+    expect(result.rejected[0]!.reason).toBe("Sensor is inactive");
   });
 
   it("should reject readings from nonexistent sensors", () => {
@@ -288,7 +292,8 @@ describe("Ingest Authorization Scope (Invariant #1)", () => {
     // Then: Reading is rejected
     expect(result.valid).toHaveLength(0);
     expect(result.rejected).toHaveLength(1);
-    expect(result.rejected[0].reason).toBe("Sensor not found");
+    expect(result.rejected[0]).toBeDefined();
+    expect(result.rejected[0]!.reason).toBe("Sensor not found");
   });
 
   it("should allow admin keys without well scope to accept from any well", () => {
