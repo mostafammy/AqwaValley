@@ -46,9 +46,10 @@ function deduplicateReadingsPerSensor(
  * Identify exact duplicates: (sensorId, timestamp, value).
  * These will be silently dropped at the DB layer via onConflictDoNothing().
  */
-function identifyExactDuplicates(
-  readings: IngestReading[],
-): { duplicates: IngestReading[]; unique: IngestReading[] } {
+function identifyExactDuplicates(readings: IngestReading[]): {
+  duplicates: IngestReading[];
+  unique: IngestReading[];
+} {
   const seen = new Set<string>();
   const unique: IngestReading[] = [];
   const duplicates: IngestReading[] = [];
