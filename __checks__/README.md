@@ -44,12 +44,14 @@ __checks__/
 All tests follow the F.I.R.S.T. principles for high-quality test design:
 
 ### **F**ast
+
 - Tests run in parallel where possible
 - No unnecessary waits or sleeps
 - Page Object Model reduces selector duplication
 - Synthetic checks are lightweight HTTP requests
 
 **Example:**
+
 ```typescript
 // Fast: single interaction, minimal assertions
 await test.step("Then the form is visible", async () => {
@@ -58,26 +60,28 @@ await test.step("Then the form is visible", async () => {
 ```
 
 ### **I**solated
+
 - Each test is independent and can run in any order
 - No shared state or test interdependencies
 - Test data builders create fresh fixtures
 - Base URLs are environment-configurable
 
 **Example:**
+
 ```typescript
 // Isolated: each scenario builds its own data
-const scenario = testLoginScenario()
-  .asAdminUser()
-  .build();
+const scenario = testLoginScenario().asAdminUser().build();
 ```
 
 ### **R**epeatable
+
 - Same test produces same result every time
 - Deterministic selectors (data-testid, accessible names)
 - No flaky waits or timing assumptions
 - Environment-based configuration
 
 **Example:**
+
 ```typescript
 // Repeatable: stable selector, auto-waiting
 async fillNationalId(nationalId: string) {
@@ -86,24 +90,28 @@ async fillNationalId(nationalId: string) {
 ```
 
 ### **S**elf-Checking
+
 - Clear, explicit assertions that fail immediately
 - No assumptions or ambiguous checks
 - Error messages are descriptive and actionable
 - Tests don't require manual verification
 
 **Example:**
+
 ```typescript
 // Self-checking: explicit, fails fast if element missing
 await expect(this.submitButton()).toHaveText(scenario.submitLabel);
 ```
 
 ### **T**imely
+
 - Written early in the development cycle
 - Run on every push and deployment
 - Smoke tests catch regressions quickly
 - Synthetic monitors run continuously in production
 
 **Example:**
+
 ```typescript
 // Timely: smoke test runs on every commit and deploy
 test("renders the AqwaValley login surface with all controls stable", ...)
@@ -120,20 +128,20 @@ Provides common utilities inherited by specific pages:
 ```typescript
 class BasePageObject {
   // Navigation & loading
-  async goto(path: string)                              // Navigate and wait
-  async waitForElement(locator): Promise<Locator>      // Auto-wait for availability
-  async screenshot(name: string)                       // Evidence capture
+  async goto(path: string); // Navigate and wait
+  async waitForElement(locator): Promise<Locator>; // Auto-wait for availability
+  async screenshot(name: string); // Evidence capture
 
   // Interactions
-  async fillInput(locator, value)                      // Fill with auto-clearing
-  async clickButton(locator)                           // Click with auto-waiting
-  
+  async fillInput(locator, value); // Fill with auto-clearing
+  async clickButton(locator); // Click with auto-waiting
+
   // Assertions
-  async expectURL(pattern: RegExp | string)
-  async expectTitle(pattern: RegExp | string)
-  async expectVisible(locator)
-  async expectText(locator, text)
-  async expectAttribute(locator, attr, value)
+  async expectURL(pattern: RegExp | string);
+  async expectTitle(pattern: RegExp | string);
+  async expectVisible(locator);
+  async expectText(locator, text);
+  async expectAttribute(locator, attr, value);
 }
 ```
 
@@ -144,24 +152,31 @@ Wraps login-specific selectors and interactions:
 ```typescript
 class LoginPage extends BasePageObject {
   // Locators (stable selectors by test-id)
-  nationalIdInput() { return this.page.getByTestId("national-id-input"); }
-  passwordInput() { return this.page.getByTestId("password-input"); }
-  submitButton() { return this.page.getByTestId("login-submit"); }
-  
+  nationalIdInput() {
+    return this.page.getByTestId("national-id-input");
+  }
+  passwordInput() {
+    return this.page.getByTestId("password-input");
+  }
+  submitButton() {
+    return this.page.getByTestId("login-submit");
+  }
+
   // Interactions (high-level, business-focused)
-  async fillNationalId(id: string)
-  async fillPassword(pwd: string)
-  async submit()
-  async login(id: string, pwd: string)
-  
+  async fillNationalId(id: string);
+  async fillPassword(pwd: string);
+  async submit();
+  async login(id: string, pwd: string);
+
   // Assertions (explicit, clear)
-  async expectLoaded(scenario)
-  async expectControls(scenario)
-  async expectError(errorText)
+  async expectLoaded(scenario);
+  async expectControls(scenario);
+  async expectError(errorText);
 }
 ```
 
 **Usage in tests:**
+
 ```typescript
 const loginPage = new LoginPage(page);
 await loginPage.login("29901011234567", "SecurePassword@123");
@@ -195,6 +210,7 @@ const scenario = testLoginScenario()
 ```
 
 **Principles:**
+
 - Defaults are realistic and minimal
 - Builders are composable
 - Build method returns immutable copy (no side effects)
@@ -229,6 +245,7 @@ test("login redirects authorized users to dashboard", async ({ page }) => {
 ```
 
 **Benefits:**
+
 - Tests read like requirements documents
 - Developers and QA can both understand the flow
 - Failures point to which step broke
@@ -274,28 +291,32 @@ helper.assertSecurityHeaders(response);
 Tests use a priority order for locators, ensuring they're both stable and accessible:
 
 1. **data-testid** (Most stable, explicit for testing)
+
    ```html
    <input data-testid="national-id-input" />
    ```
+
    ```typescript
-   page.getByTestId("national-id-input")
+   page.getByTestId("national-id-input");
    ```
 
 2. **Accessible Names** (Semantic, accessible to assistive tech)
+
    ```html
-   <label>National ID</label>
-   <input aria-label="National ID" />
+   <label>National ID</label> <input aria-label="National ID" />
    ```
+
    ```typescript
-   page.getByLabel("National ID")
+   page.getByLabel("National ID");
    ```
 
 3. **Role + Text** (Last resort, most brittle)
    ```typescript
-   page.getByRole("button", { name: "تسجيل الدخول" })
+   page.getByRole("button", { name: "تسجيل الدخول" });
    ```
 
 **Never use:**
+
 - CSS selectors like `.login-form input:first-child`
 - XPath locators
 - HTML element structure assumptions
@@ -345,6 +366,7 @@ Tests resolve the base URL in this order:
 4. `http://localhost:3000` (default local)
 
 **Set for different environments:**
+
 ```bash
 # Local development (default)
 pnpm playwright test
@@ -359,6 +381,7 @@ AQWA_VALLEY_URL=https://aqwavalley.com pnpm playwright test
 ## Best Practices
 
 ### Do's ✅
+
 - Use `data-testid` for stable selectors
 - Build test data with builders, not hard-coded values
 - Write assertions that describe the business value
@@ -368,6 +391,7 @@ AQWA_VALLEY_URL=https://aqwavalley.com pnpm playwright test
 - Handle async properly (waitForLoadState, expect auto-retry)
 
 ### Don'ts ❌
+
 - Hard-code values or IDs
 - Use CSS selector hacks or index-based queries
 - Create shared test state or fixtures
@@ -395,22 +419,25 @@ await test.step("Debug: pause and inspect", async () => {
 // Debug: log locator status
 const button = page.getByTestId("login-submit");
 console.log(await button.isVisible()); // Check visibility
-console.log(await button.isEnabled());  // Check enabled state
+console.log(await button.isEnabled()); // Check enabled state
 ```
 
 ## Performance Considerations
 
 ### Parallel Execution
+
 - Tests that don't share state can run in parallel
 - Playwright runs workers in parallel by default
 - Checkly can run checks from multiple geographic locations
 
 ### Caching
+
 - Use `waitForLoadState("networkidle")` to wait for net work completion
 - Screenshot caching helps with visual regression detection
 - Environment variables prevent redundant rebuilds
 
 ### Timeouts
+
 - Browser timeout: 30 seconds (Playwright default)
 - Navigation timeout: 30 seconds
 - Action timeout: 10 seconds
@@ -435,14 +462,18 @@ console.log(await button.isEnabled());  // Check enabled state
 // 1. Create dashboard-page.ts
 export class DashboardPage extends BasePageObject {
   // Locators
-  welcomeHeading() { return this.page.getByTestId("dashboard-welcome"); }
-  farmList() { return this.page.getByTestId("farm-list"); }
-  
+  welcomeHeading() {
+    return this.page.getByTestId("dashboard-welcome");
+  }
+  farmList() {
+    return this.page.getByTestId("farm-list");
+  }
+
   // Interactions
   async navigateToFarm(farmId: string) {
     await this.page.getByTestId(`farm-${farmId}`).click();
   }
-  
+
   // Assertions
   async expectLoaded(scenario) {
     await this.expectVisible(this.welcomeHeading());
