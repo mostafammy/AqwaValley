@@ -1,0 +1,64 @@
+"filename", "language", "Markdown", "JSON", "Log", "MS SQL", "TypeScript", "Python", "TypeScript JSX", "comment", "blank", "total"
+"c:\Users\dell\Documents\AqwaValley\IMPLEMENTATION_COMPLETE.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 12, 12
+"c:\Users\dell\Documents\AqwaValley\PHASE1_TEST_SUMMARY.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 12, 12
+"c:\Users\dell\Documents\AqwaValley\TESTING_IMPLEMENTATION_ROADMAP.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 39, 39
+"c:\Users\dell\Documents\AqwaValley\TEST_EXECUTION_GUIDE.md", "Markdown", 3, 0, 0, 0, 0, 0, 0, 0, 45, 48
+"c:\Users\dell\Documents\AqwaValley\__checks__\PATTERNS.md", "Markdown", 8, 0, 0, 0, 0, 0, 0, 0, 0, 8
+"c:\Users\dell\Documents\AqwaValley\__checks__\QUICKSTART.md", "Markdown", -4, 0, 0, 0, 0, 0, 0, 0, 12, 8
+"c:\Users\dell\Documents\AqwaValley\__checks__\README.md", "Markdown", 7, 0, 0, 0, 0, 0, 0, 0, 24, 31
+"c:\Users\dell\Documents\AqwaValley\__checks__\api.check.ts", "TypeScript", 0, 0, 0, 0, -3, 0, 0, 0, 0, -3
+"c:\Users\dell\Documents\AqwaValley\__checks__\heartbeat.check.ts", "TypeScript", 0, 0, 0, 0, -2, 0, 0, 0, 0, -2
+"c:\Users\dell\Documents\AqwaValley\__checks__\support\api-check.ts", "TypeScript", 0, 0, 0, 0, 8, 0, 0, 0, 0, 8
+"c:\Users\dell\Documents\AqwaValley\__checks__\support\base-page.ts", "TypeScript", 0, 0, 0, 0, 8, 0, 0, 0, 1, 9
+"c:\Users\dell\Documents\AqwaValley\__checks__\support\index.ts", "TypeScript", 0, 0, 0, 0, 5, 0, 0, 0, 0, 5
+"c:\Users\dell\Documents\AqwaValley\__checks__\support\login-page.ts", "TypeScript", 0, 0, 0, 0, 3, 0, 0, 0, 0, 3
+"c:\Users\dell\Documents\AqwaValley\build-output.log", "Log", 0, 0, 66, 0, 0, 0, 0, 0, 26, 92
+"c:\Users\dell\Documents\AqwaValley\drizzle\0013_audit_log_append_only.sql", "MS SQL", 0, 0, 0, 19, 0, 0, 0, 0, 3, 22
+"c:\Users\dell\Documents\AqwaValley\drizzle\0014_user_notification_preferences.sql", "MS SQL", 0, 0, 0, 7, 0, 0, 0, 0, 2, 9
+"c:\Users\dell\Documents\AqwaValley\drizzle\meta\_journal.json", "JSON", 0, 14, 0, 0, 0, 0, 0, 0, 1, 15
+"c:\Users\dell\Documents\AqwaValley\package.json", "JSON", 0, 103, 0, 0, 0, 0, 0, 0, 0, 103
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\ai\ai-contracts.test.ts", "TypeScript", 0, 0, 0, 0, 87, 0, 0, 2, 13, 102
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\email\email-notification-contracts.test.ts", "TypeScript", 0, 0, 0, 0, 54, 0, 0, 2, 11, 67
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\fao56\fao56-et0-calculation.test.ts", "TypeScript", 0, 0, 0, 0, 2, 0, 0, 0, 0, 2
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\forecast\forecast-plausibility-contract.test.ts", "TypeScript", 0, 0, 0, 0, 58, 0, 0, 2, 12, 72
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\duplicate-reading-idempotency.test.ts", "TypeScript", 0, 0, 0, 0, 3, 0, 0, 0, 0, 3
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\ingest\ingest-authorization-scope.test.ts", "TypeScript", 0, 0, 0, 0, 17, 0, 0, 0, 0, 17
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\audit-immutability.test.ts", "TypeScript", 0, 0, 0, 0, 60, 0, 0, 2, 11, 73
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\demo-cron-isolation.test.ts", "TypeScript", 0, 0, 0, 0, 61, 0, 0, 2, 11, 74
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\db\timescale-aggregation.test.ts", "TypeScript", 0, 0, 0, 0, 35, 0, 0, 0, 7, 42
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\ingest-orchestration.test.ts", "TypeScript", 0, 0, 0, 0, 8, 0, 0, 0, 1, 9
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\integration\services\quota-decision.test.ts", "TypeScript", 0, 0, 0, 0, 6, 0, 0, 0, 1, 7
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\quota\quota-hard-block-boundary.test.ts", "TypeScript", 0, 0, 0, 0, 2, 0, 0, 0, 0, 2
+"c:\Users\dell\Documents\AqwaValley\src\__tests__\reporting\reporting-contracts.test.ts", "TypeScript", 0, 0, 0, 0, 136, 0, 0, 2, 14, 152
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\ai-plan\_components\AiPlanClient.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, -6, -1, -2, -9
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\crops\_components\crop-history-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 6, 0, 1, 7
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\history\_components\history-chart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 3, 0, 0, 3
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\irrigate\_components\IrrigateClient.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 35, 0, -4, 31
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\quota\_components\quota-usage-chart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 5, 0, 0, 5
+"c:\Users\dell\Documents\AqwaValley\src\app\(farm)\farm\soil\_components\soil-moisture-chart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 3, 0, 0, 3
+"c:\Users\dell\Documents\AqwaValley\src\app\_components\auth\LoginForm.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 16, 0, 0, 16
+"c:\Users\dell\Documents\AqwaValley\src\app\api\cron\dispatch-emails\route.ts", "TypeScript", 0, 0, 0, 0, 32, 0, 0, 0, 6, 38
+"c:\Users\dell\Documents\AqwaValley\src\server\db\schema.ts", "TypeScript", 0, 0, 0, 0, 15, 0, 0, 4, 1, 20
+"c:\Users\dell\Documents\AqwaValley\src\server\services\irrigation\recommend.ts", "TypeScript", 0, 0, 0, 0, 11, 0, 0, 0, 1, 12
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC001_Gov_role_login_redirects_to_government_dashboard.py", "Python", 0, 0, 0, 0, 0, 61, 0, 20, 20, 101
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC002_Farm_role_login_redirects_to_farm_dashboard.py", "Python", 0, 0, 0, 0, 0, 78, 0, 27, 25, 130
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC003_Invalid_credentials_show_login_error.py", "Python", 0, 0, 0, 0, 0, 80, 0, 29, 27, 136
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC004_User_without_matching_portal_role_is_redirected_back_to_login.py", "Python", 0, 0, 0, 0, 0, 43, 0, 11, 13, 67
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC005_Gov_dashboard_loads_primary_widgets_after_login.py", "Python", 0, 0, 0, 0, 0, 70, 0, 23, 22, 115
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC006_Navigate_from_gov_dashboard_to_map_view_and_see_map_rendered.py", "Python", 0, 0, 0, 0, 0, 101, 0, 38, 33, 172
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC007_Non_gov_session_attempting_gov_dashboard_is_denied_or_redirected.py", "Python", 0, 0, 0, 0, 0, 72, 0, 26, 25, 123
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC008_Farm_user_lands_on_farm_dashboard_and_sees_primary_content.py", "Python", 0, 0, 0, 0, 0, 88, 0, 31, 28, 147
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC009_Navigate_from_farm_dashboard_to_quota_view.py", "Python", 0, 0, 0, 0, 0, 100, 0, 38, 33, 171
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC010_Session_without_farm_assignment_attempting_farm_dashboard_is_redirected.py", "Python", 0, 0, 0, 0, 0, 90, 0, 33, 29, 152
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC011_Well_detail_route_is_not_directly_accessible_via_static_routes_list.py", "Python", 0, 0, 0, 0, 0, 51, 0, 15, 16, 82
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC012_Government_map_page_loads_primary_well_map_content.py", "Python", 0, 0, 0, 0, 0, 52, 0, 15, 16, 83
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC013_Government_distribution_page_loads_primary_content.py", "Python", 0, 0, 0, 0, 0, 99, 0, 37, 32, 168
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC014_Government_dashboard_loads_primary_portal_content.py", "Python", 0, 0, 0, 0, 0, 51, 0, 15, 16, 82
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC015_AI_plan_page_loads_and_can_request_a_plan_happy_path.py", "Python", 0, 0, 0, 0, 0, 89, 0, 33, 29, 151
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC016_AI_plan_request_shows_reasoning_and_traceability_details.py", "Python", 0, 0, 0, 0, 0, 79, 0, 27, 25, 131
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC017_AI_plan_can_be_requested_repeatedly_and_updates_results.py", "Python", 0, 0, 0, 0, 0, 94, 0, 35, 30, 159
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\TC018_AI_plan_unauthenticated_access_is_blocked_by_login_requirement.py", "Python", 0, 0, 0, 0, 0, 35, 0, 9, 12, 56
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\mcp.log", "Log", 0, 0, 94154, 0, 0, 0, 0, 0, 0, 94154
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\raw_report.md", "Markdown", 231, 0, 0, 0, 0, 0, 0, 0, 50, 281
+"c:\Users\dell\Documents\AqwaValley\testsprite_tests\tmp\test_results.json", "JSON", 0, 290, 0, 0, 0, 0, 0, 0, 1, 291
+"Total", "-", 245, 407, 94220, 26, 606, 1333, 62, 477, 743, 98119
