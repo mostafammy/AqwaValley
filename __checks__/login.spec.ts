@@ -91,7 +91,7 @@ test.describe("Login Form", () => {
       // Error message is shown by the component when auth fails
       // We verify the error container exists and can be populated
       const errorContainer = page.locator(
-        '[class*="danger"], [class*="error"], [role="alert"]'
+        '[class*="danger"], [class*="error"], [role="alert"]',
       );
       // The container may or may not be visible depending on when we check
       // In an integration test with a real backend, we'd wait for the error
