@@ -397,7 +397,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
           >
             <Zap className="w-4 h-4" />
             توليد خطة ري
-          </L>
+          </Link>
         </div>
       </div>
     );
