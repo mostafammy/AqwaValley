@@ -5,10 +5,12 @@ Add your first E2E test to AqwaValley in 5 minutes.
 ## 1. Understand the Existing Patterns
 
 Look at working examples:
+
 - **Simple test**: [homepage.spec.ts](./homepage.spec.ts) — Load page and verify UI
 - **Complex test**: [login.spec.ts](./login.spec.ts) — Multiple scenarios with test data builders
 
 Key files you'll use:
+
 - [support/base-page.ts](./support/base-page.ts) — Common page utilities (inherit from this)
 - [support/test-data.ts](./support/test-data.ts) — Test data factories (use these)
 - [support/assertions.ts](./support/assertions.ts) — BDD assertions (use these)
@@ -32,9 +34,7 @@ test.describe("My Feature", () => {
 
     // When: Perform action
     await test.step("When I interact with the UI", async () => {
-      await page
-        .getByTestId("my-button")
-        .click();
+      await page.getByTestId("my-button").click();
     });
 
     // Then: Verify result
@@ -55,7 +55,9 @@ import { BasePageObject } from "./base-page";
 
 export class MyFeaturePage extends BasePageObject {
   // Locators
-  myButton() { return this.page.getByTestId("my-button"); }
+  myButton() {
+    return this.page.getByTestId("my-button");
+  }
 
   // Interactions
   async clickMyButton() {
@@ -127,10 +129,10 @@ Tests fail intermittently? Use these tools:
 test("debug failing test", async ({ page }) => {
   // Pause and open DevTools
   await page.pause();
-  
+
   // Or take a screenshot
   await page.screenshot({ path: "debug.png" });
-  
+
   // Or inspect element state
   console.log(await page.getByTestId("element").isVisible());
 });
@@ -170,10 +172,7 @@ await assertForm(page).containsText("Welcome, Admin");
 ### Verify Form State
 
 ```typescript
-await assertForm(page)
-  .isVisible()
-  .hasLabel("National ID")
-  .hasButton("Submit");
+await assertForm(page).isVisible().hasLabel("National ID").hasButton("Submit");
 ```
 
 ### API Check (Synthetic Monitoring)
@@ -198,34 +197,39 @@ new ApiCheck("my-api-check", {
 Priority order (best → worst):
 
 1. **data-testid** (explicit, stable)
+
    ```html
    <button data-testid="submit-button">Submit</button>
    ```
+
    ```typescript
-   page.getByTestId("submit-button")
+   page.getByTestId("submit-button");
    ```
 
 2. **Accessible labels** (semantic, user-focused)
+
    ```html
-   <label for="email">Email</label>
-   <input id="email" />
+   <label for="email">Email</label> <input id="email" />
    ```
+
    ```typescript
-   page.getByLabel("Email")
+   page.getByLabel("Email");
    ```
 
 3. **Button/Link text** (user-facing)
+
    ```html
    <button>Login</button>
    ```
+
    ```typescript
-   page.getByRole("button", { name: "Login" })
+   page.getByRole("button", { name: "Login" });
    ```
 
 4. ❌ **Avoid**: CSS selectors, XPath, element hierarchy
    ```typescript
    // BAD - brittle, not semantic
-   page.locator("#form > div > input:first-child")
+   page.locator("#form > div > input:first-child");
    ```
 
 ## 9. Review Checklist
@@ -236,7 +240,7 @@ Before submitting your test:
 - [ ] Selectors use `data-testid` or accessible names
 - [ ] Test data comes from builders, not hard-coded
 - [ ] No `setTimeout()` — use auto-waiting instead
-- [ ] Test name describes *what* it validates, not *how*
+- [ ] Test name describes _what_ it validates, not _how_
 - [ ] Run locally: `pnpm exec playwright test --headed`
 - [ ] No flakiness: Run locally multiple times
 - [ ] Check for duplication — can you use a POM or builder?
@@ -244,18 +248,22 @@ Before submitting your test:
 ## 10. Next Steps
 
 **New to E2E tests?**
+
 - Read [PATTERNS.md](./PATTERNS.md) for detailed before/after examples
 - Study [login.spec.ts](./login.spec.ts) to see BDD structure at scale
 
 **Adding to an existing page?**
+
 - Extend [support/login-page.ts](./support/login-page.ts) as an example
 - Follow the same pattern for your page object
 
 **Adding API tests?**
+
 - See [api.check.ts](./api.check.ts) for synthetic check examples
 - Use [support/api-check.ts](./support/api-check.ts) helper
 
 **Need help?**
+
 - Check [README.md](./README.md) for full documentation
 - Look at [testing-strategy-world-class-plan.md](../docs/testing-strategy-world-class-plan.md) for what to test
 
