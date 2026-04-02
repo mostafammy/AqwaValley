@@ -23,18 +23,11 @@ import { Card, CardBody, CardHeader, CardTitle } from "~/app/_components/UI/Card
 import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
 import { Button } from "~/app/_components/UI/Button";
-import type { IrrigationPlan, IrrigationZone } from "~/server/services/irrigation/schemas";
 import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** A single zone in the irrigation plan */
-type ZonePlan = IrrigationZone & {
-  soilMoistureNow?: number;
-  targetMoisture?: number;
-};
 
 /** Live weather snapshot from weather.getCurrent */
 type WeatherInfo = RouterOutputs["weather"]["getCurrent"];
@@ -43,8 +36,6 @@ type WeatherInfo = RouterOutputs["weather"]["getCurrent"];
 type ForecastDay = RouterOutputs["weather"]["getForecast"][number];
 
 /** Live irrigation inputs from irrigation.getLiveInputs */
-type LiveInputs = RouterOutputs["irrigation"]["getLiveInputs"];
-
 interface AiPlanClientProps {
   farmId: string;
   farmName: string;
@@ -276,7 +267,7 @@ function MoistureBar({
 
 const ZONE_COLORS = ["#0ea5e9", "#14b8a6", "#f59e0b", "#64748b"];
 
-function ZoneCard({ zone, idx }: { zone: ZonePlan; idx: number }) {
+function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
   const color = ZONE_COLORS[idx % ZONE_COLORS.length]!;
   const recommendedLitres = zone.recommendedLitres ?? 0;
   const inactive = recommendedLitres === 0;
@@ -371,7 +362,7 @@ function InputsStrip({
   liveInputs,
   loading 
 }: { 
-  plan?: IrrigationPlan; 
+  plan?: PlanView; 
   liveWeather?: WeatherInfo; 
   liveForecast?: ForecastDay[]; 
   liveInputs?: LiveInputs;
@@ -507,7 +498,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
       router.push("/farm/irrigate?auto=1");
     },
   });
-  const plan = latestPlanRecord?.plan as IrrigationPlan | undefined;
+  const plan = latestPlanRecord?.plan as PlanView | undefined;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
   const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
 
@@ -582,7 +573,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                       إجمالي الري اليوم
                     </div>
                   </div>
-                  <ConfidenceRing value={plan.confidence === "HIGH" ? 94 : plan.confidence === "MEDIUM" ? 65 : 35} />
+                  <ConfidenceRing value={plan.confidence ?? 94} />
                 </div>
 
                 <div className="flex items-baseline gap-3">
