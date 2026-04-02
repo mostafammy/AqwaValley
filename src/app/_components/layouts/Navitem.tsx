@@ -12,6 +12,7 @@ interface NavItemProps {
 export function NavItem({ href, icon, label, active = false, badge }: NavItemProps) {
   return (
     <Link 
+    prefetch={true}
       href={href} 
       className={`nav-item ${active ? "active" : ""}`}
       aria-current={active ? "page" : undefined}

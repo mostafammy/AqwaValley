@@ -12,6 +12,7 @@ import {
   Leaf,
   Zap,
   AlertCircle,
+  Link,
 } from "lucide-react";
 import { api } from "~/trpc/react";
 import { useSearchParams } from "next/navigation";
@@ -390,13 +391,13 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
           <p className="text-slate-500 mb-8 max-w-sm">
             يجب توليد واعتماد خطة ري من صفحة الذكاء الاصطناعي أولاً
           </p>
-          <a
+          <Link
             href="/farm/ai-plan"
             className="btn btn-primary px-8 py-3 rounded-3xl flex items-center gap-2 font-semibold"
           >
             <Zap className="w-4 h-4" />
             توليد خطة ري
-          </a>
+          </L>
         </div>
       </div>
     );
@@ -593,12 +594,12 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                 "ثقة منخفضة"}
               </div>
             </div>
-            <a
+            <Link
               href="/farm/ai-plan"
               className="text-xs text-blue-600 font-semibold hover:underline shrink-0"
             >
               عرض الخطة
-            </a>
+            </Link>
           </div>
         </div>
 
