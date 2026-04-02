@@ -44,13 +44,15 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
   });
 
   // Calculate max values to determine scaling
-  const maxConsumption = Math.max(...data.map(d => d.consumption), 0);
-  const maxQuota = Math.max(...data.map(d => d.quota), 0);
-  
+  const maxConsumption = Math.max(...data.map((d) => d.consumption), 0);
+  const maxQuota = Math.max(...data.map((d) => d.quota), 0);
+
   // If quota is significantly higher (> 2.5x), we scale primarily to consumption
   // to prevent the bars from looking tiny.
   const isQuotaExtreme = maxQuota > maxConsumption * 2.5;
-  const yDomain = (isQuotaExtreme ? [0, Math.ceil(maxConsumption * 1.3)] : [0, "auto"]) as [number, number | "auto"];
+  const yDomain = (
+    isQuotaExtreme ? [0, Math.ceil(maxConsumption * 1.3)] : [0, "auto"]
+  ) as [number, number | "auto"];
 
   return (
     <div
@@ -63,7 +65,7 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
           استهلاك الأشهر الماضية (م³)
         </div>
         {isQuotaExtreme && (
-          <div className="badge badge-warn text-[10px] py-1 px-2">
+          <div className="badge badge-warn px-2 py-1 text-[10px]">
             الحصة القصوى: {maxQuota.toLocaleString("ar-EG")} م³
           </div>
         )}
@@ -112,33 +114,35 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
                   fontSize: "13px",
                   boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
                   textAlign: "right",
-                  direction: "rtl"
+                  direction: "rtl",
                 }}
-                itemStyle={{ padding: '2px 0' }}
-                cursor={{ fill: 'rgba(26,48,80,0.02)' }}
+                itemStyle={{ padding: "2px 0" }}
+                cursor={{ fill: "rgba(26,48,80,0.02)" }}
               />
-              
-              <Bar 
-                dataKey="consumption" 
+
+              <Bar
+                dataKey="consumption"
                 name="الاستهلاك الفعلي"
                 radius={[6, 6, 0, 0]}
                 barSize={48}
               >
                 {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.consumption > entry.quota ? "#EF4444" : "#1D6FA8"} 
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      entry.consumption > entry.quota ? "#EF4444" : "#1D6FA8"
+                    }
                     opacity={0.85}
                   />
                 ))}
               </Bar>
-              
+
               {!isQuotaExtreme && (
-                <Line 
-                  type="stepAfter" 
-                  dataKey="quota" 
-                  name="الحصة المخصصة" 
-                  stroke="#D97706" 
+                <Line
+                  type="stepAfter"
+                  dataKey="quota"
+                  name="الحصة المخصصة"
+                  stroke="#D97706"
                   strokeWidth={2}
                   strokeDasharray="4 4"
                   dot={false}
