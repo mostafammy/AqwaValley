@@ -174,8 +174,10 @@ describe("Duplicate Reading Idempotency (Invariant #3)", () => {
     // Then: Duplicates are identified
     expect(unique).toHaveLength(2);
     expect(duplicates).toHaveLength(2);
-    expect(unique[0].value).toBe(100);
-    expect(unique[1].value).toBe(150);
+    expect(unique[0]).toBeDefined();
+    expect(unique[1]).toBeDefined();
+    expect(unique[0]!.value).toBe(100);
+    expect(unique[1]!.value).toBe(150);
   });
 
   it("should preserve uniqueness across multiple calls (idempotency)", () => {
