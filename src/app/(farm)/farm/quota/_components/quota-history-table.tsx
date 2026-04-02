@@ -47,14 +47,18 @@ export function QuotaHistoryTable({ history }: QuotaHistoryTableProps) {
               </tr>
             ) : (
               sortedHistory.map((item, index) => {
-                const consumption = Number(item.consumptionM3);
-                const quota = Number(item.quotaM3);
-                const diff = (quota - consumption);
+                const rawConsumption = Number(item.consumptionM3);
+                const rawQuota = Number(item.quotaM3);
+                const consumption = Number.isFinite(rawConsumption) ? rawConsumption : 0;
+                const quota = Number.isFinite(rawQuota) ? rawQuota : 0;
+                const diff = quota - consumption;
                 const dateObj = new Date(item.periodStart);
-                const monthName = dateObj.toLocaleDateString("ar-EG", {
-                  month: "long",
-                  year: "numeric",
-                });
+                const monthName = Number.isNaN(dateObj.getTime())
+                  ? "—"
+                  : dateObj.toLocaleDateString("ar-EG", {
+                      month: "long",
+                      year: "numeric",
+                    });
                 
                 const isOver = consumption > quota;
                 const state = item.effectiveState;

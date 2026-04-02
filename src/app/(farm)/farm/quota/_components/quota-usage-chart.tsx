@@ -153,10 +153,12 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
           <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
           <span>تجاوز الحصة</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-[2px] w-4 border-t-2 border-dashed border-amber-600" />
-          <span>خط الحصة</span>
-        </div>
+        {!isQuotaExtreme && (
+          <div className="flex items-center gap-1.5">
+            <div className="h-[2px] w-4 border-t-2 border-dashed border-amber-600" />
+            <span>خط الحصة</span>
+          </div>
+        )}
       </div>
     </div>
   );

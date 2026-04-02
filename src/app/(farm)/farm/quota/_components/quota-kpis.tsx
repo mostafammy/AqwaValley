@@ -1,6 +1,6 @@
 "use client";
 
-import { Droplets, Activity, CheckCircle } from "lucide-react";
+import { Droplets, Activity, CheckCircle, XCircle } from "lucide-react";
 import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
 
 type QuotaKpisProps = {
@@ -18,6 +18,7 @@ export function QuotaKpis({
   utilizationPct,
   state,
 }: QuotaKpisProps) {
+  const isExceeded = state === "exceeded" || state === "critical";
   const cards: KpiCardProps[] = [
     {
       label: "الحصة الشهرية",
@@ -81,16 +82,16 @@ export function QuotaKpis({
       label: "المتبقي من الحصة",
       value: (
         <>
-          {(remainingLitres / 1000).toLocaleString("ar-EG")} <span className="text-sm text-gray-400 font-semibold">م³</span>
+          {(Math.abs(remainingLitres) / 1000).toLocaleString("ar-EG")} <span className="text-sm text-gray-400 font-semibold">م³</span>
         </>
       ),
-      icon: CheckCircle,
-      border: "border-r-teal-500",
-      iconBg: "bg-teal-50",
-      iconColor: "text-teal-500",
+      icon: isExceeded ? XCircle : CheckCircle,
+      border: isExceeded ? "border-r-red-500" : "border-r-teal-500",
+      iconBg: isExceeded ? "bg-red-50" : "bg-teal-50",
+      iconColor: isExceeded ? "text-red-500" : "text-teal-500",
       extra: (
-        <div className="text-xs mt-1 text-emerald-600 font-medium">
-          {state === "exceeded" ? "تجاوزت الحصة" : "رصيد متاح للاستخدام"}
+        <div className={`text-xs mt-1 font-medium ${isExceeded ? "text-red-600" : "text-emerald-600"}`}>
+          {isExceeded ? "تجاوزت الحصة" : "رصيد متاح للاستخدام"}
         </div>
       ),
     },

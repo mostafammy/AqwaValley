@@ -48,8 +48,9 @@ async function main() {
     }
   } catch (e) {
     console.error("DB Inspection failed:", e);
+    process.exitCode = 1;
   } finally {
-    process.exit(0);
+    process.exit();
   }
 }
 

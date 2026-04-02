@@ -104,8 +104,11 @@ function calcDeficitMm(
   soilReading: PromptSoilReading | null,
   cropType: string,
 ): number {
-  if (!soilReading || soilReading.humidityPct === null) return 0;
   const target = getCropFieldCapacity(cropType);
+  if (!soilReading || soilReading.humidityPct === null) {
+    // Conservative fallback: treat missing humidity as 0% so deficit = full field capacity
+    return parseFloat((target * 0.1).toFixed(2));
+  }
   const deficit = Math.max(0, target - soilReading.humidityPct);
   return parseFloat((deficit * 0.1).toFixed(2));
 }

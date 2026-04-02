@@ -21,14 +21,31 @@ import {
   CloudSun,
 } from "lucide-react";
 import { api } from "~/trpc/react";
+import { type RouterOutputs } from "~/trpc/react";
 import { Card, CardBody, CardHeader, CardTitle } from "~/app/_components/UI/Card";
 import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
 import { Button } from "~/app/_components/UI/Button";
+import type { IrrigationPlan, IrrigationZone } from "~/server/services/irrigation/schemas";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** A single zone in the irrigation plan */
+type ZonePlan = IrrigationZone & {
+  soilMoistureNow?: number;
+  targetMoisture?: number;
+};
+
+/** Live weather snapshot from weather.getCurrent */
+type WeatherInfo = RouterOutputs["weather"]["getCurrent"];
+
+/** Single forecast day from weather.getForecast */
+type ForecastDay = RouterOutputs["weather"]["getForecast"][number];
+
+/** Live irrigation inputs from irrigation.getLiveInputs */
+type LiveInputs = RouterOutputs["irrigation"]["getLiveInputs"];
 
 interface AiPlanClientProps {
   farmId: string;

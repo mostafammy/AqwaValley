@@ -68,7 +68,8 @@ async function run() {
         });
         process.stdout.write("D");
       } catch (err) {
-         // Silently fail for districts if needed
+         const msg = err instanceof Error ? err.message : String(err);
+         console.error(`\n[ERROR] District ${d.id}: ${msg}`);
       }
     }
   }
