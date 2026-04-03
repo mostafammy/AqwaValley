@@ -17,16 +17,6 @@ function sortRowsDeterministically(rows: Array<Record<string, unknown>>) {
   );
 }
 
-type PdfDocumentLike = {
-  on(event: "data", cb: (chunk: Buffer | Uint8Array) => void): PdfDocumentLike;
-  on(event: "end", cb: () => void): PdfDocumentLike;
-  on(event: "error", cb: (err: Error) => void): PdfDocumentLike;
-  end(): void;
-  fontSize(size: number): PdfDocumentLike;
-  text(text: string, options?: Record<string, unknown>): PdfDocumentLike;
-  moveDown(lines?: number): PdfDocumentLike;
-};
-
 export class PdfExportStrategy implements ExportStrategy {
   readonly format = "pdf" as const;
 

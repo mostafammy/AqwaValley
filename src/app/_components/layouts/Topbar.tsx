@@ -47,7 +47,6 @@ export function Topbar({
   portalLabel = "نظام إدارة الموارد المائية",
   weatherChip,
 }: TopbarProps) {
-  const isGov = userRole === "GOV_ADMIN" || userRole === "SUPER_ADMIN";
   const { toggleMobile } = useSidebar();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);

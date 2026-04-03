@@ -29,18 +29,6 @@ type OpenWeatherPayload = {
   name?: string;
 };
 
-type OpenMeteoDailyPayload = {
-  time: string[];
-  temperature_2m_max: number[];
-  temperature_2m_min: number[];
-  et0_fao_evapotranspiration: number[];
-  precipitation_sum: number[];
-};
-
-type OpenMeteoPayload = {
-  daily: OpenMeteoDailyPayload;
-};
-
 function isNumberArray(value: unknown): value is number[] {
   return (
     Array.isArray(value) && value.every((item) => typeof item === "number")

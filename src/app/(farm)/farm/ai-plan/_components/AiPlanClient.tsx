@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import {
@@ -95,29 +95,6 @@ function asConfidence(value: unknown): ConfidenceLevel | undefined {
   return value === "HIGH" || value === "MEDIUM" || value === "LOW"
     ? value
     : undefined;
-}
-
-function parsePlanZone(value: unknown): PlanZone | null {
-  if (!isRecord(value)) return null;
-
-  const cropType = asString(value.cropType);
-  const growthStage = asString(value.growthStage);
-  if (!cropType || !growthStage) return null;
-
-  return {
-    zoneId:
-      typeof value.zoneId === "string" || typeof value.zoneId === "number"
-        ? value.zoneId
-        : undefined,
-    cropType,
-    growthStage,
-    confidence: asConfidence(value.confidence),
-    recommendedLitres: asNumber(value.recommendedLitres),
-    soilMoistureNow: asNumber(value.soilMoistureNow),
-    targetMoisture: asNumber(value.targetMoisture),
-    scheduledAt: asString(value.scheduledAt),
-    notes: asString(value.notes),
-  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
