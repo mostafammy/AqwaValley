@@ -1,0 +1,40 @@
+# VCS and metadata
+.git
+.gitignore
+
+# Dependencies and package manager artifacts
+node_modules
+.pnpm-store
+pnpm-debug.log*
+
+# Build artifacts
+.next
+dist
+build
+coverage
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Test and docs artifacts that are not required at image build time
+test-out.txt
+ts-out.txt
+lint-err*.txt
+ts-err*.txt
+compile-errors.txt
+docs
+testsprite_tests
+__checks__
+
+# Local and temp
+tmp
+temp
+*.swp
