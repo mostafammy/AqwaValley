@@ -50,7 +50,7 @@ AqwaValley is a **government-grade water management platform** that:
 
 ## 🏗️ Architecture at a Glance
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    IoT Sensor Mesh                       │
 │      (Wells in 5 districts × ~20 sensors/well)          │
@@ -102,7 +102,7 @@ AqwaValley is built with **production-grade safety**. We don't ship without proo
 | Role scope is session-scoped          | Prevent privilege escalation                       | `src/__tests__/auth/role-scope-enforcement.test.ts`          | 11 tests ✅ |
 | FAO-56 ET₀ is scientifically accurate | Agronomic correctness against published benchmarks | `src/__tests__/fao56/fao56-et0-calculation.test.ts`          | 14 tests ✅ |
 
-**Total: 52 deterministic unit tests covering critical invariants**
+Total: 52 deterministic unit tests covering critical invariants.
 
 ### Run Tests Now
 
@@ -117,9 +117,9 @@ pnpm test -- --coverage
 pnpm test -- --watch
 ```
 
-**Expected Result:**
+### Expected Result
 
-```
+```text
 ✓ 52 tests pass
 ✓ 0 flaky tests (100% deterministic)
 ✓ 0 external dependencies (all isolated)
@@ -140,7 +140,7 @@ AqwaValley is deployed on Vercel. Open the dashboard, log in, and explore:
 - **Active alerts** with suppression windows
 - **Forecast charts** showing 25-year aquifer trajectories
 
-_(URL will be provided by deployment)_
+URL is provided from your Vercel deployment.
 
 ### 2. **Run Locally**
 
@@ -333,6 +333,47 @@ AqwaValley is built for government procurement:
 - ✅ **HTTPS enforced** (Vercel SSL)
 - ✅ **Environment variable secrets** (never in code)
 - ✅ **Type safety** (zero `any` types; TypeScript strict)
+
+---
+
+## 🐳 Containerized App Mindset
+
+AqwaValley now includes a **production-grade multi-stage Docker build** designed for secure, reproducible deployments.
+
+### Why This Docker Setup Is Production-Grade
+
+- ✅ **Multi-stage build**: separates dependency install, build, and runtime
+- ✅ **Minimal runtime image**: uses Next.js standalone output, copies only what is needed
+- ✅ **Non-root runtime user**: runs as `nextjs`, not root
+- ✅ **Health checks built in**: container verifies `/api/health`
+- ✅ **Small build context**: strict `.dockerignore` avoids leaking local artifacts
+- ✅ **Deterministic dependencies**: pinned package manager + lockfile install
+
+### Build and Run Locally
+
+```bash
+# Build image
+docker build -t aqwavalley:prod .
+
+# Run container
+docker run --name aqwavalley \
+       -p 3000:3000 \
+       --env-file .env.local \
+       --restart unless-stopped \
+       aqwavalley:prod
+```
+
+### Production Deployment Notes
+
+- Use immutable image tags (example: `aqwavalley:1.0.0`) instead of only `latest`
+- Scan images in CI before release (example: Trivy or Docker Scout)
+- Inject secrets at runtime via platform secret manager
+- Keep resource limits explicit in orchestrators (CPU/memory requests and limits)
+
+### Container Files
+
+- `Dockerfile` — Hardened multi-stage production image
+- `.dockerignore` — Build context and secret hygiene
 
 ---
 
