@@ -5,10 +5,12 @@ import { Sparkles, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 type AiRecommendationCardProps = {
-  _farmId?: string;
+  farmId?: string;
 };
 
-export function AiRecommendationCard({ _farmId }: AiRecommendationCardProps) {
+export function AiRecommendationCard({
+  farmId: _farmId,
+}: AiRecommendationCardProps) {
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.005 }}

@@ -1,9 +1,11 @@
 "use client";
 
-import { Droplets, Activity, Percent, CloudSun } from "lucide-react";
 import { api } from "~/trpc/react";
 import type { QuotaState } from "~/server/services/quotaDecisionService";
-import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
+import {
+  KpiCardGrid,
+  type KpiCardProps,
+} from "~/app/_components/UI/KpiCardGrid";
 
 type FarmKpiCardsProps = {
   farmId: string;
@@ -30,7 +32,7 @@ export function KpiCards({
     {
       refetchInterval: 60000,
       initialData: undefined,
-    }
+    },
   );
 
   // Fetch current weather
@@ -38,7 +40,7 @@ export function KpiCards({
     { farmId },
     {
       refetchInterval: 900000, // 15 mins (matching server cache)
-    }
+    },
   );
 
   const dailyM3 = dailyStatus?.consumptionM3 ?? initialDailyConsumptionM3;
@@ -49,10 +51,11 @@ export function KpiCards({
       label: "الاستهلاك اليومي",
       value: (
         <>
-          {dailyM3.toFixed(1)} <span className="text-sm text-gray-400 font-semibold">م³</span>
+          {dailyM3.toFixed(1)}{" "}
+          <span className="text-sm font-semibold text-gray-400">م³</span>
         </>
       ),
-      icon: Droplets,
+      icon: "droplets",
       border:
         dailyState === "critical" || dailyState === "exceeded"
           ? "border-r-red-500"
@@ -82,7 +85,11 @@ export function KpiCards({
           }`}
         >
           <span className="badge-dot" />
-          {dailyState === "ok" ? "طبيعي" : dailyState === "warning" ? "تحذير" : "مفرط"}
+          {dailyState === "ok"
+            ? "طبيعي"
+            : dailyState === "warning"
+              ? "تحذير"
+              : "مفرط"}
         </span>
       ),
     },
@@ -90,10 +97,11 @@ export function KpiCards({
       label: "استهلاك الحصة الشهرية",
       value: (
         <>
-          {monthlyUtilizationPct.toFixed(1)} <span className="text-sm text-gray-400 font-semibold">%</span>
+          {monthlyUtilizationPct.toFixed(1)}{" "}
+          <span className="text-sm font-semibold text-gray-400">%</span>
         </>
       ),
-      icon: Activity,
+      icon: "activity",
       border:
         monthlyState === "critical" || monthlyState === "exceeded"
           ? "border-r-red-500"
@@ -123,25 +131,31 @@ export function KpiCards({
           }`}
         >
           <span className="badge-dot" />
-          {monthlyState === "ok" ? "ضمن المعدل" : monthlyState === "warning" ? "قريب من الحد" : "تجاوز الحصة"}
+          {monthlyState === "ok"
+            ? "ضمن المعدل"
+            : monthlyState === "warning"
+              ? "قريب من الحد"
+              : "تجاوز الحصة"}
         </span>
       ),
     },
     {
       label: "متوسط رطوبة التربة",
-      value: avgSoilHumidity !== null ? (
-        <>
-          {avgSoilHumidity} <span className="text-sm text-gray-400 font-semibold">%</span>
-        </>
-      ) : (
-        <span className="text-gray-400 text-lg">---</span>
-      ),
-      icon: Percent,
+      value:
+        avgSoilHumidity !== null ? (
+          <>
+            {avgSoilHumidity}{" "}
+            <span className="text-sm font-semibold text-gray-400">%</span>
+          </>
+        ) : (
+          <span className="text-lg text-gray-400">---</span>
+        ),
+      icon: "percent",
       border: "border-r-teal-500",
       iconBg: "bg-teal-50",
       iconColor: "text-teal-500",
       extra: (
-        <div className="text-xs mt-1" style={{ color: "var(--color-muted)" }}>
+        <div className="mt-1 text-xs" style={{ color: "var(--color-muted)" }}>
           من {soilReadingCount} آبار نشطة
         </div>
       ),
@@ -150,23 +164,27 @@ export function KpiCards({
       label: "حالة الطقس",
       value: weather ? (
         <>
-          {weather.temp}° <span className="text-sm text-gray-400 font-semibold">م</span>
+          {weather.temp}°{" "}
+          <span className="text-sm font-semibold text-gray-400">م</span>
         </>
       ) : (
-        <span className="text-gray-400 text-lg">---</span>
+        <span className="text-lg text-gray-400">---</span>
       ),
-      icon: CloudSun,
+      icon: "cloudSun",
       border: "border-r-sky-500",
       iconBg: "bg-sky-50",
       iconColor: "text-sky-500",
       extra: (
-        <div className="text-xs mt-1 font-medium truncate" style={{ color: "var(--color-muted)" }}>
-          {weather?.description ?? "جاري التحميل..."} {weather ? `| رطوبة ${weather.humidity}%` : ""}
+        <div
+          className="mt-1 truncate text-xs font-medium"
+          style={{ color: "var(--color-muted)" }}
+        >
+          {weather?.description ?? "جاري التحميل..."}{" "}
+          {weather ? `| رطوبة ${weather.humidity}%` : ""}
         </div>
       ),
     },
   ];
-
 
   // The dashboard shows 4 key metric cards: daily, monthly, humidity, and weather.
   // Wrap it in a div that gives some bottom margin

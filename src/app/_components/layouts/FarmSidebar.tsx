@@ -12,7 +12,7 @@ import {
   History,
   Scale,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 export function FarmSidebar() {
   const pathname = usePathname();
@@ -22,12 +22,12 @@ export function FarmSidebar() {
       : pathname === path || pathname.startsWith(`${path}/`);
   const { isMobileOpen, closeMobile } = useSidebar();
 
-  const sidebarVariants = {
+  const sidebarVariants: Variants = {
     closed: { x: "100%", opacity: 0 },
     open: {
       x: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 350, damping: 35 },
+      transition: { type: "spring" as const, stiffness: 350, damping: 35 },
     },
   };
 

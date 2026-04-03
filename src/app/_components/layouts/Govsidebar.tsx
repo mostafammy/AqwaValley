@@ -6,7 +6,7 @@ import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
 import { api } from "~/trpc/react";
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   LayoutDashboard,
   Map,
@@ -41,12 +41,12 @@ export function GovSidebar() {
     }
   }, [error]);
 
-  const sidebarVariants = {
+  const sidebarVariants: Variants = {
     closed: { x: "100%", opacity: 0 },
     open: {
       x: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 350, damping: 35 },
+      transition: { type: "spring" as const, stiffness: 350, damping: 35 },
     },
   };
 

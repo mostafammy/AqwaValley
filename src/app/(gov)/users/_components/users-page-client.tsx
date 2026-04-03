@@ -37,15 +37,21 @@ interface UserListItem {
   userId: string;
   fullName: string;
   nationalId: string;
-  email?: string;
-  phoneNumber?: string;
-  roleType: "admin" | "district_manager" | "farm_owner" | "farmer" | "auditor";
-  roleDisplayName?: string;
+  email?: string | null;
+  phoneNumber?: string | null;
+  roleType:
+    | "admin"
+    | "district_manager"
+    | "farm_owner"
+    | "farmer"
+    | "auditor"
+    | null;
+  roleDisplayName?: string | null;
   isActive: boolean;
-  farmId?: string;
-  farmName?: string;
-  farmArea?: number;
-  farmQuota?: string | number;
+  farmId?: string | null;
+  farmName?: string | null;
+  farmArea?: number | string | null;
+  farmQuota?: string | number | null;
 }
 
 export function UserManagementClient() {

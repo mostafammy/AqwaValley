@@ -168,7 +168,7 @@ export default async function SoilPage() {
         <div>
           <div className="flex items-center gap-3 text-sm font-medium text-slate-500">
             <MapPin className="h-4 w-4" />
-            <span>{farmerFarm.name}</span>
+            <span>{currentFarm.name}</span>
             <span className="text-slate-300">•</span>
             <span className="text-teal">قراءات التربة</span>
           </div>
