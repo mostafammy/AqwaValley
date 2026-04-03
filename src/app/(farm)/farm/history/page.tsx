@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-unsafe-argument */
 import { eq, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -75,7 +74,8 @@ export default async function HistoryPage() {
             لا توجد مزرعة مرتبطة بحسابك
           </h2>
           <p className="mb-6 text-gray-600">
-            يرجى التواصل مع مسؤول النظام لتخصيص مزرعة لحسابك، أو تحقق من بيانات اعتماد تسجيل الدخول الخاصة بك.
+            يرجى التواصل مع مسؤول النظام لتخصيص مزرعة لحسابك، أو تحقق من بيانات
+            اعتماد تسجيل الدخول الخاصة بك.
           </p>
           <SignOutButton className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
             العودة للرئيسية وتسجيل الخروج

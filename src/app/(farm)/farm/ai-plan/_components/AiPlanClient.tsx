@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 "use client";
 
 import {
@@ -77,13 +77,6 @@ type PlanView = {
   remainingQuotaLitres?: number;
 };
 
-type LiveWeather = { temp?: number; temperatureC?: number };
-type LiveForecastDay = {
-  et0?: number;
-  rain?: number;
-  rainfallForecastMm?: number;
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -124,32 +117,6 @@ function parsePlanZone(value: unknown): PlanZone | null {
     targetMoisture: asNumber(value.targetMoisture),
     scheduledAt: asString(value.scheduledAt),
     notes: asString(value.notes),
-  };
-}
-
-function parsePlan(value: unknown): PlanView | undefined {
-  if (!isRecord(value)) return undefined;
-
-  const totalLitres = asNumber(value.totalLitres);
-  if (totalLitres === undefined) return undefined;
-
-  const rawZones = Array.isArray(value.zones) ? value.zones : [];
-  const zones = rawZones
-    .map(parsePlanZone)
-    .filter((z): z is PlanZone => z !== null);
-
-  return {
-    confidence: asNumber(value.confidence),
-    totalLitres,
-    quotaWarning: value.quotaWarning === true,
-    reasoning: asString(value.reasoning),
-    nextIrrigationDate: asString(value.nextIrrigationDate),
-    zones,
-    temperatureC: asNumber(value.temperatureC),
-    et0: asNumber(value.et0),
-    rainfallForecastMm: asNumber(value.rainfallForecastMm),
-    avgSoilMoisture: asNumber(value.avgSoilMoisture),
-    remainingQuotaLitres: asNumber(value.remainingQuotaLitres),
   };
 }
 

@@ -14,6 +14,7 @@ import { createHash, randomBytes, randomUUID } from "crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+import bcryptjs from "bcryptjs";
 
 import * as schema from "../src/server/db/schema";
 // auth import moved to dynamic imports inside functions to avoid early env validation
@@ -1017,45 +1018,45 @@ async function createRegionalUser(args: {
   const identitySuffix = args.nationalIdSeed.toString().padStart(3, "0");
   const email = `${slug}_${identitySuffix}@${SEED_EMAIL_DOMAIN}`;
 
-  const { auth } = await import("../src/server/better-auth/config");
-
-  if (!auth?.api) {
-    throw new Error("Better Auth API not initialized.");
-  }
-
   try {
-    // Check if user already exists first to avoid unnecessary auth calls
+    // Check if user already exists first to avoid duplicate creation
     const existing = await db.query.user.findFirst({
       where: (u, { eq }) => eq(u.username, nationalId),
     });
 
     if (!existing) {
-      // Create via Better Auth API
-      // @ts-ignore
-      const signUp =
-        auth.api.signUpUsername ||
-        auth.api.signUp?.username ||
-        auth.api.signUpEmail;
+      // Hash the password using bcryptjs
+      const hashedPassword = await bcryptjs.hash("password123", 10);
 
-      if (signUp) {
-        await signUp({
-          body: {
-            name: args.fullName,
-            username: nationalId,
-            email: email,
-            password: "password123",
-          },
-        });
-      } else {
-        throw new Error(
-          `CRITICAL: Could not find sign-up method on auth.api for ${nationalId}. Seeding aborted to prevent creating unauthenticated users.`,
-        );
-      }
+      // Create user directly in database
+      const userId = randomUUID();
+      await db.insert(schema.user).values({
+        id: userId,
+        name: args.fullName,
+        username: nationalId,
+        displayUsername: args.fullName,
+        email: email,
+        emailVerified: true, // Mark seed users as verified
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Create account record for password-based auth
+      await db.insert(schema.account).values({
+        id: randomUUID(),
+        accountId: userId,
+        providerId: "credential",
+        userId: userId,
+        password: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     }
   } catch (e: any) {
     if (
       !e.message?.includes("already exists") &&
-      e.code !== "USER_ALREADY_EXISTS"
+      e.code !== "USER_ALREADY_EXISTS" &&
+      !e.message?.includes("duplicate key")
     ) {
       console.error(`    Error creating user ${nationalId}:`, e.message);
     }
