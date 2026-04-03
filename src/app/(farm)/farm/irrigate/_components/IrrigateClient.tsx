@@ -72,10 +72,7 @@ function CircularProgress({
   const display = useCountUp(Math.round(pct));
 
   return (
-    <div
-      className="relative shrink-0"
-      style={{ width: size, height: size }}
-    >
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
         <circle
           cx="50"

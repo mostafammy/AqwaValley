@@ -568,9 +568,9 @@ function UserListDirectory() {
 
       <Card className="hidden sm:block">
         <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[700px] text-right align-middle text-sm">
+          <table className="w-full min-w-175 text-right align-middle text-sm">
             <thead>
-              <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] font-medium text-[var(--color-text-muted)]">
+              <tr className="border-border border-b bg-(--color-bg-subtle) font-medium text-(--color-text-muted)">
                 <th className="px-4 py-3">الاسم</th>
                 <th className="px-4 py-3">الرقم القومي</th>
                 <th className="px-4 py-3">الصلاحية</th>
@@ -582,15 +582,15 @@ function UserListDirectory() {
               {users.map((u) => (
                 <tr
                   key={u.userId}
-                  className="border-b border-[var(--color-border)] transition hover:bg-[var(--color-bg-subtle)]"
+                  className="border-border border-b transition hover:bg-(--color-bg-subtle)"
                 >
-                  <td className="px-4 py-4 font-semibold text-[var(--color-text)]">
+                  <td className="text-text px-4 py-4 font-semibold">
                     {u.fullName}
                   </td>
-                  <td className="px-4 py-4 text-[var(--color-text-muted)]">
+                  <td className="px-4 py-4 text-(--color-text-muted)">
                     {u.nationalId}
                   </td>
-                  <td className="px-4 py-4 font-medium text-[var(--color-text-muted)]">
+                  <td className="px-4 py-4 font-medium text-(--color-text-muted)">
                     {u.roleDisplayName ?? u.roleType}
                   </td>
                   <td className="px-4 py-4">
@@ -613,7 +613,7 @@ function UserListDirectory() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="py-8 text-center text-[var(--color-text-muted)]"
+                    className="py-8 text-center text-(--color-text-muted)"
                   >
                     لا يوجد مستخدمين لعرضهم.
                   </td>
@@ -624,8 +624,8 @@ function UserListDirectory() {
         </div>
 
         {total > 0 && (
-          <CardFooter className="flex items-center justify-between border-t border-[var(--color-border)] px-4 py-3">
-            <span className="text-sm text-[var(--color-text-muted)]">
+          <CardFooter className="border-border flex items-center justify-between border-t px-4 py-3">
+            <span className="text-sm text-(--color-text-muted)">
               إظهار {Math.min(page * pageSize, total)} من أصل {total}
             </span>
             <div className="flex gap-2">
