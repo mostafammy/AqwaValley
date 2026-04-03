@@ -23,6 +23,19 @@ export type WellMarker = {
 };
 
 const CRITICAL_STATUSES: WellMarker["status"][] = ["offline", "restricted"];
+const PULSE_STATUSES: WellMarker["status"][] = [
+  "offline",
+  "restricted",
+  "maintenance",
+];
+
+const STATUS_AURA_COLOR: Record<WellMarker["status"], string> = {
+  active: "rgba(13, 158, 126, 0.35)",
+  inactive: "rgba(100, 116, 139, 0.25)",
+  maintenance: "rgba(245, 158, 11, 0.35)",
+  offline: "rgba(217, 64, 64, 0.4)",
+  restricted: "rgba(124, 58, 237, 0.4)",
+};
 
 function escapeHtml(str: string) {
   if (typeof document === "undefined") return str;
@@ -148,27 +161,36 @@ export function LeafletMap({
         const color = wellStatusColor(w.status);
         const label = wellStatusLabel(w.status);
         const isCritical = CRITICAL_STATUSES.includes(w.status);
+        const shouldPulse = PULSE_STATUSES.includes(w.status);
         const escapedWellName = escapeHtml(w.name);
+        const auraColor = STATUS_AURA_COLOR[w.status];
+        const pulseDuration = w.status === "offline" ? "1.4s" : "2s";
 
         const icon = L.divIcon({
           className: "",
           html: `
-            <div style="position:relative;width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+              <div style="position:absolute;width:24px;height:24px;border-radius:9999px;background:${auraColor};filter:blur(7px);opacity:0.9;"></div>
+              ${shouldPulse ? `<div class="pulse-ring" style="color:${color};width:20px;height:20px;animation-duration:${pulseDuration};"></div>` : ""}
+              ${shouldPulse ? `<div class="pulse-ring" style="color:${color};width:26px;height:26px;animation-duration:${pulseDuration};animation-delay:0.35s;"></div>` : ""}
               ${isCritical ? `<div class="well-ping" style="position:absolute;width:20px;height:20px;border-radius:50%;background:${color};"></div>` : ""}
-              <div style="position:relative;width:14px;height:14px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 1px 5px rgba(0,0,0,.4);z-index:1;"></div>
+              <div style="position:relative;width:14px;height:14px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 1px 7px rgba(0,0,0,.45);z-index:2;"></div>
             </div>
           `,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
 
         const marker = L.marker([w.lat, w.lng], { icon }).addTo(layerGroup)
           .bindPopup(`
-            <div style="font-family:Cairo,sans-serif;direction:rtl;min-width:140px">
-              <strong>${escapedWellName}</strong><br/>
-              <span style="color:${color}">● ${label}</span><br/>
-              المنسوب: ${w.levelPct}%<br/>
-              ${escapeHtml(w.district)}
+            <div style="font-family:Cairo,sans-serif;direction:rtl;min-width:185px;line-height:1.5;">
+              <div style="font-size:14px;font-weight:800;color:#0A1628;margin-bottom:4px;">${escapedWellName}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:${color};"></span>
+                <span style="font-size:12px;color:${color};font-weight:700;">${label}</span>
+              </div>
+              <div style="font-size:12px;color:#334155;">المنسوب الحالي: <strong>${w.levelPct}%</strong></div>
+              <div style="font-size:11px;color:#64748b;">${escapeHtml(w.district)}</div>
             </div>
           `);
 
