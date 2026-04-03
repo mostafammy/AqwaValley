@@ -174,19 +174,28 @@ function CustomSelect({
 
 function ReportGenerator() {
   const utils = api.useUtils();
+  const { data: supportedReportTypes } =
+    api.reports.getSupportedReportTypes.useQuery();
   const [reportType, setReportType] = useState("");
   const [formats, setFormats] = useState<string[]>(["pdf"]);
   const [scopeType, setScopeType] = useState<"global" | "district">("global");
+  const [districtId, setDistrictId] = useState("");
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     msg: string;
   } | null>(null);
+
+  const availableReportTypes =
+    supportedReportTypes && supportedReportTypes.length > 0
+      ? supportedReportTypes
+      : REPORT_TYPE_VALUES;
 
   const createMutation = api.reports.requestGeneration.useMutation({
     onSuccess: () => {
       setFeedback({ type: "success", msg: "تم تقديم طلب التقرير بنجاح" });
       setReportType("");
       setFormats(["pdf"]);
+      setDistrictId("");
       void utils.reports.listJobs.invalidate();
     },
     onError: (err) => {
@@ -205,12 +214,25 @@ function ReportGenerator() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
+
+    if (scopeType === "district" && !districtId.trim()) {
+      setFeedback({
+        type: "error",
+        msg: "يرجى إدخال معرف المركز عند اختيار نطاق مركز معين",
+      });
+      return;
+    }
+
     createMutation.mutate({
       reportType: reportType as (typeof REPORT_TYPE_VALUES)[number],
       formats: formats as ("pdf" | "csv" | "xlsx")[],
       generationMode: "strict",
       granularity: "monthly",
-      scope: { scopeType, districtId: undefined },
+      scope: {
+        scopeType,
+        districtId:
+          scopeType === "district" ? districtId.trim() || undefined : undefined,
+      },
       parameterSchemaVersion: "report-params-v1",
       templateVersion: "v1",
       policyVersion: "policy-current",
@@ -236,16 +258,21 @@ function ReportGenerator() {
             <label className="text-sm font-medium text-slate-700">
               نوع التقرير
             </label>
-            <CustomSelect
+            <select
               value={reportType}
-              onChange={setReportType}
+              onChange={(e) => setReportType(e.target.value)}
               required
-              placeholder="اختر نوع التقرير"
-              options={REPORT_TYPE_VALUES.map((type) => ({
-                value: type,
-                label: REPORT_TYPE_LABELS[type] ?? type,
-              }))}
-            />
+              className="w-full rounded-[10px] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="" disabled>
+                اختر نوع التقرير
+              </option>
+              {availableReportTypes.map((type) => (
+                <option key={type} value={type}>
+                  {REPORT_TYPE_LABELS[type] ?? type}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Formats */}
@@ -292,6 +319,20 @@ function ReportGenerator() {
                 </button>
               ))}
             </div>
+            {scopeType === "district" && (
+              <input
+                type="text"
+                value={districtId}
+                onChange={(e) => setDistrictId(e.target.value)}
+                placeholder="معرّف المركز (UUID)"
+                className="w-full rounded-[10px] border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            )}
+            {scopeType === "global" && (
+              <p className="text-xs text-slate-500">
+                ملاحظة: التقارير العامة تتطلب صلاحية admin أو auditor.
+              </p>
+            )}
           </div>
 
           {/* Feedback */}
@@ -309,7 +350,11 @@ function ReportGenerator() {
 
           <Button
             type="submit"
-            disabled={createMutation.isPending || !reportType}
+            disabled={
+              createMutation.isPending ||
+              !reportType ||
+              (scopeType === "district" && !districtId.trim())
+            }
             className="w-full rounded-xl py-3 font-semibold"
           >
             {createMutation.isPending ? "جاري الإنشاء..." : "إنشاء التقرير"}

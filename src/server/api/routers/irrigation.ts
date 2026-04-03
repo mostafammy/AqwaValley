@@ -19,10 +19,13 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import {
   farm,
+  farmWell,
   irrigationEvent,
   irrigationRecommendation,
   irrigationSession,
   irrigationSimulationRun,
+  well,
+  wellStatusHistory,
 } from "~/server/db/schema";
 import { evaluateAndPersistRunDiff } from "~/server/services/irrigation/runDiffService";
 import { replaySimulationRun } from "~/server/services/irrigation/runReplayService";
@@ -107,6 +110,17 @@ const saveSessionInput = z.object({
 const getSessionInput = z.object({
   farmId: z.string().uuid(),
   planId: z.string().uuid().nullable(),
+});
+
+const getFarmWellFlowControlsInput = z.object({
+  farmId: z.string().uuid(),
+});
+
+const setWellFlowControlInput = z.object({
+  farmId: z.string().uuid(),
+  wellId: z.string().uuid(),
+  targetFlowM3Hr: z.number().min(0),
+  note: z.string().trim().max(500).optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -330,6 +344,136 @@ export const irrigationRouter = createTRPCRouter({
       return {
         avgSoilMoisture,
         remainingQuotaLitres: quota.remainingLitres,
+      };
+    }),
+
+  getFarmWellFlowControls: protectedProcedure
+    .input(getFarmWellFlowControlsInput)
+    .query(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      const rows = await ctx.db
+        .select({
+          wellId: well.id,
+          wellName: well.name,
+          valveState: well.valveState,
+          baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
+          maxFlowRateM3Hr: well.maxFlowRateM3Hr,
+          status: well.status,
+        })
+        .from(farmWell)
+        .innerJoin(well, eq(farmWell.wellId, well.id))
+        .where(eq(farmWell.farmId, input.farmId))
+        .orderBy(well.name);
+
+      return rows.map((row) => {
+        const baseline =
+          row.baselineFlowRateM3Hr != null
+            ? Number(row.baselineFlowRateM3Hr)
+            : null;
+        const max =
+          row.maxFlowRateM3Hr != null ? Number(row.maxFlowRateM3Hr) : null;
+        const suggestedTarget = baseline ?? max ?? 0;
+
+        return {
+          wellId: row.wellId,
+          wellName: row.wellName,
+          valveState: row.valveState,
+          status: row.status,
+          baselineFlowRateM3Hr: baseline,
+          maxFlowRateM3Hr: max,
+          suggestedTargetFlowM3Hr: suggestedTarget,
+        };
+      });
+    }),
+
+  setWellFlowControl: protectedProcedure
+    .input(setWellFlowControlInput)
+    .mutation(async ({ ctx, input }) => {
+      await ensureUserCanAccessFarm(ctx, input.farmId);
+
+      const [farmWellRecord] = await ctx.db
+        .select({
+          wellId: well.id,
+          status: well.status,
+          baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
+          maxFlowRateM3Hr: well.maxFlowRateM3Hr,
+        })
+        .from(farmWell)
+        .innerJoin(well, eq(farmWell.wellId, well.id))
+        .where(
+          and(eq(farmWell.farmId, input.farmId), eq(well.id, input.wellId)),
+        )
+        .limit(1);
+
+      if (!farmWellRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Well is not assigned to this farm.",
+        });
+      }
+
+      const maxFlow =
+        farmWellRecord.maxFlowRateM3Hr != null
+          ? Number(farmWellRecord.maxFlowRateM3Hr)
+          : null;
+
+      if (maxFlow != null && input.targetFlowM3Hr > maxFlow) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Requested flow exceeds maximum allowed flow (${maxFlow} m3/hr).`,
+        });
+      }
+
+      const nextValveState =
+        input.targetFlowM3Hr <= 0
+          ? "closed"
+          : maxFlow != null && input.targetFlowM3Hr >= maxFlow
+            ? "open"
+            : "partially_open";
+
+      const [updated] = await ctx.db
+        .update(well)
+        .set({
+          valveState: nextValveState,
+          updatedAt: new Date(),
+        })
+        .where(eq(well.id, input.wellId))
+        .returning({
+          wellId: well.id,
+          valveState: well.valveState,
+          baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
+          maxFlowRateM3Hr: well.maxFlowRateM3Hr,
+        });
+
+      if (!updated) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Well not found.",
+        });
+      }
+
+      await ctx.db.insert(wellStatusHistory).values({
+        wellId: input.wellId,
+        changedBy: ctx.session.user.id,
+        toStatus: farmWellRecord.status,
+        reason:
+          `Flow control set to ${input.targetFlowM3Hr.toFixed(2)} m3/hr` +
+          (input.note ? ` (${input.note})` : ""),
+      });
+
+      return {
+        wellId: updated.wellId,
+        targetFlowM3Hr: input.targetFlowM3Hr,
+        valveState: updated.valveState,
+        baselineFlowRateM3Hr:
+          updated.baselineFlowRateM3Hr != null
+            ? Number(updated.baselineFlowRateM3Hr)
+            : null,
+        maxFlowRateM3Hr:
+          updated.maxFlowRateM3Hr != null
+            ? Number(updated.maxFlowRateM3Hr)
+            : null,
       };
     }),
 
