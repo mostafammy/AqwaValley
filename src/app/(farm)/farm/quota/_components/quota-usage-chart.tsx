@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 "use client";
 
 import { BarChart as BarChartIcon } from "lucide-react";

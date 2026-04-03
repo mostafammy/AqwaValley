@@ -125,7 +125,7 @@ export default async function CropsPage() {
       {/* History Table */}
       <Suspense fallback={<Skeleton className="h-80 rounded-3xl" />}>
         <CropHistoryTable
-          farmId={farmerFarm.id}
+          farmId={currentFarm.id}
           cropTypes={cropTypes}
           growthStages={growthStages}
         />

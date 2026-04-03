@@ -77,26 +77,6 @@ type PlanView = {
   remainingQuotaLitres?: number;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function asNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value)
-    ? value
-    : undefined;
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
-
-function asConfidence(value: unknown): ConfidenceLevel | undefined {
-  return value === "HIGH" || value === "MEDIUM" || value === "LOW"
-    ? value
-    : undefined;
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────

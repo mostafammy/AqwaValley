@@ -29,18 +29,6 @@ type OpenWeatherPayload = {
   name?: string;
 };
 
-function isNumberArray(value: unknown): value is number[] {
-  return (
-    Array.isArray(value) && value.every((item) => typeof item === "number")
-  );
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return (
-    Array.isArray(value) && value.every((item) => typeof item === "string")
-  );
-}
-
 function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
   if (!value || typeof value !== "object") return false;
   const candidate = value as {

@@ -512,7 +512,7 @@ function UserListDirectory() {
   const { data, isLoading } = api.users.listAll.useQuery({ page, pageSize });
   const deactivateMut = api.users.deactivate.useMutation({
     onSuccess: () => {
-      ctx.users.listAll.invalidate();
+      void ctx.users.listAll.invalidate();
       setSelectedUser(null);
       setConfirmAction(null);
     },
@@ -653,13 +653,13 @@ function UserListDirectory() {
       {selectedUser && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/30" />
-          <div className="animate-in fade-in zoom-in-95 relative w-full max-w-lg rounded-xl bg-[var(--color-bg)] shadow-2xl">
+          <div className="animate-in fade-in zoom-in-95 bg-bg relative w-full max-w-lg rounded-xl shadow-2xl">
             <Card className="border-0 shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-6 pt-4 pb-4">
+              <CardHeader className="border-border flex flex-row items-center justify-between border-b bg-(--color-bg-subtle) px-6 pt-4 pb-4">
                 <CardTitle>بيانات المستخدم التفصيلية</CardTitle>
                 <button
                   onClick={() => setSelectedUser(null)}
-                  className="rounded-full p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)]"
+                  className="rounded-full p-1 text-(--color-text-muted) hover:bg-(--color-bg-hover)"
                 >
                   <svg
                     className="h-6 w-6"
@@ -679,35 +679,35 @@ function UserListDirectory() {
 
               <CardBody className="space-y-6 p-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-[var(--color-text-muted)]">
+                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
+                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
                       الاسم الكامل
                     </div>
-                    <div className="mt-1 font-semibold text-[var(--color-text)]">
+                    <div className="text-text mt-1 font-semibold">
                       {selectedUser.fullName}
                     </div>
                   </div>
-                  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-[var(--color-text-muted)]">
+                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
+                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
                       الرقم القومي
                     </div>
-                    <div className="mt-1 font-medium text-[var(--color-text)]">
+                    <div className="text-text mt-1 font-medium">
                       {selectedUser.nationalId}
                     </div>
                   </div>
-                  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-[var(--color-text-muted)]">
+                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
+                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
                       البريد الإلكتروني
                     </div>
-                    <div className="mt-1 font-medium break-all text-[var(--color-text)]">
+                    <div className="text-text mt-1 font-medium break-all">
                       {selectedUser.email ?? "غير متوفر"}
                     </div>
                   </div>
-                  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-[var(--color-text-muted)]">
+                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
+                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
                       رقم الهاتف
                     </div>
-                    <div className="mt-1 font-medium text-[var(--color-text)]">
+                    <div className="text-text mt-1 font-medium">
                       {selectedUser.phoneNumber ?? "غير متوفر"}
                     </div>
                   </div>
@@ -718,34 +718,34 @@ function UserListDirectory() {
                   selectedUser.farmId && (
                     <Card
                       accent="blue"
-                      className="border border-[var(--color-border)] !shadow-none"
+                      className="border-border border shadow-none!"
                     >
                       <CardHeader className="px-4 pt-4 pb-2">
                         <CardTitle>بيانات المزرعة المرتبطة</CardTitle>
                       </CardHeader>
                       <CardBody size="sm">
                         <div className="flex flex-col gap-3 px-2">
-                          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2">
-                            <span className="text-sm font-semibold text-[var(--color-text-muted)]">
+                          <div className="border-border flex items-center justify-between border-b pb-2">
+                            <span className="text-sm font-semibold text-(--color-text-muted)">
                               اسم المزرعة
                             </span>
-                            <span className="font-bold text-[var(--color-text)]">
+                            <span className="text-text font-bold">
                               {selectedUser.farmName}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2">
-                            <span className="text-sm font-semibold text-[var(--color-text-muted)]">
+                          <div className="border-border flex items-center justify-between border-b pb-2">
+                            <span className="text-sm font-semibold text-(--color-text-muted)">
                               المساحة
                             </span>
-                            <span className="font-bold text-[var(--color-text)]">
+                            <span className="text-text font-bold">
                               {selectedUser.farmArea} فدان
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-[var(--color-text-muted)]">
+                            <span className="text-sm font-semibold text-(--color-text-muted)">
                               الحصة السنوية
                             </span>
-                            <span className="font-bold text-[var(--color-primary-600)]">
+                            <span className="font-bold text-(--color-primary-600)">
                               {selectedUser.farmQuota &&
                                 Number(
                                   selectedUser.farmQuota,
@@ -760,7 +760,7 @@ function UserListDirectory() {
               </CardBody>
             </Card>
 
-            <CardFooter className="flex items-center justify-between rounded-b-xl border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-4">
+            <CardFooter className="border-border flex items-center justify-between rounded-b-xl border-t bg-(--color-bg-subtle) p-4">
               <Button variant="secondary" onClick={() => setSelectedUser(null)}>
                 إغلاق
               </Button>
@@ -789,9 +789,9 @@ function UserListDirectory() {
       )}
 
       {confirmAction && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-          <div className="animate-in fade-in zoom-in-95 relative w-full max-w-md rounded-xl bg-[var(--color-bg)] p-6 shadow-2xl">
+          <div className="animate-in fade-in zoom-in-95 bg-bg relative w-full max-w-md rounded-xl p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
@@ -809,14 +809,12 @@ function UserListDirectory() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--color-text)]">
-                  تأكيد التعطيل
-                </h3>
+                <h3 className="text-text text-lg font-bold">تأكيد التعطيل</h3>
               </div>
             </div>
-            <p className="mb-6 text-[var(--color-text-muted)]">
+            <p className="mb-6 text-(--color-text-muted)">
               هل أنت متأكد من تعطيل حساب{" "}
-              <span className="font-semibold text-[var(--color-text)]">
+              <span className="text-text font-semibold">
                 {confirmAction.userName}
               </span>
               ؟ لن يستطيع هذا المستخدم تسجيل الدخول حتى تقوم بتفعيله مرة أخرى.
