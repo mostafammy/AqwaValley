@@ -351,7 +351,8 @@ function WellFlowControlRow({
           </div>
           {well.targetFlowRateM3Hr != null ? (
             <div className="mt-1 text-xs text-blue-600">
-              التدفق المضبوط حاليًا: {well.targetFlowRateM3Hr.toFixed(2)} م³/ساعة
+              التدفق المضبوط حاليًا: {well.targetFlowRateM3Hr.toFixed(2)}{" "}
+              م³/ساعة
             </div>
           ) : null}
         </div>

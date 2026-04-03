@@ -1,6 +1,14 @@
 "use client";
 
-import { Calendar, Droplets, ArrowLeft, History, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  Calendar,
+  Droplets,
+  ArrowLeft,
+  History,
+  CheckCircle,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import { api } from "~/trpc/react";
 import { useRef } from "react";
 import { motion } from "framer-motion";
@@ -22,17 +30,24 @@ interface PlanHistorySectionProps {
   onActivate: (planId: string) => void;
 }
 
-export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionProps) {
+export function PlanHistorySection({
+  farmId,
+  onActivate,
+}: PlanHistorySectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: plans, isLoading } = api.irrigation.listPlans.useQuery(
-    { farmId, limit: 12 }
-  );
+  const { data: plans, isLoading } = api.irrigation.listPlans.useQuery({
+    farmId,
+    limit: 12,
+  });
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === "left" ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      const scrollTo =
+        direction === "left"
+          ? scrollLeft - clientWidth
+          : scrollLeft + clientWidth;
       scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
     }
   };
@@ -40,112 +55,128 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
   if (plans?.length === 0 && !isLoading) return null;
 
   return (
-    <div className="pt-12 border-t border-gray-100" id="history-section">
-      <div className="flex items-center justify-between mb-8">
+    <div className="border-t border-gray-100 pt-12" id="history-section">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-navy flex items-center gap-3">
-            <History className="w-6 h-6 text-blue-500" />
+          <h2 className="text-navy flex items-center gap-3 text-2xl font-black">
+            <History className="h-6 w-6 text-blue-500" />
             سجل التوصيات السابقة
           </h2>
-          <p className="text-sm text-gray-400 mt-1 font-medium">مراجعة والاعتماد السريع للخطط السابقة</p>
+          <p className="mt-1 text-sm font-medium text-gray-400">
+            مراجعة والاعتماد السريع للخطط السابقة
+          </p>
         </div>
-        
+
         <div className="flex gap-2">
-          <motion.button 
+          <motion.button
             whileTap={tapFeedback}
             onClick={() => scroll("right")}
             aria-label="التحريك لليمين"
-            className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
+            className="hover:bg-white-light text-muted rounded-xl border border-gray-200 bg-white p-2 transition-colors"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="h-5 w-5" />
           </motion.button>
-          <motion.button 
+          <motion.button
             whileTap={tapFeedback}
             onClick={() => scroll("left")}
             aria-label="التحريك لليسار"
-            className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
+            className="hover:bg-white-light text-muted rounded-xl border border-gray-200 bg-white p-2 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </motion.button>
         </div>
       </div>
 
-      <div 
+      <div
         ref={scrollRef}
-        className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory no-scrollbar scroll-smooth"
+        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-8"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="min-w-[320px] h-64 bg-gray-100 animate-pulse rounded-3xl" />
-          ))
-        ) : (
-          plans?.map((plan) => {
-            const planData = (plan.plan as IrrigationPlanObject) || { reasoning: "بدون تفاصيل", zones: [] };
-            const isActivated = plan.status === "ACTIVATED";
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-64 min-w-[320px] animate-pulse rounded-3xl bg-gray-100"
+              />
+            ))
+          : plans?.map((plan) => {
+              const planData = (plan.plan as IrrigationPlanObject) || {
+                reasoning: "بدون تفاصيل",
+                zones: [],
+              };
+              const isActivated = plan.status === "ACTIVATED";
 
-            return (
-              <Card 
-                key={plan.id}
-                accent={isActivated ? "teal" : undefined}
-                className={`min-w-[320px] md:min-w-95 snap-start border ${
-                  isActivated ? "ring-4 ring-teal/5 shadow-ok/5" : "border-gray-100"
-                } group cursor-default h-full flex flex-col`}
-              >
-                <CardBody className="p-6 h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                        <Calendar className="w-3.5 h-3.5 text-blue" />
+              return (
+                <Card
+                  key={plan.id}
+                  accent={isActivated ? "teal" : undefined}
+                  className={`min-w-[320px] snap-start border md:min-w-95 ${
+                    isActivated
+                      ? "ring-teal/5 shadow-ok/5 ring-4"
+                      : "border-gray-100"
+                  } group flex h-full cursor-default flex-col`}
+                >
+                  <CardBody className="flex h-full flex-col p-6">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                        <Calendar className="text-blue h-3.5 w-3.5" />
                         {new Intl.DateTimeFormat("ar-EG", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
                         }).format(new Date(plan.createdAt))}
-                     </div>
-                     <span className={`badge ${isActivated ? "badge-ok" : "badge-gray"}`}>
-                        {isActivated ? <CheckCircle className="w-3 h-3 mr-1" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-1" />}
+                      </div>
+                      <span
+                        className={`badge ${isActivated ? "badge-ok" : "badge-gray"}`}
+                      >
+                        {isActivated ? (
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                        ) : (
+                          <span className="mr-1 h-1.5 w-1.5 rounded-full bg-slate-300" />
+                        )}
                         {isActivated ? "مُفعَّلة" : "مسودة"}
-                     </span>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-6 font-medium italic opacity-80 group-hover:opacity-100 transition-opacity">
-                      &quot;{planData.reasoning}&quot;
+                      </span>
                     </div>
-                  </div>
 
-                  <div className="flex items-end justify-between border-t border-gray-50 pt-5 mt-auto">
-                     <div className="space-y-1">
-                        <div className="text-[10px] text-slate-400 font-bold flex items-center gap-1 uppercase">
-                           <Droplets className="w-3 h-3" /> الكمية
+                    <div className="flex-1">
+                      <div className="mb-6 line-clamp-3 text-sm leading-relaxed font-medium text-slate-600 italic opacity-80 transition-opacity group-hover:opacity-100">
+                        &quot;{planData.reasoning}&quot;
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-end justify-between border-t border-gray-50 pt-5">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
+                          <Droplets className="h-3 w-3" /> الكمية
                         </div>
-                        <div className="text-xl font-black text-navy flex items-baseline gap-1">
+                        <div className="text-navy flex items-baseline gap-1 text-xl font-black">
                           {(plan.totalLitres / 1000).toFixed(1)}
-                          <span className="text-[10px] font-medium text-slate-400">م³</span>
+                          <span className="text-[10px] font-medium text-slate-400">
+                            م³
+                          </span>
                         </div>
-                     </div>
+                      </div>
 
-                     {!isActivated ? (
-                       <motion.button 
-                         whileTap={tapFeedback}
-                         onClick={() => onActivate(plan.id)}
-                         className="btn btn-ghost bg-blue-light text-blue text-[11px] px-4 py-2 rounded-xl transition-all shadow-sm gap-2"
-                       >
+                      {!isActivated ? (
+                        <motion.button
+                          whileTap={tapFeedback}
+                          onClick={() => onActivate(plan.id)}
+                          className="btn btn-ghost bg-blue-light text-blue gap-2 rounded-xl px-4 py-2 text-[11px] shadow-sm transition-all"
+                        >
                           تطبيق الآن
-                          <ArrowLeft className="w-3.5 h-3.5" />
-                       </motion.button>
-                     ) : (
-                       <div className="flex items-center gap-1.5 text-teal text-[11px] font-bold bg-teal-light/30 px-3.5 py-2 rounded-xl border border-teal/10">
-                          <CheckCircle className="w-4 h-4" />
+                          <ArrowLeft className="h-3.5 w-3.5" />
+                        </motion.button>
+                      ) : (
+                        <div className="text-teal bg-teal-light/30 border-teal/10 flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-[11px] font-bold">
+                          <CheckCircle className="h-4 w-4" />
                           الخطة الحالية
-                       </div>
-                     )}
-                  </div>
-                </CardBody>
-              </Card>
-            );
-          })
-        )}
+                        </div>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
+              );
+            })}
       </div>
     </div>
   );

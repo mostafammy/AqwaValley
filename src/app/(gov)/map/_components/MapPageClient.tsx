@@ -8,7 +8,12 @@ import { Badge } from "~/app/_components/UI/Badge";
 import Image from "next/image";
 import { tapFeedback } from "~/lib/motion";
 
-type WellStatus = "active" | "inactive" | "maintenance" | "offline" | "restricted";
+type WellStatus =
+  | "active"
+  | "inactive"
+  | "maintenance"
+  | "offline"
+  | "restricted";
 
 interface WellData {
   id: string;
@@ -84,15 +89,20 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
         {/* District filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="district-select" className="text-sm font-medium text-gray-600">المركز:</label>
+          <label
+            htmlFor="district-select"
+            className="text-sm font-medium text-gray-600"
+          >
+            المركز:
+          </label>
           <select
             id="district-select"
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">الكل</option>
             {districts.map((d) => (
@@ -105,12 +115,17 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
 
         {/* Status filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="status-select" className="text-sm font-medium text-gray-600">الحالة:</label>
+          <label
+            htmlFor="status-select"
+            className="text-sm font-medium text-gray-600"
+          >
+            الحالة:
+          </label>
           <select
             id="status-select"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">الكل</option>
             {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
@@ -122,7 +137,7 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
         </div>
 
         {/* Results count */}
-        <div className="flex items-center gap-2 mr-auto">
+        <div className="mr-auto flex items-center gap-2">
           <Badge variant="gray">
             {filteredWells.length} من {initialWells.length} بئر
           </Badge>
@@ -139,24 +154,31 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
       </div>
 
       {/* Status legend */}
-      <div className="flex flex-wrap items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
         <span className="text-xs text-gray-500">دليل الحالات:</span>
         {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
-          <span key={status} className="inline-flex items-center gap-1.5 text-xs text-gray-600">
-            <span className={`w-3 h-3 rounded-full ${STATUS_COLORS[status]}`} />
+          <span
+            key={status}
+            className="inline-flex items-center gap-1.5 text-xs text-gray-600"
+          >
+            <span className={`h-3 w-3 rounded-full ${STATUS_COLORS[status]}`} />
             {STATUS_LABELS[status]}
           </span>
         ))}
       </div>
 
       {/* Map */}
-      <div className="w-full h-[calc(100vh-280px)] min-h-[400px] rounded-xl overflow-hidden shadow-sm border border-gray-200">
+      <div className="h-[calc(100vh-280px)] min-h-[400px] w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm">
         {filteredWells.length > 0 ? (
           <MapClient wells={filteredWells} oases={[]} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-50">
+          <div className="flex h-full w-full items-center justify-center bg-gray-50">
             <div className="text-center text-gray-400">
-              <Image src="/svg/map-empty.svg" className="w-16 h-16 mx-auto mb-3 opacity-30" alt="" />
+              <Image
+                src="/svg/map-empty.svg"
+                className="mx-auto mb-3 h-16 w-16 opacity-30"
+                alt=""
+              />
               <p className="text-sm">لا توجد آبار مطابقة للفلاتر المحددة</p>
             </div>
           </div>

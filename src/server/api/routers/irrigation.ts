@@ -373,7 +373,9 @@ export const irrigationRouter = createTRPCRouter({
             ? Number(row.baselineFlowRateM3Hr)
             : null;
         const target =
-          row.targetFlowRateM3Hr != null ? Number(row.targetFlowRateM3Hr) : null;
+          row.targetFlowRateM3Hr != null
+            ? Number(row.targetFlowRateM3Hr)
+            : null;
         const max =
           row.maxFlowRateM3Hr != null ? Number(row.maxFlowRateM3Hr) : null;
         const suggestedTarget = target ?? baseline ?? max ?? 0;

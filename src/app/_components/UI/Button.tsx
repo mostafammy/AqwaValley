@@ -2,8 +2,14 @@ import { type ReactNode } from "react";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { tapFeedback } from "~/lib/motion";
 
-type Variant = "primary" | "ghost" | "danger" | "success" | "secondary" | "gold";
-type Size    = "sm" | "md" | "lg";
+type Variant =
+  | "primary"
+  | "ghost"
+  | "danger"
+  | "success"
+  | "secondary"
+  | "gold";
+type Size = "sm" | "md" | "lg";
 
 interface ButtonProps extends HTMLMotionProps<"button"> {
   variant?: Variant;
@@ -30,7 +36,7 @@ export function Button({
       {...props}
     >
       {loading && (
-        <span className="w-[13px] h-[13px] rounded-full border-2 border-white/30 border-t-white animate-spin" />
+        <span className="h-[13px] w-[13px] animate-spin rounded-full border-2 border-white/30 border-t-white" />
       )}
       {!loading && icon}
       {children as ReactNode}
