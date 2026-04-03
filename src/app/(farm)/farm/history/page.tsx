@@ -84,9 +84,6 @@ export default async function HistoryPage() {
       </div>
     );
   }
-      .limit(1);
-    currentFarm = fallbackRows[0];
-  }
 
   // ── Fetch History Data ───────────────────────────────────────────
   const today = new Date();
