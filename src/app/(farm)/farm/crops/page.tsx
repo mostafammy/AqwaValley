@@ -108,7 +108,7 @@ export default async function CropsPage() {
         <div className="lg:col-span-8">
           <CropProfileForm
             profile={profile ?? null}
-            farmId={farmerFarm.id}
+            farmId={currentFarm.id}
             updateAction={updateCropProfile}
             cropTypes={cropTypes}
             growthStages={growthStages}

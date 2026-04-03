@@ -1,6 +1,13 @@
 "use client";
 import { type UserRole } from "~/lib/types";
-import { Bell, Droplets, LogOut, Menu, SeevronDown } from "lucide-react";
+import {
+  Bell,
+  Droplets,
+  LogOut,
+  Menu,
+  ChevronDown,
+  Settings,
+} from "lucide-react";
 import { useSidebar } from "./SidebarProvider";
 import { useState, useRef, useEffect } from "react";
 import { authClient } from "~/server/better-auth/client";
