@@ -10,15 +10,15 @@ const LeafletMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-gray-100 animate-pulse flex items-center justify-center">
-        <span className="text-gray-400 text-sm">جاري تحميل الخريطة...</span>
+      <div className="flex h-full w-full animate-pulse items-center justify-center bg-gray-100">
+        <span className="text-sm text-gray-400">جاري تحميل الخريطة...</span>
       </div>
     ),
-  }
+  },
 );
 
 interface MapClientProps {
-  wells:  WellMarker[];
+  wells: WellMarker[];
   oases?: OasisMarker[];
 }
 
@@ -32,7 +32,9 @@ export function MapClient({ wells, oases = [] }: MapClientProps) {
     ).length;
     const avgLevel =
       wells.length > 0
-        ? Math.round(wells.reduce((sum, w) => sum + (w.levelPct ?? 0), 0) / wells.length)
+        ? Math.round(
+            wells.reduce((sum, w) => sum + (w.levelPct ?? 0), 0) / wells.length,
+          )
         : 0;
 
     return { active, maintenance, critical, avgLevel };
@@ -47,31 +49,39 @@ export function MapClient({ wells, oases = [] }: MapClientProps) {
         onOasisClick={(oasisId) => router.push(`/districts#${oasisId}`)}
       />
 
-      <div className="pointer-events-none absolute right-3 top-3 z-[500] w-52 rounded-[18px] border border-white/25 bg-white/20 p-3 backdrop-blur-2xl shadow-lg md:w-60 md:p-4 glass-panel">
+      <div className="glass-panel pointer-events-none absolute top-3 right-3 z-[500] w-52 rounded-[18px] border border-white/25 bg-white/20 p-3 shadow-lg backdrop-blur-2xl md:w-60 md:p-4">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-bold tracking-wide text-slate-700">مؤشرات مباشرة</span>
+          <span className="text-xs font-bold tracking-wide text-slate-700">
+            مؤشرات مباشرة
+          </span>
           <span className="text-[10px] text-slate-500">تحديث فوري</span>
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-[11px]">
           <div className="rounded-xl bg-white/45 px-2 py-1.5">
             <div className="text-slate-500">نشط</div>
-            <div className="font-extrabold text-emerald-700">{stats.active}</div>
+            <div className="font-extrabold text-emerald-700">
+              {stats.active}
+            </div>
           </div>
           <div className="rounded-xl bg-white/45 px-2 py-1.5">
             <div className="text-slate-500">صيانة</div>
-            <div className="font-extrabold text-amber-700">{stats.maintenance}</div>
+            <div className="font-extrabold text-amber-700">
+              {stats.maintenance}
+            </div>
           </div>
           <div className="rounded-xl bg-white/45 px-2 py-1.5">
             <div className="flex items-center gap-1 text-slate-500">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
               حرج
             </div>
             <div className="font-extrabold text-red-700">{stats.critical}</div>
           </div>
           <div className="rounded-xl bg-white/45 px-2 py-1.5">
             <div className="text-slate-500">متوسط المنسوب</div>
-            <div className="font-extrabold text-blue-700">{stats.avgLevel}%</div>
+            <div className="font-extrabold text-blue-700">
+              {stats.avgLevel}%
+            </div>
           </div>
         </div>
 

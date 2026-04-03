@@ -188,12 +188,12 @@ function SummaryAmbient({
   return (
     <div className="group relative overflow-hidden rounded-[24px]">
       <div
-        className={`pointer-events-none absolute -left-16 -top-16 z-0 h-44 w-44 rounded-full blur-3xl transition-opacity duration-500 ${
+        className={`pointer-events-none absolute -top-16 -left-16 z-0 h-44 w-44 rounded-full blur-3xl transition-opacity duration-500 ${
           quotaState === "warning" ? "bg-amber-200/50" : "bg-teal-200/45"
         }`}
       />
       <div
-        className={`pointer-events-none absolute -bottom-20 -right-20 z-0 h-52 w-52 rounded-full blur-3xl transition-opacity duration-500 opacity-70 ${
+        className={`pointer-events-none absolute -right-20 -bottom-20 z-0 h-52 w-52 rounded-full opacity-70 blur-3xl transition-opacity duration-500 ${
           quotaState === "warning" ? "bg-orange-200/35" : "bg-cyan-200/35"
         }`}
       />
@@ -268,76 +268,78 @@ function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
       <Card
         className={`overflow-hidden transition-all hover:shadow-md ${inactive ? "opacity-60" : ""}`}
       >
-      <CardBody className="p-6">
-        <div className="mb-4 flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-2xl"
-              style={{ backgroundColor: `${color}15` }}
-            >
-              <Leaf className="h-5 w-5" style={{ color }} />
-            </div>
-            <div>
-              <div className="text-xs font-semibold tracking-widest text-slate-500">
-                منطقة {zone.zoneId ?? idx + 1}
-              </div>
-              <div className="text-navy text-lg leading-tight font-semibold">
-                {zone.cropType}
-              </div>
-              <div className="text-sm text-slate-500">{zone.growthStage}</div>
-            </div>
-          </div>
-          {!inactive && <ConfidenceBadge level={getZoneConfidence(zone.confidence)} />}
-        </div>
-
-        {!inactive ? (
-          <>
-            <div className="my-6 flex items-baseline gap-2 border-y border-slate-100 py-4">
-              <span
-                className="text-4xl font-semibold tabular-nums"
-                style={{ color }}
-              >
-                {litresCubic}
-              </span>
-              <span className="text-xl font-medium text-slate-400">م³</span>
-              <span className="mr-auto text-sm text-slate-400">
-                ({recommendedLitres.toLocaleString("ar-EG")} ل)
-              </span>
-              <Droplets className="h-8 w-8 shrink-0" style={{ color }} />
-            </div>
-
-            {zone.soilMoistureNow !== undefined && (
-              <MoistureBar
-                label="رطوبة التربة الحالية"
-                current={zone.soilMoistureNow}
-                target={zone.targetMoisture ?? 65}
-                color={color}
-              />
-            )}
-          </>
-        ) : (
-          <div className="my-8 rounded-2xl border border-dashed border-slate-200 py-6 text-center font-medium text-slate-400">
-            لا يحتاج ري اليوم
-          </div>
-        )}
-
-        {!inactive && (
-          <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
-            <div className="flex items-center gap-2 text-slate-500">
-              <Calendar className="h-4 w-4" />
-              {zone.scheduledAt ?? "—"}
-            </div>
-            {zone.notes && (
+        <CardBody className="p-6">
+          <div className="mb-4 flex items-start justify-between">
+            <div className="flex items-center gap-3">
               <div
-                className="max-w-[48%] truncate text-right text-sm text-slate-500"
-                title={zone.notes}
+                className="flex h-9 w-9 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: `${color}15` }}
               >
-                {zone.notes}
+                <Leaf className="h-5 w-5" style={{ color }} />
               </div>
+              <div>
+                <div className="text-xs font-semibold tracking-widest text-slate-500">
+                  منطقة {zone.zoneId ?? idx + 1}
+                </div>
+                <div className="text-navy text-lg leading-tight font-semibold">
+                  {zone.cropType}
+                </div>
+                <div className="text-sm text-slate-500">{zone.growthStage}</div>
+              </div>
+            </div>
+            {!inactive && (
+              <ConfidenceBadge level={getZoneConfidence(zone.confidence)} />
             )}
           </div>
-        )}
-      </CardBody>
+
+          {!inactive ? (
+            <>
+              <div className="my-6 flex items-baseline gap-2 border-y border-slate-100 py-4">
+                <span
+                  className="text-4xl font-semibold tabular-nums"
+                  style={{ color }}
+                >
+                  {litresCubic}
+                </span>
+                <span className="text-xl font-medium text-slate-400">م³</span>
+                <span className="mr-auto text-sm text-slate-400">
+                  ({recommendedLitres.toLocaleString("ar-EG")} ل)
+                </span>
+                <Droplets className="h-8 w-8 shrink-0" style={{ color }} />
+              </div>
+
+              {zone.soilMoistureNow !== undefined && (
+                <MoistureBar
+                  label="رطوبة التربة الحالية"
+                  current={zone.soilMoistureNow}
+                  target={zone.targetMoisture ?? 65}
+                  color={color}
+                />
+              )}
+            </>
+          ) : (
+            <div className="my-8 rounded-2xl border border-dashed border-slate-200 py-6 text-center font-medium text-slate-400">
+              لا يحتاج ري اليوم
+            </div>
+          )}
+
+          {!inactive && (
+            <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
+              <div className="flex items-center gap-2 text-slate-500">
+                <Calendar className="h-4 w-4" />
+                {zone.scheduledAt ?? "—"}
+              </div>
+              {zone.notes && (
+                <div
+                  className="max-w-[48%] truncate text-right text-sm text-slate-500"
+                  title={zone.notes}
+                >
+                  {zone.notes}
+                </div>
+              )}
+            </div>
+          )}
+        </CardBody>
       </Card>
     </motion.div>
   );
@@ -478,7 +480,11 @@ function EmptyState({
       <motion.div
         className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100"
         animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 2.2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        transition={{
+          duration: 2.2,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "easeInOut",
+        }}
       >
         <Droplets className="h-9 w-9 text-slate-400" />
       </motion.div>
@@ -551,7 +557,11 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1.1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          transition={{
+            duration: 1.1,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
         >
           <Cpu className="h-10 w-10 text-slate-400" />
         </motion.div>
@@ -597,7 +607,11 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               animate={generatePlan.isPending ? { rotate: 360 } : { rotate: 0 }}
               transition={
                 generatePlan.isPending
-                  ? { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }
+                  ? {
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "linear",
+                    }
                   : springs.floaty
               }
               className="inline-flex"
@@ -642,160 +656,164 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             exit={{ opacity: 0, y: -12 }}
             transition={springs.floaty}
           >
-        <div className="grid grid-cols-1 gap-5 md:gap-8 xl:grid-cols-12">
-          {/* Left Column */}
-          <div className="space-y-5 md:space-y-8 xl:col-span-5">
-            {/* Summary Card */}
-            <SummaryAmbient quotaState={quotaState}>
-              <Card>
-                <CardBody className="p-5 md:p-8">
-                <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row md:mb-8">
-                  <div>
-                    <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-                      ملخص الخطة
+            <div className="grid grid-cols-1 gap-5 md:gap-8 xl:grid-cols-12">
+              {/* Left Column */}
+              <div className="space-y-5 md:space-y-8 xl:col-span-5">
+                {/* Summary Card */}
+                <SummaryAmbient quotaState={quotaState}>
+                  <Card>
+                    <CardBody className="p-5 md:p-8">
+                      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row md:mb-8">
+                        <div>
+                          <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
+                            ملخص الخطة
+                          </div>
+                          <div className="text-navy mt-1 text-2xl font-semibold">
+                            إجمالي الري اليوم
+                          </div>
+                        </div>
+                        <ConfidenceRing
+                          value={getSafeConfidence(plan.confidence)}
+                        />
+                      </div>
+
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-navy text-4xl font-semibold tabular-nums md:text-6xl">
+                          {((plan.totalLitres ?? 0) / 1000).toFixed(1)}
+                        </span>
+                        <span className="text-2xl text-slate-300 md:text-3xl">
+                          م³
+                        </span>
+                      </div>
+                      <div className="mt-1 text-sm text-slate-500">
+                        {(plan.totalLitres ?? 0).toLocaleString("ar-EG")} لتر
+                      </div>
+
+                      {plan.quotaWarning && (
+                        <div className="mt-8 flex items-center gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
+                          <AlertCircle className="h-5 w-5 shrink-0" />
+                          تم تقليص الكمية لتناسب الحصة المتبقية
+                        </div>
+                      )}
+
+                      <div className="mt-10 flex items-center justify-between border-t pt-6 text-sm">
+                        <div>
+                          <div className="text-xs text-slate-400">
+                            تاريخ التوليد
+                          </div>
+                          <div className="text-navy font-medium">
+                            {formatDate(latestPlanRecord!.createdAt)}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`flex items-center gap-2 rounded-3xl px-5 py-2 text-sm font-medium ${
+                            isActivated
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {isActivated ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                          )}
+                          {isActivated ? "مُفعّلة" : "قيد المراجعة"}
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </SummaryAmbient>
+
+                {/* AI Reasoning */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-teal-50">
+                        <Sparkles className="text-teal h-4 w-4" />
+                      </div>
+                      <CardTitle>تحليل المهندس الزراعي</CardTitle>
                     </div>
-                    <div className="text-navy mt-1 text-2xl font-semibold">
-                      إجمالي الري اليوم
-                    </div>
-                  </div>
-                  <ConfidenceRing value={getSafeConfidence(plan.confidence)} />
-                </div>
-
-                <div className="flex items-baseline gap-3">
-                  <span className="text-navy text-4xl font-semibold tabular-nums md:text-6xl">
-                    {((plan.totalLitres ?? 0) / 1000).toFixed(1)}
-                  </span>
-                  <span className="text-2xl text-slate-300 md:text-3xl">
-                    م³
-                  </span>
-                </div>
-                <div className="mt-1 text-sm text-slate-500">
-                  {(plan.totalLitres ?? 0).toLocaleString("ar-EG")} لتر
-                </div>
-
-                {plan.quotaWarning && (
-                  <div className="mt-8 flex items-center gap-3 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
-                    <AlertCircle className="h-5 w-5 shrink-0" />
-                    تم تقليص الكمية لتناسب الحصة المتبقية
-                  </div>
-                )}
-
-                <div className="mt-10 flex items-center justify-between border-t pt-6 text-sm">
-                  <div>
-                    <div className="text-xs text-slate-400">تاريخ التوليد</div>
-                    <div className="text-navy font-medium">
-                      {formatDate(latestPlanRecord!.createdAt)}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`flex items-center gap-2 rounded-3xl px-5 py-2 text-sm font-medium ${
-                      isActivated
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {isActivated ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                  </CardHeader>
+                  <CardBody className="pt-2">
+                    <p className="leading-relaxed text-slate-600">
+                      “{plan.reasoning ?? "—"}”
+                    </p>
+                    {plan.nextIrrigationDate && (
+                      <div className="text-teal mt-6 flex items-center gap-2 text-sm font-medium">
+                        <Calendar className="h-4 w-4" />
+                        الري القادم المقترح: {plan.nextIrrigationDate}
+                      </div>
                     )}
-                    {isActivated ? "مُفعّلة" : "قيد المراجعة"}
-                  </div>
-                </div>
-                </CardBody>
-              </Card>
-            </SummaryAmbient>
+                  </CardBody>
+                </Card>
 
-            {/* AI Reasoning */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-teal-50">
-                    <Sparkles className="text-teal h-4 w-4" />
-                  </div>
-                  <CardTitle>تحليل المهندس الزراعي</CardTitle>
-                </div>
-              </CardHeader>
-              <CardBody className="pt-2">
-                <p className="leading-relaxed text-slate-600">
-                  “{plan.reasoning ?? "—"}”
-                </p>
-                {plan.nextIrrigationDate && (
-                  <div className="text-teal mt-6 flex items-center gap-2 text-sm font-medium">
-                    <Calendar className="h-4 w-4" />
-                    الري القادم المقترح: {plan.nextIrrigationDate}
-                  </div>
+                {!isActivated && (
+                  <motion.button
+                    onClick={() =>
+                      activatePlan.mutate({ planId: latestPlanRecord!.id })
+                    }
+                    disabled={activatePlan.isPending}
+                    whileTap={tapFeedback}
+                    whileHover={{ scale: 1.01 }}
+                    transition={springs.snappy}
+                    className="btn btn-primary w-full py-5 text-base font-semibold"
+                  >
+                    <Play className="h-5 w-5" />
+                    {activatePlan.isPending
+                      ? "جاري الاعتماد..."
+                      : "اعتماد وتفعيل الخطة"}
+                  </motion.button>
                 )}
-              </CardBody>
-            </Card>
-
-            {!isActivated && (
-              <motion.button
-                onClick={() =>
-                  activatePlan.mutate({ planId: latestPlanRecord!.id })
-                }
-                disabled={activatePlan.isPending}
-                whileTap={tapFeedback}
-                whileHover={{ scale: 1.01 }}
-                transition={springs.snappy}
-                className="btn btn-primary w-full py-5 text-base font-semibold"
-              >
-                <Play className="h-5 w-5" />
-                {activatePlan.isPending
-                  ? "جاري الاعتماد..."
-                  : "اعتماد وتفعيل الخطة"}
-              </motion.button>
-            )}
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-5 md:space-y-8 xl:col-span-7">
-            <InputsStrip
-              plan={plan}
-              liveWeather={liveWeather}
-              liveForecast={liveForecast}
-              liveInputs={liveInputs}
-              loading={isDataLoading}
-            />
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-navy text-2xl font-semibold">
-                توزيع الري حسب المناطق
-              </h2>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase">
-                <Cpu className="h-3.5 w-3.5" />
-                {latestPlanRecord?.modelUsed ?? "claude-sonnet"}
               </div>
-            </div>
 
-            <motion.div
-              className="grid grid-cols-1 gap-4 md:grid-cols-2"
-              variants={variants.staggerFast}
-              initial="hidden"
-              animate="show"
-            >
-              {plan.zones?.map((zone, i) => (
-                <ZoneCard key={zone.zoneId ?? i} zone={zone} idx={i} />
-              ))}
-            </motion.div>
+              {/* Right Column */}
+              <div className="space-y-5 md:space-y-8 xl:col-span-7">
+                <InputsStrip
+                  plan={plan}
+                  liveWeather={liveWeather}
+                  liveForecast={liveForecast}
+                  liveInputs={liveInputs}
+                  loading={isDataLoading}
+                />
 
-            {/* Savings banner */}
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 md:gap-6 md:rounded-3xl md:p-6">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-                <Droplets className="text-teal h-7 w-7" />
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold">توفير مياه بنسبة ~15%</div>
-                <div className="text-sm text-slate-600">
-                  مقارنة بالري التقليدي • بناءً على معادلات FAO-56 المخصصة لمناخ
-                  الصحراء الغربية
+                <div className="flex items-center justify-between">
+                  <h2 className="text-navy text-2xl font-semibold">
+                    توزيع الري حسب المناطق
+                  </h2>
+                  <div className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase">
+                    <Cpu className="h-3.5 w-3.5" />
+                    {latestPlanRecord?.modelUsed ?? "claude-sonnet"}
+                  </div>
+                </div>
+
+                <motion.div
+                  className="grid grid-cols-1 gap-4 md:grid-cols-2"
+                  variants={variants.staggerFast}
+                  initial="hidden"
+                  animate="show"
+                >
+                  {plan.zones?.map((zone, i) => (
+                    <ZoneCard key={zone.zoneId ?? i} zone={zone} idx={i} />
+                  ))}
+                </motion.div>
+
+                {/* Savings banner */}
+                <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 md:gap-6 md:rounded-3xl md:p-6">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+                    <Droplets className="text-teal h-7 w-7" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">توفير مياه بنسبة ~15%</div>
+                    <div className="text-sm text-slate-600">
+                      مقارنة بالري التقليدي • بناءً على معادلات FAO-56 المخصصة
+                      لمناخ الصحراء الغربية
+                    </div>
+                  </div>
+                  <ArrowLeft className="h-5 w-5 shrink-0 text-slate-400" />
                 </div>
               </div>
-              <ArrowLeft className="h-5 w-5 shrink-0 text-slate-400" />
             </div>
-          </div>
-        </div>
           </motion.div>
         )}
       </AnimatePresence>

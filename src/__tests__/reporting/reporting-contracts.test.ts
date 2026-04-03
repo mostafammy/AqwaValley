@@ -3,7 +3,10 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { CsvExportStrategy } from "~/server/services/reporting/exporters";
+import {
+  CsvExportStrategy,
+  PdfExportStrategy,
+} from "~/server/services/reporting/exporters";
 import {
   buildReportFingerprint,
   canonicalJsonString,
@@ -121,6 +124,39 @@ describe("Reporting contract coverage (Invariant #9)", () => {
       second.payload.toString("utf8"),
     );
     expect(first.contentType).toBe("text/csv; charset=utf-8");
+  });
+
+  it("reporting_pdf_export_produces_binary_payload", async () => {
+    const exporter = new PdfExportStrategy();
+
+    const result = await exporter.export({
+      data: {
+        reportType: "audit_trail",
+        generatedAtIso: "2026-02-10T12:00:00.000Z",
+        scope: {
+          scopeType: "district",
+          districtId: "00000000-0000-0000-0000-000000000001",
+        },
+        rows: [
+          {
+            eventType: "generate",
+            actorId: "user-a",
+            payload: { id: 1, label: "alpha" },
+          },
+        ],
+      },
+      templateVersion: "report-v2",
+      metadata: {
+        channel: "scheduled",
+        issuedBy: "reporting-engine",
+      },
+    });
+
+    expect(result.format).toBe("pdf");
+    expect(result.contentType).toBe("application/pdf");
+    expect(result.payload.length).toBeGreaterThan(0);
+    expect(result.payload.toString("utf8", 0, 4)).toBe("%PDF");
+    expect(result.outputHash).toHaveLength(64);
   });
 
   it("reporting_download_links_are_explicitly_time_bound", () => {

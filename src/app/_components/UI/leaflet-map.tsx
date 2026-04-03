@@ -89,15 +89,15 @@ export function LeafletMap({
       });
 
       L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { attribution: 'Tiles © Esri' }
-    ).addTo(mapInstance);
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles © Esri" },
+      ).addTo(mapInstance);
 
-    // Overlay: Borders + labels
-    L.tileLayer(
-      'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      { attribution: 'Labels © Esri' }
-    ).addTo(mapInstance);
+      // Overlay: Borders + labels
+      L.tileLayer(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Labels © Esri" },
+      ).addTo(mapInstance);
 
       layerGroupRef.current = L.layerGroup().addTo(mapInstance);
       mapRef.current = mapInstance;

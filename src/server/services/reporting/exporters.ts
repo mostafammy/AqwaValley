@@ -1,6 +1,7 @@
 import { canonicalJsonString, hashSha256 } from "./normalization";
 import type { ExportResult, ReportData, ReportFormat } from "./types";
 import ExcelJS from "exceljs";
+import PDFDocument from "pdfkit";
 
 export interface ExportStrategy {
   readonly format: ReportFormat;
@@ -17,20 +18,109 @@ function sortRowsDeterministically(rows: Array<Record<string, unknown>>) {
   );
 }
 
+function serializeCellValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return `${value}`;
+  }
+  return canonicalJsonString(value);
+}
+
 export class PdfExportStrategy implements ExportStrategy {
   readonly format = "pdf" as const;
 
-  async export(_input: {
+  async export(input: {
     data: ReportData;
     templateVersion: string;
     metadata: Record<string, unknown>;
   }): Promise<ExportResult> {
-    // PDF generation is temporarily disabled due to font issues on serverless
-    // For now, return an error that gets caught by the orchestrator
-    throw new Error(
-      "PDF generation is unavailable. Please use CSV or XLSX format instead. " +
-        "PDF support requires font bundling for serverless deployment.",
-    );
+    const rows = sortRowsDeterministically(input.data.rows);
+    const headerSet = new Set<string>();
+
+    for (const row of rows) {
+      Object.keys(row)
+        .sort()
+        .forEach((key) => headerSet.add(key));
+    }
+
+    const headers = [...headerSet].sort();
+    const chunks: Buffer[] = [];
+
+    const payload = await new Promise<Buffer>((resolve, reject) => {
+      const doc = new PDFDocument({
+        size: "A4",
+        margin: 40,
+        compress: false,
+        info: {
+          Title: `AqwaValley ${input.data.reportType} Report`,
+          Author: "AqwaValley Reporting Engine",
+          Subject: "Deterministic report export",
+          Keywords: "aqwavalley,reporting,pdf",
+          Creator: "AqwaValley Reporting Engine",
+          Producer: "AqwaValley Reporting Engine",
+          CreationDate: new Date("2026-01-01T00:00:00.000Z"),
+          ModDate: new Date("2026-01-01T00:00:00.000Z"),
+        },
+      });
+
+      doc.on("data", (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+      doc.on("end", () => {
+        resolve(Buffer.concat(chunks));
+      });
+      doc.on("error", (error) => {
+        reject(error instanceof Error ? error : new Error(String(error)));
+      });
+
+      doc.font("Helvetica").fontSize(16).text("AqwaValley Report", {
+        align: "left",
+      });
+      doc.moveDown(0.5);
+      doc.fontSize(10).text(`Report Type: ${input.data.reportType}`);
+      doc.fontSize(10).text(`Template Version: ${input.templateVersion}`);
+      doc.fontSize(10).text(`Generated At: ${input.data.generatedAtIso}`);
+      doc
+        .fontSize(10)
+        .text(`Metadata: ${canonicalJsonString(input.metadata)}`, {
+          width: 500,
+        });
+
+      if (headers.length === 0) {
+        doc.moveDown(1);
+        doc.fontSize(10).text("No data rows available.");
+      } else {
+        doc.moveDown(1);
+        doc.fontSize(11).text(`Columns: ${headers.join(", ")}`, {
+          width: 500,
+        });
+        doc.moveDown(0.5);
+
+        for (const row of rows) {
+          const line = headers
+            .map((key) => `${key}=${serializeCellValue(row[key])}`)
+            .join(" | ");
+          doc.fontSize(9).text(line, {
+            width: 500,
+          });
+        }
+      }
+
+      doc.end();
+    });
+
+    return {
+      format: this.format,
+      fileExtension: "pdf",
+      contentType: "application/pdf",
+      outputHash: hashSha256(payload.toString("base64")),
+      payload,
+    };
   }
 }
 
@@ -56,15 +146,7 @@ export class CsvExportStrategy implements ExportStrategy {
     for (const row of rows) {
       const values = headers.map((key) => {
         const value = row[key];
-        if (value === null || value === undefined) return "";
-        const serializedSource =
-          typeof value === "string"
-            ? value
-            : typeof value === "number" ||
-                typeof value === "boolean" ||
-                typeof value === "bigint"
-              ? `${value}`
-              : canonicalJsonString(value);
+        const serializedSource = serializeCellValue(value);
         const serialized = serializedSource.replaceAll('"', '""');
         return `"${serialized}"`;
       });
@@ -122,17 +204,7 @@ export class XlsxExportStrategy implements ExportStrategy {
     for (const row of rows) {
       sheet.addRow(
         headers.map((key) => {
-          const value = row[key];
-          if (value === null || value === undefined) return "";
-          if (typeof value === "string") return value;
-          if (
-            typeof value === "number" ||
-            typeof value === "boolean" ||
-            typeof value === "bigint"
-          ) {
-            return `${value}`;
-          }
-          return canonicalJsonString(value);
+          return serializeCellValue(row[key]);
         }),
       );
     }
