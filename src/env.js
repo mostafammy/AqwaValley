@@ -78,6 +78,11 @@ export const env = createEnv({
     // Application base URL (for building token links)
     APP_URL: z.string().url().default("http://localhost:3000"),
     REPORT_ARTIFACT_DIR: z.string().default("./.reports"),
+    REPORT_STORAGE_BACKEND: z.enum(["fs", "r2"]).default("fs"),
+    R2_ACCOUNT_ID: z.string().optional(),
+    R2_ACCESS_KEY_ID: z.string().optional(),
+    R2_SECRET_ACCESS_KEY: z.string().optional(),
+    R2_BUCKET_NAME: z.string().optional(),
     REPORT_QUEUE_BATCH_SIZE: z.coerce
       .number()
       .int()
@@ -138,6 +143,11 @@ export const env = createEnv({
     RESET_TOKEN_TTL_HOURS: process.env.RESET_TOKEN_TTL_HOURS,
     APP_URL: process.env.APP_URL,
     REPORT_ARTIFACT_DIR: process.env.REPORT_ARTIFACT_DIR,
+    REPORT_STORAGE_BACKEND: process.env.REPORT_STORAGE_BACKEND,
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
     REPORT_QUEUE_BATCH_SIZE: process.env.REPORT_QUEUE_BATCH_SIZE,
     NEXT_PUBLIC_ASSISTLOOP_AGENT_ID:
       process.env.NEXT_PUBLIC_ASSISTLOOP_AGENT_ID,

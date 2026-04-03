@@ -63,8 +63,17 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
 
 ### Phase D: Global Sweeps and Gate
 
-- [ ] D1. Global `whileTap` sweep
+- [x] D1. Global `whileTap` sweep
   - Scope: farm and gov pages
+  - Completed targets:
+    - `src/app/_components/UI/Button.tsx`
+    - `src/app/(farm)/farm/ai-plan/_components/PlanHistorySection.tsx`
+    - `src/app/(farm)/farm/soil/_components/refresh-button.tsx`
+    - `src/app/(farm)/farm/crops/_components/crop-profile-form.tsx`
+    - `src/app/(gov)/forecast/_components/ForecastPageClient.tsx`
+    - `src/app/(gov)/wells/[wellId]/_components/readings-chart.tsx`
+    - `src/app/(gov)/map/_components/MapPageClient.tsx`
+    - `src/app/(gov)/users/_components/users-page-client.tsx`
 
 - [ ] D2. Radius normalization sweep
   - Scope: touched components only first pass

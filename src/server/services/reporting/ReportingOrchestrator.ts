@@ -11,7 +11,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { unlink } from "fs/promises";
 
 import type { DBConnection } from "~/server/db";
 import {
@@ -32,7 +31,7 @@ import {
   XlsxExportStrategy,
 } from "./exporters";
 import type { ReportData, ReportRequestInput } from "./types";
-import { persistArtifact, resolveArtifactAbsolutePath } from "./storage";
+import { deleteArtifact, persistArtifact } from "./storage";
 
 function addDays(date: Date, days: number): Date {
   const next = new Date(date);
@@ -230,6 +229,7 @@ export class ReportingOrchestrator {
             const persisted = await persistArtifact({
               storageKey,
               payload: result.payload,
+              contentType: result.contentType,
             });
 
             await this.db
@@ -379,8 +379,7 @@ export class ReportingOrchestrator {
 
     for (const artifact of artifacts) {
       try {
-        const absolutePath = resolveArtifactAbsolutePath(artifact.storageKey);
-        await unlink(absolutePath);
+        await deleteArtifact(artifact.storageKey);
       } catch {
         // Best-effort file cleanup; DB cleanup below is authoritative.
       }

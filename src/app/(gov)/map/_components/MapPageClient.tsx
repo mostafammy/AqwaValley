@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { MapClient } from "~/app/(gov)/dashboard/_components/map-client";
 import type { WellMarker } from "~/app/_components/UI/leaflet-map";
 import { Badge } from "~/app/_components/UI/Badge";
 import Image from "next/image";
+import { tapFeedback } from "~/lib/motion";
 
 type WellStatus = "active" | "inactive" | "maintenance" | "offline" | "restricted";
 
@@ -125,12 +127,13 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
             {filteredWells.length} من {initialWells.length} بئر
           </Badge>
           {hasFilters && (
-            <button
+            <motion.button
+              whileTap={tapFeedback}
               onClick={handleReset}
               className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
             >
               إعادة تعيين
-            </button>
+            </motion.button>
           )}
         </div>
       </div>

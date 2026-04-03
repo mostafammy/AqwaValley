@@ -3,7 +3,9 @@
 import { Calendar, Droplets, ArrowLeft, History, CheckCircle, ChevronRight, ChevronLeft } from "lucide-react";
 import { api } from "~/trpc/react";
 import { useRef } from "react";
+import { motion } from "framer-motion";
 import { Card, CardBody } from "~/app/_components/UI/Card";
+import { tapFeedback } from "~/lib/motion";
 
 interface IrrigationPlanObject {
   reasoning: string;
@@ -49,20 +51,22 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
         </div>
         
         <div className="flex gap-2">
-          <button 
+          <motion.button 
+            whileTap={tapFeedback}
             onClick={() => scroll("right")}
             aria-label="التحريك لليمين"
             className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
+            whileTap={tapFeedback}
             onClick={() => scroll("left")}
             aria-label="التحريك لليسار"
             className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-white-light text-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -122,13 +126,14 @@ export function PlanHistorySection({ farmId, onActivate }: PlanHistorySectionPro
                      </div>
 
                      {!isActivated ? (
-                       <button 
+                       <motion.button 
+                         whileTap={tapFeedback}
                          onClick={() => onActivate(plan.id)}
                          className="btn btn-ghost bg-blue-light text-blue text-[11px] px-4 py-2 rounded-xl transition-all shadow-sm gap-2"
                        >
                           تطبيق الآن
                           <ArrowLeft className="w-3.5 h-3.5" />
-                       </button>
+                       </motion.button>
                      ) : (
                        <div className="flex items-center gap-1.5 text-teal text-[11px] font-bold bg-teal-light/30 px-3.5 py-2 rounded-xl border border-teal/10">
                           <CheckCircle className="w-4 h-4" />

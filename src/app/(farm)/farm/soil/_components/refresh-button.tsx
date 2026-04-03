@@ -3,13 +3,16 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCcw } from "lucide-react";
+import { motion } from "framer-motion";
+import { tapFeedback } from "~/lib/motion";
 
 export function RefreshButton() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
+    <motion.button
+      whileTap={tapFeedback}
       onClick={() => startTransition(() => router.refresh())}
       disabled={isPending}
       className="flex items-center gap-3 px-7 py-4 bg-white border border-slate-200 rounded-3xl text-sm font-semibold text-navy hover:bg-slate-50 active:scale-[0.97] transition-all disabled:opacity-70 shadow-sm cursor-pointer"
@@ -20,6 +23,6 @@ export function RefreshButton() {
       <span>
         {isPending ? "جاري تحديث البيانات..." : "تحديث البيانات"}
       </span>
-    </button>
+    </motion.button>
   );
 }

@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Leaf } from "lucide-react";
+import { motion } from "framer-motion";
+import { tapFeedback } from "~/lib/motion";
 
 type CropType =
   | "wheat" | "rice" | "corn" | "cotton"
@@ -107,7 +109,8 @@ const [harvestDate, setHarvestDate] = useState<string>(
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {cropTypes.map((opt) => (
-              <button
+              <motion.button
+                whileTap={tapFeedback}
                 key={opt.type}
                 type="button"
                 onClick={() => setCropType(opt.type as CropType)}
@@ -120,7 +123,7 @@ const [harvestDate, setHarvestDate] = useState<string>(
                 `}
               >
                 {opt.displayName}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -132,7 +135,8 @@ const [harvestDate, setHarvestDate] = useState<string>(
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
             {growthStages.map((opt) => (
-              <button
+              <motion.button
+                whileTap={tapFeedback}
                 key={opt.stage}
                 type="button"
                 onClick={() => setGrowthStage(opt.stage as GrowthStage)}
@@ -150,7 +154,7 @@ const [harvestDate, setHarvestDate] = useState<string>(
                     {opt.description}
                   </div>
                 )}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -222,7 +226,8 @@ const [harvestDate, setHarvestDate] = useState<string>(
         )}
 
         {/* Submit */}
-        <button
+        <motion.button
+          whileTap={tapFeedback}
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
@@ -230,7 +235,7 @@ const [harvestDate, setHarvestDate] = useState<string>(
         >
           <Leaf className="w-5 h-5" />
           {isPending ? "جاري الحفظ..." : "حفظ البروفايل"}
-        </button>
+        </motion.button>
 
       </div>
     </div>

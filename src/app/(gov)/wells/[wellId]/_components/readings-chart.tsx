@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useIntersectionObserver } from "~/lib/hooks";
+import { tapFeedback } from "~/lib/motion";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart,
@@ -75,7 +77,8 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
         </div>
         <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
           {RANGES.map((r) => (
-            <button
+            <motion.button
+              whileTap={tapFeedback}
               key={r.key}
               onClick={() => setActiveRange(r.key)}
               className={`rounded-md px-3 py-1 text-xs font-semibold transition-all ${
@@ -85,7 +88,7 @@ export function ReadingsChart({ wellId }: { wellId: string }) {
               } `}
             >
               {r.label}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

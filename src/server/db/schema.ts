@@ -453,6 +453,10 @@ export const well = pgTable(
       precision: 12,
       scale: 2,
     }),
+    targetFlowRateM3Hr: numeric("target_flow_rate_m3_hr", {
+      precision: 12,
+      scale: 2,
+    }),
     maxFlowRateM3Hr: numeric("max_flow_rate_m3_hr", {
       precision: 12,
       scale: 2,

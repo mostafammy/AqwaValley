@@ -1,8 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { createReadStream } from "fs";
-import { access } from "fs/promises";
-import { Readable } from "stream";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -15,7 +12,7 @@ import {
   userRoleAssignment,
 } from "~/server/db/schema";
 import { ReportAccessPolicy } from "~/server/services/reporting/ReportAccessPolicy";
-import { resolveArtifactAbsolutePath } from "~/server/services/reporting/storage";
+import { loadArtifactBuffer } from "~/server/services/reporting/storage";
 
 export const runtime = "nodejs";
 
@@ -85,10 +82,9 @@ export async function GET(
     throw error;
   }
 
-  const sizeBytes = artifact.fileSizeBytes;
-  const absolutePath = resolveArtifactAbsolutePath(artifact.storageKey);
+  let payload: Buffer;
   try {
-    await access(absolutePath);
+    payload = await loadArtifactBuffer(artifact.storageKey);
   } catch {
     return NextResponse.json(
       { error: "ARTIFACT_STORAGE_MISSING" },
@@ -96,18 +92,10 @@ export async function GET(
     );
   }
 
-  const nodeStream = createReadStream(absolutePath);
-  nodeStream.once("error", () => {
-    if (!nodeStream.destroyed) {
-      nodeStream.destroy();
-    }
-  });
-
-  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
-
   const filename = `${artifact.id}.${artifact.format}`;
+  const sizeBytes = artifact.fileSizeBytes ?? payload.byteLength;
 
-  return new Response(webStream, {
+  return new Response(new Uint8Array(payload), {
     status: 200,
     headers: {
       "content-type": artifact.contentType,

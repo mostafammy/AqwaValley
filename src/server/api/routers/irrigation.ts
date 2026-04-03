@@ -357,6 +357,7 @@ export const irrigationRouter = createTRPCRouter({
           wellId: well.id,
           wellName: well.name,
           valveState: well.valveState,
+          targetFlowRateM3Hr: well.targetFlowRateM3Hr,
           baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
           maxFlowRateM3Hr: well.maxFlowRateM3Hr,
           status: well.status,
@@ -371,15 +372,18 @@ export const irrigationRouter = createTRPCRouter({
           row.baselineFlowRateM3Hr != null
             ? Number(row.baselineFlowRateM3Hr)
             : null;
+        const target =
+          row.targetFlowRateM3Hr != null ? Number(row.targetFlowRateM3Hr) : null;
         const max =
           row.maxFlowRateM3Hr != null ? Number(row.maxFlowRateM3Hr) : null;
-        const suggestedTarget = baseline ?? max ?? 0;
+        const suggestedTarget = target ?? baseline ?? max ?? 0;
 
         return {
           wellId: row.wellId,
           wellName: row.wellName,
           valveState: row.valveState,
           status: row.status,
+          targetFlowRateM3Hr: target,
           baselineFlowRateM3Hr: baseline,
           maxFlowRateM3Hr: max,
           suggestedTargetFlowM3Hr: suggestedTarget,
@@ -396,6 +400,7 @@ export const irrigationRouter = createTRPCRouter({
         .select({
           wellId: well.id,
           status: well.status,
+          targetFlowRateM3Hr: well.targetFlowRateM3Hr,
           baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
           maxFlowRateM3Hr: well.maxFlowRateM3Hr,
         })
@@ -435,12 +440,14 @@ export const irrigationRouter = createTRPCRouter({
       const [updated] = await ctx.db
         .update(well)
         .set({
+          targetFlowRateM3Hr: input.targetFlowM3Hr.toFixed(2),
           valveState: nextValveState,
           updatedAt: new Date(),
         })
         .where(eq(well.id, input.wellId))
         .returning({
           wellId: well.id,
+          targetFlowRateM3Hr: well.targetFlowRateM3Hr,
           valveState: well.valveState,
           baselineFlowRateM3Hr: well.baselineFlowRateM3Hr,
           maxFlowRateM3Hr: well.maxFlowRateM3Hr,
@@ -465,6 +472,10 @@ export const irrigationRouter = createTRPCRouter({
       return {
         wellId: updated.wellId,
         targetFlowM3Hr: input.targetFlowM3Hr,
+        persistedTargetFlowM3Hr:
+          updated.targetFlowRateM3Hr != null
+            ? Number(updated.targetFlowRateM3Hr)
+            : null,
         valveState: updated.valveState,
         baselineFlowRateM3Hr:
           updated.baselineFlowRateM3Hr != null

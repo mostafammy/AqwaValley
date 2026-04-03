@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useIntersectionObserver } from "~/lib/hooks";
+import { tapFeedback } from "~/lib/motion";
 import { api } from "~/trpc/react";
 import {
   AreaChart,
@@ -58,12 +60,13 @@ export function ForecastPageClient({ districts }: ForecastPageClientProps) {
             لم يتم العثور على بيانات توقعات لهذا المركز حالياً. يرجى المحاولة
             مرة أخرى لاحقاً أو اختيار مركز آخر.
           </p>
-          <button
+          <motion.button
+            whileTap={tapFeedback}
             onClick={() => window.location.reload()}
             className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
           >
             إعادة المحاولة
-          </button>
+          </motion.button>
         </div>
       ) : (
         <>

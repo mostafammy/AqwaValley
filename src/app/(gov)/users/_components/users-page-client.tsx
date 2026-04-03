@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Papa from "papaparse";
 import { z } from "zod";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/UI/Button";
+import { tapFeedback } from "~/lib/motion";
 import {
   Card,
   CardHeader,
@@ -73,7 +75,8 @@ export function UserManagementClient() {
           إنشاء هويات جديدة للمستخدمين وإرسال دعوات تفعيل آمنة.
         </p>
         <div className="mt-6 flex gap-4 border-b border-gray-200">
-          <button
+          <motion.button
+            whileTap={tapFeedback}
             onClick={() => setActiveMode("single")}
             className={`px-2 pb-4 text-sm font-medium ${
               activeMode === "single"
@@ -82,8 +85,9 @@ export function UserManagementClient() {
             }`}
           >
             دعوة فردية
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileTap={tapFeedback}
             onClick={() => setActiveMode("bulk")}
             className={`px-2 pb-4 text-sm font-medium ${
               activeMode === "bulk"
@@ -92,7 +96,7 @@ export function UserManagementClient() {
             }`}
           >
             إضافة جماعية (CSV)
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -648,7 +652,8 @@ function UserListDirectory() {
                       </Button>
 
                       <SpringDropdown isOpen={openMenuUserId === u.userId}>
-                        <button
+                        <motion.button
+                          whileTap={tapFeedback}
                           className="block w-full rounded-lg px-3 py-2 text-right text-sm text-gray-700 hover:bg-gray-50"
                           onClick={() => {
                             setSelectedUser(u);
@@ -656,9 +661,10 @@ function UserListDirectory() {
                           }}
                         >
                           عرض التفاصيل
-                        </button>
+                        </motion.button>
                         {u.isActive && (
-                          <button
+                          <motion.button
+                            whileTap={tapFeedback}
                             className="block w-full rounded-lg px-3 py-2 text-right text-sm text-red-600 hover:bg-red-50"
                             onClick={() => {
                               setConfirmAction({
@@ -670,7 +676,7 @@ function UserListDirectory() {
                             }}
                           >
                             تعطيل الحساب
-                          </button>
+                          </motion.button>
                         )}
                       </SpringDropdown>
                     </div>

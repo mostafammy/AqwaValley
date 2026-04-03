@@ -325,6 +325,7 @@ function WellFlowControlRow({
     wellName: string;
     status: string;
     valveState: "open" | "closed" | "partially_open" | "auto";
+    targetFlowRateM3Hr: number | null;
     baselineFlowRateM3Hr: number | null;
     maxFlowRateM3Hr: number | null;
     suggestedTargetFlowM3Hr: number;
@@ -348,6 +349,11 @@ function WellFlowControlRow({
           <div className="mt-1 text-xs text-slate-500">
             الحالة: {well.status} · الصمام: {well.valveState}
           </div>
+          {well.targetFlowRateM3Hr != null ? (
+            <div className="mt-1 text-xs text-blue-600">
+              التدفق المضبوط حاليًا: {well.targetFlowRateM3Hr.toFixed(2)} م³/ساعة
+            </div>
+          ) : null}
         </div>
         <Badge variant={well.valveState === "closed" ? "warn" : "ok"}>
           {well.valveState === "closed"
@@ -403,6 +409,7 @@ function WellFlowControlRow({
 // ── Main Component ────────────────────────────────────────────────────────────
 export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
   const searchParams = useSearchParams();
+  const utils = api.useUtils();
 
   const { data: latestPlanRecord } = api.irrigation.getLatestPlan.useQuery(
     { farmId },
@@ -451,6 +458,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
   const setWellFlowControl = api.irrigation.setWellFlowControl.useMutation({
     onSuccess: (result) => {
       setLastAppliedWellId(result.wellId);
+      void utils.irrigation.getFarmWellFlowControls.invalidate({ farmId });
     },
   });
 
