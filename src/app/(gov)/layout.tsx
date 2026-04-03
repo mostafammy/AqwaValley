@@ -5,6 +5,7 @@ import { SidebarProvider } from "../_components/layouts/SidebarProvider";
 import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
 import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
+import Footer from "../_components/layouts/Footer";
 
 /**
  * Layout component that enforces government-portal access and renders the portal chrome around its children.
@@ -49,6 +50,7 @@ export default async function GovLayout({
           <GovSidebar />
           <main className="layout-main">{children}</main>
         </div>
+        <Footer />
       </div>
     </SidebarProvider>
   );
