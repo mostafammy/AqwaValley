@@ -82,7 +82,7 @@ export default async function CropsPage() {
   const [profile] = await db
     .select()
     .from(cropProfile)
-    .where(eq(cropProfile.farmId, farmerFarm.id))
+    .where(eq(cropProfile.farmId, currentFarm.id))
     .limit(1);
 
   const cropTypes = await db.select().from(cropTypeLookup);

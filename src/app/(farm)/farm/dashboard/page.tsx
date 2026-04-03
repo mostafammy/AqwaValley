@@ -18,7 +18,10 @@ import { KpiCards } from "./_components/KpiCards";
 import { QuotaBarCard } from "./_components/QuotaBarCard";
 import { SoilHumidityCard } from "./_components/SoilHumidityCard";
 import { WeeklyTrendCard } from "./_components/WeeklyTrendCard";
-import { StaggerContainer, StaggerItem } from "~/app/_components/layouts/StaggerContainer";
+import {
+  StaggerContainer,
+  StaggerItem,
+} from "~/app/_components/layouts/StaggerContainer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -174,9 +177,12 @@ export default async function FarmDashboardPage() {
       : null;
 
   return (
-    <StaggerContainer className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8" dir="rtl">
+    <StaggerContainer
+      className="space-y-6 p-4 md:p-6 lg:space-y-8 lg:p-8"
+      dir="rtl"
+    >
       <StaggerItem>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-800 md:text-3xl">
               أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"}
@@ -185,11 +191,11 @@ export default async function FarmDashboardPage() {
               {currentFarm.name}
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-slate-100/50 rounded-full px-3 py-1 ring-1 ring-black/5">
+          <div className="flex items-center gap-3 rounded-full bg-slate-100/50 px-3 py-1 ring-1 ring-black/5">
             <span className="text-[11px] font-semibold text-slate-500">
               تحديث مباشر
             </span>
-            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           </div>
         </div>
       </StaggerItem>
@@ -207,7 +213,7 @@ export default async function FarmDashboardPage() {
       </StaggerItem>
 
       <StaggerItem>
-        <div className="bg-white rounded-3xl shadow-sm ring-1 ring-black/5 overflow-hidden transition-shadow hover:shadow-md">
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md">
           <QuotaBarCard
             consumptionM3={monthlyQuota.consumptionM3}
             quotaM3={monthlyQuota.quotaM3}
@@ -225,10 +231,10 @@ export default async function FarmDashboardPage() {
 
       <StaggerItem>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="md:col-span-2 bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-1 transition-shadow hover:shadow-md">
+          <div className="rounded-3xl bg-white p-1 shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md md:col-span-2">
             <WeeklyTrendCard weeklyTrend={weeklyTrend} />
           </div>
-          <div className="bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-1 transition-shadow hover:shadow-md">
+          <div className="rounded-3xl bg-white p-1 shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md">
             <SoilHumidityCard soilReadings={soilReadings} />
           </div>
         </div>

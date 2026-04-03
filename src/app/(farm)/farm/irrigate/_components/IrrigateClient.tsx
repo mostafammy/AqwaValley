@@ -343,7 +343,15 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         running,
       });
     }
-  }, [frameCount, litersPumped, done, running, farmId, latestPlanRecord?.id, saveSession]);
+  }, [
+    frameCount,
+    litersPumped,
+    done,
+    running,
+    farmId,
+    latestPlanRecord?.id,
+    saveSession,
+  ]);
 
   // Pump simulation - smooth 10 minute irrigation
   useEffect(() => {

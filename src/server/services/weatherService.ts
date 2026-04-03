@@ -168,60 +168,62 @@ export const weatherService = {
     try {
       // Use Open-Meteo for ET0 and forecast as it's free and specialized
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration,precipitation_sum&timezone=Africa%2FCairo&forecast_days=${days}`;
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
       try {
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(`Open-Meteo returned ${response.status}`);
+        if (!response.ok)
+          throw new Error(`Open-Meteo returned ${response.status}`);
 
-      interface OpenMeteoResponse {
-        daily: {
-          time: string[];
-          temperature_2m_max: (number | null)[];
-          temperature_2m_min: (number | null)[];
-          et0_fao_evapotranspiration: (number | null)[];
-          precipitation_sum: (number | null)[];
-        };
+        interface OpenMeteoResponse {
+          daily: {
+            time: string[];
+            temperature_2m_max: (number | null)[];
+            temperature_2m_min: (number | null)[];
+            et0_fao_evapotranspiration: (number | null)[];
+            precipitation_sum: (number | null)[];
+          };
+        }
+
+        const data = (await response.json()) as OpenMeteoResponse;
+        if (!data.daily)
+          throw new Error("Invalid Open-Meteo response structure");
+
+        const forecast: ForecastDay[] = data.daily.time.map((date, i) => ({
+          date,
+          maxTemp: data.daily.temperature_2m_max[i] ?? 0,
+          minTemp: data.daily.temperature_2m_min[i] ?? 0,
+          et0: data.daily.et0_fao_evapotranspiration[i] ?? 0,
+          rain: data.daily.precipitation_sum[i] ?? 0,
+        }));
+
+        forecastCache.set(cacheKey, {
+          data: forecast,
+          expires: Date.now() + CACHE_TTL_MS,
+        });
+
+        return forecast;
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      const data = (await response.json()) as OpenMeteoResponse;
-      if (!data.daily) throw new Error("Invalid Open-Meteo response structure");
-
-      const forecast: ForecastDay[] = data.daily.time.map((date, i) => ({
-        date,
-        maxTemp: data.daily.temperature_2m_max[i] ?? 0,
-        minTemp: data.daily.temperature_2m_min[i] ?? 0,
-        et0: data.daily.et0_fao_evapotranspiration[i] ?? 0,
-        rain: data.daily.precipitation_sum[i] ?? 0,
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        console.error("Open-Meteo forecast request timed out after 10s");
+      } else {
+        console.error("Failed to fetch Open-Meteo forecast:", error);
+      }
+      // Return sensible desert defaults as fallback
+      return Array.from({ length: days }).map((_, i) => ({
+        date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0]!,
+        maxTemp: 35,
+        minTemp: 20,
+        et0: 7.5,
+        rain: 0,
       }));
-
-      forecastCache.set(cacheKey, {
-        data: forecast,
-        expires: Date.now() + CACHE_TTL_MS,
-      });
-
-      return forecast;
-    } finally {
-      clearTimeout(timeoutId);
     }
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      console.error("Open-Meteo forecast request timed out after 10s");
-    } else {
-      console.error("Failed to fetch Open-Meteo forecast:", error);
-    }
-    // Return sensible desert defaults as fallback
-    return Array.from({ length: days }).map((_, i) => ({
-      date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0]!,
-      maxTemp: 35,
-      minTemp: 20,
-      et0: 7.5,
-      rain: 0,
-    }));
-  }
-},
+  },
 
   getFallbackWeather(): WeatherInfo {
     return {
