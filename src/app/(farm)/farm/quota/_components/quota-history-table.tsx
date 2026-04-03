@@ -1,6 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ClipboardList } from "lucide-react";
+import { springs } from "~/lib/motion";
 
 type QuotaHistoryItem = {
   periodStart: string | Date;
@@ -31,7 +33,7 @@ export function QuotaHistoryTable({ history }: QuotaHistoryTableProps) {
       </div>
       <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar" style={{ maxHeight: '350px' }}>
         <table className="w-full text-right text-sm border-collapse">
-          <thead className="sticky top-0 bg-white z-10">
+          <thead className="glass-header sticky top-0 z-10">
             <tr className="border-b border-gray-100 text-gray-400">
               <th className="pb-3 pr-2 font-medium bg-white">الشهر</th>
               <th className="pb-3 pr-2 font-medium bg-white">الحصة</th>
@@ -66,7 +68,13 @@ export function QuotaHistoryTable({ history }: QuotaHistoryTableProps) {
                 const state = item.effectiveState;
 
                 return (
-                  <tr key={index} className="hover:bg-gray-50/50">
+                  <motion.tr
+                    key={index}
+                    className="table-row-hover hover:bg-gray-50/50"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...springs.floaty, delay: index * 0.04 }}
+                  >
                     <td className="py-4 pr-2 font-semibold text-gray-700">
                       {monthName}
                     </td>
@@ -88,13 +96,13 @@ export function QuotaHistoryTable({ history }: QuotaHistoryTableProps) {
                             : state === "warning"
                               ? "badge-warn"
                               : "badge-ok"
-                        }`}
+                        } badge-animate`}
                       >
                         <span className="badge-dot" />
                         {isOver ? "تجاوز" : "ضمن الحصة"}
                       </span>
                     </td>
-                  </tr>
+                  </motion.tr>
                 );
               })
             )}

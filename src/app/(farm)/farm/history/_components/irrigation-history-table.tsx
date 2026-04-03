@@ -1,8 +1,10 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ClipboardList, Eye } from "lucide-react";
 import { Badge } from "~/app/_components/UI/Badge";
 import { Card, CardBody, CardHeader } from "~/app/_components/UI/Card";
+import { springs, tapFeedback } from "~/lib/motion";
 
 type IrrigationEvent = {
   id: string;
@@ -92,7 +94,10 @@ export function IrrigationHistoryTable({
                   <span className="text-xs font-medium text-gray-500">
                     الحالة
                   </span>
-                  <Badge variant={statusVariants[event.status] ?? "gray"}>
+                  <Badge
+                    variant={statusVariants[event.status] ?? "gray"}
+                    className="badge-animate"
+                  >
                     {statusLabels[event.status] ?? event.status}
                   </Badge>
                 </div>
@@ -109,6 +114,7 @@ export function IrrigationHistoryTable({
                           ? "danger"
                           : "warn"
                     }
+                    className="badge-animate"
                   >
                     {event.quotaDebitStatus === "COMPLETED" ||
                     event.quotaDebitStatus === "APPLIED"
@@ -119,13 +125,15 @@ export function IrrigationHistoryTable({
                   </Badge>
                 </div>
                 <div className="flex items-center justify-end border-t border-gray-200 pt-2">
-                  <button
+                  <motion.button
+                    whileTap={tapFeedback}
+                    transition={springs.snappy}
                     className="inline-flex items-center justify-center rounded p-2 text-gray-500 transition-colors hover:bg-white hover:text-gray-700"
                     aria-label="عرض التفاصيل"
                     title="عرض التفاصيل"
                   >
                     <Eye className="h-4 w-4" />
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             ))
@@ -135,7 +143,7 @@ export function IrrigationHistoryTable({
         {/* Desktop table view */}
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full border-collapse text-right text-sm">
-            <thead className="border-b border-gray-100">
+            <thead className="glass-header border-b border-gray-100">
               <tr>
                 <th className="pr-4 pb-4 font-medium whitespace-nowrap text-gray-600">
                   التاريخ
@@ -166,10 +174,13 @@ export function IrrigationHistoryTable({
                   </td>
                 </tr>
               ) : (
-                history.map((event) => (
-                  <tr
+                history.map((event, index) => (
+                  <motion.tr
                     key={event.id}
-                    className="transition-colors hover:bg-gray-50"
+                    className="table-row-hover transition-colors hover:bg-gray-50"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...springs.floaty, delay: index * 0.04 }}
                   >
                     <td className="py-4 pr-4 font-medium">
                       {event.createdAt.toLocaleDateString("ar-EG", {
@@ -195,7 +206,10 @@ export function IrrigationHistoryTable({
                         : "—"}
                     </td>
                     <td className="py-4 pr-4">
-                      <Badge variant={statusVariants[event.status] ?? "gray"}>
+                      <Badge
+                        variant={statusVariants[event.status] ?? "gray"}
+                        className="badge-animate"
+                      >
                         {statusLabels[event.status] ?? event.status}
                       </Badge>
                     </td>
@@ -209,6 +223,7 @@ export function IrrigationHistoryTable({
                               ? "danger"
                               : "warn"
                         }
+                          className="badge-animate"
                       >
                         {event.quotaDebitStatus === "COMPLETED" ||
                         event.quotaDebitStatus === "APPLIED"
@@ -219,15 +234,17 @@ export function IrrigationHistoryTable({
                       </Badge>
                     </td>
                     <td className="py-4 pr-4 text-center">
-                      <button
+                      <motion.button
+                        whileTap={tapFeedback}
+                        transition={springs.snappy}
                         className="inline-flex items-center justify-center rounded p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                         aria-label="عرض التفاصيل"
                         title="عرض التفاصيل"
                       >
                         <Eye className="h-4 w-4" />
-                      </button>
+                      </motion.button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
