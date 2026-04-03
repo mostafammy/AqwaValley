@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Papa from "papaparse";
 import { z } from "zod";
 import { api } from "~/trpc/react";
@@ -13,6 +13,12 @@ import {
   CardFooter,
 } from "~/app/_components/UI/Card";
 import { Badge } from "~/app/_components/UI/Badge";
+import {
+  AnimatedUserRow,
+  SpringButton,
+  SpringDropdown,
+  SpringModal,
+} from "./users-motion-components";
 
 // Matches backend z.object
 const provisionInputSchema = z.object({
@@ -513,6 +519,8 @@ function BulkProvisionArea() {
 function UserListDirectory() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [openMenuUserId, setOpenMenuUserId] = useState<string | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
 
   const ctx = api.useUtils();
   const { data, isLoading } = api.users.listAll.useQuery({ page, pageSize });
@@ -530,6 +538,23 @@ function UserListDirectory() {
     userId: string;
     userName: string;
   } | null>(null);
+
+  useEffect(() => {
+    const onPointerDown = (e: MouseEvent) => {
+      if (!actionMenuRef.current) return;
+      if (!actionMenuRef.current.contains(e.target as Node)) {
+        setOpenMenuUserId(null);
+      }
+    };
+
+    if (openMenuUserId) {
+      window.addEventListener("mousedown", onPointerDown);
+    }
+
+    return () => {
+      window.removeEventListener("mousedown", onPointerDown);
+    };
+  }, [openMenuUserId]);
 
   if (isLoading)
     return (
@@ -585,9 +610,10 @@ function UserListDirectory() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
-                <tr
+              {users.map((u, index) => (
+                <AnimatedUserRow
                   key={u.userId}
+                  delay={index * 0.04}
                   className="border-border border-b transition hover:bg-(--color-bg-subtle)"
                 >
                   <td className="text-text px-4 py-4 font-semibold">
@@ -605,15 +631,51 @@ function UserListDirectory() {
                     </Badge>
                   </td>
                   <td className="px-4 py-4">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setSelectedUser(u)}
+                    <div
+                      className="relative inline-flex"
+                      ref={openMenuUserId === u.userId ? actionMenuRef : null}
                     >
-                      التفاصيل
-                    </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          setOpenMenuUserId((prev) =>
+                            prev === u.userId ? null : u.userId,
+                          )
+                        }
+                      >
+                        إجراءات
+                      </Button>
+
+                      <SpringDropdown isOpen={openMenuUserId === u.userId}>
+                        <button
+                          className="block w-full rounded-lg px-3 py-2 text-right text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => {
+                            setSelectedUser(u);
+                            setOpenMenuUserId(null);
+                          }}
+                        >
+                          عرض التفاصيل
+                        </button>
+                        {u.isActive && (
+                          <button
+                            className="block w-full rounded-lg px-3 py-2 text-right text-sm text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              setConfirmAction({
+                                type: "deactivate",
+                                userId: u.userId,
+                                userName: u.fullName,
+                              });
+                              setOpenMenuUserId(null);
+                            }}
+                          >
+                            تعطيل الحساب
+                          </button>
+                        )}
+                      </SpringDropdown>
+                    </div>
                   </td>
-                </tr>
+                </AnimatedUserRow>
               ))}
               {users.length === 0 && (
                 <tr>
@@ -656,14 +718,17 @@ function UserListDirectory() {
         )}
       </Card>
 
-      {selectedUser && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/30" />
-          <div className="animate-in fade-in zoom-in-95 bg-bg relative w-full max-w-lg rounded-xl shadow-2xl">
+      <SpringModal
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        size="lg"
+      >
+        {selectedUser ? (
+          <div className="bg-bg relative w-full rounded-xl shadow-2xl">
             <Card className="border-0 shadow-none">
               <CardHeader className="border-border flex flex-row items-center justify-between border-b bg-(--color-bg-subtle) px-6 pt-4 pb-4">
                 <CardTitle>بيانات المستخدم التفصيلية</CardTitle>
-                <button
+                <SpringButton
                   onClick={() => setSelectedUser(null)}
                   className="rounded-full p-1 text-(--color-text-muted) hover:bg-(--color-bg-hover)"
                 >
@@ -680,7 +745,7 @@ function UserListDirectory() {
                       d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                </button>
+                </SpringButton>
               </CardHeader>
 
               <CardBody className="space-y-6 p-6">
@@ -791,13 +856,16 @@ function UserListDirectory() {
               )}
             </CardFooter>
           </div>
-        </div>
-      )}
+        ) : null}
+      </SpringModal>
 
-      {confirmAction && (
-        <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-          <div className="animate-in fade-in zoom-in-95 bg-bg relative w-full max-w-md rounded-xl p-6 shadow-2xl">
+      <SpringModal
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        priority="danger"
+      >
+        {confirmAction ? (
+          <div className="bg-bg relative w-full rounded-xl p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
@@ -843,8 +911,8 @@ function UserListDirectory() {
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        ) : null}
+      </SpringModal>
     </div>
   );
 }
