@@ -54,7 +54,7 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
     - `src/app/(gov)/users/_components/users-motion-components.tsx` (new)
     - `src/app/(gov)/users/_components/users-page-client.tsx`
 
-- [ ] C3. Skeleton system and loading routes
+- [x] C3. Skeleton system and loading routes
   - Targets:
     - `src/app/_components/UI/Skeleton.tsx`
     - `src/app/(farm)/farm/ai-plan/loading.tsx`
