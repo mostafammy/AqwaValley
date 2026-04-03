@@ -44,7 +44,7 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
 
 ### Phase C: Data/Modal Polish
 
-- [ ] C1. Table sticky header and hover lift
+- [x] C1. Table sticky header and hover lift
   - Targets:
     - `src/app/(farm)/farm/history/_components/irrigation-history-table.tsx`
     - `src/app/(farm)/farm/quota/_components/quota-history-table.tsx`
