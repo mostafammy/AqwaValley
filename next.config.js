@@ -9,10 +9,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 const config = {
   output: "standalone",
   outputFileTracingExcludes: {
-    "*": [
-      "**/.pnpm-store/**",
-      "**/pnpm/store/**",
-    ],
+    "*": ["**/.pnpm-store/**", "**/pnpm/store/**"],
   },
 };
 
