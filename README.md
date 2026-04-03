@@ -41,7 +41,7 @@ AqwaValley is a **government-grade water management platform** that:
 | --------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | **Real-Time Sensor Ingest** | Managers see water extraction _as it happens_                            | 7 unit tests verify cross-well authorization prevents data leakage |
 | **Quota Hard Enforcement**  | Conservation guarantee: irrigation blocked at ≥100% utilization          | 9 unit tests validate boundaries at 99.9%, 100.0%, 100.1%          |
-| **AI Irrigation Planning**  | Multi-provider reasoning across weather, soil, and quota                | Groq-first cascade + FAO-56 fallback for resilience                |
+| **AI Irrigation Planning**  | AI adapts irrigation from weather, soil, and quota context               | Groq-first cascade with deterministic FAO-56 fallback              |
 | **Aquifer Forecasting**     | 25-year horizon with 80% and 95% confidence intervals                    | Deterministic, scientifically validated, policy-ready              |
 | **Multi-Tenant ABAC**       | District managers see only their districts; farmers see only their farms | 11 unit tests enforce role+scope session binding                   |
 | **Append-Only Audit Log**   | Every decision is traceable; no retroactive hiding                       | Required for procurement + governance compliance                   |
@@ -95,12 +95,12 @@ AqwaValley uses a **resilient multi-provider AI transport layer** designed for r
 ### Provider Strategy (Fast + Reliable)
 
 1. **Tier 1: Groq Cloud**
-       - Primary model: `openai/gpt-oss-120b`
-       - Purpose: lowest latency path for real-time irrigation recommendation generation
+   - Primary model: `openai/gpt-oss-120b`
+   - Purpose: lowest latency path for real-time irrigation recommendation generation
 
 2. **Tier 2: OpenRouter Waterfall**
-       - Automatic fallback pool across multiple free-tier and high-capacity models
-       - Includes: `openai/gpt-oss-120b:free`, `meta-llama/llama-3.3-70b-instruct:free`, `nousresearch/hermes-3-llama-3.1-405b:free`, `qwen/qwen-2.5-72b-instruct:free`, and additional backups
+   - Automatic fallback pool across multiple free-tier and high-capacity models
+   - Includes: `openai/gpt-oss-120b:free`, `meta-llama/llama-3.3-70b-instruct:free`, `nousresearch/hermes-3-llama-3.1-405b:free`, `qwen/qwen-2.5-72b-instruct:free`, and additional backups
 
 ### Decision Reliability Logic
 
@@ -248,20 +248,20 @@ AqwaValley includes world-class engineering documentation. Start here:
 
 Built on proven, scalable technologies:
 
-| Layer          | Technology                       | Why We Chose It                                   |
-| -------------- | -------------------------------- | ------------------------------------------------- |
-| **Frontend**   | Next.js 15 App Router + React 19 | Server components + client interactivity          |
-| **Backend**    | Node.js + tRPC                   | Type-safe API layer, end-to-end TypeScript        |
-| **Database**   | PostgreSQL 17 + TimescaleDB      | Time-series compression, 100x faster aggregations |
-| **ORM**        | Drizzle 0.41                     | Type-safe SQL, migrations-as-code                 |
-| **Auth**       | BetterAuth 1.3                   | Session-based + ABAC scope enforcement            |
-| **AI**         | Groq Cloud + OpenRouter          | Low-latency primary path with resilient multi-model fallback |
-| **Charts**     | Recharts 3.8                     | Interactive time-series dashboards                |
-| **Maps**       | Leaflet 1.9                      | GeoJSON water stress visualization                |
-| **Styling**    | Tailwind CSS 4 + Lucide icons    | Modern, accessible, responsive                    |
-| **Cron**       | Upstash QStash                   | Serverless scheduled tasks                        |
-| **Monitoring** | Sentry + Pino logging            | Error tracking + structured logs                  |
-| **Tests**      | Vitest 4.1 + Playwright 1.58     | Fast unit tests + E2E browser automation          |
+| Layer          | Technology                       | Why We Chose It                                              |
+| -------------- | -------------------------------- | ------------------------------------------------------------ |
+| **Frontend**   | Next.js 15 App Router + React 19 | Server components + client interactivity                     |
+| **Backend**    | Node.js + tRPC                   | Type-safe API layer, end-to-end TypeScript                   |
+| **Database**   | PostgreSQL 17 + TimescaleDB      | Time-series compression, 100x faster aggregations            |
+| **ORM**        | Drizzle 0.41                     | Type-safe SQL, migrations-as-code                            |
+| **Auth**       | BetterAuth 1.3                   | Session-based + ABAC scope enforcement                       |
+| **AI**         | Groq Cloud + OpenRouter          | Low-latency primary path + resilient fallback                |
+| **Charts**     | Recharts 3.8                     | Interactive time-series dashboards                           |
+| **Maps**       | Leaflet 1.9                      | GeoJSON water stress visualization                           |
+| **Styling**    | Tailwind CSS 4 + Lucide icons    | Modern, accessible, responsive                               |
+| **Cron**       | Upstash QStash                   | Serverless scheduled tasks                                   |
+| **Monitoring** | Sentry + Pino logging            | Error tracking + structured logs                             |
+| **Tests**      | Vitest 4.1 + Playwright 1.58     | Fast unit tests + E2E browser automation                     |
 
 ---
 
