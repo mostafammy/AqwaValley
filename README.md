@@ -7,7 +7,11 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![TimescaleDB](https://img.shields.io/badge/TimescaleDB-2.x-0F7938?style=for-the-badge)](https://www.timescaledb.com/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-52%20Unit%20Tests-brightgreen?style=for-the-badge)](#-world-class-test-discipline)
+[![Tests](https://img.shields.io/badge/Tests-52%20Unit%20Tests-brightgreen?style=for-the-badge)](#-testing)
+
+[![CI](https://img.shields.io/github/actions/workflow/status/mostafammy/AqwaValley/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/mostafammy/AqwaValley/actions/workflows/ci.yml)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/mostafammy/AqwaValley/docker-build.yml?branch=main&style=for-the-badge&label=Docker%20Build)](https://github.com/mostafammy/AqwaValley/actions/workflows/docker-build.yml)
+[![Deploy Status](https://img.shields.io/website?url=https%3A%2F%2Faqwa-valley.vercel.app&style=for-the-badge&label=Deploy&up_message=Live&down_message=Down)](https://aqwa-valley.vercel.app)
 
 > **Real-time water management meets AI + deterministic safety logic.** AqwaValley helps water-stressed regions optimize extraction, protect non-renewable aquifers, and enforce fair, auditable allocation.
 
@@ -18,18 +22,19 @@
 - [🎯 The Problem](#-the-problem)
 - [✨ The Solution](#-the-solution)
 - [🏗️ Architecture at a Glance](#️-architecture-at-a-glance)
-- [🤖 AI Components and Service Reliability](#-ai-components-and-service-reliability)
-- [🧪 World-Class Test Discipline](#-world-class-test-discipline)
+- [📚 Core Services](#-core-services)
+- [🤖 AI Reliability](#-ai-reliability)
+- [🧪 Testing](#-testing)
 - [📚 Documentation](#-documentation)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [📊 Key Project Metrics](#-key-project-metrics)
-- [🚀 Performance and Quality Metrics](#-performance--quality-metrics)
-- [🔐 Security and Compliance](#-security--compliance)
-- [🐳 Containerized App Mindset](#-containerized-app-mindset)
+- [🚀 Lighthouse and Performance](#-lighthouse-and-performance)
+- [🔐 Security](#-security)
+- [🐳 Containerization](#-containerization)
 - [🚢 Deployment](#-deployment)
-- [🤝 Contributing](#-support--contribution)
+- [🤝 Contributing](#-contributing)
 - [👥 Contributors](#-contributors)
-- [📈 Cron Scheduling (QStash)](#-cron-scheduling-qstash)
+- [📈 Cron and Scheduling](#-cron-and-scheduling)
 
 ---
 
@@ -110,7 +115,36 @@ AqwaValley is a **government-grade water management platform** that:
 
 ---
 
-## 🤖 AI Components and Service Reliability
+## 📚 Core Services
+
+AqwaValley is built as a set of clear domain services, each with a single operational responsibility and strong auditability.
+
+### Service Catalog
+
+| Service                               | What It Does                                                                                               | What We Provide                                                                          |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Sensor Ingest Service**             | Validates API key + well/sensor scope, accepts single/batch readings, enforces idempotency and rate limits | Trusted real-time telemetry ingestion to TimescaleDB without cross-well leakage          |
+| **Latest State Service**              | Maintains denormalized latest sensor state per well/sensor for fast reads                                  | Low-latency dashboard state for operational monitoring                                   |
+| **Alert and Rule Engine**             | Evaluates threshold rules, applies suppression windows, writes alert events                                | Actionable anomaly detection without alert spam                                          |
+| **Quota Decision Service**            | Computes quota utilization, warning/critical/exceeded states, and effective state with overrides           | Deterministic quota governance for farm and district water control                       |
+| **AI Irrigation Service**             | Produces irrigation guidance using Groq-first and OpenRouter fallback cascade with deterministic settings  | Reliable recommendation generation with model traceability and graceful fallback         |
+| **FAO-56 Fallback Service**           | Executes rule-based agronomic calculations when AI is unavailable or exhausted                             | Continuity of irrigation decisions even during provider outages                          |
+| **Aquifer Forecast Service**          | Generates district and well-level forecasts (5/10/25-year) with uncertainty intervals                      | Policy-grade planning signals for long-horizon resource governance                       |
+| **Reporting and Export Service**      | Orchestrates async report jobs and delivers governance artifacts (PDF/CSV/XLSX)                            | Auditable, shareable outputs for regulators, district managers, and compliance workflows |
+| **Users and Access Service**          | Handles roles, ABAC scope enforcement, lifecycle operations, and profile governance                        | Least-privilege access across districts, farms, and operational domains                  |
+| **Simulation and Cron Orchestration** | Runs simulation ingest and scheduled background workflows via QStash                                       | Safe automation for recurring operations and scenario testing                            |
+| **Observability and Audit Service**   | Structured logging, error monitoring, immutable audit patterns                                             | Production diagnosability and procurement-ready traceability                             |
+
+### Service Outcomes for Stakeholders
+
+- **Farmers**: receive resilient irrigation guidance and predictable quota behavior.
+- **District Operators**: gain real-time monitoring, alerts, and override-aware control.
+- **Policy Teams**: access long-horizon forecasts and reproducible governance reports.
+- **Engineering/SRE**: operate a deterministic, testable, and failure-tolerant platform.
+
+---
+
+## 🤖 AI Reliability
 
 AqwaValley uses a **resilient multi-provider AI transport layer** designed for regulated irrigation decisions.
 
@@ -173,7 +207,7 @@ Use this section during live demos to prove AqwaValley is resilient under real f
 
 ---
 
-## 🧪 World-Class Test Discipline
+## 🧪 Testing
 
 AqwaValley is built with **production-grade safety**. We don't ship without proof.
 
@@ -324,7 +358,7 @@ Built on proven, scalable technologies:
 
 ---
 
-## 🚀 Performance & Quality Metrics
+## 🚀 Lighthouse and Performance
 
 AqwaValley is built with performance as a first-class concern. Our Lighthouse scores reflect production-grade quality:
 
@@ -406,7 +440,7 @@ Why we built it this way:
 
 ---
 
-## 🔐 Security & Compliance
+## 🔐 Security
 
 AqwaValley is built for government procurement:
 
@@ -421,7 +455,7 @@ AqwaValley is built for government procurement:
 
 ---
 
-## 🐳 Containerized App Mindset
+## 🐳 Containerization
 
 AqwaValley now includes a **production-grade multi-stage Docker build** designed for secure, reproducible deployments.
 
@@ -495,7 +529,7 @@ pnpm preview    # Preview prod build locally
 
 ---
 
-## 📞 Support & Contribution
+## 🤝 Contributing
 
 ### Questions?
 
@@ -565,7 +599,7 @@ AqwaValley is built with ❤️ for water-stressed agricultural communities.
 
 ---
 
-## 📈 Cron Scheduling (QStash)
+## 📈 Cron and Scheduling
 
 Automated daily tasks are orchestrated via Vercel Cron + Upstash QStash:
 
