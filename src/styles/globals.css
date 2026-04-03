@@ -121,7 +121,7 @@
 
   /* ── Layout ── */
   --sidebar-width: 220px;
-  --topbar-height: 54px;
+  --topbar-height: 72px;
 
   /* ── Animations ── */
   --animate-fade-in-pop: fade-in-pop 0.8s ease-out;
@@ -170,6 +170,7 @@
 
   html {
     overflow-y: scroll; /* Force scrollbar to always exist so layout doesn't shift */
+    scroll-padding-top: var(--topbar-height);
   }
 }
 
@@ -695,7 +696,7 @@
   .layout-content-row {
     display: flex;
     flex: 1;
-    padding-top: 72px;
+    padding-top: var(--topbar-height);
   }
 
   .layout-main {
