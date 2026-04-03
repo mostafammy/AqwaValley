@@ -175,7 +175,7 @@ describe("Reporting contract coverage (Invariant #9)", () => {
       "const expiresAt = addDays(new Date(), 1)",
     );
     expect(orchestratorSource).toContain(
-      "signedUrl: `/api/reports/download/${artifact.id}`",
+      "presigned?.url ?? `/api/reports/download/${artifact.id}`",
     );
     expect(routeSource).toContain(
       "artifact.expiresAt && artifact.expiresAt < new Date()",
