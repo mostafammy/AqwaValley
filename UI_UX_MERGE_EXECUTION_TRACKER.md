@@ -49,7 +49,7 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
     - `src/app/(farm)/farm/history/_components/irrigation-history-table.tsx`
     - `src/app/(farm)/farm/quota/_components/quota-history-table.tsx`
 
-- [ ] C2. Users modal/dropdown spring wrappers
+- [x] C2. Users modal/dropdown spring wrappers
   - Targets:
     - `src/app/(gov)/users/_components/users-motion-components.tsx` (new)
     - `src/app/(gov)/users/_components/users-page-client.tsx`
