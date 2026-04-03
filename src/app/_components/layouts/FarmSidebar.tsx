@@ -49,7 +49,7 @@ export function FarmSidebar() {
   return (
     <>
       <div
-        className={`fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 top-[72px] z-[1100] bg-black/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={closeMobile}
         aria-hidden="true"
       />
@@ -58,7 +58,7 @@ export function FarmSidebar() {
         initial={false}
         animate={isDesktop || isMobileOpen ? "open" : "closed"}
         variants={sidebarVariants}
-        className={`fixed top-0 right-0 bottom-0 z-50 flex w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl backdrop-blur-2xl lg:static lg:translate-x-0 lg:opacity-100 lg:shadow-none ${!isMobileOpen && "hidden lg:flex"}`}
+        className={`fixed top-[72px] right-0 z-[1200] flex h-[calc(100dvh-72px)] w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl backdrop-blur-2xl lg:shrink-0 lg:translate-x-0 lg:opacity-100 lg:shadow-none ${!isMobileOpen && "hidden lg:flex"}`}
       >
         <div className="flex h-20 items-center justify-center border-b border-white/5 px-6 pt-4 pb-2">
           <div className="flex items-center gap-3 text-xl font-extrabold tracking-tight text-white">

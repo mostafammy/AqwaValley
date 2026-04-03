@@ -695,6 +695,7 @@
   .layout-content-row {
     display: flex;
     flex: 1;
+    padding-top: 72px;
   }
 
   .layout-main {

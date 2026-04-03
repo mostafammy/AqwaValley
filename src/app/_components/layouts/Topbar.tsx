@@ -101,7 +101,7 @@ export function Topbar({
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
   return (
-    <header className="sticky top-0 z-40 flex h-[72px] w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
+    <header className="fixed top-0 right-0 left-0 z-[1300] flex h-[72px] w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
       {/* ── Right side: Logo, Title & Mobile Menu ── */}
       <div className="flex items-center gap-4">
         <motion.button
