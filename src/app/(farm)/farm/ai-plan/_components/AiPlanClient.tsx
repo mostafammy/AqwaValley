@@ -134,7 +134,7 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
   const circ = 2 * Math.PI * r;
   const offset = circ - (value / 100) * circ;
   return (
-    <div className="relative h-24 w-24 flex-shrink-0 md:h-32 md:w-32">
+    <div className="relative h-24 w-24 shrink-0 md:h-32 md:w-32">
       <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
         <circle
           cx="50"
@@ -435,7 +435,7 @@ function EmptyState({
   loading: boolean;
 }) {
   return (
-    <div className="flex min-h-[320px] flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-8 text-center md:min-h-[420px] md:p-16">
+    <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-8 text-center md:min-h-105 md:p-16">
       <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
         <Droplets className="h-9 w-9 text-slate-400" />
       </div>
@@ -683,7 +683,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
 
             {/* Savings banner */}
             <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 md:gap-6 md:rounded-3xl md:p-6">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
                 <Droplets className="text-teal h-7 w-7" />
               </div>
               <div className="flex-1">

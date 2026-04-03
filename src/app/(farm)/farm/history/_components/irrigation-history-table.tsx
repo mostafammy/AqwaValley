@@ -50,7 +50,7 @@ export function IrrigationHistoryTable({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <ClipboardList className="h-5 w-5 flex-shrink-0 text-blue-500" />
+          <ClipboardList className="h-5 w-5 shrink-0 text-blue-500" />
           <span className="text-base font-semibold text-gray-800">
             سجل الجلسات
           </span>
