@@ -184,7 +184,11 @@ function TimerBox({ seconds }: { seconds: number }) {
     <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-5">
       <motion.div
         animate={{ rotate: seconds > 0 ? 360 : 0 }}
-        transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        transition={{
+          duration: 8,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "linear",
+        }}
       >
         <Timer className="h-5 w-5 text-slate-400" />
       </motion.div>
@@ -518,7 +522,11 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         </div>
 
         <div className="flex gap-3">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={tapFeedback} transition={springs.snappy}>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={tapFeedback}
+            transition={springs.snappy}
+          >
             <Button
               onClick={(e) => {
                 if (totalLiters <= 0 || running) return;
@@ -556,7 +564,11 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               بدء الري
             </Button>
           </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={tapFeedback} transition={springs.snappy}>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={tapFeedback}
+            transition={springs.snappy}
+          >
             <Button
               variant="secondary"
               onClick={() => setRunning(false)}
