@@ -701,6 +701,12 @@
     flex: 1;
     padding: 22px 26px;
   }
+
+  @media (min-width: 1024px) {
+    .layout-main {
+      padding-right: calc(26px + 260px);
+    }
+  }
 }
 @keyframes fadeSlideUp {
   from {
@@ -722,6 +728,105 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.04);
+  }
+  40% {
+    transform: scale(0.98);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes progress-water {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.heartbeat {
+  animation: heartbeat 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.progress-water {
+  background: linear-gradient(90deg, #0ea5e9, #14b8a6, #0ea5e9);
+  background-size: 200% 100%;
+  animation: progress-water 1.6s linear infinite;
+}
+
+.glass-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(26, 48, 80, 0.1);
+}
+
+.table-row-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.table-row-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -18px rgba(10, 22, 40, 0.28);
+  background: rgba(29, 111, 168, 0.03);
+}
+
+.badge-animate {
+  animation: fade-in-pop 0.28s ease-out;
+}
+
+.zone-active-glow {
+  box-shadow:
+    0 0 0 1px rgba(13, 158, 126, 0.28),
+    0 0 0 6px rgba(13, 158, 126, 0.08),
+    0 16px 30px -20px rgba(13, 158, 126, 0.5);
+}
+
+.glass-panel {
+  border-radius: var(--radius-panel);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 35px -18px rgba(10, 22, 40, 0.4);
 }
 
 /* ── Leaflet Map Enhancements ── */
