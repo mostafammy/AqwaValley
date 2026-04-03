@@ -31,7 +31,11 @@ import {
   XlsxExportStrategy,
 } from "./exporters";
 import type { ReportData, ReportRequestInput } from "./types";
-import { deleteArtifact, persistArtifact } from "./storage";
+import {
+  createArtifactDownloadLink,
+  deleteArtifact,
+  persistArtifact,
+} from "./storage";
 
 function addDays(date: Date, days: number): Date {
   const next = new Date(date);
@@ -494,10 +498,16 @@ export class ReportingOrchestrator {
     });
 
     const expiresAt = addDays(new Date(), 1);
+    const presigned = await createArtifactDownloadLink({
+      storageKey: artifact.storageKey,
+      expiresInSeconds: 60 * 60 * 24,
+      contentType: artifact.contentType,
+      filename: `${artifact.id}.${artifact.format}`,
+    });
 
     return {
-      signedUrl: `/api/reports/download/${artifact.id}`,
-      expiresAt,
+      signedUrl: presigned?.url ?? `/api/reports/download/${artifact.id}`,
+      expiresAt: presigned?.expiresAt ?? expiresAt,
       contentType: artifact.contentType,
     };
   }

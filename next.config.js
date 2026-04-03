@@ -8,6 +8,9 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    "*": ["./node_modules/pdfkit/js/data/*.afm"],
+  },
   outputFileTracingExcludes: {
     "*": ["**/.pnpm-store/**", "**/pnpm/store/**"],
   },

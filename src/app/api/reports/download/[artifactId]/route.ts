@@ -12,7 +12,10 @@ import {
   userRoleAssignment,
 } from "~/server/db/schema";
 import { ReportAccessPolicy } from "~/server/services/reporting/ReportAccessPolicy";
-import { loadArtifactBuffer } from "~/server/services/reporting/storage";
+import {
+  createArtifactDownloadLink as createStorageDownloadLink,
+  loadArtifactBuffer,
+} from "~/server/services/reporting/storage";
 
 export const runtime = "nodejs";
 
@@ -82,6 +85,18 @@ export async function GET(
     throw error;
   }
 
+  const filename = `${artifact.id}.${artifact.format}`;
+  const directLink = await createStorageDownloadLink({
+    storageKey: artifact.storageKey,
+    expiresInSeconds: 60 * 15,
+    contentType: artifact.contentType,
+    filename,
+  });
+
+  if (directLink) {
+    return NextResponse.redirect(directLink.url, 307);
+  }
+
   let payload: Buffer;
   try {
     payload = await loadArtifactBuffer(artifact.storageKey);
@@ -92,7 +107,6 @@ export async function GET(
     );
   }
 
-  const filename = `${artifact.id}.${artifact.format}`;
   const sizeBytes = artifact.fileSizeBytes ?? payload.byteLength;
 
   return new Response(new Uint8Array(payload), {

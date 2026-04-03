@@ -4,6 +4,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { mkdir, readFile, stat, unlink, writeFile } from "fs/promises";
 import path from "path";
 
@@ -41,6 +42,10 @@ function getStorageBackend(): ReportStorageBackend {
   const configured = process.env.REPORT_STORAGE_BACKEND?.trim().toLowerCase();
   if (configured === "r2") return "r2";
   return "fs";
+}
+
+export function isR2StorageEnabled(): boolean {
+  return getStorageBackend() === "r2";
 }
 
 function requireR2Config() {
@@ -184,4 +189,42 @@ export async function deleteArtifact(storageKey: string): Promise<void> {
 
   const absolutePath = toAbsolutePath(safeKey);
   await unlink(absolutePath);
+}
+
+export async function createArtifactDownloadLink(params: {
+  storageKey: string;
+  expiresInSeconds: number;
+  contentType?: string;
+  filename?: string;
+}): Promise<{ url: string; expiresAt: Date } | null> {
+  if (!isR2StorageEnabled()) {
+    return null;
+  }
+
+  const cfg = requireR2Config();
+  const client = getR2Client();
+  const safeKey = sanitizeStorageKey(params.storageKey);
+  const expiresIn = Math.max(
+    60,
+    Math.min(86400, Math.floor(params.expiresInSeconds)),
+  );
+  const safeFilename = params.filename?.replaceAll('"', "").trim();
+
+  const url = await getSignedUrl(
+    client,
+    new GetObjectCommand({
+      Bucket: cfg.bucketName,
+      Key: safeKey,
+      ResponseContentType: params.contentType,
+      ResponseContentDisposition: safeFilename
+        ? `attachment; filename="${safeFilename}"`
+        : undefined,
+    }),
+    { expiresIn },
+  );
+
+  return {
+    url,
+    expiresAt: new Date(Date.now() + expiresIn * 1000),
+  };
 }
