@@ -1,5 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 "use client";
+
+import { type ReactNode, useId } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 import {
   Sparkles,
@@ -30,6 +32,7 @@ import { AiNeuralPulse } from "./AiNeuralPulse";
 import { PlanHistorySection } from "./PlanHistorySection";
 import { Button } from "~/app/_components/UI/Button";
 import { useRouter } from "next/navigation";
+import { springs, tapFeedback, variants } from "~/lib/motion";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -77,6 +80,8 @@ type PlanView = {
   remainingQuotaLitres?: number;
 };
 
+type QuotaState = "warning" | "safe";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,6 +94,20 @@ function formatDate(d: Date | string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(d));
+}
+
+function resolveQuotaState(plan?: PlanView): QuotaState {
+  return plan?.quotaWarning ? "warning" : "safe";
+}
+
+function getSafeConfidence(confidence?: number): number {
+  if (typeof confidence !== "number" || Number.isNaN(confidence)) return 94;
+  return Math.min(100, Math.max(0, Math.round(confidence)));
+}
+
+function getZoneConfidence(level?: ConfidenceLevel): ConfidenceLevel {
+  if (level === "LOW" || level === "MEDIUM" || level === "HIGH") return level;
+  return "HIGH";
 }
 
 function ConfidenceBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
@@ -110,11 +129,14 @@ function ConfidenceBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ConfidenceRing({ value = 94 }: { value?: number }) {
+  const gradientId = useId();
   const r = 46;
   const circ = 2 * Math.PI * r;
-  const offset = circ - (value / 100) * circ;
+  const boundedValue = getSafeConfidence(value);
+  const offset = circ - (boundedValue / 100) * circ;
+
   return (
-    <div className="relative h-24 w-24 shrink-0 md:h-32 md:w-32">
+    <div className="heartbeat relative h-24 w-24 shrink-0 md:h-32 md:w-32">
       <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
         <circle
           cx="50"
@@ -124,22 +146,21 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
           stroke="#f1f5f9"
           strokeWidth="9"
         />
-        <circle
+        <motion.circle
           cx="50"
           cy="50"
           r={r}
           fill="none"
-          stroke="url(#pro-ring)"
+          stroke={`url(#${gradientId})`}
           strokeWidth="9"
           strokeLinecap="round"
           strokeDashoffset={offset}
           strokeDasharray={circ}
-          style={{
-            transition: "stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
+          animate={{ strokeDashoffset: offset }}
+          transition={springs.floaty}
         />
         <defs>
-          <linearGradient id="pro-ring" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#0ea5e9" />
             <stop offset="100%" stopColor="#14b8a6" />
           </linearGradient>
@@ -147,12 +168,36 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-navy text-3xl leading-none font-semibold md:text-4xl">
-          {value}%
+          {boundedValue}%
         </span>
         <span className="mt-1 text-xs font-medium tracking-widest text-slate-500">
           مستوى الثقة
         </span>
       </div>
+    </div>
+  );
+}
+
+function SummaryAmbient({
+  quotaState,
+  children,
+}: {
+  quotaState: QuotaState;
+  children: ReactNode;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-[24px]">
+      <div
+        className={`pointer-events-none absolute -left-16 -top-16 z-0 h-44 w-44 rounded-full blur-3xl transition-opacity duration-500 ${
+          quotaState === "warning" ? "bg-amber-200/50" : "bg-teal-200/45"
+        }`}
+      />
+      <div
+        className={`pointer-events-none absolute -bottom-20 -right-20 z-0 h-52 w-52 rounded-full blur-3xl transition-opacity duration-500 opacity-70 ${
+          quotaState === "warning" ? "bg-orange-200/35" : "bg-cyan-200/35"
+        }`}
+      />
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
@@ -213,9 +258,16 @@ function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
   const litresCubic = (recommendedLitres / 1000).toFixed(1);
 
   return (
-    <Card
-      className={`overflow-hidden transition-all hover:shadow-md ${inactive ? "opacity-60" : ""}`}
+    <motion.div
+      custom={idx}
+      variants={variants.zoneCard}
+      initial="hidden"
+      animate="show"
+      exit="exit"
     >
+      <Card
+        className={`overflow-hidden transition-all hover:shadow-md ${inactive ? "opacity-60" : ""}`}
+      >
       <CardBody className="p-6">
         <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -235,7 +287,7 @@ function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
               <div className="text-sm text-slate-500">{zone.growthStage}</div>
             </div>
           </div>
-          {!inactive && <ConfidenceBadge level={zone.confidence ?? "HIGH"} />}
+          {!inactive && <ConfidenceBadge level={getZoneConfidence(zone.confidence)} />}
         </div>
 
         {!inactive ? (
@@ -286,7 +338,8 @@ function ZoneCard({ zone, idx }: { zone: PlanZone; idx: number }) {
           </div>
         )}
       </CardBody>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -415,10 +468,20 @@ function EmptyState({
   loading: boolean;
 }) {
   return (
-    <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-8 text-center md:min-h-105 md:p-16">
-      <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      exit="exit"
+      variants={variants.scaleIn}
+      className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-8 text-center md:min-h-105 md:p-16"
+    >
+      <motion.div
+        className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 2.2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+      >
         <Droplets className="h-9 w-9 text-slate-400" />
-      </div>
+      </motion.div>
       <h3 className="text-navy mb-3 text-xl font-semibold md:text-2xl">
         لا توجد خطة ري حالياً
       </h3>
@@ -426,15 +489,18 @@ function EmptyState({
         اضغط على الزر أدناه ليحلل النظام بيانات المزرعة ويولد خطة الري الأمثل
         لليوم بناءً على معادلات FAO-56
       </p>
-      <button
+      <motion.button
         onClick={onGenerate}
         disabled={loading}
+        whileTap={tapFeedback}
+        whileHover={{ scale: 1.02 }}
+        transition={springs.snappy}
         className="btn btn-primary flex items-center gap-3 rounded-3xl px-10 py-4 text-base font-semibold"
       >
         <Zap className="h-5 w-5" />
         {loading ? "جاري التوليد..." : "توليد خطة الري الذكية"}
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }
 
@@ -478,11 +544,17 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   const plan = latestPlanRecord?.plan as PlanView | undefined;
   const isActivated = latestPlanRecord?.status === "ACTIVATED";
   const isDataLoading = weatherLoading || forecastLoading || inputsLoading;
+  const quotaState = resolveQuotaState(plan);
 
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <Cpu className="h-10 w-10 animate-spin text-slate-400" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        >
+          <Cpu className="h-10 w-10 text-slate-400" />
+        </motion.div>
         <p className="font-medium text-slate-500">جاري تحميل خطة الري...</p>
       </div>
     );
@@ -510,35 +582,73 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-6">
+        <motion.div
+          className="flex items-center gap-6"
+          whileHover={{ scale: 1.02 }}
+          whileTap={tapFeedback}
+          transition={springs.snappy}
+        >
           <Button
             onClick={() => generatePlan.mutate({ farmId })}
             disabled={generatePlan.isPending}
             className="btn btn-primary flex items-center gap-3"
           >
-            <Cpu
-              className={`h-4 w-4 ${generatePlan.isPending ? "animate-spin" : ""}`}
-            />
+            <motion.span
+              animate={generatePlan.isPending ? { rotate: 360 } : { rotate: 0 }}
+              transition={
+                generatePlan.isPending
+                  ? { duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }
+                  : springs.floaty
+              }
+              className="inline-flex"
+            >
+              <Cpu className="h-4 w-4" />
+            </motion.span>
             {generatePlan.isPending ? "جاري التوليد..." : "خطة جديدة"}
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Body */}
-      {generatePlan.isPending ? (
-        <AiNeuralPulse />
-      ) : !plan ? (
-        <EmptyState
-          onGenerate={() => generatePlan.mutate({ farmId })}
-          loading={generatePlan.isPending}
-        />
-      ) : (
+      <AnimatePresence mode="wait" initial={false}>
+        {generatePlan.isPending ? (
+          <motion.div
+            key="pulse"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={springs.floaty}
+          >
+            <AiNeuralPulse />
+          </motion.div>
+        ) : !plan ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={springs.floaty}
+          >
+            <EmptyState
+              onGenerate={() => generatePlan.mutate({ farmId })}
+              loading={generatePlan.isPending}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="plan"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={springs.floaty}
+          >
         <div className="grid grid-cols-1 gap-5 md:gap-8 xl:grid-cols-12">
           {/* Left Column */}
           <div className="space-y-5 md:space-y-8 xl:col-span-5">
             {/* Summary Card */}
-            <Card>
-              <CardBody className="p-5 md:p-8">
+            <SummaryAmbient quotaState={quotaState}>
+              <Card>
+                <CardBody className="p-5 md:p-8">
                 <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row md:mb-8">
                   <div>
                     <div className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
@@ -548,7 +658,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                       إجمالي الري اليوم
                     </div>
                   </div>
-                  <ConfidenceRing value={plan.confidence ?? 94} />
+                  <ConfidenceRing value={getSafeConfidence(plan.confidence)} />
                 </div>
 
                 <div className="flex items-baseline gap-3">
@@ -593,8 +703,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                     {isActivated ? "مُفعّلة" : "قيد المراجعة"}
                   </div>
                 </div>
-              </CardBody>
-            </Card>
+                </CardBody>
+              </Card>
+            </SummaryAmbient>
 
             {/* AI Reasoning */}
             <Card>
@@ -610,28 +721,31 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
                 <p className="leading-relaxed text-slate-600">
                   “{plan.reasoning ?? "—"}”
                 </p>
-                {(plan as any).nextIrrigationDate && (
+                {plan.nextIrrigationDate && (
                   <div className="text-teal mt-6 flex items-center gap-2 text-sm font-medium">
                     <Calendar className="h-4 w-4" />
-                    الري القادم المقترح: {(plan as any).nextIrrigationDate}
+                    الري القادم المقترح: {plan.nextIrrigationDate}
                   </div>
                 )}
               </CardBody>
             </Card>
 
             {!isActivated && (
-              <button
+              <motion.button
                 onClick={() =>
                   activatePlan.mutate({ planId: latestPlanRecord!.id })
                 }
                 disabled={activatePlan.isPending}
+                whileTap={tapFeedback}
+                whileHover={{ scale: 1.01 }}
+                transition={springs.snappy}
                 className="btn btn-primary w-full py-5 text-base font-semibold"
               >
                 <Play className="h-5 w-5" />
                 {activatePlan.isPending
                   ? "جاري الاعتماد..."
                   : "اعتماد وتفعيل الخطة"}
-              </button>
+              </motion.button>
             )}
           </div>
 
@@ -655,11 +769,16 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <motion.div
+              className="grid grid-cols-1 gap-4 md:grid-cols-2"
+              variants={variants.staggerFast}
+              initial="hidden"
+              animate="show"
+            >
               {plan.zones?.map((zone, i) => (
                 <ZoneCard key={zone.zoneId ?? i} zone={zone} idx={i} />
               ))}
-            </div>
+            </motion.div>
 
             {/* Savings banner */}
             <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 md:gap-6 md:rounded-3xl md:p-6">
@@ -677,7 +796,9 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
             </div>
           </div>
         </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="border-t pt-8">
         <PlanHistorySection
