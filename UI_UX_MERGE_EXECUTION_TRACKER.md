@@ -37,7 +37,7 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
 - [x] B2. AI Plan centerpiece entrance and confidence pulse
   - Target: `src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx`
 
-- [ ] B3. Map overlay and pulsing marker rings
+- [x] B3. Map overlay and pulsing marker rings
   - Targets:
     - `src/app/_components/UI/leaflet-map.tsx`
     - `src/app/(gov)/dashboard/_components/map-client.tsx`
