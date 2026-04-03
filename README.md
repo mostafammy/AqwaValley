@@ -1,13 +1,35 @@
-# 🌍 AqwaValley: AI-Powered Water Equity for Agricultural Districts
+# 🌍 AqwaValley - AI Water Governance Platform
 
-> **Real-time water management meets artificial intelligence.** AqwaValley enables water-stressed agricultural districts to optimize extraction, prevent aquifer collapse, and ensure fair allocation—without expensive infrastructure.
+## _Production-grade intelligence for sustainable irrigation and aquifer resilience_
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript)
-![Next.js](https://img.shields.io/badge/Next.js-15.2-000?logo=next.js)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql)
-![TimescaleDB](https://img.shields.io/badge/TimescaleDB-2.x-0F7938)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Tests](https://img.shields.io/badge/Tests-52%20Unit%20Tests-brightgreen)
+[![Next.js](https://img.shields.io/badge/Next.js-15.2-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![TimescaleDB](https://img.shields.io/badge/TimescaleDB-2.x-0F7938?style=for-the-badge)](https://www.timescaledb.com/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-52%20Unit%20Tests-brightgreen?style=for-the-badge)](#-world-class-test-discipline)
+
+> **Real-time water management meets AI + deterministic safety logic.** AqwaValley helps water-stressed regions optimize extraction, protect non-renewable aquifers, and enforce fair, auditable allocation.
+
+---
+
+## 📖 Table of Contents
+
+- [🎯 The Problem](#-the-problem)
+- [✨ The Solution](#-the-solution)
+- [🏗️ Architecture at a Glance](#️-architecture-at-a-glance)
+- [🤖 AI Components and Service Reliability](#-ai-components-and-service-reliability)
+- [🧪 World-Class Test Discipline](#-world-class-test-discipline)
+- [📚 Documentation](#-documentation)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📊 Key Project Metrics](#-key-project-metrics)
+- [🚀 Performance and Quality Metrics](#-performance--quality-metrics)
+- [🔐 Security and Compliance](#-security--compliance)
+- [🐳 Containerized App Mindset](#-containerized-app-mindset)
+- [🚢 Deployment](#-deployment)
+- [🤝 Contributing](#-support--contribution)
+- [👥 Contributors](#-contributors)
+- [📈 Cron Scheduling (QStash)](#-cron-scheduling-qstash)
 
 ---
 
