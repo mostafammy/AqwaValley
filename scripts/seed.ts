@@ -18,7 +18,6 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import * as schema from "../src/server/db/schema";
 // auth import moved to dynamic imports inside functions to avoid early env validation
 
-
 function loadLocalEnv() {
   const envFiles = [".env.local", ".env"];
   for (const file of envFiles) {
@@ -560,6 +559,43 @@ const SENSOR_SPECS = [
   },
 ];
 
+const wellStatusValues = [
+  "active",
+  "inactive",
+  "maintenance",
+  "offline",
+  "restricted",
+] as const;
+
+const farmStatusValues = [
+  "active",
+  "inactive",
+  "suspended",
+  "archived",
+] as const;
+
+function getRandomWellStatus(): (typeof wellStatusValues)[number] {
+  const weights = [0.5, 0.1, 0.15, 0.15, 0.1];
+  const r = Math.random();
+  let sum = 0;
+  for (let i = 0; i < weights.length; i++) {
+    sum += weights[i]!;
+    if (r < sum) return wellStatusValues[i]!;
+  }
+  return wellStatusValues[0]!;
+}
+
+function getRandomFarmStatus(): (typeof farmStatusValues)[number] {
+  const weights = [0.6, 0.15, 0.15, 0.1];
+  const r = Math.random();
+  let sum = 0;
+  for (let i = 0; i < weights.length; i++) {
+    sum += weights[i]!;
+    if (r < sum) return farmStatusValues[i]!;
+  }
+  return farmStatusValues[0]!;
+}
+
 const WELLS_PER_DISTRICT = 10;
 const READING_INTERVAL_MINUTES = 60;
 const HISTORY_HOURS = 8760;
@@ -742,7 +778,7 @@ async function seedLookupCatalogs() {
 async function seedAdminUser() {
   console.log("  Finding existing admin user...");
   // Use the nationalId/username from src/server/db/seed.ts or its variant
-  const adminUsername = "12345678901234"; 
+  const adminUsername = "12345678901234";
 
   const [adminUser] = await db
     .select({ id: schema.user.id })
@@ -751,7 +787,9 @@ async function seedAdminUser() {
     .limit(1);
 
   if (!adminUser) {
-    throw new Error(`CRITICAL: Admin user "${adminUsername}" not found. You must run "npx tsx src/server/db/seed.ts" first to create the primary system admin.`);
+    throw new Error(
+      `CRITICAL: Admin user "${adminUsername}" not found. You must run "npx tsx src/server/db/seed.ts" first to create the primary system admin.`,
+    );
   } else {
     SEED_ADMIN_ID = adminUser.id;
     console.log(`    Admin found: ${SEED_ADMIN_ID}`);
@@ -821,13 +859,14 @@ async function seedWells(
       const lng = districtRecord.seed.centerLng + (Math.random() - 0.5) * 0.18;
       const baselineDepth = Number(districtRecord.seed.baselineDepthM);
 
+      const wellStatus = getRandomWellStatus();
       const [wellRecord] = await db
         .insert(schema.well)
         .values({
           districtId: districtRecord.id,
           name: `${districtRecord.seed.name} Well ${wellIndex.toString().padStart(2, "0")}`,
           depthM: (baselineDepth + (Math.random() * 28 - 8)).toFixed(2),
-          status: "active",
+          status: wellStatus,
           hasSensor: false,
           latitude: lat.toFixed(8),
           longitude: lng.toFixed(8),
@@ -847,7 +886,7 @@ async function seedWells(
         wellId: wellRecord.id,
         changedBy: SEED_ADMIN_ID,
         fromStatus: null,
-        toStatus: "active",
+        toStatus: wellStatus,
         reason: "Initial regional seed",
       });
 
@@ -987,29 +1026,37 @@ async function createRegionalUser(args: {
   try {
     // Check if user already exists first to avoid unnecessary auth calls
     const existing = await db.query.user.findFirst({
-        where: (u, { eq }) => eq(u.username, nationalId)
+      where: (u, { eq }) => eq(u.username, nationalId),
     });
 
     if (!existing) {
-        // Create via Better Auth API
-        // @ts-ignore
-        const signUp = auth.api.signUpUsername || (auth.api.signUp?.username) || auth.api.signUpEmail;
-        
-        if (signUp) {
-            await signUp({
-              body: {
-                name: args.fullName,
-                username: nationalId,
-                email: email,
-                password: "password123",
-              },
-            });
-        } else {
-            throw new Error(`CRITICAL: Could not find sign-up method on auth.api for ${nationalId}. Seeding aborted to prevent creating unauthenticated users.`);
-        }
+      // Create via Better Auth API
+      // @ts-ignore
+      const signUp =
+        auth.api.signUpUsername ||
+        auth.api.signUp?.username ||
+        auth.api.signUpEmail;
+
+      if (signUp) {
+        await signUp({
+          body: {
+            name: args.fullName,
+            username: nationalId,
+            email: email,
+            password: "password123",
+          },
+        });
+      } else {
+        throw new Error(
+          `CRITICAL: Could not find sign-up method on auth.api for ${nationalId}. Seeding aborted to prevent creating unauthenticated users.`,
+        );
+      }
     }
   } catch (e: any) {
-    if (!e.message?.includes("already exists") && e.code !== "USER_ALREADY_EXISTS") {
+    if (
+      !e.message?.includes("already exists") &&
+      e.code !== "USER_ALREADY_EXISTS"
+    ) {
       console.error(`    Error creating user ${nationalId}:`, e.message);
     }
   }
@@ -1027,21 +1074,25 @@ async function createRegionalUser(args: {
   const userId = userRecord.id;
 
   // Add/Update user profile
-  await db.insert(schema.userProfile).values({
-    userId,
-    nationalId,
-    fullName: args.fullName,
-    phoneNumber: `+2010${args.nationalIdSeed.toString().padStart(8, "0")}`.slice(0, 14),
-    districtId: args.districtId,
-    isActive: true,
-  }).onConflictDoUpdate({
-    target: schema.userProfile.userId,
-    set: {
+  await db
+    .insert(schema.userProfile)
+    .values({
+      userId,
       nationalId,
       fullName: args.fullName,
+      phoneNumber:
+        `+2010${args.nationalIdSeed.toString().padStart(8, "0")}`.slice(0, 14),
       districtId: args.districtId,
-    }
-  });
+      isActive: true,
+    })
+    .onConflictDoUpdate({
+      target: schema.userProfile.userId,
+      set: {
+        nationalId,
+        fullName: args.fullName,
+        districtId: args.districtId,
+      },
+    });
 
   const [roleRecord] = await db
     .select({ id: schema.role.id })
@@ -1051,11 +1102,14 @@ async function createRegionalUser(args: {
 
   if (!roleRecord) throw new Error(`Role not found: ${args.roleType}`);
 
-  await db.insert(schema.userRoleAssignment).values({
-    userId,
-    roleId: roleRecord.id,
-    assignedBy: SEED_ADMIN_ID,
-  }).onConflictDoNothing();
+  await db
+    .insert(schema.userRoleAssignment)
+    .values({
+      userId,
+      roleId: roleRecord.id,
+      assignedBy: SEED_ADMIN_ID,
+    })
+    .onConflictDoNothing();
 
   return { userId };
 }
@@ -1099,6 +1153,7 @@ async function seedFarmsAndCrops(
         now.getTime() + farmSeed.expectedHarvestInDays * 24 * 60 * 60_000,
       );
 
+      const farmStatus = getRandomFarmStatus();
       const [farmRecord] = await db
         .insert(schema.farm)
         .values({
@@ -1106,7 +1161,7 @@ async function seedFarmsAndCrops(
           ownerId: owner.userId,
           farmerUserId: farmer.userId,
           districtId: districtRecord.id,
-          status: "active",
+          status: farmStatus,
           totalAreaAcres: farmSeed.totalAreaAcres,
           monthlyQuotaM3: farmSeed.monthlyQuotaM3,
           annualQuotaM3: farmSeed.annualQuotaM3,
