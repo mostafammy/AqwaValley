@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Droplets,
   Play,
@@ -12,14 +13,15 @@ import {
   Leaf,
   Zap,
   AlertCircle,
-  Link,
 } from "lucide-react";
+import { AnimatePresence, motion, useSpring } from "framer-motion";
 import { api } from "~/trpc/react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardBody } from "~/app/_components/UI/Card";
 import { Badge } from "~/app/_components/UI/Badge";
 import { Button } from "~/app/_components/UI/Button";
 import type { IrrigationPlan } from "~/server/services/irrigation/schemas";
+import { springs, tapFeedback } from "~/lib/motion";
 
 interface IrrigateClientProps {
   farmId: string;
@@ -27,6 +29,13 @@ interface IrrigateClientProps {
 }
 
 const ZONE_COLORS = ["#0ea5e9", "#14b8a6", "#f59e0b", "#64748b"];
+
+type Ripple = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+};
 
 // ── useCountUp ────────────────────────────────────────────────────────────────
 function useCountUp(target: number, duration = 600) {
@@ -55,6 +64,25 @@ function useCountUp(target: number, duration = 600) {
   return value;
 }
 
+function useRipple() {
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+
+  const triggerRipple = (e: MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.6;
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    setRipples((prev) => [...prev, { id, x, y, size }]);
+  };
+
+  const clearRipple = (id: number) => {
+    setRipples((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  return { ripples, triggerRipple, clearRipple };
+}
+
 // ── Circular Progress ─────────────────────────────────────────────────────────
 function CircularProgress({
   pct,
@@ -67,8 +95,14 @@ function CircularProgress({
 }) {
   const r = 46;
   const circ = 2 * Math.PI * r;
-  const offset = circ - (Math.min(pct, 100) / 100) * circ;
+  const progressSpring = useSpring(Math.min(pct, 100), springs.floaty);
   const display = useCountUp(Math.round(pct));
+
+  useEffect(() => {
+    progressSpring.set(Math.min(pct, 100));
+  }, [pct, progressSpring]);
+
+  const offset = circ - (progressSpring.get() / 100) * circ;
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -81,7 +115,7 @@ function CircularProgress({
           stroke="#f1f5f9"
           strokeWidth="9"
         />
-        <circle
+        <motion.circle
           cx="50"
           cy="50"
           r={r}
@@ -91,7 +125,8 @@ function CircularProgress({
           strokeLinecap="round"
           strokeDasharray={circ}
           strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.5s ease" }}
+          animate={{ strokeDashoffset: offset }}
+          transition={springs.floaty}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -147,7 +182,12 @@ function TimerBox({ seconds }: { seconds: number }) {
 
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-5">
-      <Timer className="h-5 w-5 text-slate-400" />
+      <motion.div
+        animate={{ rotate: seconds > 0 ? 360 : 0 }}
+        transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+      >
+        <Timer className="h-5 w-5 text-slate-400" />
+      </motion.div>
       <div>
         <div className="text-navy font-mono text-2xl font-bold tabular-nums">
           {m}:{s}
@@ -199,7 +239,7 @@ function ZoneStatusCard({
           : isDone
             ? "border-emerald-200 bg-emerald-50"
             : running
-              ? "border-blue-200 bg-white shadow-md"
+              ? "zone-active-glow border-blue-200 bg-white shadow-md"
               : "border-slate-100 bg-white shadow-sm"
       } `}
     >
@@ -247,7 +287,7 @@ function ZoneStatusCard({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${running && !isDone ? "progress-water" : ""}`}
                 style={{
                   width: `${zonePct}%`,
                   background: isDone ? "#10b981" : color,
@@ -399,6 +439,8 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
 
   const overallPct = totalLiters > 0 ? (litersPumped / totalLiters) * 100 : 0;
   const remainingLiters = Math.max(0, totalLiters - litersPumped);
+  const { ripples, triggerRipple, clearRipple } = useRipple();
+  const titleText = done ? "اكتمل الري" : running ? "الري جاري" : "تشغيل الري";
 
   // ── No plan state ────────────────────────────────────────────────────────
   if (!plan) {
@@ -445,9 +487,18 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
             </span>
             <span className="text-sm text-slate-500">• {farmName}</span>
           </div>
-          <h1 className="text-navy text-3xl font-bold md:text-4xl">
-            {done ? "اكتمل الري" : running ? "الري جاري" : "تشغيل الري"}
-          </h1>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.h1
+              key={titleText}
+              className="text-navy text-3xl font-bold md:text-4xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={springs.snappy}
+            >
+              {titleText}
+            </motion.h1>
+          </AnimatePresence>
           <p className="mt-2 flex items-center gap-2 text-sm text-slate-500">
             <span
               className={`h-2 w-2 rounded-full ${
@@ -467,39 +518,55 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         </div>
 
         <div className="flex gap-3">
-          <Button
-            onClick={() => {
-              if (totalLiters <= 0 || running) return;
-              // Restore from saved session if available and not yet restored
-              if (savedSession && !restoredRef.current) {
-                setFrameCount(savedSession.frameCount);
-                setLitersPumped(savedSession.litersPumped);
-                setDone(savedSession.done);
-                restoredRef.current = true;
-              } else if (!savedSession) {
-                // No saved session - fresh start
-                setFrameCount(0);
-                setLitersPumped(0);
-                setDone(false);
-              }
-              // If savedSession exists and already restored, just continue from current state
-              setRunning(true);
-            }}
-            disabled={running || done || totalLiters <= 0}
-            className="btn btn-primary flex items-center gap-2 rounded-2xl px-6 py-3"
-          >
-            <Play className="h-4 w-4" />
-            بدء الري
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => setRunning(false)}
-            disabled={!running}
-            className="flex items-center gap-2 rounded-2xl px-6 py-3"
-          >
-            <Square className="h-4 w-4" />
-            إيقاف
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={tapFeedback} transition={springs.snappy}>
+            <Button
+              onClick={(e) => {
+                if (totalLiters <= 0 || running) return;
+                triggerRipple(e);
+                if (savedSession && !restoredRef.current) {
+                  setFrameCount(savedSession.frameCount);
+                  setLitersPumped(savedSession.litersPumped);
+                  setDone(savedSession.done);
+                  restoredRef.current = true;
+                } else if (!savedSession) {
+                  setFrameCount(0);
+                  setLitersPumped(0);
+                  setDone(false);
+                }
+                setRunning(true);
+              }}
+              disabled={running || done || totalLiters <= 0}
+              className="btn btn-primary relative flex items-center gap-2 overflow-hidden rounded-2xl px-6 py-3"
+            >
+              {ripples.map((ripple) => (
+                <span
+                  key={ripple.id}
+                  className="pointer-events-none absolute rounded-full bg-white/35"
+                  style={{
+                    left: ripple.x,
+                    top: ripple.y,
+                    width: ripple.size,
+                    height: ripple.size,
+                    animation: "well-ping 0.65s ease-out 1",
+                  }}
+                  onAnimationEnd={() => clearRipple(ripple.id)}
+                />
+              ))}
+              <Play className="h-4 w-4" />
+              بدء الري
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={tapFeedback} transition={springs.snappy}>
+            <Button
+              variant="secondary"
+              onClick={() => setRunning(false)}
+              disabled={!running}
+              className="flex items-center gap-2 rounded-2xl px-6 py-3"
+            >
+              <Square className="h-4 w-4" />
+              إيقاف
+            </Button>
+          </motion.div>
         </div>
       </div>
 
@@ -538,10 +605,11 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                   <span>{totalLiters.toLocaleString("ar-EG")} لتر</span>
                 </div>
                 <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
+                  <motion.div
+                    className={`h-full rounded-full ${running && !done ? "progress-water" : ""}`}
+                    animate={{ width: `${overallPct}%` }}
+                    transition={springs.floaty}
                     style={{
-                      width: `${overallPct}%`,
                       background: done
                         ? "#10b981"
                         : "linear-gradient(90deg, #0ea5e9, #14b8a6)",
@@ -550,19 +618,35 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                 </div>
               </div>
 
-              {done && (
-                <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-700">
-                  <CheckCircle className="h-5 w-5 shrink-0" />
-                  تم ضخ {totalLiters.toLocaleString("ar-EG")} لتر بنجاح
-                </div>
-              )}
+              <AnimatePresence>
+                {done && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: 6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={springs.floaty}
+                    className="mt-6 flex items-center gap-3 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-700"
+                  >
+                    <CheckCircle className="h-5 w-5 shrink-0" />
+                    تم ضخ {totalLiters.toLocaleString("ar-EG")} لتر بنجاح
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              {plan.quotaWarning && (
-                <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
-                  <AlertCircle className="h-5 w-5 shrink-0" />
-                  تم تقليص الكمية لتناسب الحصة المتبقية
-                </div>
-              )}
+              <AnimatePresence>
+                {plan.quotaWarning && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: 6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={springs.floaty}
+                    className="mt-4 flex items-center gap-3 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700"
+                  >
+                    <AlertCircle className="h-5 w-5 shrink-0" />
+                    تم تقليص الكمية لتناسب الحصة المتبقية
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardBody>
           </Card>
 
