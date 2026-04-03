@@ -357,6 +357,25 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ---
 
+## 👥 Contributors
+
+AqwaValley is built collaboratively. Thanks to everyone who has contributed code, documentation, and ideas!
+
+📊 **View all contributors** on [GitHub Contributors](https://github.com/mostafammy/AqwaValley/graphs/contributors)
+
+We welcome contributions of all kinds:
+
+- 🐛 Bug reports and fixes
+- ✨ Feature implementations
+- 📚 Documentation improvements
+- 🧪 Tests and quality assurance
+- 🎨 UI/UX enhancements
+- 📊 Data science and modeling
+
+**Getting started?** See [How to Contribute](#how-to-contribute) section above.
+
+---
+
 ## ⭐ Credits
 
 AqwaValley is built with ❤️ for water-stressed agricultural communities.
