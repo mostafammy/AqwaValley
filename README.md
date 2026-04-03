@@ -128,6 +128,27 @@ Input Context (farm, crop, weather, quota, sensors)
               -> exhausted: FAO-56 deterministic fallback
 ```
 
+### AI Failure Drill (Demo Scenarios)
+
+Use this section during live demos to prove AqwaValley is resilient under real failure modes:
+
+1. **Scenario 1: Groq Outage**
+   - Trigger: disable `GROQ_API_KEY` or simulate Groq `503` responses.
+   - Expected behavior: request automatically falls through to OpenRouter cascade.
+   - Demo proof: recommendation still returns, and `modelUsed` shows an OpenRouter model.
+
+2. **Scenario 2: OpenRouter Rate-Limit**
+   - Trigger: simulate OpenRouter `429` on first-choice model.
+   - Expected behavior: client retries the next model in the OpenRouter waterfall.
+   - Demo proof: response succeeds from a later fallback model without user-facing failure.
+
+3. **Scenario 3: All Models Exhausted**
+   - Trigger: force repeated transient failures across Groq and all OpenRouter models.
+   - Expected behavior: AI transport returns `ALL_MODELS_EXHAUSTED`, then AqwaValley serves deterministic FAO-56 fallback logic.
+   - Demo proof: irrigation recommendation still renders (rule-based path), preserving continuity.
+
+**Judge message:** "Our system is designed so provider instability never becomes farmer downtime."
+
 ---
 
 ## 🧪 World-Class Test Discipline
@@ -248,20 +269,20 @@ AqwaValley includes world-class engineering documentation. Start here:
 
 Built on proven, scalable technologies:
 
-| Layer          | Technology                       | Why We Chose It                                              |
-| -------------- | -------------------------------- | ------------------------------------------------------------ |
-| **Frontend**   | Next.js 15 App Router + React 19 | Server components + client interactivity                     |
-| **Backend**    | Node.js + tRPC                   | Type-safe API layer, end-to-end TypeScript                   |
-| **Database**   | PostgreSQL 17 + TimescaleDB      | Time-series compression, 100x faster aggregations            |
-| **ORM**        | Drizzle 0.41                     | Type-safe SQL, migrations-as-code                            |
-| **Auth**       | BetterAuth 1.3                   | Session-based + ABAC scope enforcement                       |
-| **AI**         | Groq Cloud + OpenRouter          | Low-latency primary path + resilient fallback                |
-| **Charts**     | Recharts 3.8                     | Interactive time-series dashboards                           |
-| **Maps**       | Leaflet 1.9                      | GeoJSON water stress visualization                           |
-| **Styling**    | Tailwind CSS 4 + Lucide icons    | Modern, accessible, responsive                               |
-| **Cron**       | Upstash QStash                   | Serverless scheduled tasks                                   |
-| **Monitoring** | Sentry + Pino logging            | Error tracking + structured logs                             |
-| **Tests**      | Vitest 4.1 + Playwright 1.58     | Fast unit tests + E2E browser automation                     |
+| Layer          | Technology                       | Why We Chose It                                   |
+| -------------- | -------------------------------- | ------------------------------------------------- |
+| **Frontend**   | Next.js 15 App Router + React 19 | Server components + client interactivity          |
+| **Backend**    | Node.js + tRPC                   | Type-safe API layer, end-to-end TypeScript        |
+| **Database**   | PostgreSQL 17 + TimescaleDB      | Time-series compression, 100x faster aggregations |
+| **ORM**        | Drizzle 0.41                     | Type-safe SQL, migrations-as-code                 |
+| **Auth**       | BetterAuth 1.3                   | Session-based + ABAC scope enforcement            |
+| **AI**         | Groq Cloud + OpenRouter          | Low-latency primary path + resilient fallback     |
+| **Charts**     | Recharts 3.8                     | Interactive time-series dashboards                |
+| **Maps**       | Leaflet 1.9                      | GeoJSON water stress visualization                |
+| **Styling**    | Tailwind CSS 4 + Lucide icons    | Modern, accessible, responsive                    |
+| **Cron**       | Upstash QStash                   | Serverless scheduled tasks                        |
+| **Monitoring** | Sentry + Pino logging            | Error tracking + structured logs                  |
+| **Tests**      | Vitest 4.1 + Playwright 1.58     | Fast unit tests + E2E browser automation          |
 
 ---
 
