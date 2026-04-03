@@ -77,6 +77,70 @@ AqwaValley is a **government-grade water management platform** that:
 
 ## 🏗️ Architecture at a Glance
 
+AqwaValley is designed like a production control system: **fast ingest**, **deterministic guardrails**, and **auditable decisions**.
+
+- 📡 **Data Plane** — sensor ingest, TimescaleDB hypertables, and latest-state denormalization for O(1) reads
+- 🧠 **Decision Plane** — analytics, quota enforcement, AI recommendations, and forecasting
+- 🧾 **Governance Plane** — ABAC, immutable audit trails, and exportable reports
+
+> ✅ **Safety Envelope:** AI can recommend _actions_, but **authorization, quota boundaries, and traceability** are enforced deterministically. If AI is unavailable, the platform falls back to **FAO‑56** rules.
+
+### 🗺️ End-to-End Flow
+
+```mermaid
+flowchart TD
+  subgraph Sensors["📡 Field Sensors"]
+    sensorMesh["Wells × Sensors"]
+  end
+
+  subgraph Edge["🌐 Edge APIs (Next.js)"]
+    ingest["POST /api/sensors/ingest\nX-API-Key / Bearer"]
+    cron["POST /api/cron/*\nUpstash-Signature"]
+    trpc["tRPC API\n(wells, sensors, alerts, analytics, users, irrigation)"]
+  end
+
+  subgraph Data["🗄️ Postgres + TimescaleDB"]
+    sensorData["sensor_data (hypertable)\nUNIQUE(sensor_id,timestamp)"]
+    latestState["latest_sensor_state (denorm)"]
+    rules["alert_rule (active rules)"]
+    alerts["alerts (triggered events)"]
+    irrigationRec["irrigation_recommendation\n(modelUsed persisted)"]
+  end
+
+  subgraph Compute["🧠 Services"]
+    ingestSvc["Ingest Service\n(idempotent bulk insert)"]
+    alertEval["Alert Eval\n(evaluateRules + suppression)"]
+    analyticsSvc["Analytics\n(time_bucket, trends)"]
+    quota["Quota Guardrails\n(hard stop @ ≥100%)"]
+    ai["AI Transport\nGroq → OpenRouter → FAO-56"]
+    reports["Reporting/Exports\nPDF/CSV/XLSX"]
+  end
+
+  sensorMesh --> ingest
+  ingest --> ingestSvc
+  cron --> ingest
+  cron --> reports
+  ingestSvc --> sensorData
+  ingestSvc --> latestState
+  ingestSvc --> rules
+  ingestSvc --> alertEval
+  rules --> alertEval
+  alertEval --> alerts
+  sensorData --> analyticsSvc
+  latestState --> analyticsSvc
+  analyticsSvc --> quota
+  analyticsSvc --> ai
+  quota --> ai
+  ai --> irrigationRec
+  irrigationRec --> reports
+  alerts --> reports
+  trpc --> analyticsSvc
+  trpc --> reports
+```
+
+<details>
+<summary>ASCII diagram (quick scan)</summary>
+
 ```text
 ┌─────────────────────────────────────────────────────────┐
 │                    IoT Sensor Mesh                       │
@@ -87,31 +151,66 @@ AqwaValley is a **government-grade water management platform** that:
     │   INGEST LAYER (Authorization-Scoped)       │
     │  • API key validation (hashed, well-scoped) │
     │  • Duplicate reading idempotency            │
-    │  • Rate limiting (500 readings/min/key)     │
+    │  • Rate limiting (default 300/min/key)      │
     └──────┬──────────────────────────────────────┘
            │ Bulk insert to TimescaleDB hypertable
     ┌──────▼──────────────────────────────────────┐
     │   ANALYTICS LAYER (CQRS Read Model)         │
-    │  • Time-series aggregations (1h, 1d buckets)│
+    │  • Time-series aggregations (time_bucket)   │
     │  • Water stress calculations (FAO-56)       │
-    │  • Trend detection & anomalies               │
+    │  • Trend detection & anomalies              │
     └──────┬──────────────────────────────────────┘
-           │ Consumed by AI & decision services
+           │ Consumed by decision services
     ┌──────▼──────────────────────────────────────┐
     │   DECISION LAYER (AI + Rules)               │
-    │  • AI: Llama 3.3 irrigation planning        │
+    │  • AI: Groq → OpenRouter → FAO-56 fallback  │
     │  • Rules: Quota enforcement & alerts        │
     │  • Forecasts: Aquifer 5/10/25-year outlook  │
     └──────┬──────────────────────────────────────┘
            │ Exposed via tRPC + REST
     ┌──────▼──────────────────────────────────────┐
-    │   DASHBOARD + REPORTS                        │
+    │   DASHBOARD + REPORTS                       │
     │  • Real-time charts (Recharts)              │
     │  • Water stress map (Leaflet/GeoJSON)       │
-    │  • PDF/Excel exports                         │
-    │  • Governance audit trails                   │
+    │  • PDF/Excel exports                        │
+    │  • Governance audit trails                  │
     └──────────────────────────────────────────────┘
 ```
+
+</details>
+
+### 🔁 Ingest Pipeline (Deterministic, Idempotent, Audited)
+
+1. 🔐 Extract and validate API key (`X-API-Key` or `Authorization: Bearer`)
+2. 🧯 Apply per-key rate limiting (`INGEST_RATE_LIMIT_PER_MINUTE`, default `300`)
+3. ✅ Validate payload via Zod (single reading or batch up to `500`)
+4. 🗄️ Bulk insert into `sensor_data` with conflict-safe idempotency
+5. ⚡ Upsert `latest_sensor_state` only if the reading timestamp is newer
+6. 🚨 Load active rules, run `evaluateRules()`, and apply suppression windows
+7. 🧾 Persist triggered alerts (append-only) for governance review
+
+Code entry points:
+
+- Route handler: [src/app/api/sensors/ingest/route.ts](./src/app/api/sensors/ingest/route.ts)
+- Service layer: [src/server/services/ingestService.ts](./src/server/services/ingestService.ts)
+- Rule evaluation: [src/server/services/alertEvalService.ts](./src/server/services/alertEvalService.ts)
+
+### 🔌 API Surface Map
+
+| Interface                                   | What it’s for                                     | Implementation                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/sensors/ingest`                  | Sensor ingestion (single/batch)                   | [src/app/api/sensors/ingest/route.ts](./src/app/api/sensors/ingest/route.ts)                                                                                                                                                                                                                                                                                               |
+| `POST /api/cron/simulate-ingest`            | Deterministic simulator ingestion for demos/tests | [src/app/api/cron/simulate-ingest/route.ts](./src/app/api/cron/simulate-ingest/route.ts), [src/lib/cronAuth.ts](./src/lib/cronAuth.ts)                                                                                                                                                                                                                                     |
+| `tRPC wells/sensors/alerts/analytics/users` | Dashboards + admin ops                            | [src/server/api/routers/wells.ts](./src/server/api/routers/wells.ts), [src/server/api/routers/sensors.ts](./src/server/api/routers/sensors.ts), [src/server/api/routers/alerts.ts](./src/server/api/routers/alerts.ts), [src/server/api/routers/analytics.ts](./src/server/api/routers/analytics.ts), [src/server/api/routers/users.ts](./src/server/api/routers/users.ts) |
+| `tRPC irrigation`                           | AI irrigation plans + activation workflow         | [src/server/api/routers/irrigation.ts](./src/server/api/routers/irrigation.ts)                                                                                                                                                                                                                                                                                             |
+
+### ✅ Design Guarantees (What We Prove)
+
+- 🔒 **Scope at the boundary**: ABAC + well-scoped API keys prevent cross-tenant data leakage
+- 🔁 **Idempotent ingest**: `UNIQUE(sensor_id, timestamp)` + conflict-safe inserts prevent double counting
+- ⚡ **Fast reads by design**: denormalized latest-state table keeps dashboards snappy
+- 🚫 **Quota hard stop**: deterministic enforcement at ≥100% utilization (see Tier 0 tests)
+- 🧯 **Resilient decisions**: multi-provider AI + deterministic FAO‑56 fallback (no dead-end UX)
 
 ---
 
@@ -165,6 +264,20 @@ AqwaValley uses a **resilient multi-provider AI transport layer** designed for r
 - **Hard-error handling**: non-retryable errors fail fast where appropriate
 - **Traceability by design**: every response stores `modelUsed` for governance and post-incident analysis
 - **No dead-end UX**: if all AI models are exhausted, system falls back to rule-based FAO-56 logic
+
+### 🧱 AI Safety Envelope (Never Trust Raw AI)
+
+AqwaValley treats AI as an untrusted component inside a deterministic governance system.
+
+- ✅ Zod-validate structured outputs before any DB writes
+- 🚫 Hard quota enforcement is independent of AI output (AI can’t override the database)
+- 🧾 Persist full traceability record, including `modelUsed` and whether fallback was used
+
+Code entry points:
+
+- Orchestrator: [src/server/services/irrigation/recommend.ts](./src/server/services/irrigation/recommend.ts)
+- Transport layer: [src/server/ai/openrouter-client.ts](./src/server/ai/openrouter-client.ts)
+- Router API: [src/server/api/routers/irrigation.ts](./src/server/api/routers/irrigation.ts)
 
 ### Why This Is Impressive for Judges
 
@@ -270,7 +383,16 @@ pnpm install
 
 # Set up environment
 cp .env.example .env.local
-# Edit .env.local with DATABASE_URL, NEXTAUTH_SECRET, OPENROUTER_API_KEY
+# Edit .env.local (see `.env.example` + `src/env.js` for the full schema)
+# Minimum required:
+# - DATABASE_URL
+# - BETTER_AUTH_URL
+# - OPENWEATHER_API_KEY
+# Recommended:
+# - BETTER_AUTH_SECRET
+# Optional AI providers:
+# - GROQ_API_KEY
+# - OPENROUTER_API_KEY
 
 # Run migrations and seed demo data
 pnpm db:push
@@ -344,17 +466,17 @@ Built on proven, scalable technologies:
 
 ## 📊 Key Project Metrics
 
-| Metric                  | Value                        | Significance                                 |
-| ----------------------- | ---------------------------- | -------------------------------------------- |
-| **Unit Tests**          | 52 deterministic tests       | 5 of 11 Tier 0 invariants covered (Phase 1)  |
-| **Test Execution Time** | ~3 seconds                   | Fast enough to run on every commit           |
-| **Type Coverage**       | 100% (strict mode)           | Zero `any` types; complete type safety       |
-| **Authorization Model** | ABAC + role + scope          | Prevents cross-district data leakage         |
-| **Time-Series DB**      | TimescaleDB hypertable       | 100x faster aggregations than raw PostgreSQL |
-| **Forecasting Horizon** | 5, 10, 25 years              | Policy-grade aquifer planning                |
-| **FAO-56 Validation**   | ±5% vs. published benchmarks | Agronomically correct                        |
-| **Ingest Throughput**   | 500 readings/min/key         | Handles 1,000+ wells × 20 sensors/well       |
-| **Uptime SLO**          | 99.9% (Vercel)               | Governance-grade reliability                 |
+| Metric                  | Value                          | Significance                                 |
+| ----------------------- | ------------------------------ | -------------------------------------------- |
+| **Unit Tests**          | 52 deterministic tests         | 5 of 11 Tier 0 invariants covered (Phase 1)  |
+| **Test Execution Time** | ~3 seconds                     | Fast enough to run on every commit           |
+| **Type Coverage**       | 100% (strict mode)             | Zero `any` types; complete type safety       |
+| **Authorization Model** | ABAC + role + scope            | Prevents cross-district data leakage         |
+| **Time-Series DB**      | TimescaleDB hypertable         | 100x faster aggregations than raw PostgreSQL |
+| **Forecasting Horizon** | 5, 10, 25 years                | Policy-grade aquifer planning                |
+| **FAO-56 Validation**   | ±5% vs. published benchmarks   | Agronomically correct                        |
+| **Ingest Throughput**   | 300 readings/min/key (default) | Handles 1,000+ wells × 20 sensors/well       |
+| **Uptime SLO**          | 99.9% (Vercel)                 | Governance-grade reliability                 |
 
 ---
 
@@ -512,11 +634,20 @@ vercel deploy --prod
 
 **Environment variables required:**
 
+Source of truth: [`src/env.js`](./src/env.js)
+
 - `DATABASE_URL` — PostgreSQL connection string
-- `NEXTAUTH_SECRET` — Session encryption key
-- `OPENROUTER_API_KEY` — AI model access (free tier)
-- `QSTASH_TOKEN` — Cron scheduling (Upstash)
-- `SENTRY_AUTH_TOKEN` — Error tracking (optional)
+- `BETTER_AUTH_URL` — Public base URL (e.g., `https://<your-vercel-app>`)
+- `OPENWEATHER_API_KEY` — Weather inputs for planning/forecasting
+- `BETTER_AUTH_SECRET` — Session signing secret (required in production)
+- `QSTASH_CURRENT_SIGNING_KEY` / `QSTASH_NEXT_SIGNING_KEY` — Verify QStash-signed cron requests (required in production)
+
+Optional (feature-dependent):
+
+- `GROQ_API_KEY` — Primary low-latency AI provider
+- `OPENROUTER_API_KEY` — Fallback AI provider pool
+- `SENTRY_AUTH_TOKEN` — Build-time sourcemap upload (optional)
+- `QSTASH_TOKEN` — Token to sync schedules (`pnpm cron:sync:qstash`)
 
 ### Local Development
 
@@ -534,8 +665,7 @@ pnpm preview    # Preview prod build locally
 ### Questions?
 
 - 💬 **Issues**: Open a GitHub issue with `[question]` tag
-- 📧 **Email**: [Your contact info]
-- 🤝 **PRs Welcome**: Follow [CONTRIBUTING.md](./CONTRIBUTING.md) (coming soon)
+- 🤝 **PRs Welcome**: See the workflow below
 
 ### How to Contribute
 
