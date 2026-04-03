@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { useSidebar } from "./SidebarProvider";
 import {
@@ -15,6 +16,20 @@ import {
 import { motion, type Variants } from "framer-motion";
 
 export function FarmSidebar() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const syncDesktopState = () => setIsDesktop(mediaQuery.matches);
+
+    syncDesktopState();
+    mediaQuery.addEventListener("change", syncDesktopState);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncDesktopState);
+    };
+  }, []);
+
   const pathname = usePathname();
   const is = (path: string) =>
     path === "/"
@@ -41,7 +56,7 @@ export function FarmSidebar() {
 
       <motion.aside
         initial={false}
-        animate={isMobileOpen ? "open" : "closed"}
+        animate={isDesktop || isMobileOpen ? "open" : "closed"}
         variants={sidebarVariants}
         className={`fixed top-0 right-0 bottom-0 z-50 flex w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl backdrop-blur-2xl lg:static lg:translate-x-0 lg:opacity-100 lg:shadow-none ${!isMobileOpen && "hidden lg:flex"}`}
       >

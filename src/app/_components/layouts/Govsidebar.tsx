@@ -5,7 +5,7 @@ import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { Badge } from "../UI/Badge";
 import { useSidebar } from "./SidebarProvider";
 import { api } from "~/trpc/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import {
   LayoutDashboard,
@@ -21,6 +21,20 @@ import {
 } from "lucide-react";
 
 export function GovSidebar() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const syncDesktopState = () => setIsDesktop(mediaQuery.matches);
+
+    syncDesktopState();
+    mediaQuery.addEventListener("change", syncDesktopState);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncDesktopState);
+    };
+  }, []);
+
   const pathname = usePathname();
   const is = (path: string) =>
     path === "/"
@@ -61,7 +75,7 @@ export function GovSidebar() {
 
       <motion.aside
         initial={false}
-        animate={isMobileOpen ? "open" : "closed"}
+        animate={isDesktop || isMobileOpen ? "open" : "closed"}
         variants={sidebarVariants}
         className={`fixed top-0 right-0 bottom-0 z-50 flex w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl backdrop-blur-2xl lg:static lg:translate-x-0 lg:opacity-100 lg:shadow-none ${!isMobileOpen && "hidden lg:flex"}`}
       >
