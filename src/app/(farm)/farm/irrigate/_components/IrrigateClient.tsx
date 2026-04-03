@@ -276,7 +276,6 @@ function ZoneStatusCard({
 // ── Main Component ────────────────────────────────────────────────────────────
 export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
   const searchParams = useSearchParams();
-  const utils = api.useUtils();
 
   const { data: latestPlanRecord } = api.irrigation.getLatestPlan.useQuery(
     { farmId },
@@ -344,7 +343,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         running,
       });
     }
-  }, [frameCount, litersPumped, done, running, farmId, latestPlanRecord?.id]);
+  }, [frameCount, litersPumped, done, running, farmId, latestPlanRecord?.id, saveSession]);
 
   // Pump simulation - smooth 10 minute irrigation
   useEffect(() => {

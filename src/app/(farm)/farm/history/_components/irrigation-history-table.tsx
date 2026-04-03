@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 "use client";
 
 import { ClipboardList, Eye } from "lucide-react";
 import { Badge } from "~/app/_components/UI/Badge";
-import { Button } from "~/app/_components/UI/Button";
 import { Card, CardBody, CardHeader } from "~/app/_components/UI/Card";
 
 type IrrigationEvent = {

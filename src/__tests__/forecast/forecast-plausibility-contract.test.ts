@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { describe, expect, it } from "vitest";
 
 import { PhysicalPlausibilityValidator } from "~/server/services/forecast/core/plausibility/PhysicalPlausibilityValidator";

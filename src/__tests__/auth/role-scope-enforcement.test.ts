@@ -164,12 +164,6 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
     farmIds: [farmX],
   };
 
-  const farmerInFarmY: User = {
-    id: "farmer-user-2",
-    role: "farmer",
-    farmIds: [farmY],
-  };
-
   const districtAdminAlpha: User = {
     id: "admin-user-1",
     role: "district_admin",

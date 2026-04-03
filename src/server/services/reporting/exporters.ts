@@ -1,6 +1,5 @@
 import { canonicalJsonString, hashSha256 } from "./normalization";
 import type { ExportResult, ReportData, ReportFormat } from "./types";
-import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
 
 export interface ExportStrategy {
@@ -28,22 +27,10 @@ type PdfDocumentLike = {
   moveDown(lines?: number): PdfDocumentLike;
 };
 
-async function pdfDocToBuffer(doc: PdfDocumentLike): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer | Uint8Array) =>
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)),
-    );
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-    doc.end();
-  });
-}
-
 export class PdfExportStrategy implements ExportStrategy {
   readonly format = "pdf" as const;
 
-  async export(input: {
+  async export(_input: {
     data: ReportData;
     templateVersion: string;
     metadata: Record<string, unknown>;

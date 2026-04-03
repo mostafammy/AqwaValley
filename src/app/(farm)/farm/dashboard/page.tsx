@@ -18,6 +18,7 @@ import { KpiCards } from "./_components/KpiCards";
 import { QuotaBarCard } from "./_components/QuotaBarCard";
 import { SoilHumidityCard } from "./_components/SoilHumidityCard";
 import { WeeklyTrendCard } from "./_components/WeeklyTrendCard";
+import { StaggerContainer, StaggerItem } from "~/app/_components/layouts/StaggerContainer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -173,56 +174,65 @@ export default async function FarmDashboardPage() {
       : null;
 
   return (
-    <div
-      className="space-y-4 p-4 md:space-y-8 md:p-6"
-      dir="rtl"
-      style={{ animation: "fadeSlideUp 0.7s ease-out both" }}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h1 className="text-xl font-bold md:text-3xl">
-            أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 md:text-base">
-            {currentFarm.name}
-          </p>
+    <StaggerContainer className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8" dir="rtl">
+      <StaggerItem>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-800 md:text-3xl">
+              أهلاً، {session.user.name?.split(" ")[0] ?? "مزارع"}
+            </h1>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              {currentFarm.name}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 bg-slate-100/50 rounded-full px-3 py-1 ring-1 ring-black/5">
+            <span className="text-[11px] font-semibold text-slate-500">
+              تحديث مباشر
+            </span>
+            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="mt-1 shrink-0 text-xs text-gray-400">
-            تحديث كل 60 ثانية
-          </span>
+      </StaggerItem>
+
+      <StaggerItem>
+        <KpiCards
+          farmId={currentFarm.id}
+          initialDailyConsumptionM3={dailyQuota.consumptionM3}
+          initialDailyState={dailyQuota.effectiveState}
+          monthlyUtilizationPct={monthlyQuota.utilizationPct}
+          monthlyState={monthlyQuota.effectiveState}
+          avgSoilHumidity={avgSoilHumidity}
+          soilReadingCount={soilReadings.length}
+        />
+      </StaggerItem>
+
+      <StaggerItem>
+        <div className="bg-white rounded-3xl shadow-sm ring-1 ring-black/5 overflow-hidden transition-shadow hover:shadow-md">
+          <QuotaBarCard
+            consumptionM3={monthlyQuota.consumptionM3}
+            quotaM3={monthlyQuota.quotaM3}
+            utilizationPct={monthlyQuota.utilizationPct}
+            effectiveState={monthlyQuota.effectiveState}
+            trendDirection={monthlyQuota.trendDirection}
+            trendDeltaPct={monthlyQuota.trendDeltaPct}
+          />
         </div>
-      </div>
+      </StaggerItem>
 
-      <KpiCards
-        farmId={currentFarm.id}
-        initialDailyConsumptionM3={dailyQuota.consumptionM3}
-        initialDailyState={dailyQuota.effectiveState}
-        monthlyUtilizationPct={monthlyQuota.utilizationPct}
-        monthlyState={monthlyQuota.effectiveState}
-        avgSoilHumidity={avgSoilHumidity}
-        soilReadingCount={soilReadings.length}
-      />
+      <StaggerItem>
+        <AiRecommendationCard farmId={currentFarm.id} />
+      </StaggerItem>
 
-      <QuotaBarCard
-        consumptionM3={monthlyQuota.consumptionM3}
-        quotaM3={monthlyQuota.quotaM3}
-        utilizationPct={monthlyQuota.utilizationPct}
-        effectiveState={monthlyQuota.effectiveState}
-        trendDirection={monthlyQuota.trendDirection}
-        trendDeltaPct={monthlyQuota.trendDeltaPct}
-      />
-
-      <AiRecommendationCard farmId={currentFarm.id} />
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <WeeklyTrendCard weeklyTrend={weeklyTrend} />
+      <StaggerItem>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="md:col-span-2 bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-1 transition-shadow hover:shadow-md">
+            <WeeklyTrendCard weeklyTrend={weeklyTrend} />
+          </div>
+          <div className="bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-1 transition-shadow hover:shadow-md">
+            <SoilHumidityCard soilReadings={soilReadings} />
+          </div>
         </div>
-        <div>
-          <SoilHumidityCard soilReadings={soilReadings} />
-        </div>
-      </div>
-    </div>
+      </StaggerItem>
+    </StaggerContainer>
   );
 }

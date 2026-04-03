@@ -5,9 +5,7 @@ import {
   Droplets,
   LogOut,
   Menu,
-  Search,
-  Settings,
-  ChevronDown,
+  SeevronDown,
 } from "lucide-react";
 import { useSidebar } from "./SidebarProvider";
 import { useState, useRef, useEffect } from "react";
@@ -15,6 +13,7 @@ import { authClient } from "~/server/better-auth/client";
 import { useRouter } from "next/navigation";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { api } from "~/trpc/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ROLE_LABELS: Record<string, string> = {
   GOV_ADMIN: "مسؤول حكومي",
@@ -96,56 +95,54 @@ export function Topbar({
   const handleSettingsClick = () => {
     setIsProfileOpen(false);
     // TODO: Implement actual settings navigation or modal
-    console.log("Navigating to settings...");
     router.push("/settings");
   };
 
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
   return (
-    <header className="topbar">
+    <header className="sticky top-0 z-40 flex h-[72px] w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 sm:px-6 backdrop-blur-2xl transition-all duration-300">
       {/* ── Right side: Logo, Title & Mobile Menu ── */}
-      <div className="flex items-center gap-3">
-        <button
+      <div className="flex items-center gap-4">
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={toggleMobile}
-          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md border-none bg-transparent transition-colors hover:bg-white/10 md:hidden"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-slate-100/50 text-slate-600 transition-colors hover:bg-slate-200/50 lg:hidden"
         >
-          <Menu className="h-5 w-5 text-white" />
-        </button>
+          <Menu className="h-5 w-5" />
+        </motion.button>
 
-        <div className="topbar-logo-bg">
-          {isGov ? (
-            <Droplets className="h-6 w-6 text-white" strokeWidth={1.8} />
-          ) : (
-            <Droplets className="h-5 w-5 text-white" />
-          )}
+        <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-navy to-navy-3 shadow-md ring-1 ring-navy/10 lg:hidden">
+          <Droplets className="h-5 w-5 text-sky-300" strokeWidth={2} />
         </div>
-        <div className="hidden flex-col pr-2 sm:flex">
-          <h1 className="topbar-title">أكوا الوادي</h1>
-          <p className="topbar-subtitle">{portalLabel}</p>
+        <div className="hidden flex-col pr-2 lg:flex">
+          <h1 className="text-lg font-extrabold tracking-tight text-slate-800">أكوا الوادي</h1>
+          <p className="text-[11px] font-semibold text-slate-500">{portalLabel}</p>
         </div>
       </div>
 
       {/* ── Left side: Icons & Profile ── */}
-      <div className="mr-auto flex items-center gap-4">
+      <div className="mr-auto flex items-center gap-2 sm:gap-4">
         {weatherChip && (
-          <div className="hidden items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 sm:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-4 py-1.5 text-[13px] font-bold text-sky-700 shadow-sm sm:flex">
             {weatherChip}
           </div>
         )}
 
-        <div className="relative flex items-center gap-2 rtl:space-x-reverse">
-          <button
+        <div className="relative flex items-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             ref={bellRef}
-            className="topbar-icon-btn relative"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-100/50 text-slate-600 transition-all hover:bg-slate-200"
             aria-label="عرض الإشعارات"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.5}/>
             {notifCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-(--color-danger) outline-2 outline-(--color-navy)"></span>
+              <span className="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_0_2px_white] ring-1 ring-black/5 animate-pulse"></span>
             )}
-          </button>
+          </motion.button>
           <NotificationDropdown
             isOpen={isNotifOpen}
             onClose={() => setIsNotifOpen(false)}
@@ -154,52 +151,65 @@ export function Topbar({
         </div>
 
         {/* Divider */}
-        <div className="bg-border-2 hidden h-8 w-px sm:block"></div>
+        <div className="hidden h-6 w-[1px] bg-slate-200 sm:block mx-1"></div>
 
         {/* Profile */}
-        <div className="topbar-profile-wrapper" ref={dropdownRef}>
-          <button
-            className="flex cursor-pointer items-center gap-3 border-none bg-transparent p-0 text-inherit transition-opacity hover:opacity-80"
+        <div className="relative" ref={dropdownRef}>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            className="group flex cursor-pointer items-center gap-3 rounded-full bg-transparent p-1 pl-2 pr-1 transition-colors hover:bg-slate-100 outline-none"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             aria-haspopup="true"
             aria-expanded={isProfileOpen}
           >
             <div className="hidden flex-col items-end text-right sm:flex">
-              <span className="text-xs font-semibold text-white">
+              <span className="text-sm font-bold text-slate-800">
                 {userName}
               </span>
-              <span className="topbar-subtitle">{roleLabel}</span>
+              <span className="text-[11px] font-semibold text-slate-500">{roleLabel}</span>
             </div>
-            <div className="topbar-profile-avatar">{userInitials}</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-sky-100 to-sky-50 text-sm font-bold text-sky-700 shadow-sm ring-1 ring-sky-200/50 group-hover:shadow-md transition-shadow">
+              {userInitials}
+            </div>
             <ChevronDown
-              className={`text-light-text h-3 w-3 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
+              className={`text-slate-400 h-4 w-4 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
             />
-          </button>
+          </motion.button>
 
-          {isProfileOpen && (
-            <div className="topbar-dropdown">
-              <div className="mb-1 border-b border-white/5 px-3 py-2 sm:hidden">
-                <p className="mb-0.5 text-xs font-bold text-white">
-                  {userName}
-                </p>
-                <p className="text-light-text text-[10px]">{roleLabel}</p>
-              </div>
-              <button
-                className="topbar-dropdown-item"
-                onClick={handleSettingsClick}
+          <AnimatePresence>
+            {isProfileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="absolute left-0 top-full mt-2 w-56 origin-top-left overflow-hidden rounded-2xl bg-white/90 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/5"
               >
-                <Settings className="h-4 w-4" />
-                <span>إعدادات الحساب</span>
-              </button>
-              <button
-                className="topbar-dropdown-item danger"
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>تسجيل الخروج</span>
-              </button>
-            </div>
-          )}
+                <div className="mb-1 border-b border-slate-100 px-3 py-3 sm:hidden">
+                  <p className="text-sm font-bold text-slate-800">
+                    {userName}
+                  </p>
+                  <p className="text-xs font-medium text-slate-500">{roleLabel}</p>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 outline-none"
+                    onClick={handleSettingsClick}
+                  >
+                    <Settings className="h-[1.125rem] w-[1.125rem] text-slate-400" />
+                    <span>إعدادات الحساب</span>
+                  </button>
+                  <button
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 outline-none group"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-[1.125rem] w-[1.125rem] text-red-400 group-hover:text-red-500" />
+                    <span>تسجيل الخروج</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

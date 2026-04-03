@@ -53,22 +53,6 @@ function isStringArray(value: unknown): value is string[] {
   );
 }
 
-function isOpenMeteoPayload(value: unknown): value is OpenMeteoPayload {
-  if (!value || typeof value !== "object") return false;
-
-  const candidate = value as { daily?: unknown };
-  if (!candidate.daily || typeof candidate.daily !== "object") return false;
-
-  const daily = candidate.daily as Record<string, unknown>;
-  return (
-    isStringArray(daily.time) &&
-    isNumberArray(daily.temperature_2m_max) &&
-    isNumberArray(daily.temperature_2m_min) &&
-    isNumberArray(daily.et0_fao_evapotranspiration) &&
-    isNumberArray(daily.precipitation_sum)
-  );
-}
-
 function isOpenWeatherPayload(value: unknown): value is OpenWeatherPayload {
   if (!value || typeof value !== "object") return false;
   const candidate = value as {
