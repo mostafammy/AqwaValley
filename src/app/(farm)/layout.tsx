@@ -9,6 +9,7 @@ import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
 import { db } from "~/server/db";
 import { farm } from "~/server/db/schema";
 import { api } from "~/trpc/server";
+import Footer from "../_components/layouts/Footer";
 
 /**
  * Render the farm portal layout for authenticated users with the farmer role.
@@ -75,12 +76,12 @@ export default async function FarmLayout({
           userInitials={initials}
           portalLabel={currentFarm?.name ?? "مزرعتي"}
           weatherChip={weatherChip}
-          searchBar={false}
         />
         <div className="layout-content-row">
           <FarmSidebar />
           <main className="layout-main">{children}</main>
         </div>
+        <Footer />
       </div>
     </SidebarProvider>
   );
