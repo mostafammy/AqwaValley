@@ -7,15 +7,29 @@ import {
   farm,
   cropTypeLookup,
   growthStageLookup,
+  userRoleAssignment,
+  role,
 } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { CropProfileForm } from "./_components/crop-profile-form";
 import { CropHistoryTable } from "./_components/crop-history-table";
 import { WaterReqCard } from "./_components/water-req-card";
 import { Skeleton } from "~/app/_components/UI/Skeleton";
 import { updateCropProfile } from "~/app/_actions/crops";
+import { SignOutButton } from "~/app/_components/auth/SignOutButton";
 
 export const metadata = { title: "بروفايل المحاصيل | AquaValley" };
+
+async function hasAdminOrManagerRole(userId: string): Promise<boolean> {
+  const userRoles = await db
+    .select({ type: role.type })
+    .from(userRoleAssignment)
+    .innerJoin(role, eq(userRoleAssignment.roleId, role.id))
+    .where(eq(userRoleAssignment.userId, userId));
+
+  const roleTypes = userRoles.map((r) => r.type);
+  return roleTypes.includes("admin") || roleTypes.includes("district_manager");
+}
 
 export default async function CropsPage() {
   const session = await getSession();
@@ -24,16 +38,43 @@ export default async function CropsPage() {
   const [farmerFarm] = await db
     .select({ id: farm.id })
     .from(farm)
-    .where(eq(farm.farmerUserId, session.user.id))
+    .where(
+      or(
+        eq(farm.farmerUserId, session.user.id),
+        eq(farm.ownerId, session.user.id),
+      ),
+    )
     .limit(1);
 
-  if (!farmerFarm) {
+  let currentFarm = farmerFarm;
+
+  if (!currentFarm && process.env.NODE_ENV === "development") {
+    const isAdminOrManager = await hasAdminOrManagerRole(session.user.id);
+    if (isAdminOrManager && process.env.DEV_ALLOW_FALLBACK === "true") {
+      const [fallbackFarm] = await db
+        .select({ id: farm.id })
+        .from(farm)
+        .limit(1);
+      currentFarm = fallbackFarm;
+    }
+  }
+
+  if (!currentFarm) {
     return (
-      <div
-        className="flex h-[60vh] flex-col items-center justify-center text-slate-400"
-        dir="rtl"
-      >
-        <p className="text-sm font-medium">لم يتم تعيين مزرعة لهذا الحساب</p>
+      <div className="flex min-h-[60vh] items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <div className="mb-4 text-6xl">🚫</div>
+          <h2 className="mb-2 text-xl font-bold text-gray-800">
+            لا توجد مزرعة مرتبطة بحسابك
+          </h2>
+          <p className="mb-6 text-gray-600">
+            يرجى التواصل مع مسؤول النظام لتخصيص مزرعة لحسابك، أو تحقق من بيانات
+            اعتماد تسجيل الدخول الخاصة بك.
+          </p>
+          <SignOutButton className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
+            العودة للرئيسية وتسجيل الخروج
+          </SignOutButton>
+        </div>
       </div>
     );
   }

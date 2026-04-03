@@ -3,9 +3,16 @@ import { redirect } from "next/navigation";
 
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
-import { farm, farmWell, latestSensorState } from "~/server/db/schema";
+import {
+  farm,
+  farmWell,
+  latestSensorState,
+  userRoleAssignment,
+  role,
+} from "~/server/db/schema";
 import { api } from "~/trpc/server";
 
+import { SignOutButton } from "~/app/_components/auth/SignOutButton";
 import { AiRecommendationCard } from "./_components/AiRecommendationCard";
 import { KpiCards } from "./_components/KpiCards";
 import { QuotaBarCard } from "./_components/QuotaBarCard";
@@ -23,6 +30,19 @@ export type SoilReading = {
   lastUpdatedAt: Date;
 };
 
+// ─── Helper: Check if user has admin/manager role ──────────────────────────
+
+async function hasAdminOrManagerRole(userId: string): Promise<boolean> {
+  const userRoles = await db
+    .select({ type: role.type })
+    .from(userRoleAssignment)
+    .innerJoin(role, eq(userRoleAssignment.roleId, role.id))
+    .where(eq(userRoleAssignment.userId, userId));
+
+  const roleTypes = userRoles.map((r) => r.type);
+  return roleTypes.includes("admin") || roleTypes.includes("district_manager");
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function FarmDashboardPage() {
@@ -37,6 +57,8 @@ export default async function FarmDashboardPage() {
       districtId: farm.districtId,
       monthlyQuotaM3: farm.monthlyQuotaM3,
       status: farm.status,
+      ownerId: farm.ownerId,
+      farmerUserId: farm.farmerUserId,
     })
     .from(farm)
     .where(
@@ -49,33 +71,46 @@ export default async function FarmDashboardPage() {
 
   let currentFarm = farmRows[0];
 
-  // Fallback for development/demo: if no farm is assigned to this user, grab the first one
+  // Fallback for development/demo: if no farm is assigned, grab first farm
+  // BUT only if user has admin or manager role - otherwise they can't access it
   if (!currentFarm && process.env.NODE_ENV === "development") {
-    console.log(
-      "No farm assigned to user, falling back to first farm (development mode only)",
-    );
-    const fallbackRows = await db
-      .select({
-        id: farm.id,
-        name: farm.name,
-        districtId: farm.districtId,
-        monthlyQuotaM3: farm.monthlyQuotaM3,
-        status: farm.status,
-      })
-      .from(farm)
-      .limit(1);
-    currentFarm = fallbackRows[0];
+    const isAdminOrManager = await hasAdminOrManagerRole(session.user.id);
+    if (isAdminOrManager) {
+      console.log(
+        "No farm assigned to user, falling back to first farm (admin/manager dev mode)",
+      );
+      const fallbackRows = await db
+        .select({
+          id: farm.id,
+          name: farm.name,
+          districtId: farm.districtId,
+          monthlyQuotaM3: farm.monthlyQuotaM3,
+          status: farm.status,
+          ownerId: farm.ownerId,
+          farmerUserId: farm.farmerUserId,
+        })
+        .from(farm)
+        .limit(1);
+      currentFarm = fallbackRows[0];
+    }
   }
 
-  // Still empty (no farms in DB at all)
+  // Still empty (no farms in DB at all) or no access
   if (!currentFarm) {
     return (
-      <div className="page">
-        <div className="empty-state" style={{ marginTop: "80px" }}>
-          <div className="empty-icon">🌾</div>
-          <div className="empty-msg">
-            لم يتم إنشاء أي مزارع في النظام بعد. يرجى تشغيل السكريبت.
-          </div>
+      <div className="flex min-h-[60vh] items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <div className="mb-4 text-6xl">🚫</div>
+          <h2 className="mb-2 text-xl font-bold text-gray-800">
+            لا توجد مزرعة مرتبطة بحسابك
+          </h2>
+          <p className="mb-6 text-gray-600">
+            يرجى التواصل مع مسؤول النظام لتخصيص مزرعة لحسابك، أو تحقق من بيانات
+            اعتماد تسجيل الدخول الخاصة بك.
+          </p>
+          <SignOutButton className="inline-block rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
+            العودة للرئيسية وتسجيل الخروج
+          </SignOutButton>
         </div>
       </div>
     );
