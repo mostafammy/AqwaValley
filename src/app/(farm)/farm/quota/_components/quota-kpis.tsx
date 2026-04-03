@@ -1,7 +1,9 @@
 "use client";
 
-import { Droplets, Activity, CheckCircle, XCircle } from "lucide-react";
-import { KpiCardGrid, type KpiCardProps } from "~/app/_components/UI/KpiCardGrid";
+import {
+  KpiCardGrid,
+  type KpiCardProps,
+} from "~/app/_components/UI/KpiCardGrid";
 
 type QuotaKpisProps = {
   monthlyLimit: number;
@@ -24,27 +26,27 @@ export function QuotaKpis({
       label: "الحصة الشهرية",
       value: (
         <>
-          {(monthlyLimit / 1000).toLocaleString("ar-EG")} <span className="text-sm text-gray-400 font-semibold">م³</span>
+          {(monthlyLimit / 1000).toLocaleString("ar-EG")}{" "}
+          <span className="text-sm font-semibold text-gray-400">م³</span>
         </>
       ),
-      icon: Droplets,
+      icon: "droplets",
       border: "border-r-blue-500",
       iconBg: "bg-blue-50",
       iconColor: "text-blue-500",
       extra: (
-        <div className="text-xs mt-1 text-gray-400">
-          المخصصة لهذا الشهر
-        </div>
+        <div className="mt-1 text-xs text-gray-400">المخصصة لهذا الشهر</div>
       ),
     },
     {
       label: "المستهلك هذا الشهر",
       value: (
         <>
-          {(usedLitres / 1000).toLocaleString("ar-EG")} <span className="text-sm text-gray-400 font-semibold">م³</span>
+          {(usedLitres / 1000).toLocaleString("ar-EG")}{" "}
+          <span className="text-sm font-semibold text-gray-400">م³</span>
         </>
       ),
-      icon: Activity,
+      icon: "activity",
       border:
         state === "critical" || state === "exceeded"
           ? "border-r-red-500"
@@ -82,15 +84,18 @@ export function QuotaKpis({
       label: "المتبقي من الحصة",
       value: (
         <>
-          {(Math.abs(remainingLitres) / 1000).toLocaleString("ar-EG")} <span className="text-sm text-gray-400 font-semibold">م³</span>
+          {(Math.abs(remainingLitres) / 1000).toLocaleString("ar-EG")}{" "}
+          <span className="text-sm font-semibold text-gray-400">م³</span>
         </>
       ),
-      icon: isExceeded ? XCircle : CheckCircle,
+      icon: isExceeded ? "xCircle" : "checkCircle",
       border: isExceeded ? "border-r-red-500" : "border-r-teal-500",
       iconBg: isExceeded ? "bg-red-50" : "bg-teal-50",
       iconColor: isExceeded ? "text-red-500" : "text-teal-500",
       extra: (
-        <div className={`text-xs mt-1 font-medium ${isExceeded ? "text-red-600" : "text-emerald-600"}`}>
+        <div
+          className={`mt-1 text-xs font-medium ${isExceeded ? "text-red-600" : "text-emerald-600"}`}
+        >
           {isExceeded ? "تجاوزت الحصة" : "رصيد متاح للاستخدام"}
         </div>
       ),

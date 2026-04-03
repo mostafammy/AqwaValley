@@ -1,7 +1,6 @@
 import { db } from "~/server/db";
 import { well, alerts, sensorData, sensors } from "~/server/db/schema";
 import { eq, count, and, isNull, avg, sum, gte } from "drizzle-orm";
-import { Droplets, AlertTriangle, Activity, TrendingDown } from "lucide-react";
 import {
   KpiCardGrid,
   type KpiCardProps,
@@ -68,7 +67,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "إجمالي الآبار النشطة",
     value: kpi.totalWells.toLocaleString("ar-EG"),
-    icon: Droplets,
+    icon: "droplets",
     border: "border-r-blue-500",
     iconBg: "bg-blue-50",
     iconColor: "text-blue-500",
@@ -76,7 +75,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "تنبيهات حرجة",
     value: String(kpi.criticalAlerts),
-    icon: AlertTriangle,
+    icon: "alertTriangle",
     border: "border-r-red-500",
     iconBg: "bg-red-50",
     iconColor: "text-red-500",
@@ -84,7 +83,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "استهلاك اليوم (م³)",
     value: kpi.todayConsumption,
-    icon: Activity,
+    icon: "activity",
     border: "border-r-teal-500",
     iconBg: "bg-teal-50",
     iconColor: "text-teal-500",
@@ -92,7 +91,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "متوسط منسوب المياه",
     value: kpi.avgLevel,
-    icon: TrendingDown,
+    icon: "trendingDown",
     border: "border-r-amber-500",
     iconBg: "bg-amber-50",
     iconColor: "text-amber-500",
