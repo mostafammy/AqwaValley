@@ -13,6 +13,8 @@ import {
   Leaf,
   Zap,
   AlertCircle,
+  SlidersHorizontal,
+  Check,
 } from "lucide-react";
 import { AnimatePresence, motion, useSpring } from "framer-motion";
 import { api } from "~/trpc/react";
@@ -313,6 +315,91 @@ function ZoneStatusCard({
   );
 }
 
+function WellFlowControlRow({
+  well,
+  onApply,
+  isApplying,
+}: {
+  well: {
+    wellId: string;
+    wellName: string;
+    status: string;
+    valveState: "open" | "closed" | "partially_open" | "auto";
+    baselineFlowRateM3Hr: number | null;
+    maxFlowRateM3Hr: number | null;
+    suggestedTargetFlowM3Hr: number;
+  };
+  onApply: (input: { wellId: string; targetFlowM3Hr: number }) => void;
+  isApplying: boolean;
+}) {
+  const maxFlow = well.maxFlowRateM3Hr ?? well.baselineFlowRateM3Hr ?? 100;
+  const initialTarget = Math.min(well.suggestedTargetFlowM3Hr, maxFlow);
+  const [targetFlow, setTargetFlow] = useState(initialTarget);
+
+  useEffect(() => {
+    setTargetFlow(Math.min(well.suggestedTargetFlowM3Hr, maxFlow));
+  }, [well.suggestedTargetFlowM3Hr, maxFlow]);
+
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-4">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <div className="text-navy text-sm font-semibold">{well.wellName}</div>
+          <div className="mt-1 text-xs text-slate-500">
+            الحالة: {well.status} · الصمام: {well.valveState}
+          </div>
+        </div>
+        <Badge variant={well.valveState === "closed" ? "warn" : "ok"}>
+          {well.valveState === "closed"
+            ? "مغلق"
+            : well.valveState === "partially_open"
+              ? "تدفق جزئي"
+              : well.valveState === "open"
+                ? "مفتوح"
+                : "تلقائي"}
+        </Badge>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs text-slate-500">
+          <span>0 م³/ساعة</span>
+          <span className="font-semibold text-slate-700">
+            {targetFlow.toFixed(2)} م³/ساعة
+          </span>
+          <span>{maxFlow.toFixed(2)} م³/ساعة</span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={maxFlow}
+          step={0.1}
+          value={targetFlow}
+          onChange={(event) => setTargetFlow(Number(event.target.value))}
+          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200"
+        />
+      </div>
+
+      <div className="mt-3 flex items-center justify-end">
+        <motion.div whileTap={tapFeedback} transition={springs.snappy}>
+          <Button
+            variant="secondary"
+            disabled={isApplying}
+            onClick={() =>
+              onApply({
+                wellId: well.wellId,
+                targetFlowM3Hr: targetFlow,
+              })
+            }
+            className="rounded-2xl px-4 py-2"
+          >
+            {isApplying ? "جاري التطبيق..." : "تطبيق التدفق"}
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
   const searchParams = useSearchParams();
@@ -350,6 +437,22 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
       staleTime: 1000 * 60 * 5,
     },
   );
+
+  const { data: farmWellControls } =
+    api.irrigation.getFarmWellFlowControls.useQuery(
+      { farmId },
+      { refetchOnWindowFocus: false, staleTime: 1000 * 30 },
+    );
+
+  const [lastAppliedWellId, setLastAppliedWellId] = useState<string | null>(
+    null,
+  );
+
+  const setWellFlowControl = api.irrigation.setWellFlowControl.useMutation({
+    onSuccess: (result) => {
+      setLastAppliedWellId(result.wellId);
+    },
+  });
 
   // Restore saved state on mount (only once via ref)
   const restoredRef = useRef(false);
@@ -705,6 +808,52 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               />
             ))}
           </div>
+
+          {farmWellControls && farmWellControls.length > 0 && (
+            <Card>
+              <CardBody className="space-y-4 p-5 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-navy flex items-center gap-2 text-base font-semibold">
+                      <SlidersHorizontal className="h-4 w-4 text-blue-600" />
+                      التحكم في تدفق كل بئر
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                      تعديل التدفق يضبط حالة الصمام تلقائيًا حسب القيمة
+                      المطلوبة.
+                    </p>
+                  </div>
+                  {lastAppliedWellId ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-2xl bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <Check className="h-3.5 w-3.5" />
+                      تم التطبيق
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="space-y-3">
+                  {farmWellControls.map((wellControl) => (
+                    <WellFlowControlRow
+                      key={wellControl.wellId}
+                      well={wellControl}
+                      isApplying={
+                        setWellFlowControl.isPending &&
+                        setWellFlowControl.variables?.wellId ===
+                          wellControl.wellId
+                      }
+                      onApply={({ wellId, targetFlowM3Hr }) => {
+                        setWellFlowControl.mutate({
+                          farmId,
+                          wellId,
+                          targetFlowM3Hr,
+                        });
+                      }}
+                    />
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Plan summary */}
           <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5">
