@@ -34,7 +34,7 @@ Status legend: `[ ]` not started, `[-]` in progress, `[x]` completed.
 - [x] B1. Irrigate page tactile interaction package
   - Target: `src/app/(farm)/farm/irrigate/_components/IrrigateClient.tsx`
 
-- [ ] B2. AI Plan centerpiece entrance and confidence pulse
+- [x] B2. AI Plan centerpiece entrance and confidence pulse
   - Target: `src/app/(farm)/farm/ai-plan/_components/AiPlanClient.tsx`
 
 - [ ] B3. Map overlay and pulsing marker rings
