@@ -2,8 +2,8 @@ import { db } from "~/server/db";
 import { well, alerts } from "~/server/db/schema";
 import { count, isNull, and, inArray } from "drizzle-orm";
 import { Suspense } from "react";
-import { DistrictCard } from "./_components/district-card";
 import { ScrollToHash } from "./_components/scroll-to-hash";
+import { DistrictsClient } from "./_components/districts-client";
 
 export const metadata = { title: "المراكز والآبار | AquaValley" };
 
@@ -104,10 +104,8 @@ export default async function DistrictsPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        {districts.map((d) => (
-          <DistrictCard key={d.dbId} {...d} />
-        ))}
+      <div className="mt-6">
+        <DistrictsClient districts={districts} />
       </div>
     </div>
   );
