@@ -3,6 +3,7 @@ import { well, alerts, sensorData, sensors } from "~/server/db/schema";
 import { eq, count, and, isNull, avg, sum, gte } from "drizzle-orm";
 import {
   KpiCardGrid,
+  AnimatedNumber,
   type KpiCardProps,
 } from "~/app/_components/UI/KpiCardGrid";
 
@@ -66,7 +67,7 @@ async function getKpiData() {
 const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
     label: "إجمالي الآبار النشطة",
-    value: kpi.totalWells.toLocaleString("ar-EG"),
+    value: <AnimatedNumber value={kpi.totalWells} />,
     icon: "droplets",
     border: "border-r-blue-500",
     iconBg: "bg-blue-50",
@@ -74,7 +75,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   },
   {
     label: "تنبيهات حرجة",
-    value: String(kpi.criticalAlerts),
+    value: <AnimatedNumber value={kpi.criticalAlerts} />,
     icon: "alertTriangle",
     border: "border-r-red-500",
     iconBg: "bg-red-50",

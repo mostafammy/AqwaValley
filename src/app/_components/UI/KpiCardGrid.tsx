@@ -15,6 +15,27 @@ import {
   XCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCountUp } from "~/lib/use-count-up";
+
+export function AnimatedNumber({
+  value,
+  duration = 800,
+  decimals = 0,
+}: {
+  value: number;
+  duration?: number;
+  decimals?: number;
+}) {
+  const count = useCountUp(value, duration, decimals);
+  return (
+    <>
+      {count.toLocaleString("ar-EG", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+    </>
+  );
+}
 
 const KPI_ICONS = {
   droplets: Droplets,

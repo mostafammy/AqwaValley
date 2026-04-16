@@ -10,6 +10,7 @@ import { db } from "~/server/db";
 import { farm } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import Footer from "../_components/layouts/Footer";
+import { AmbientCanvas } from "~/app/_components/layouts/AmbientCanvas";
 
 /**
  * Render the farm portal layout for authenticated users with the farmer role.
@@ -69,6 +70,7 @@ export default async function FarmLayout({
   return (
     <SidebarProvider>
       <div className="layout-root">
+        <AmbientCanvas variant="farm" />
         <ScrollReset />
         <Topbar
           userName={name}

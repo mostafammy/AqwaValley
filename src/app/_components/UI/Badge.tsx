@@ -17,14 +17,22 @@ interface BadgeProps {
   className?: string;
 }
 
-export function Badge({ variant = "gray", children, dot = false, className = "" }: BadgeProps) {
+export function Badge({
+  variant = "gray",
+  children,
+  dot = false,
+  className = "",
+  pulse = false,
+}: BadgeProps & { pulse?: boolean }) {
   return (
     <span className={`badge badge-${variant} ${className}`}>
       {dot && (
         <span
-          className="badge-dot"
+          className="badge-dot relative"
           style={{ background: dotColors[variant] }}
-        />
+        >
+          {pulse && <span className="pulse-ring" style={{ color: dotColors[variant] }} />}
+        </span>
       )}
       {children}
     </span>

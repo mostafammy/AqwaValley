@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function useCountUp(target: number, duration = 800) {
+export function useCountUp(target: number, duration = 800, decimals = 0) {
   const [value, setValue] = useState(target);
   const prev = useRef(target);
 
@@ -18,7 +18,9 @@ export function useCountUp(target: number, duration = 800) {
       const elapsed  = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased    = 1 - Math.pow(1 - progress, 3); // ease out cubic
-      setValue(Math.round(start + diff * eased));
+      const current  = start + diff * eased;
+      
+      setValue(current);
 
       if (progress < 1) rafId = requestAnimationFrame(tick);
       else prev.current = target;
@@ -31,5 +33,6 @@ export function useCountUp(target: number, duration = 800) {
     };
   }, [target, duration]);
 
-  return value;
+  // Round only the return value so the internal state is smooth
+  return Number(value.toFixed(decimals));
 }

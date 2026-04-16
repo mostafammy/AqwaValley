@@ -6,6 +6,7 @@ import { getSession } from "~/server/better-auth/server";
 import { getUserRolePath } from "~/app/_actions/auth";
 import { ScrollReset } from "~/app/_components/layouts/ScrollReset";
 import Footer from "../_components/layouts/Footer";
+import { AmbientCanvas } from "~/app/_components/layouts/AmbientCanvas";
 
 /**
  * Layout component that enforces government-portal access and renders the portal chrome around its children.
@@ -39,6 +40,7 @@ export default async function GovLayout({
   return (
     <SidebarProvider>
       <div className="layout-root">
+        <AmbientCanvas variant="gov" />
         <ScrollReset />
         <Topbar
           userName={name}

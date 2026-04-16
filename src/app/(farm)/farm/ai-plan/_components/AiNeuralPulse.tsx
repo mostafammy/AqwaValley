@@ -28,18 +28,18 @@ export function AiNeuralPulse() {
     <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
       {/* Neural Core */}
       <div className="relative mb-12 flex items-center justify-center">
-        {/* outer rings */}
-        <div className="absolute w-64 h-64 border border-blue-100 rounded-full animate-ping opacity-20" />
-        <div className="absolute w-48 h-48 border-2 border-blue-200/50 rounded-full animate-[spin_10s_linear_infinite]" />
-        <div className="absolute w-32 h-32 border-2 border-dashed border-blue-300/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+        {/* liquid concentric rings */}
+        <div className="absolute w-64 h-64 border-2 border-teal/20 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '0s' }} />
+        <div className="absolute w-48 h-48 border-2 border-teal/40 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '0.6s' }} />
+        <div className="absolute w-32 h-32 border-2 border-teal/60 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '1.2s' }} />
         
         {/* inner core glow */}
-        <div className="absolute inset-0 bg-blue-500 blur-3xl opacity-20 rounded-full animate-pulse" />
+        <div className="absolute inset-0 bg-teal/20 blur-3xl rounded-full animate-pulse" />
         
         {/* center icon container */}
-        <div className="relative z-10 w-24 h-24 bg-white rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.2)] border border-blue-100 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white" />
-          <ActiveIcon className="w-10 h-10 text-blue-500 relative z-10 animate-bounce transition-all duration-500" />
+        <div className="relative z-10 w-24 h-24 bg-white rounded-3xl shadow-[0_0_40px_rgba(13,158,126,0.3)] border border-teal-100 flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-white" />
+          <ActiveIcon className="w-10 h-10 text-teal relative z-10 animate-bounce transition-all duration-500" />
         </div>
       </div>
 

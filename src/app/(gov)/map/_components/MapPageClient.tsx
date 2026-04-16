@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { MapClient } from "~/app/(gov)/dashboard/_components/map-client";
 import type { WellMarker } from "~/app/_components/UI/leaflet-map";
 import { Badge } from "~/app/_components/UI/Badge";
@@ -55,6 +56,7 @@ const STATUS_COLORS: Record<WellStatus, string> = {
 export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Filter wells based on selected filters
   const filteredWells = useMemo<WellMarker[]>(() => {
@@ -88,56 +90,19 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-        {/* District filter */}
-        <div className="flex items-center gap-2">
-          <label
-            htmlFor="district-select"
-            className="text-sm font-medium text-gray-600"
-          >
-            المركز:
-          </label>
-          <select
-            id="district-select"
-            value={selectedDistrict}
-            onChange={(e) => setSelectedDistrict(e.target.value)}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          >
-            <option value="all">الكل</option>
-            {districts.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Filters Toggle Button */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+          className="flex items-center gap-2 rounded-full glass-sm px-4 py-2 text-sm font-semibold text-navy transition-all hover:bg-white/60"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          تصفية البئر
+          {isFiltersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
 
-        {/* Status filter */}
+        {/* Results count (Always Visible) */}
         <div className="flex items-center gap-2">
-          <label
-            htmlFor="status-select"
-            className="text-sm font-medium text-gray-600"
-          >
-            الحالة:
-          </label>
-          <select
-            id="status-select"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          >
-            <option value="all">الكل</option>
-            {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Results count */}
-        <div className="mr-auto flex items-center gap-2">
           <Badge variant="gray">
             {filteredWells.length} من {initialWells.length} بئر
           </Badge>
@@ -153,19 +118,79 @@ export function MapPageClient({ initialWells, districts }: MapPageClientProps) {
         </div>
       </div>
 
-      {/* Status legend */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
-        <span className="text-xs text-gray-500">دليل الحالات:</span>
-        {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
-          <span
-            key={status}
-            className="inline-flex items-center gap-1.5 text-xs text-gray-600"
+      <AnimatePresence>
+        {isFiltersOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            className="overflow-hidden"
           >
-            <span className={`h-3 w-3 rounded-full ${STATUS_COLORS[status]}`} />
-            {STATUS_LABELS[status]}
-          </span>
-        ))}
-      </div>
+            {/* Filters Panel */}
+            <div className="glass-md flex flex-wrap items-center gap-4 rounded-xl p-4">
+              {/* District filter */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="district-select"
+                  className="text-sm font-medium text-gray-600"
+                >
+                  المركز:
+                </label>
+                <select
+                  id="district-select"
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="all">الكل</option>
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status filter */}
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="status-select"
+                  className="text-sm font-medium text-gray-600"
+                >
+                  الحالة:
+                </label>
+                <select
+                  id="status-select"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="all">الكل</option>
+                  {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
+                    <option key={status} value={status}>
+                      {STATUS_LABELS[status]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status legend */}
+              <div className="mr-auto flex flex-wrap items-center gap-3 rounded-lg bg-white/50 p-2 shadow-sm">
+                <span className="text-xs text-gray-500">دليل الحالات:</span>
+                {(Object.keys(STATUS_LABELS) as WellStatus[]).map((status) => (
+                  <span
+                    key={status}
+                    className="inline-flex items-center gap-1.5 text-xs text-gray-600"
+                  >
+                    <span className={`h-3 w-3 rounded-full ${STATUS_COLORS[status]}`} />
+                    {STATUS_LABELS[status]}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Map */}
       <div className="h-[calc(100vh-280px)] min-h-[400px] w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm">

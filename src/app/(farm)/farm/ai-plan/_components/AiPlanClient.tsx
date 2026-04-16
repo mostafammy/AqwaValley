@@ -136,8 +136,17 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
   const offset = circ - (boundedValue / 100) * circ;
 
   return (
-    <div className="heartbeat relative h-24 w-24 shrink-0 md:h-32 md:w-32">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+    <motion.div
+      className="relative h-24 w-24 shrink-0 md:h-32 md:w-32"
+      animate={{ scale: [1, 1.05, 0.98, 1.02, 1] }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <motion.div
+        className="absolute inset-0 rounded-full border-2 border-teal/40"
+        animate={{ scale: [1, 1.6], opacity: [0.4, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+      />
+      <svg className="h-full w-full -rotate-90 relative z-10" viewBox="0 0 100 100">
         <circle
           cx="50"
           cy="50"
@@ -166,7 +175,7 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
           </linearGradient>
         </defs>
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
         <span className="text-navy text-3xl leading-none font-semibold md:text-4xl">
           {boundedValue}%
         </span>
@@ -174,7 +183,7 @@ function ConfidenceRing({ value = 94 }: { value?: number }) {
           مستوى الثقة
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -187,15 +196,29 @@ function SummaryAmbient({
 }) {
   return (
     <div className="group relative overflow-hidden rounded-[24px]">
-      <div
-        className={`pointer-events-none absolute -top-16 -left-16 z-0 h-44 w-44 rounded-full blur-3xl transition-opacity duration-500 ${
-          quotaState === "warning" ? "bg-amber-200/50" : "bg-teal-200/45"
-        }`}
+      <motion.div
+        className="pointer-events-none absolute -top-16 -left-16 z-0 h-44 w-44 rounded-full blur-3xl opacity-50"
+        animate={{
+          x: quotaState === "warning" ? -8 : 0,
+          y: quotaState === "warning" ? -8 : 0,
+          backgroundColor:
+            quotaState === "warning"
+              ? "rgba(251,191,36,0.5)"
+              : "rgba(13,158,126,0.45)",
+        }}
+        transition={springs.silk}
       />
-      <div
-        className={`pointer-events-none absolute -right-20 -bottom-20 z-0 h-52 w-52 rounded-full opacity-70 blur-3xl transition-opacity duration-500 ${
-          quotaState === "warning" ? "bg-orange-200/35" : "bg-cyan-200/35"
-        }`}
+      <motion.div
+        className="pointer-events-none absolute -right-20 -bottom-20 z-0 h-52 w-52 rounded-full blur-3xl opacity-70"
+        animate={{
+          x: quotaState === "warning" ? 8 : 0,
+          y: quotaState === "warning" ? 8 : 0,
+          backgroundColor:
+            quotaState === "warning"
+              ? "rgba(254,215,170,0.35)"
+              : "rgba(165,243,252,0.35)",
+        }}
+        transition={springs.silk}
       />
       <div className="relative z-10">{children}</div>
     </div>
@@ -413,12 +436,15 @@ function InputsStrip({
       {inputs.map(({ icon: Icon, label, value, unit, warn, isGood }) => (
         <div
           key={label}
-          className={`flex flex-col gap-1.5 rounded-2xl border px-4 py-3 text-sm transition-all md:gap-2 md:rounded-3xl md:px-5 md:py-4 ${
+          style={{
+            boxShadow: warn ? "0 0 0 1px rgba(217,119,6,0.3)" : undefined,
+          }}
+          className={`glass-sm flex flex-col gap-1.5 rounded-2xl px-4 py-3 text-sm transition-all md:gap-2 md:rounded-3xl md:px-5 md:py-4 ${
             warn
-              ? "border-amber-200 bg-amber-50 text-amber-700 shadow-sm"
+              ? "text-amber-700"
               : isGood
-                ? "border-blue-200 bg-blue-50 text-blue-700 shadow-sm"
-                : "border-slate-100 bg-white shadow-sm hover:shadow-md"
+                ? "text-blue-700"
+                : "text-navy"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -651,10 +677,10 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
         ) : (
           <motion.div
             key="plan"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={springs.floaty}
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.97 }}
+            transition={{ ...springs.bouncy, delay: 0.05 }}
           >
             <div className="grid grid-cols-1 gap-5 md:gap-8 xl:grid-cols-12">
               {/* Left Column */}

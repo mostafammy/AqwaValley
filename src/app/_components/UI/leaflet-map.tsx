@@ -169,7 +169,7 @@ export function LeafletMap({
         const icon = L.divIcon({
           className: "",
           html: `
-            <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;animation: fade-in-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: ${Math.random() * 0.3}s;">
               <div style="position:absolute;width:24px;height:24px;border-radius:9999px;background:${auraColor};filter:blur(7px);opacity:0.9;"></div>
               ${shouldPulse ? `<div class="pulse-ring" style="color:${color};width:20px;height:20px;animation-duration:${pulseDuration};"></div>` : ""}
               ${shouldPulse ? `<div class="pulse-ring" style="color:${color};width:26px;height:26px;animation-duration:${pulseDuration};animation-delay:0.35s;"></div>` : ""}

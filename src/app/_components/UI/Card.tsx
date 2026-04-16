@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+import { cardLift } from "~/lib/motion";
+
 type Accent = "blue" | "teal" | "danger" | "warn" | "sand" | "navy";
 type PaddingSize = "md" | "sm";
 
@@ -6,6 +9,9 @@ interface CardProps {
   accent?: Accent;
   className?: string;
   onClick?: () => void;
+  glass?: boolean | "xs" | "sm" | "md" | "lg" | "nav";
+  lift?: boolean;
+  glow?: "teal" | "blue" | "amber" | "none";
 }
 
 interface CardHeaderProps {
@@ -24,12 +30,45 @@ interface CardFooterProps {
   className?: string;
 }
 
-export function Card({ children, accent, className = "", onClick }: CardProps) {
+export function Card({
+  children,
+  accent,
+  className = "",
+  onClick,
+  glass,
+  lift,
+  glow,
+}: CardProps) {
+  let glassClass = "";
+  if (glass === true) glassClass = "glass-md";
+  else if (typeof glass === "string") glassClass = `glass-${glass}`;
+
+  const glowClass = glow && glow !== "none" ? `glow-${glow}` : "";
+
+  const classes = [
+    glass ? glassClass : "card",
+    accent ? `card-accent-${accent}` : "",
+    glowClass,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (lift || onClick) {
+    return (
+      <motion.div
+        className={classes}
+        onClick={onClick}
+        whileHover={lift ? cardLift.whileHover : undefined}
+        whileTap={onClick ? cardLift.whileTap : undefined}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
   return (
-    <div
-      className={`card ${accent ? `card-accent-${accent}` : ""} ${className}`}
-      onClick={onClick}
-    >
+    <div className={classes} onClick={onClick}>
       {children}
     </div>
   );

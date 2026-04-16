@@ -4,6 +4,7 @@ import { api } from "~/trpc/react";
 import type { QuotaState } from "~/server/services/quotaDecisionService";
 import {
   KpiCardGrid,
+  AnimatedNumber,
   type KpiCardProps,
 } from "~/app/_components/UI/KpiCardGrid";
 
@@ -51,7 +52,7 @@ export function KpiCards({
       label: "الاستهلاك اليومي",
       value: (
         <>
-          {dailyM3.toFixed(1)}{" "}
+          <AnimatedNumber value={dailyM3} decimals={1} />{" "}
           <span className="text-sm font-semibold text-gray-400">م³</span>
         </>
       ),
@@ -97,7 +98,7 @@ export function KpiCards({
       label: "استهلاك الحصة الشهرية",
       value: (
         <>
-          {monthlyUtilizationPct.toFixed(1)}{" "}
+          <AnimatedNumber value={monthlyUtilizationPct} decimals={1} />{" "}
           <span className="text-sm font-semibold text-gray-400">%</span>
         </>
       ),
@@ -144,7 +145,7 @@ export function KpiCards({
       value:
         avgSoilHumidity !== null ? (
           <>
-            {avgSoilHumidity}{" "}
+            <AnimatedNumber value={avgSoilHumidity} />{" "}
             <span className="text-sm font-semibold text-gray-400">%</span>
           </>
         ) : (
@@ -164,7 +165,7 @@ export function KpiCards({
       label: "حالة الطقس",
       value: weather ? (
         <>
-          {weather.temp}°{" "}
+          <AnimatedNumber value={weather.temp} />°{" "}
           <span className="text-sm font-semibold text-gray-400">م</span>
         </>
       ) : (

@@ -131,11 +131,33 @@ function CircularProgress({
           transition={springs.floaty}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-navy text-2xl font-bold tabular-nums">
-          {display}%
-        </span>
-        <span className="text-[10px] font-medium text-slate-400">مكتمل</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden">
+        <AnimatePresence mode="wait">
+          {pct >= 100 ? (
+            <motion.div
+              key="done-icon"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={springs.bouncy}
+            >
+              <CheckCircle className="h-8 w-8 text-emerald-500" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="pct-text"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="flex flex-col items-center"
+            >
+              <span className="text-navy text-2xl font-bold tabular-nums">
+                {display}%
+              </span>
+              <span className="text-[10px] font-medium text-slate-400">مكتمل</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -158,8 +180,15 @@ function AnimatedStatBox({
   const display = useCountUp(value, 600);
 
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-5">
-      <Icon className="h-5 w-5 text-slate-400" />
+    <motion.div 
+      animate={{ 
+        boxShadow: color.includes("emerald") ? "0 4px 14px -5px rgba(16,185,129,0)" :
+                    color.includes("blue") ? "0 4px 14px -5px rgba(37,99,235,0.2)" : 
+                    "0 4px 14px -5px rgba(0,0,0,0.05)" 
+      }}
+      className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all"
+    >
+      <Icon className={`h-5 w-5 ${color.includes("emerald") ? "text-emerald-400" : "text-slate-400"}`} />
       <div>
         <div className={`text-2xl font-bold tabular-nums ${color}`}>
           {display.toLocaleString("ar-EG")}
@@ -169,7 +198,7 @@ function AnimatedStatBox({
       <div className="text-xs font-medium tracking-wider text-slate-500 uppercase">
         {label}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -238,15 +267,21 @@ function ZoneStatusCard({
   const animatedPumped = useCountUp(zonePumped, 600);
 
   return (
-    <div
-      className={`flex flex-col gap-4 rounded-2xl border p-5 transition-all ${
+    <motion.div
+      layout
+      animate={{
+        scale: running && !isDone ? 1.02 : 1,
+        boxShadow: running && !isDone ? "0 10px 25px -5px rgba(59, 130, 246, 0.15)" : "0 1px 3px rgba(0,0,0,0.05)"
+      }}
+      transition={springs.floaty}
+      className={`relative flex flex-col gap-4 rounded-2xl border p-5 ${
         inactive
           ? "border-gray-100 bg-gray-50 opacity-50"
           : isDone
             ? "border-emerald-200 bg-emerald-50"
             : running
-              ? "zone-active-glow border-blue-200 bg-white shadow-md"
-              : "border-slate-100 bg-white shadow-sm"
+              ? "border-blue-200 bg-white"
+              : "border-slate-100 bg-white"
       } `}
     >
       {/* Header */}
@@ -292,10 +327,11 @@ function ZoneStatusCard({
               <span>{zone.recommendedLitres.toLocaleString("ar-EG")} ل</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${running && !isDone ? "progress-water" : ""}`}
+              <motion.div
+                className={`h-full rounded-full ${running && !isDone ? "progress-water" : ""}`}
+                animate={{ width: `${zonePct}%` }}
+                transition={springs.floaty}
                 style={{
-                  width: `${zonePct}%`,
                   background: isDone ? "#10b981" : color,
                 }}
               />
@@ -311,7 +347,7 @@ function ZoneStatusCard({
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -598,7 +634,12 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-3xl bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              <Droplets className="h-3.5 w-3.5" />
+              <motion.div 
+                animate={{ scale: running ? [1, 1.25, 1] : 1 }}
+                transition={{ duration: 1.5, repeat: running ? Infinity : 0, ease: "easeInOut" }}
+              >
+                <Droplets className={`h-3.5 w-3.5 ${running ? "text-blue-500" : ""}`} />
+              </motion.div>
               تشغيل الري
             </span>
             <span className="text-sm text-slate-500">• {farmName}</span>
@@ -659,17 +700,24 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               className="btn btn-primary relative flex items-center gap-2 overflow-hidden rounded-2xl px-6 py-3"
             >
               {ripples.map((ripple) => (
-                <span
+                <motion.span
                   key={ripple.id}
-                  className="pointer-events-none absolute rounded-full bg-white/35"
-                  style={{
-                    left: ripple.x,
-                    top: ripple.y,
-                    width: ripple.size,
-                    height: ripple.size,
-                    animation: "well-ping 0.65s ease-out 1",
-                  }}
-                  onAnimationEnd={() => clearRipple(ripple.id)}
+                  className="pointer-events-none absolute rounded-full bg-white/40"
+                  initial={{ scale: 0, opacity: 0.8 }}
+                  animate={{ scale: 2, opacity: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  onAnimationComplete={() => clearRipple(ripple.id)}
+                  style={{ left: ripple.x, top: ripple.y, width: ripple.size, height: ripple.size }}
+                />
+              ))}
+              {ripples.map((ripple) => (
+                <motion.span
+                  key={`delay-${ripple.id}`}
+                  className="pointer-events-none absolute rounded-full bg-white/20"
+                  initial={{ scale: 0, opacity: 0.6 }}
+                  animate={{ scale: 2.5, opacity: 0 }}
+                  transition={{ duration: 1.2, delay: 0.15, ease: "easeOut" }}
+                  style={{ left: ripple.x, top: ripple.y, width: ripple.size, height: ripple.size }}
                 />
               ))}
               <Play className="h-4 w-4" />
