@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { type WellWithAlerts } from "./districts-client";
 
@@ -10,6 +9,7 @@ interface WellTileProps {
   dimmed?: boolean;
   onHoverStart?: () => void;
   onHoverEnd?: () => void;
+  onClick?: () => void;
 }
 
 const TILT_MAX = 9;
@@ -51,7 +51,7 @@ function generateSparkline(id: string, levelPct: number) {
   return d;
 }
 
-export function WellTile({ well, variants, dimmed = false, onHoverStart, onHoverEnd }: WellTileProps) {
+export function WellTile({ well, variants, dimmed = false, onHoverStart, onHoverEnd, onClick }: WellTileProps) {
   const numMatch = well.name.match(/\d+/);
   const wellLabel = numMatch ? numMatch[0].padStart(2, '0') : well.name.slice(0, 2);
 
@@ -76,7 +76,7 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
   const sparklineD = generateSparkline(well.id, well.levelPct);
   
   // Spotlight / 3D Tilt Logic
-  const cardRef = useRef<HTMLAnchorElement>(null);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const normX = useMotionValue(0.5);
   const normY = useMotionValue(0.5);
 
@@ -87,7 +87,7 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
   const rotateY = useSpring(rawRotateY, TILT_SPRING);
   const glowOpacity = useSpring(0, GLOW_SPRING);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     const el = cardRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -108,16 +108,18 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
   };
 
   return (
-    <motion.div variants={variants} className="h-full block">
-      <Link 
-        href={`/wells/${well.id}`} 
-        className="block h-full"
+    <motion.div variants={variants} className="h-full block layout-id-wrapper">
+      <button 
+        onClick={onClick}
+        type="button"
+        className="block h-full w-full text-right outline-none cursor-pointer"
         ref={cardRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
       >
         <motion.div
+          layoutId={`well-card-${well.id}`}
           animate={{
             scale: dimmed ? 0.96 : 1,
             opacity: dimmed ? 0.5 : 1,
@@ -217,7 +219,7 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
             }}
           />
         </motion.div>
-      </Link>
+      </button>
     </motion.div>
   );
 }

@@ -5,6 +5,7 @@ import { WellTile } from "./well-tile";
 
 interface WellsCanvasProps {
   district: DistrictWithWells | undefined;
+  onExpandWell: (id: string) => void;
 }
 
 const containerVariants = {
@@ -31,7 +32,7 @@ const itemVariants = {
   },
 };
 
-export function WellsCanvas({ district }: WellsCanvasProps) {
+export function WellsCanvas({ district, onExpandWell }: WellsCanvasProps) {
   const [hoveredWellId, setHoveredWellId] = useState<string | null>(null);
 
   if (!district) return null;
@@ -80,6 +81,7 @@ export function WellsCanvas({ district }: WellsCanvasProps) {
                 dimmed={hoveredWellId !== null && hoveredWellId !== well.id}
                 onHoverStart={() => setHoveredWellId(well.id)}
                 onHoverEnd={() => setHoveredWellId(null)}
+                onClick={() => onExpandWell(well.id)}
               />
             ))}
             {district.wells.length === 0 && (
