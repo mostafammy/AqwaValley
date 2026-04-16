@@ -37,7 +37,7 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
           <motion.div
             layoutId={`well-card-${well.id}`}
             className="w-full max-w-5xl h-[85vh] bg-white rounded-[24px] pointer-events-auto shadow-[0_30px_100px_rgba(0,0,0,0.15)] overflow-hidden relative flex flex-col z-10"
-            transition={{ type: "spring", stiffness: 350, damping: 35 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.55, opacity: { duration: 0.2 } }}
           >
             {/* Header section matching color context */}
             <div className="relative flex-shrink-0 p-8 border-b border-[rgba(0,0,0,0.05)] bg-[rgba(244,244,245,0.3)]">

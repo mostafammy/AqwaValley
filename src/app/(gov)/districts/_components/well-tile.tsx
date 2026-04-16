@@ -129,7 +129,7 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
             rotateY,
             transformPerspective: 900,
           }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
+          transition={{ layout: { type: "spring", bounce: 0, duration: 0.55 }, duration: 0.18, ease: "easeOut" }}
           className={cn(
             "group relative flex flex-col justify-between overflow-hidden rounded-[16px] border p-5 h-full",
             "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
