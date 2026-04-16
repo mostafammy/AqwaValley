@@ -144,8 +144,9 @@ export function DemoAlertButton() {
   return (
     <div className="flex flex-col gap-2">
       <Button
-        variant="danger"
+        variant="ghost"
         size="sm"
+        className="!border-[#E5E5EA] !text-slate-400 hover:!border-slate-300 hover:!text-slate-600"
         onClick={triggerDemoAlerts}
         disabled={isLoading}
         icon={
@@ -156,7 +157,7 @@ export function DemoAlertButton() {
           )
         }
       >
-        {isLoading ? "جارٍ..." : "تشغيل تنبيهات تجريبية"}
+        {isLoading ? "جارٍ..." : "تجريبي"}
       </Button>
       {message && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-right text-xs whitespace-pre-line text-blue-800">

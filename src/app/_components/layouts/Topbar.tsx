@@ -144,7 +144,7 @@ export function Topbar({
           >
             <Bell className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.5} />
             {notifCount > 0 && (
-              <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-red-500 shadow-[0_0_0_2px_white] ring-1 ring-black/5"></span>
+              <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50"></span>
             )}
           </motion.button>
           <NotificationDropdown

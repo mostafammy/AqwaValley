@@ -25,16 +25,15 @@ export function NavItem({
       href={href}
       className={`group relative mx-2 my-1 flex items-center gap-3 overflow-hidden rounded-2xl px-4 py-3 transition-all duration-300 outline-none ${
         active
-          ? "bg-white/10 font-bold text-sky-100 shadow-lg ring-1 ring-white/20"
+          ? "font-bold text-sky-400"
           : "font-medium text-slate-400 hover:bg-white/5 hover:text-white"
       }`}
       aria-current={active ? "page" : undefined}
     >
-      {/* Background active glow */}
       {active && (
         <motion.div
           layoutId="active-nav-bg"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.15),transparent_70%)]"
+          className="pointer-events-none absolute right-0 top-1/2 -mt-[14px] h-[28px] w-1 rounded-l-full bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.5)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}

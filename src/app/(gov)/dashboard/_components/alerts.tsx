@@ -29,7 +29,7 @@ async function getActiveAlerts() {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "bg-red-500 shadow-red-500/40 border-red-200",
+  critical: "bg-[#FF3B30] shadow-[0_0_8px_rgba(255,59,48,0.4)] border-[#FF3B30]",
   warning: "bg-orange-500 shadow-orange-500/40 border-orange-200",
   info: "bg-blue-500 shadow-blue-500/40 border-blue-200",
 };
@@ -38,7 +38,7 @@ export async function AlertsFeed() {
   const active = await getActiveAlerts();
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-black/5 transition-all hover:shadow-xl md:p-6">
+    <div className={`group relative flex flex-col overflow-hidden rounded-[2rem] bg-white p-5 border border-[#E5E5EA] transition-colors duration-500 hover:border-slate-300 md:p-6 ${active.length === 0 ? "min-h-[120px]" : "h-full"}`}>
       <div className="absolute -top-20 -left-20 z-0 h-40 w-40 rounded-full bg-rose-50 opacity-0 mix-blend-multiply blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
 
       <div className="relative z-10 mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
@@ -50,7 +50,7 @@ export async function AlertsFeed() {
           <span>التنبيهات النشطة</span>
         </Link>
         {active.length > 0 && (
-          <span className="flex h-6 items-center justify-center rounded-full bg-red-100 px-2.5 text-xs font-black text-red-600 shadow-sm ring-1 ring-red-200">
+          <span className="flex h-6 items-center justify-center rounded-full bg-[#FF3B30] px-2.5 text-xs font-black text-white shadow-sm ring-1 ring-[#FF3B30]/50">
             {active.length}
           </span>
         )}
@@ -58,16 +58,19 @@ export async function AlertsFeed() {
 
       <div className="relative z-10 flex-1 space-y-3 overflow-y-auto">
         {active.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center py-10 text-slate-400">
-            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">
-              <CheckCircle
-                className="h-8 w-8 text-emerald-400"
-                strokeWidth={2}
-              />
+          <div className="flex flex-col items-center justify-center py-6 gap-3">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="text-emerald-400 opacity-80">
+              <path d="M24 4C24 4 10 18 10 28a14 14 0 0028 0C38 18 24 4 24 4z" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M18 28l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div className="flex flex-col items-center">
+              <span className="text-[13px] font-semibold text-slate-400">
+                لا توجد تنبيهات نشطة
+              </span>
+              <span className="text-[11px] text-slate-300">
+                جميع الأنظمة تعمل بشكل طبيعي
+              </span>
             </div>
-            <span className="text-sm font-bold text-slate-500">
-              لا توجد تنبيهات نشطة
-            </span>
           </div>
         ) : (
           active.map((alert) => (

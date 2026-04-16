@@ -30,15 +30,18 @@ export interface DistributionPoint {
 interface DashboardChartsProps {
   consumptionData: ConsumptionPoint[];
   distributionData: DistributionPoint[];
+  insight?: string | null;
 }
 
 export function DashboardCharts({
   consumptionData,
   distributionData,
+  insight,
 }: DashboardChartsProps) {
   const { targetRef, isVisible } = useIntersectionObserver();
   const actualId = useId();
   const quotaId = useId();
+  const barGradientId = useId();
 
   return (
     <div
@@ -47,14 +50,19 @@ export function DashboardCharts({
     >
       {/* Line Chart — اتجاه الاستهلاك */}
       <motion.div
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -2, borderColor: "#CBD5E1" }}
         transition={{ duration: 0.3 }}
-        className="group relative overflow-hidden rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-black/5 transition-all hover:shadow-xl"
+        className="group relative overflow-hidden rounded-[2rem] bg-white p-6 border border-[#E5E5EA] transition-colors"
       >
         <div className="absolute -top-20 -right-20 z-0 h-40 w-40 rounded-full bg-blue-50/50 opacity-0 mix-blend-multiply blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
-        <h3 className="relative z-10 mb-6 text-right text-lg font-extrabold tracking-tight text-slate-800">
+        <h3 className="relative z-10 mb-2 text-right text-lg font-extrabold tracking-tight text-slate-800">
           الاستهلاك الشهري للمياه
         </h3>
+        {insight && (
+          <p className="relative z-10 mb-4 text-right text-[13px] font-semibold leading-relaxed text-slate-500">
+            <span className="text-sky-500">✦</span> {insight}
+          </p>
+        )}
         <div className="relative z-10 h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={isVisible ? consumptionData : []}>
@@ -140,9 +148,9 @@ export function DashboardCharts({
 
       {/* Bar Chart — التوزيع حسب المنطقة */}
       <motion.div
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -2, borderColor: "#CBD5E1" }}
         transition={{ duration: 0.3 }}
-        className="group relative overflow-hidden rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-black/5 transition-all hover:shadow-xl"
+        className="group relative overflow-hidden rounded-[2rem] bg-white p-6 border border-[#E5E5EA] transition-colors"
       >
         <div className="absolute -top-20 -right-20 z-0 h-40 w-40 rounded-full bg-slate-100/50 opacity-0 mix-blend-multiply blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
         <h3 className="relative z-10 mb-6 text-right text-lg font-extrabold tracking-tight text-slate-800">
@@ -151,6 +159,12 @@ export function DashboardCharts({
         <div className="relative z-10 h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={isVisible ? distributionData : []} barSize={24}>
+              <defs>
+                <linearGradient id={barGradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-bar-from)" stopOpacity={1} />
+                  <stop offset="100%" stopColor="var(--chart-bar-to)" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="#f1f5f9"
@@ -188,10 +202,11 @@ export function DashboardCharts({
               />
               <Bar
                 dataKey="القيمة (متر مكعب)"
-                fill="#0A1628"
-                radius={[8, 8, 8, 8]}
+                fill={`url(#${barGradientId})`}
+                radius={[4, 4, 0, 0]}
                 isAnimationActive={isVisible}
-                animationDuration={1500}
+                animationDuration={800}
+                animationEasing="cubic-bezier(0.16, 1, 0.3, 1)"
               />
             </BarChart>
           </ResponsiveContainer>

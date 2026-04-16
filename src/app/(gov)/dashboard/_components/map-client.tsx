@@ -49,7 +49,7 @@ export function MapClient({ wells, oases = [] }: MapClientProps) {
         onOasisClick={(oasisId) => router.push(`/districts#${oasisId}`)}
       />
 
-      <div className="glass-panel pointer-events-none absolute top-3 right-3 z-[500] w-52 rounded-[18px] border border-white/25 bg-white/20 p-3 shadow-lg backdrop-blur-2xl md:w-60 md:p-4">
+      <div className="glass-panel pointer-events-none absolute top-3 right-3 z-[500] w-52 rounded-[18px] p-3 md:w-60 md:p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs font-bold tracking-wide text-slate-700">
             مؤشرات مباشرة

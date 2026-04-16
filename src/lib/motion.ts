@@ -74,3 +74,48 @@ export const cardLift = {
   whileHover: { y: -4, scale: 1.01, transition: springs.floaty },
   whileTap: tapFeedback,
 };
+
+/** Apple's signature ease-out — used for entrance animations */
+export const APPLE_EASE = [0.16, 1, 0.3, 1] as const;
+
+/** Spring for interactive elements (hover, tap, card lift) */
+export const SPRING_INTERACTIVE = {
+  type: "spring",
+  stiffness: 400,
+  damping: 30,
+} as const;
+
+/** Spring for chart bars growing from 0 */
+export const SPRING_CHART = {
+  type: "spring",
+  stiffness: 100,
+  damping: 15,
+} as const;
+
+/** Duration scale */
+export const DURATION = {
+  fast: 0.15,
+  normal: 0.3,
+  slow: 0.6,
+  crawl: 1.5,
+} as const;
+
+export const STAGGER_DELAY = 0.05;
+
+/** Entrance animation preset */
+export const entranceFadeSlideUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: {
+    delay,
+    duration: DURATION.slow,
+    ease: APPLE_EASE,
+  },
+});
+
+/** Card hover interaction */
+export const cardHover = {
+  scale: 1.01,
+  y: -2,
+  transition: { duration: DURATION.fast, ease: "easeOut" },
+};

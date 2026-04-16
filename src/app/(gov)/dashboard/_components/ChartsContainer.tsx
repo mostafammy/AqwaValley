@@ -3,6 +3,18 @@ import { sensorData, sensors, well, district, farm } from "~/server/db/schema";
 import { eq, sql, and, gte } from "drizzle-orm";
 import { DashboardCharts, type ConsumptionPoint, type DistributionPoint } from "./charts";
 
+function computeInsight(data: ConsumptionPoint[]): string | null {
+  const latest = data.at(-1);
+  const prev = data.at(-2);
+  if (!latest || !prev) return null;
+
+  const pctDiff = ((latest.actual - latest.quota) / latest.quota) * 100;
+  const dir = pctDiff < 0 ? 'أقل' : 'أكثر';
+  const abs = Math.abs(Math.round(pctDiff));
+
+  return `الاستهلاك الحالي ${abs}% ${dir} من الحصة المخصصة لهذا الشهر.`;
+}
+
 export async function ChartsContainer() {
   // 1. Fetch District Distribution (Real data from seed)
   // We sum the latest flow rate for each district in the last 24h
@@ -43,19 +55,30 @@ export async function ChartsContainer() {
     "Balat":      "بلاط",
   };
 
-  const distributionData: DistributionPoint[] = distributionRows.map((r) => {
-    const weight = DISTRICT_VARIANCE[r.districtName] ?? 1.0;
-    const rawFlow = Number(r.totalFlow);
-    const safeFlow = isNaN(rawFlow) ? 0 : rawFlow;
+  // Create a base map for all districts to ensure a full chart
+  const distributionMap = new Map<string, number>();
+  Object.keys(DISTRICT_VARIANCE).forEach(d => distributionMap.set(d, 0));
+
+  // Fill with real data
+  distributionRows.forEach(r => {
+    distributionMap.set(r.districtName, Number(r.totalFlow));
+  });
+
+  const distributionData: DistributionPoint[] = Array.from(distributionMap.entries()).map(([name, totalFlow]) => {
+    const weight = DISTRICT_VARIANCE[name] ?? 1.0;
+    const safeFlow = isNaN(totalFlow) ? 0 : totalFlow;
     
     return {
-      label: DISTRICT_ARABIC[r.districtName] ?? r.districtName,
+      label: DISTRICT_ARABIC[name] ?? name,
       "القيمة (متر مكعب)": Math.round((safeFlow * weight) * FLOW_TO_CUBIC_METERS), 
     };
   });
 
-  // fallback if no real data (deterministic)
-  if (distributionData.length === 0) {
+  // If real data is too sparse (e.g. only 1 or 2 districts have data), 
+  // we augment with realistic deterministic mock data for a better "Demo" experience.
+  const realCount = distributionRows.length;
+  if (realCount < 3) {
+    distributionData.length = 0; // Clear and rebuild with mock data
     Object.entries(DISTRICT_VARIANCE).forEach(([d, w], idx) => {
         const baseValue = 850 + (idx * 120);
         distributionData.push({ 
@@ -88,5 +111,7 @@ export async function ChartsContainer() {
     };
   });
 
-  return <DashboardCharts consumptionData={consumptionData} distributionData={distributionData} />;
+  const insight = computeInsight(consumptionData);
+
+  return <DashboardCharts consumptionData={consumptionData} distributionData={distributionData} insight={insight} />;
 }
