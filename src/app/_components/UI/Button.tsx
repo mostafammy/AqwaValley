@@ -16,6 +16,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
   size?: Size;
   loading?: boolean;
   icon?: ReactNode;
+  children?: ReactNode;
 }
 
 const hoverByVariant: Record<Variant, { scale: number; y?: number }> = {
