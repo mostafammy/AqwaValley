@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Type,
   Eye,
@@ -69,6 +69,7 @@ function useSettings() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [savedFlash, setSavedFlash] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load on mount & apply
   useEffect(() => {
@@ -76,6 +77,13 @@ function useSettings() {
     setSettings(stored);
     applyToDom(stored);
     setLoaded(true);
+  }, []);
+
+  // Clear flash timer on unmount to avoid setState after unmount
+  useEffect(() => {
+    return () => {
+      if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
+    };
   }, []);
 
   const update = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
@@ -90,8 +98,9 @@ function useSettings() {
   const save = useCallback((s: Settings) => {
     saveToStorage(s);
     applyToDom(s);
+    if (flashTimerRef.current !== null) clearTimeout(flashTimerRef.current);
     setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2500);
+    flashTimerRef.current = setTimeout(() => setSavedFlash(false), 2500);
   }, []);
 
   const reset = useCallback(() => {
@@ -236,7 +245,7 @@ export function SettingsClient() {
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--color-text)]">الإعدادات</h1>
           <p className="mt-0.5 text-sm text-[var(--color-muted)]">
-            تخصيص المظهر وإمكانية الوصول — تُطبَّق فوراً وتُحفظ تلقائياً
+          تخصيص إمكانية الوصول — تُطبَّق فوراً ويجب حفظها يدوياً
           </p>
         </div>
       </div>
