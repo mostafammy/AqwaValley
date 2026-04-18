@@ -214,12 +214,7 @@ function TimerBox({ seconds }: { seconds: number }) {
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-5">
       <motion.div
-        animate={{ rotate: seconds > 0 ? 360 : 0 }}
-        transition={{
-          duration: 8,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "linear",
-        }}
+        
       >
         <Timer className="h-5 w-5 text-slate-400" />
       </motion.div>

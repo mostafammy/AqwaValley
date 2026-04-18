@@ -219,7 +219,7 @@ async function getFarmConsumptionM3(
   periodStart: Date,
   periodEnd: Date,
 ): Promise<number> {
-  const rows = await db.execute(sql`
+  const sensorRows = await db.execute(sql`
     SELECT COALESCE(SUM(sd.value * (fw.allocation_pct::numeric / 100)), 0) AS consumption
     FROM sensor_data sd
     INNER JOIN sensors s ON s.id = sd.sensor_id
@@ -230,9 +230,28 @@ async function getFarmConsumptionM3(
       AND sd.timestamp < ${periodEnd.toISOString()}::timestamptz
   `);
 
-  return Number(
-    (rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0,
-  );
+  const eventRows = await db.execute(sql`
+    SELECT COALESCE(SUM(ie.actual_consumption_m3), 0) AS consumption
+    FROM irrigation_event ie
+    WHERE ie.farm_id = ${farmId}::uuid
+      AND ie.actual_consumption_m3 IS NOT NULL
+      AND ie.started_at >= ${periodStart.toISOString()}::timestamptz
+      AND ie.started_at < ${periodEnd.toISOString()}::timestamptz
+  `);
+
+  const sessionRows = await db.execute(sql`
+    SELECT COALESCE(SUM(isess.liters_pumped::numeric / 1000), 0) AS consumption
+    FROM irrigation_session isess
+    WHERE isess.farm_id = ${farmId}::uuid
+      AND isess.updated_at >= ${periodStart.toISOString()}::timestamptz
+      AND isess.updated_at < ${periodEnd.toISOString()}::timestamptz
+  `);
+
+  const sensorConsumption = Number((sensorRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  const eventConsumption = Number((eventRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  const sessionConsumption = Number((sessionRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+
+  return round2(sensorConsumption + eventConsumption + sessionConsumption);
 }
 
 async function getDistrictConsumptionM3(
@@ -241,7 +260,7 @@ async function getDistrictConsumptionM3(
   periodStart: Date,
   periodEnd: Date,
 ): Promise<number> {
-  const rows = await db.execute(sql`
+  const sensorRows = await db.execute(sql`
     SELECT COALESCE(SUM(sd.value), 0) AS consumption
     FROM sensor_data sd
     INNER JOIN sensors s ON s.id = sd.sensor_id
@@ -252,9 +271,30 @@ async function getDistrictConsumptionM3(
       AND sd.timestamp < ${periodEnd.toISOString()}::timestamptz
   `);
 
-  return Number(
-    (rows[0] as Record<string, unknown> | undefined)?.consumption ?? 0,
-  );
+  const eventRows = await db.execute(sql`
+    SELECT COALESCE(SUM(ie.actual_consumption_m3), 0) AS consumption
+    FROM irrigation_event ie
+    INNER JOIN farm f ON f.id = ie.farm_id
+    WHERE f.district_id = ${districtId}::uuid
+      AND ie.actual_consumption_m3 IS NOT NULL
+      AND ie.started_at >= ${periodStart.toISOString()}::timestamptz
+      AND ie.started_at < ${periodEnd.toISOString()}::timestamptz
+  `);
+
+  const sessionRows = await db.execute(sql`
+    SELECT COALESCE(SUM(isess.liters_pumped::numeric / 1000), 0) AS consumption
+    FROM irrigation_session isess
+    INNER JOIN farm f ON f.id = isess.farm_id
+    WHERE f.district_id = ${districtId}::uuid
+      AND isess.updated_at >= ${periodStart.toISOString()}::timestamptz
+      AND isess.updated_at < ${periodEnd.toISOString()}::timestamptz
+  `);
+
+  const sensorConsumption = Number((sensorRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  const eventConsumption = Number((eventRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+  const sessionConsumption = Number((sessionRows[0] as Record<string, unknown> | undefined)?.consumption ?? 0);
+
+  return round2(sensorConsumption + eventConsumption + sessionConsumption);
 }
 
 async function getFarmBaselineM3(
