@@ -29,6 +29,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
+      {/* Anti-flash: restore settings before first paint */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=JSON.parse(localStorage.getItem('aquavalley:settings:v2')||'{}');var h=document.documentElement;if(s.fontSize)h.setAttribute('data-font-size',s.fontSize);if(s.contrast)h.setAttribute('data-contrast',s.contrast);if(s.reduceMotion)h.setAttribute('data-reduce-motion','true');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <AssistLoopLoader />
       <body className="antialiased">
         <NavigationProgressBar />
