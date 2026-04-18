@@ -1053,3 +1053,28 @@
   );
   animation: shimmer 1.5s infinite;
 }
+
+/* ═══════════════════════════════════════════════════
+   SETTINGS: Font Size Overrides
+   Applied via data-font-size on <html>
+═══════════════════════════════════════════════════ */
+html[data-font-size="sm"] { font-size: 13px; }
+html[data-font-size="md"] { font-size: 15px; }
+html[data-font-size="lg"] { font-size: 17px; }
+html[data-font-size="xl"] { font-size: 19px; }
+
+
+
+/* ═══════════════════════════════════════════════════
+   SETTINGS: Reduce Motion
+   Applied via data-reduce-motion="true" on <html>
+═══════════════════════════════════════════════════ */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
