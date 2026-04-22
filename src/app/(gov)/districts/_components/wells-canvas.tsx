@@ -42,23 +42,28 @@ export function WellsCanvas({ district, onExpandWell }: WellsCanvasProps) {
       <div className="flex flex-col gap-6">
         
         {/* District Summary Header */}
-        <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.05)] pb-4">
+        <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.06)] pb-6 mb-2">
           <div>
-            <h2 className="text-[20px] font-bold text-[#1C1C1E]">{district.name}</h2>
-            <p className="text-[12px] text-[#8E8E93] mt-1">
-              إجمالي الآبار: {district.totalWells} · التنبيهات النشطة: {district.alertCount}
-            </p>
+            <h2 className="text-[22px] font-bold text-[#1C1C1E] tracking-tight">{district.name}</h2>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="text-[12px] text-[#475569] font-medium">إجمالي الآبار: {district.totalWells}</span>
+              <span className="w-1 h-1 rounded-full bg-gray-300" />
+              <span className="text-[12px] text-[#475569] font-medium">التنبيهات النشطة: {district.alertCount}</span>
+            </div>
           </div>
           
-          <div className="flex gap-4 text-left">
+          <div className="flex gap-8 text-right">
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider">متوسط المنسوب</span>
-              <span className="text-[18px] font-bold text-[#1C1C1E]">{Math.round(district.avgLevelPct)}%</span>
+              <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-widest mb-1">متوسط المنسوب</span>
+              <span className="text-[20px] font-bold text-[#1C1C1E]">{Math.round(district.avgLevelPct)}%</span>
             </div>
-            <div className="w-px bg-[rgba(0,0,0,0.05)]" />
+            <div className="w-px bg-[rgba(0,0,0,0.08)] my-1" />
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#8E8E93] font-semibold uppercase tracking-wider">معدل الانخفاض</span>
-              <span className="text-[18px] font-bold text-[#1C1C1E]">{district.depletionRate} م/سنة</span>
+              <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-widest mb-1">معدل الانخفاض</span>
+              <span className="text-[20px] font-bold text-[#1C1C1E]">
+                {district.depletionRate} 
+                <span className="text-[12px] font-medium text-[#64748b] mr-1">م/سنة</span>
+              </span>
             </div>
           </div>
         </div>

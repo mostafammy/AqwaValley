@@ -27,16 +27,16 @@
   --color-sand-light: #fbf5e8;
 
   /* ── Semantic / Status ── */
-  --color-danger: #FF3B30;
-  --color-danger-bg: #ffeceb;
-  --color-danger-text: #FF3B30;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-danger-text: #b91c1c;
 
-  --color-warn: #d97706;
-  --color-warn-bg: #fef3e0;
-  --color-warn-text: #92500a;
+  --color-warn: #b45309;
+  --color-warn-bg: #ffedd5;
+  --color-warn-text: #92400e;
 
-  --color-ok: #0d9e7e;
-  --color-ok-bg: #e6f7f2;
+  --color-ok: #059669;
+  --color-ok-bg: #d1fae5;
   --color-ok-text: #065f46;
 
   --color-info: #1d6fa8;
@@ -50,8 +50,8 @@
   --color-border-card: #E5E5EA;
   --color-white: #ffffff;
   --color-text: #1a2940;
-  --color-muted: #5a7090;
-  --color-light-text: #8aa0b8;
+  --color-muted: #475569;
+  --color-light-text: #64748b;
   --color-border: rgba(26, 48, 80, 0.1);
   --color-border-2: rgba(26, 48, 80, 0.18);
 

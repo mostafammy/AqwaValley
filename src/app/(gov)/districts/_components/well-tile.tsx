@@ -120,42 +120,48 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
       >
         <motion.div
           layoutId={`well-card-${well.id}`}
+          initial={false}
+          whileHover={{ 
+            y: -5,
+            boxShadow: "0 12px 24px rgba(0,0,0,0.06)",
+            borderColor: "rgba(0,0,0,0.15)",
+          }}
           animate={{
             scale: dimmed ? 0.96 : 1,
             opacity: dimmed ? 0.5 : 1,
+            y: 0,
+            boxShadow: isCritical 
+              ? "0 4px 12px rgba(220,38,38,0.1)" 
+              : "0 2px 4px rgba(0,0,0,0.02)",
+            borderColor: isCritical 
+              ? "rgba(220,38,38,0.4)" 
+              : "rgba(0,0,0,0.08)",
           }}
           style={{
             rotateX,
             rotateY,
             transformPerspective: 900,
           }}
-          transition={{ layout: { type: "spring", bounce: 0, duration: 0.55 }, duration: 0.18, ease: "easeOut" }}
+          transition={{ 
+            layout: { type: "spring", bounce: 0, duration: 0.55 },
+            y: { type: "spring", stiffness: 400, damping: 25 },
+            boxShadow: { duration: 0.2 },
+            borderColor: { duration: 0.2 },
+            opacity: { duration: 0.2 },
+            scale: { duration: 0.2 }
+          }}
           className={cn(
-            "group relative flex flex-col justify-between overflow-hidden rounded-[16px] border p-5 h-full",
-            "bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
-            "transition-[border-color] duration-300",
-            "hover:border-zinc-300",
-             isCritical && "well-critical-pulse border-[rgba(255,59,48,0.2)] shadow-[0_4px_20px_rgba(255,59,48,0.12)]"
+            "group relative flex flex-col justify-between overflow-hidden rounded-[20px] border p-6 h-full bg-white",
+             isCritical && "bg-red-50/10"
           )}
         >
-          {/* Static accent tint — always visible */}
+          {/* Subtle accent indicator */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-[16px]"
-            style={{
-              background: `radial-gradient(ellipse at 20% 20%, ${baseColor}14, transparent 65%)`,
-            }}
+            className="pointer-events-none absolute top-0 right-0 w-1 h-full opacity-60"
+            style={{ backgroundColor: baseColor }}
           />
 
-          {/* Hover glow layer */}
-          <motion.div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-[16px]"
-            style={{
-              opacity: glowOpacity,
-              background: `radial-gradient(ellipse at 20% 20%, ${baseColor}2e, transparent 65%)`,
-            }}
-          />
 
           {/* Shimmer sweep */}
           <div
@@ -185,26 +191,28 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
           </div>
 
           <div className="relative z-10 flex-1 mt-2">
-            {/* Micro Sparkline */}
-            <div className="w-full h-[28px] relative rounded-md mb-3 overflow-hidden">
+            {/* Micro Sparkline with Baseline */}
+            <div className="w-full h-[32px] relative rounded-md mb-4 overflow-hidden bg-gray-50/50">
               <svg 
                 viewBox="0 0 100 24" 
                 preserveAspectRatio="none" 
                 className="w-full h-full absolute bottom-0"
               >
+                {/* Contextual Baseline */}
+                <line x1="0" y1="12" x2="100" y2="12" stroke="rgba(0,0,0,0.06)" strokeWidth="0.5" strokeDasharray="2,2" />
                 <path 
                   d={sparklineD} 
-                  fill={`${baseColor}26`} // 15% opacity
-                  stroke={`${baseColor}66`} // 40% opacity
+                  fill={`${baseColor}1A`} // 10% opacity for cleaner look
+                  stroke={`${baseColor}CC`} // 80% opacity for better contrast
                   strokeWidth="1.5"
                   vectorEffect="non-scaling-stroke"
                 />
               </svg>
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-2 border-t border-[rgba(0,0,0,0.05)]">
-              <span className="text-[10px] text-[#8E8E93] font-medium">المنسوب: {Math.round(well.levelPct)}%</span>
-              <span className="text-[10px] text-[#8E8E93] font-medium">
+            <div className="flex items-center justify-between mt-auto pt-3 border-t border-[rgba(0,0,0,0.06)]">
+              <span className="text-[11px] text-[#475569] font-semibold">المنسوب: {Math.round(well.levelPct)}%</span>
+              <span className="text-[11px] text-[#475569] font-semibold">
                 {well.flowRate ?? "—"}
                 {well.flowRate != null && " م³/س"}
               </span>
