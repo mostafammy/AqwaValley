@@ -66,7 +66,7 @@ interface DrawerDemoProps extends React.HTMLAttributes<HTMLDivElement> {
   discountedPrice?: number;
 }
 
-const drawerVariants = {
+const drawerVariants: Variants = {
   hidden: {
     y: "100%",
     opacity: 0,
@@ -92,7 +92,7 @@ const drawerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: {
     y: 20,
     opacity: 0,
@@ -137,21 +137,21 @@ export default function SmoothDrawer({
           animate="visible"
           className="mx-auto w-full max-w-[340px] space-y-6"
           initial="hidden"
-          variants={drawerVariants as Variants}
+          variants={drawerVariants}
         >
-          <motion.div variants={itemVariants as Variants}>
+          <motion.div variants={itemVariants}>
             <DrawerHeader className="space-y-2.5 px-0">
               <DrawerTitle className="flex items-center gap-2.5 font-semibold text-2xl tracking-tighter">
-                <motion.div variants={itemVariants as Variants}>
+                <motion.div variants={itemVariants}>
                   <div className="rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-1.5 shadow-inner dark:from-zinc-800 dark:to-zinc-900">
                     <Image alt="Logo" height={32} src="/logo.svg" width={32} />
                   </div>
                 </motion.div>
-                <motion.span variants={itemVariants as Variants}>
+                <motion.span variants={itemVariants}>
                   {title}
                 </motion.span>
               </DrawerTitle>
-              <motion.div variants={itemVariants as Variants}>
+              <motion.div variants={itemVariants}>
                 <DrawerDescription className="text-sm text-zinc-600 leading-relaxed tracking-tighter dark:text-zinc-400">
                   {description}
                 </DrawerDescription>
@@ -159,11 +159,11 @@ export default function SmoothDrawer({
             </DrawerHeader>
           </motion.div>
 
-          <motion.div variants={itemVariants as Variants}>
+          <motion.div variants={itemVariants}>
             <PriceTag discountedPrice={discountedPrice} price={price} />
           </motion.div>
 
-          <motion.div variants={itemVariants as Variants}>
+          <motion.div variants={itemVariants}>
             <DrawerFooter className="flex flex-col gap-3 px-0">
               <div className="w-full">
                 <Link
