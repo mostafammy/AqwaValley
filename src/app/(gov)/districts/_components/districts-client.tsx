@@ -34,7 +34,7 @@ interface DistrictsClientProps {
 export function DistrictsClient({ districts }: DistrictsClientProps) {
   // Default to first district if available
   const [selectedId, setSelectedId] = useState<string>(
-    districts.length > 0 ? districts[0].dbId : ""
+    districts.length > 0 ? (districts[0]?.dbId ?? "") : ""
   );
 
   const selectedDistrict = districts.find((d) => d.dbId === selectedId);
