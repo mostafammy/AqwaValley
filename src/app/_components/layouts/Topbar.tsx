@@ -198,13 +198,15 @@ export function Topbar({
                   </p>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <button
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors outline-none hover:bg-slate-100"
-                    onClick={handleSettingsClick}
-                  >
-                    <Settings className="h-[1.125rem] w-[1.125rem] text-slate-400" />
-                    <span>إعدادات الحساب</span>
-                  </button>
+                  {userRole !== "FARMER" && (
+                    <button
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors outline-none hover:bg-slate-100"
+                      onClick={handleSettingsClick}
+                    >
+                      <Settings className="h-[1.125rem] w-[1.125rem] text-slate-400" />
+                      <span>إعدادات الحساب</span>
+                    </button>
+                  )}
                   <button
                     className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors outline-none hover:bg-red-50"
                     onClick={handleSignOut}

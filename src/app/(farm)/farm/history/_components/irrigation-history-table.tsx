@@ -124,17 +124,6 @@ export function IrrigationHistoryTable({
                         : "قيد الانتظار"}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-end border-t border-gray-200 pt-2">
-                  <motion.button
-                    whileTap={tapFeedback}
-                    transition={springs.snappy}
-                    className="inline-flex items-center justify-center rounded p-2 text-gray-500 transition-colors hover:bg-white hover:text-gray-700"
-                    aria-label="عرض التفاصيل"
-                    title="عرض التفاصيل"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </motion.button>
-                </div>
               </div>
             ))
           )}
@@ -232,17 +221,6 @@ export function IrrigationHistoryTable({
                             ? "فشل"
                             : "قيد الانتظار"}
                       </Badge>
-                    </td>
-                    <td className="py-4 pr-4 text-center">
-                      <motion.button
-                        whileTap={tapFeedback}
-                        transition={springs.snappy}
-                        className="inline-flex items-center justify-center rounded p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                        aria-label="عرض التفاصيل"
-                        title="عرض التفاصيل"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </motion.button>
                     </td>
                   </motion.tr>
                 ))
