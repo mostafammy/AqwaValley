@@ -1,11 +1,11 @@
 import { useRef } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { type Variants, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "~/lib/utils";
 import { type WellWithAlerts } from "./districts-client";
 
 interface WellTileProps {
   well: WellWithAlerts;
-  variants?: any;
+  variants?: Variants;
   dimmed?: boolean;
   onHoverStart?: () => void;
   onHoverEnd?: () => void;
@@ -52,7 +52,7 @@ function generateSparkline(id: string, levelPct: number) {
 }
 
 export function WellTile({ well, variants, dimmed = false, onHoverStart, onHoverEnd, onClick }: WellTileProps) {
-  const numMatch = well.name.match(/\d+/);
+  const numMatch = /\d+/.exec(well.name);
   const wellLabel = numMatch ? numMatch[0].padStart(2, '0') : well.name.slice(0, 2);
 
   // Status Colors
@@ -205,7 +205,8 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
             <div className="flex items-center justify-between mt-auto pt-2 border-t border-[rgba(0,0,0,0.05)]">
               <span className="text-[10px] text-[#8E8E93] font-medium">المنسوب: {Math.round(well.levelPct)}%</span>
               <span className="text-[10px] text-[#8E8E93] font-medium">
-                {well.flowRate != null ? `${well.flowRate} م³/س` : "—"}
+                {well.flowRate ?? "—"}
+                {well.flowRate != null && " م³/س"}
               </span>
             </div>
           </div>

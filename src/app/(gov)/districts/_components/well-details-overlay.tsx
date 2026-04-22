@@ -51,7 +51,10 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
 
               <div className="flex items-center gap-4 mb-2">
                 <span className="text-[48px] font-[800] tracking-[-0.05em] text-[#1C1C1E] leading-none">
-                  {well.name.match(/\d+/) ? well.name.match(/\d+/)?.[0].padStart(2, '0') : well.name.slice(0, 2)}
+                  {(() => {
+                    const match = /\d+/.exec(well.name);
+                    return match ? match[0].padStart(2, '0') : well.name.slice(0, 2);
+                  })()}
                 </span>
                 <div className="flex flex-col">
                   <h2 className="text-[20px] font-bold text-[#1C1C1E]">{well.name}</h2>
@@ -99,9 +102,9 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
                      <Activity size={20} className="text-[#34C759]" />
                      <span className="text-[13px] font-bold">معدل التدفق</span>
                    </div>
-                   <div className="text-[40px] font-black text-[#1C1C1E] tracking-tight">
-                     {well.flowRate != null ? well.flowRate : "—"} <span className="text-[16px] text-[#8E8E93]">م³/س</span>
-                   </div>
+                    <div className="text-[40px] font-black text-[#1C1C1E] tracking-tight">
+                      {well.flowRate ?? "—"} <span className="text-[16px] text-[#8E8E93]">م³/س</span>
+                    </div>
                 </div>
 
                 <div className="bg-[rgba(0,0,0,0.02)] p-6 rounded-[20px] border border-[rgba(0,0,0,0.04)]">
