@@ -1,141 +1,85 @@
-import { type ComponentProps } from "react";
-import { type Badge } from "~/app/_components/UI/Badge";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
-type BadgeVariant = ComponentProps<typeof Badge>["variant"];
+type BadgeVariant = "ok" | "warn" | "danger" | "info" | "gray" | "navy" | "gold"
+type WellStatus = "active" | "inactive" | "maintenance" | "offline" | "restricted"
+type AlertSeverity = "critical" | "warning" | "info"
+type AlertType = "threshold_breach" | "anomaly" | "sensor_offline"
+
+const WELL_STATUS_TO_BADGE: Record<WellStatus, BadgeVariant> = {
+  active: "ok",
+  inactive: "gray",
+  maintenance: "warn",
+  offline: "danger",
+  restricted: "gold",
+}
+
+const WELL_STATUS_TO_COLOR: Record<WellStatus, string> = {
+  active: "#0D9E7E",
+  inactive: "#94A3B8",
+  maintenance: "#F59E0B",
+  offline: "#D94040",
+  restricted: "#7C3AED",
+}
+
+const WELL_STATUS_TO_LABEL: Record<WellStatus, string> = {
+  active: "نشط",
+  inactive: "غير نشط",
+  maintenance: "صيانة",
+  offline: "متوقف",
+  restricted: "مقيد",
+}
+
+const ALERT_SEVERITY_TO_BADGE: Record<AlertSeverity, BadgeVariant> = {
+  critical: "danger",
+  warning: "warn",
+  info: "info",
+}
+
+const ALERT_SEVERITY_TO_LABEL: Record<AlertSeverity, string> = {
+  critical: "حرج",
+  warning: "تحذير",
+  info: "تنبيه",
+}
+
+const ALERT_TYPE_TO_LABEL: Record<AlertType, string> = {
+  threshold_breach: "تجاوز الحد",
+  anomaly: "شذوذ",
+  sensor_offline: "تعطل الحساس",
+}
 
 export function wellStatusVariant(status: string): BadgeVariant {
-  const map: Record<string, BadgeVariant> = {
-    active: "ok",
-    inactive: "gray",
-    maintenance: "warn",
-    offline: "danger",
-    restricted: "navy",
-  };
-  return map[status] ?? "gray";
+  return WELL_STATUS_TO_BADGE[status as WellStatus] ?? "gray"
 }
 
 export function wellStatusColor(status: string): string {
-  const map: Record<string, string> = {
-    active: "var(--color-ok)",
-    inactive: "var(--color-muted)",
-    maintenance: "var(--color-warn)",
-    offline: "var(--color-danger)",
-    restricted: "var(--color-restricted)",
-  };
-  return map[status] ?? "var(--color-muted)";
+  return WELL_STATUS_TO_COLOR[status as WellStatus] ?? "#94A3B8"
 }
 
 export function wellStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    active: "نشط",
-    inactive: "غير نشط",
-    maintenance: "صيانة",
-    offline: "غير متصل",
-    restricted: "مقيد",
-  };
-  return map[status] ?? status;
+  return WELL_STATUS_TO_LABEL[status as WellStatus] ?? "غير معروف"
 }
 
 export function alertSeverityVariant(severity: string): BadgeVariant {
-  const map: Record<string, BadgeVariant> = {
-    critical: "danger",
-    warning: "warn",
-    info: "info",
-  };
-  return map[severity] ?? "info";
+  return ALERT_SEVERITY_TO_BADGE[severity as AlertSeverity] ?? "gray"
 }
 
 export function alertSeverityLabel(severity: string): string {
-  const map: Record<string, string> = {
-    critical: "حرج",
-    warning: "تحذير",
-    info: "تنبيه",
-  };
-  return map[severity] ?? severity;
+  return ALERT_SEVERITY_TO_LABEL[severity as AlertSeverity] ?? "غير معروف"
 }
 
 export function alertTypeLabel(type: string): string {
-  const map: Record<string, string> = {
-    threshold_breach: "تجاوز حد",
-    anomaly: "شذوذ",
-    sensor_offline: "حساس غير متصل",
-  };
-  return map[type] ?? type;
+  return ALERT_TYPE_TO_LABEL[type as AlertType] ?? "غير معروف"
 }
 
-/**
- * Transforms raw alert messages into user-friendly Arabic text.
- * Handles messages like: "pressure value 5 gt 3.5 (rule: uuid)"
- */
-export function formatAlertMessage(message: string): string {
-  // If already in Arabic, return as is
-  if (/[\u0600-\u06FF]/.test(message)) {
-    return message;
+export function formatAlertMessage(message: string | null | undefined): string {
+  if (!message) {
+    return "لا توجد رسالة"
   }
 
-  // Parse technical messages
-  // Pattern: "sensorType value X operator Y (rule: uuid)"
-  const match = /^(\w+)_?\s*value\s*(\d+\.?\d*)\s*(gt|lt|gte|lte|eq)\s*(\d+\.?\d*)/i.exec(message);
-  
-  if (!match) {
-    return message;
-  }
-
-  const sensorType = match[1]?.toLowerCase() ?? "";
-  const value = match[2] ?? "";
-  const operator = (match[3] ?? "").toLowerCase();
-  const threshold = match[4] ?? "";
-  
-  // Sensor type labels
-  const sensorLabels: Record<string, { name: string; unit: string }> = {
-    water_level: { name: "منسوب المياه", unit: "%" },
-    flow_rate: { name: "معدل التدفق", unit: "م³/س" },
-    pressure: { name: "الضغط", unit: "بار" },
-    temperature: { name: "درجة الحرارة", unit: "°م" },
-    humidity: { name: "الرطوبة", unit: "%" },
-  };
-  
-  const sensor = sensorLabels[sensorType] ?? { name: sensorType, unit: "" };
-
-  // Operator labels
-  const operatorLabels: Record<string, string> = {
-    gt: "أعلى من",
-    lt: "أقل من",
-    gte: "أعلى من أو يساوي",
-    lte: "أقل من أو يساوي",
-    eq: "يساوي",
-  };
-  const opLabel = operatorLabels[operator] ?? operator;
-
-  // Direction indicators
-  const isHigh = operator === "gt" || operator === "gte";
-  const isLow = operator === "lt" || operator === "lte";
-  const isEq = operator === "eq";
-  
-  let direction: string;
-  if (isHigh) {
-    direction = "ارتفاع";
-  } else if (isLow) {
-    direction = "انخفاض";
-  } else if (isEq) {
-    direction = "ثبات";
-  } else {
-    direction = "تغيير";
-  }
-
-  // Build readable message
-  return `${sensor.name}: ${direction} ${value}${sensor.unit} (${opLabel} الحد: ${threshold}${sensor.unit})`;
-}
-
-/** @deprecated use alertSeverityVariant instead */
-export function alertTypeVariant(type: string): BadgeVariant {
-  return alertSeverityVariant(type);
-}
-
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return String(message).trim() || "لا توجد رسالة"
 }
