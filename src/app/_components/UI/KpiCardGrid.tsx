@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCountUp } from "~/lib/use-count-up";
-import { entranceFadeSlideUp, cardHover, STAGGER_DELAY } from "~/lib/motion";
+import { entranceFadeSlideUp, STAGGER_DELAY } from "~/lib/motion";
 
 export function AnimatedNumber({
   value,

@@ -8,7 +8,7 @@ import {
   formatAlertMessage,
 } from "~/lib/utils";
 import Link from "next/link";
-import { ChevronLeft, CheckCircle, BellRing } from "lucide-react";
+import { ChevronLeft, BellRing } from "lucide-react";
 
 async function getActiveAlerts() {
   return db

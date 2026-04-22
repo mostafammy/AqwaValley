@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ClipboardList, Eye } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { Badge } from "~/app/_components/UI/Badge";
 import { Card, CardBody, CardHeader } from "~/app/_components/UI/Card";
-import { springs, tapFeedback } from "~/lib/motion";
+import { springs } from "~/lib/motion";
 
 type IrrigationEvent = {
   id: string;
