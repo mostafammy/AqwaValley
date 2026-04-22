@@ -23,8 +23,23 @@ export async function validateCronRequest(request: Request): Promise<{
   reason?: string;
 }> {
   const signature = getSignature(request.headers);
+  const cronSecret = process.env.CRON_SECRET;
+
+  // Fallback to CRON_SECRET validation if signature is missing (useful for local testing/direct calls)
   if (!signature) {
-    return { ok: false, reason: "Missing Upstash-Signature header" };
+    if (!cronSecret) {
+      return { ok: false, reason: "Missing Upstash-Signature header and no CRON_SECRET configured" };
+    }
+
+    const authHeader = request.headers.get("authorization");
+    const xCronSecret = request.headers.get("x-cron-secret");
+    const providedSecret = xCronSecret ?? (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
+
+    if (providedSecret === cronSecret) {
+      return { ok: true };
+    }
+
+    return { ok: false, reason: "Missing Upstash-Signature header and invalid/missing CRON_SECRET" };
   }
 
   const qstashReceiver = getReceiver();
