@@ -122,11 +122,10 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.3 }}
-                className="mt-auto"
+                className="mt-8"
               >
                 <ReadingsChart wellId={well.id} />
-              </motion.div>
-            </motion.div>
+              </motion.div>            </motion.div>
           </motion.div>
         </div>
       )}

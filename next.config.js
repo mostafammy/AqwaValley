@@ -14,6 +14,7 @@ const config = {
   outputFileTracingExcludes: {
     "*": ["**/.pnpm-store/**", "**/pnpm/store/**"],
   },
+  serverExternalPackages: ["pdfkit"],
 };
 
 // Plugin options for @sentry/webpack-plugin — passed as the 2nd arg to withSentryConfig

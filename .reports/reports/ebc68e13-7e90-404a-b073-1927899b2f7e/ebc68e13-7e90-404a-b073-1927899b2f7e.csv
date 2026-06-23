@@ -1,0 +1,4 @@
+#meta:{"metadata":{"maskingRulesVersion":"masking-current","policyVersion":"policy-current","reportJobId":"ebc68e13-7e90-404a-b073-1927899b2f7e","snapshotId":"itest-1782236049544-aa1e464f"},"templateVersion":"v1"}
+actorId,createdAt,entityId,entityType
+"PBrA4TTRuc5v2kBqgyXOLRuIcxu7TtB7","""2026-03-30T17:30:35.691Z""","6oNTwsQ5ZjDd9NUil9S1l4clu1nNZWaX","user_role"
+"PBrA4TTRuc5v2kBqgyXOLRuIcxu7TtB7","""2026-04-02T19:50:23.708Z""","6oNTwsQ5ZjDd9NUil9S1l4clu1nNZWaX","user_deactivation"

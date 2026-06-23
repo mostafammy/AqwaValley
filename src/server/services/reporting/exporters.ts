@@ -78,7 +78,7 @@ export class PdfExportStrategy implements ExportStrategy {
         reject(error instanceof Error ? error : new Error(String(error)));
       });
 
-      doc.font("Helvetica").fontSize(16).text("AqwaValley Report", {
+      doc.font("Courier").fontSize(16).text("AqwaValley Report", {
         align: "left",
       });
       doc.moveDown(0.5);
