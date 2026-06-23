@@ -462,6 +462,11 @@ export class ReportingOrchestrator {
     return { job, artifacts };
   }
 
+  async deleteJob(jobId: string): Promise<void> {
+    await this.cleanupArtifactsForJob(jobId);
+    await this.db.delete(reportJob).where(eq(reportJob.id, jobId));
+  }
+
   async resolveDownload(params: {
     actorId: string;
     reportArtifactId: string;

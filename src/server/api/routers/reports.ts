@@ -229,4 +229,22 @@ export const reportsRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  deleteJob: viewerProcedure
+    .input(z.object({ reportJobId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const deps = buildReportingDependencies(ctx.db);
+      const result = await deps.orchestrator.getJobWithArtifacts(
+        input.reportJobId,
+      );
+
+      deps.policy.assertCanViewJob({
+        actorId: ctx.session.user.id,
+        actorRoles: ctx.userRoles,
+        requestedBy: result.job.requestedBy,
+      });
+
+      await deps.orchestrator.deleteJob(input.reportJobId);
+      return { success: true };
+    }),
 });

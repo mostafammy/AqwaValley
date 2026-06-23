@@ -7,6 +7,7 @@
  * LAYER: Unit (pure logic, no DB)
  * PRINCIPLES: F.I.R.S.T. - Deterministic authorization logic
  */
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
 import { describe, it, expect } from "vitest";
 

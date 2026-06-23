@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Droplets, Activity, Settings, TrendingDown } from "lucide-react";
+import { X, Droplets, Activity, TrendingDown } from "lucide-react";
 import { type WellWithAlerts } from "./districts-client";
 import { useEffect } from "react";
 import {ReadingsChart} from "~/app/(gov)/wells/[wellId]/_components/readings-chart";

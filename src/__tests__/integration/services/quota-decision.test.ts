@@ -59,9 +59,17 @@ function createQuotaDbDouble(options: {
     breachInserts: [] as Row[],
   };
 
+  let executeCallCount = 0;
+
   const db = {
     select: () => new QueryChain(selectQueue.shift() ?? []),
-    execute: async () => [{ consumption: options.executeConsumption ?? 0 }],
+    execute: async () => {
+      // Distribute consumption across three execute() calls (sensor, events, sessions)
+      // Return full consumption on first call, 0 on subsequent calls
+      const consumption = executeCallCount === 0 ? (options.executeConsumption ?? 0) : 0;
+      executeCallCount++;
+      return [{ consumption }];
+    },
     insert: () => ({
       values: (value: Row | Row[]) => {
         const list = Array.isArray(value) ? value : [value];

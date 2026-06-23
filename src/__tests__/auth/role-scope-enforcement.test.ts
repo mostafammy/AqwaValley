@@ -158,6 +158,18 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
   const districtAlpha = "district-alpha-id";
   const districtBeta = "district-beta-id";
 
+  // Helper to create sessions with dynamic expiration
+  const createValidSession = (user: User, nowRef?: Date): Session => {
+    const now = nowRef ?? new Date();
+    return {
+      userId: user.id,
+      user,
+      createdAt: new Date(now.getTime() - 5 * 60 * 1000), // 5 min ago
+      lastSeenAt: new Date(now.getTime() - 1 * 60 * 1000), // 1 min ago
+      expiresAt: new Date(now.getTime() + 59 * 60 * 1000), // 59 min from now
+    };
+  };
+
   const farmerInFarmX: User = {
     id: "farmer-user-1",
     role: "farmer",
@@ -179,13 +191,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should allow a farmer to access their own farm", () => {
     // Given: Farmer with access to farm X
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     // When: Requesting access to farm X
     const result = authorizeRequest(session, {
@@ -199,13 +205,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should REJECT a farmer accessing another farmer's farm", () => {
     // Given: Farmer X with session
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     // When: Attempting to access farm Y
     const result = authorizeRequest(session, {
@@ -221,13 +221,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
   it("should REJECT manipulated farmId in the request", () => {
     // Scenario: Frontend manipulation or CSRF attack
     // Given: Farmer X's session
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     // When: Malicious request with farm Y
     const result = authorizeRequest(session, {
@@ -242,13 +236,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
   it("should reject session when user ID in request doesn't match session", () => {
     // Scenario: Session hijacking attempt
     // Given: Farmer X's session
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     // When: Request with a different user ID
     const result = authorizeRequest(session, {
@@ -289,13 +277,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should allow district admin to access any farm in their district", () => {
     // Given: District admin for alpha
-    const session: Session = {
-      userId: districtAdminAlpha.id,
-      user: districtAdminAlpha,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(districtAdminAlpha);
 
     // When: Accessing any farm in their district
     const result = authorizeRequest(session, {
@@ -309,13 +291,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should REJECT district admin accessing a different district", () => {
     // Given: District admin for alpha
-    const session: Session = {
-      userId: districtAdminAlpha.id,
-      user: districtAdminAlpha,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(districtAdminAlpha);
 
     // When: Attempting to access district beta
     const result = authorizeRequest(session, {
@@ -330,13 +306,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should allow system admin to access any farm and district", () => {
     // Given: System admin session
-    const session: Session = {
-      userId: systemAdmin.id,
-      user: systemAdmin,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(systemAdmin);
 
     // When: Accessing any farm
     const farmResult = authorizeRequest(session, {
@@ -358,13 +328,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
   it("should prevent privilege escalation with invalid session", () => {
     // Scenario: Attacker tries to use old farmer session with admin privs
     // Given: Farmer session that should not have admin access
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     // When: Farmer tries to access system admin resources
     const result = authorizeRequest(session, {
@@ -378,12 +342,10 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should reject undefined session user", () => {
     // Given: Malformed session with missing user
+    const validSession = createValidSession(farmerInFarmX);
     const badSession = {
-      userId: farmerInFarmX.id,
+      ...validSession,
       user: null, // ← Missing user object
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
     } as unknown as Session;
 
     // When: Checking validity
@@ -395,13 +357,7 @@ describe("Role Scope Session Authorization (Invariant #6)", () => {
 
   it("should be deterministic: same session, same request = same result", () => {
     // Given: Fixed session and request
-    const session: Session = {
-      userId: farmerInFarmX.id,
-      user: farmerInFarmX,
-      createdAt: new Date("2026-04-02T10:00:00Z"),
-      lastSeenAt: new Date("2026-04-02T10:05:00Z"),
-      expiresAt: new Date("2026-04-02T11:00:00Z"),
-    };
+    const session = createValidSession(farmerInFarmX);
 
     const request: AccessRequest = {
       requesterUserId: farmerInFarmX.id,
