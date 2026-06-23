@@ -373,8 +373,11 @@ export class ReportingOrchestrator {
     };
   }
 
-  private async cleanupArtifactsForJob(reportJobId: string): Promise<void> {
-    const artifacts = await this.db.query.reportArtifact.findMany({
+  private async cleanupArtifactsForJob(
+    reportJobId: string,
+    connection: DBConnection = this.db,
+  ): Promise<void> {
+    const artifacts = await connection.query.reportArtifact.findMany({
       where: eq(reportArtifact.reportJobId, reportJobId),
       columns: {
         storageKey: true,
@@ -389,7 +392,7 @@ export class ReportingOrchestrator {
       }
     }
 
-    await this.db
+    await connection
       .delete(reportArtifact)
       .where(eq(reportArtifact.reportJobId, reportJobId));
   }
@@ -462,9 +465,27 @@ export class ReportingOrchestrator {
     return { job, artifacts };
   }
 
-  async deleteJob(jobId: string): Promise<void> {
-    await this.cleanupArtifactsForJob(jobId);
-    await this.db.delete(reportJob).where(eq(reportJob.id, jobId));
+  async deleteJob(params: {
+    jobId: string;
+    actorId: string;
+  }): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      // Clean up artifacts within the same transaction
+      await this.cleanupArtifactsForJob(params.jobId, tx);
+
+      // Delete the job (audit log entries will have reportJobId set to null due to FK onDelete: "set null")
+      await tx.delete(reportJob).where(eq(reportJob.id, params.jobId));
+
+      // Record the deletion in the audit log
+      await tx.insert(reportAuditLog).values({
+        reportJobId: null, // Job is being deleted, so no reference
+        actorId: params.actorId,
+        actionType: "job_deleted",
+        details: {
+          deletedJobId: params.jobId,
+        },
+      });
+    });
   }
 
   async resolveDownload(params: {

@@ -234,17 +234,22 @@ export const reportsRouter = createTRPCRouter({
     .input(z.object({ reportJobId: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const deps = buildReportingDependencies(ctx.db);
-      const result = await deps.orchestrator.getJobWithArtifacts(
-        input.reportJobId,
+
+      // Only admins and auditors can delete jobs (destructive operation)
+      const isAdminOrAuditor = ctx.userRoles.some((role) =>
+        ["admin", "auditor"].includes(role),
       );
+      if (!isAdminOrAuditor) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only administrators can delete report jobs",
+        });
+      }
 
-      deps.policy.assertCanViewJob({
+      await deps.orchestrator.deleteJob({
+        jobId: input.reportJobId,
         actorId: ctx.session.user.id,
-        actorRoles: ctx.userRoles,
-        requestedBy: result.job.requestedBy,
       });
-
-      await deps.orchestrator.deleteJob(input.reportJobId);
       return { success: true };
     }),
 });

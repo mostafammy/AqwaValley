@@ -19,3 +19,15 @@ CREATE TRIGGER report_audit_log_block_mutations
 BEFORE UPDATE OR DELETE ON "report_audit_log"
 FOR EACH ROW
 EXECUTE FUNCTION prevent_append_only_audit_mutation();
+
+-- Prevent TRUNCATE on audit_log table (statement-level trigger)
+CREATE TRIGGER audit_log_block_truncate
+BEFORE TRUNCATE ON "audit_log"
+FOR EACH STATEMENT
+EXECUTE FUNCTION prevent_append_only_audit_mutation();
+
+-- Prevent TRUNCATE on report_audit_log table (statement-level trigger)
+CREATE TRIGGER report_audit_log_block_truncate
+BEFORE TRUNCATE ON "report_audit_log"
+FOR EACH STATEMENT
+EXECUTE FUNCTION prevent_append_only_audit_mutation();
