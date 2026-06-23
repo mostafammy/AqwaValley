@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Droplets, Activity, Settings, TrendingDown } from "lucide-react";
 import { type WellWithAlerts } from "./districts-client";
 import { useEffect } from "react";
+import {ReadingsChart} from "~/app/(gov)/wells/[wellId]/_components/readings-chart";
 
 interface WellDetailsOverlayProps {
   well: WellWithAlerts | null;
@@ -69,8 +70,8 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
                     />
                     <span className="text-[14px] text-[#8E8E93] font-medium">
                       {well.status === 'active' ? 'نشط' : 
-                       well.status === 'offline' ? 'متوقف' : 
-                       well.status === 'inactive' ? 'غير نشط' : 'صيانة'}
+                      well.status === 'offline' ? 'متوقف' : 
+                      well.status === 'inactive' ? 'غير نشط' : 'صيانة'}
                     </span>
                   </div>
                 </div>
@@ -117,16 +118,14 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
                    </div>
                 </div>
               </div>
-
-              {/* Placeholder for complex charts / controls */}
-              <div className="w-full h-[300px] bg-gray-50 border border-gray-100 rounded-[20px] flex items-center justify-center overflow-hidden relative">
-                 <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                 <div className="text-[#8E8E93] flex flex-col items-center gap-3">
-                   <Settings size={32} className="opacity-50" />
-                   <p className="font-medium">سيتم ربط المخططات وقراءات SCADA الفورية هنا</p>
-                 </div>
-              </div>
-
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+                className="mt-auto"
+              >
+                <ReadingsChart wellId={well.id} />
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>
