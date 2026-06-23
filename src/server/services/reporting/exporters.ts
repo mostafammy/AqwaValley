@@ -78,7 +78,8 @@ export class PdfExportStrategy implements ExportStrategy {
         reject(error instanceof Error ? error : new Error(String(error)));
       });
 
-      doc.font("Courier").fontSize(16).text("AqwaValley Report", {
+      // Use PDFKit's built-in font handling to avoid file system issues in serverless environments
+      doc.font('Courier').fontSize(16).text("AqwaValley Report", {
         align: "left",
       });
       doc.moveDown(0.5);
