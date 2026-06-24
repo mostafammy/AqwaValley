@@ -5,22 +5,20 @@ import {
   farm,
   cropProfile,
   farmWell,
-  latestSensorState,
   cropTypeLookup,
   userRoleAssignment,
   role,
 } from "~/server/db/schema";
-import { eq, or, inArray, and } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { SoilGauge } from "./_components/soil-gauge";
-import { SoilMoistureChart } from "./_components/soil-moisture-chart";
+import { SoilMoistureChart, type SoilChartSeries, type SoilChartPoint } from "./_components/soil-moisture-chart";
 import { SoilCompositionCard } from "./_components/soil-composition-card";
-import { RefreshButton } from "./_components/refresh-button"; // ← new
+import { RefreshButton } from "./_components/refresh-button";
 import { MapPin, Thermometer } from "lucide-react";
 import { SignOutButton } from "~/app/_components/auth/SignOutButton";
+import { SoilDataRepository } from "~/server/repositories/soil-data.repository";
 
 export const metadata = { title: "قراءات التربة | AquaValley" };
-
-type SensorState = typeof latestSensorState.$inferSelect;
 
 async function hasAdminOrManagerRole(userId: string): Promise<boolean> {
   const userRoles = await db
@@ -32,6 +30,8 @@ async function hasAdminOrManagerRole(userId: string): Promise<boolean> {
   const roleTypes = userRoles.map((r) => r.type);
   return roleTypes.includes("admin") || roleTypes.includes("district_manager");
 }
+
+const ZONE_COLORS = ["#D97706", "#0D9E7E", "#1D6FA8", "#9333EA", "#E11D48"];
 
 export default async function SoilPage() {
   const session = await getSession();
@@ -99,67 +99,53 @@ export default async function SoilPage() {
 
   const wellIds = farmWells.map((fw) => fw.wellId);
 
-  let humiditySensors: SensorState[] = [];
-  if (wellIds.length > 0) {
-    humiditySensors = await db
-      .select()
-      .from(latestSensorState)
-      .where(
-        and(
-          inArray(latestSensorState.wellId, wellIds),
-          eq(latestSensorState.type, "humidity"),
-        ),
-      );
-  }
+  // Use Repository Pattern to fetch all real sensor data
+  const repo = new SoilDataRepository();
+  const [humidityReadings, temperatureReadings, humidityHistory] = await Promise.all([
+    repo.getLatestHumidityByWells(wellIds),
+    repo.getLatestTemperatureByWells(wellIds),
+    repo.getHumidityHistory7d(wellIds),
+  ]);
 
-  const hasLiveSensors = humiditySensors.length > 0;
-  const pctValue = hasLiveSensors
-    ? Math.round(humiditySensors[0]?.value ?? 43)
-    : 43;
+  const targetMoisture = Number(profile?.targetSoilMoisturePct ?? 60);
 
-  const zones = [
-    {
-      id: "a",
-      name: `${activeCropName} — منطقة أ`,
+  // Dynamic zones based on actual well sensors
+  const zones = humidityReadings.map((r, i) => {
+    const pctValue = Math.round(r.value);
+    const color = ZONE_COLORS[i % ZONE_COLORS.length];
+    return {
+      id: r.wellId,
+      name: `${activeCropName} — ${r.wellName}`,
       pct: pctValue,
-      target: Number(profile?.targetSoilMoisturePct ?? 60),
-      color: "#D97706",
-      hint:
-        pctValue < Number(profile?.targetSoilMoisturePct ?? 60) - 10
-          ? "تحتاج ري فوراً"
-          : "حالة مستقرة",
-    },
-    {
-      id: "b",
-      name: "بنجر السكر — منطقة ب",
-      pct: 68,
-      target: 65,
-      color: "#0D9E7E",
-      hint: "النطاق المثالي",
-    },
-    {
-      id: "c",
-      name: "نخيل التمر — منطقة ج",
-      pct: 55,
-      target: 50,
-      color: "#1D6FA8",
-      hint: "مقبول — رطوبة كافية",
-    },
-  ];
+      target: targetMoisture,
+      color: color,
+      hint: pctValue < targetMoisture - 10 ? "تحتاج ري فوراً" : "حالة مستقرة",
+    };
+  });
+
+  // Prepare generic chart series
+  const chartSeries: SoilChartSeries[] = humidityReadings.map((r, i) => ({
+    wellId: r.wellId,
+    wellName: r.wellName,
+    color: ZONE_COLORS[i % ZONE_COLORS.length]!,
+  }));
+
+  // Pivot historical data by time bucket
+  const pointsByDate = new Map<string, SoilChartPoint>();
+  for (const point of humidityHistory) {
+    // Label by short weekday
+    const dateLabel = new Date(point.bucket).toLocaleDateString("ar-EG", { weekday: "short" });
+    if (!pointsByDate.has(dateLabel)) {
+      pointsByDate.set(dateLabel, { label: dateLabel });
+    }
+    const currentPoint = pointsByDate.get(dateLabel)!;
+    currentPoint[point.wellId] = point.avgValue;
+  }
+  const chartData = Array.from(pointsByDate.values());
+
+  const soilTempC = temperatureReadings[0]?.value;
 
   const refreshKey = Date.now();
-
-  // TODO: Replace hardcoded chartData with actual historical sensor readings
-  // For now, use live sensor data for the latest entry
-  const chartData = [
-    { name: "سبت", wheat: 65, beet: 70, palms: 55 },
-    { name: "أحد", wheat: 60, beet: 68, palms: 53 },
-    { name: "اثن", wheat: 55, beet: 70, palms: 54 },
-    { name: "ثلا", wheat: 50, beet: 66, palms: 56 },
-    { name: "أرب", wheat: 48, beet: 67, palms: 55 },
-    { name: "خمس", wheat: 45, beet: 69, palms: 57 },
-    { name: "جمع", wheat: pctValue, beet: 68, palms: 55 },
-  ];
 
   return (
     <div className="mx-auto max-w-screen-2xl space-y-10 p-6 md:p-8" dir="rtl">
@@ -180,27 +166,32 @@ export default async function SoilPage() {
           </p>
         </div>
 
-        {/* ← Updated Refresh Button */}
         <RefreshButton />
       </div>
 
       {/* Soil Gauges */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {zones.map((zone) => (
-          <div
-            key={`${zone.id}-${refreshKey}`}
-            className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
-          >
-            <SoilGauge
-              percentage={zone.pct}
-              label={zone.name}
-              target={zone.target}
-              statusText={zone.hint}
-              color={zone.color}
-            />
-          </div>
-        ))}
-      </div>
+      {zones.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-500">
+          لا توجد مستشعرات رطوبة مسجلة لهذه المزرعة حالياً.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {zones.map((zone) => (
+            <div
+              key={`${zone.id}-${refreshKey}`}
+              className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+            >
+              <SoilGauge
+                percentage={zone.pct}
+                label={zone.name}
+                target={zone.target}
+                statusText={zone.hint}
+                color={zone.color}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Chart + Composition */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -210,25 +201,18 @@ export default async function SoilPage() {
               رطوبة التربة — آخر 7 أيام
             </h3>
             <div className="flex items-center gap-6 text-xs font-medium">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-amber-600" />
-                <span className="text-slate-600">منطقة أ</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-teal-600" />
-                <span className="text-slate-600">منطقة ب</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-blue-600" />
-                <span className="text-slate-600">منطقة ج</span>
-              </div>
+              {chartSeries.map((s) => (
+                <div key={s.wellId} className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="text-slate-600 truncate max-w-[150px]">{s.wellName}</span>
+                </div>
+              ))}
             </div>
           </div>
-          <SoilMoistureChart key={refreshKey} data={chartData} />
+          <SoilMoistureChart key={refreshKey} data={chartData} series={chartSeries} />
         </div>
 
         <div className="space-y-6 lg:col-span-4">
-          {/* TODO: Wire SoilCompositionCard to real soil data from API or database */}
           <SoilCompositionCard clay={32} sand={48} silt={20} />
 
           <div className="bg-navy rounded-3xl p-8 text-white">
@@ -238,20 +222,22 @@ export default async function SoilPage() {
               </div>
               <div className="text-base font-semibold">حرارة التربة</div>
             </div>
-            {/* TODO: Replace hardcoded values with real soil temperature, evaporation, and drainage data */}
-            <div className="mb-8 text-5xl font-semibold tabular-nums">26°م</div>
+            
+            <div className="mb-8 text-5xl font-semibold tabular-nums">
+              {soilTempC !== undefined ? `${soilTempC.toFixed(1)}°م` : "—"}
+            </div>
             <div className="grid grid-cols-2 gap-6 border-t border-white/10 pt-6">
               <div>
                 <div className="text-xs font-medium text-blue-200">
                   التبخر اليومي
                 </div>
-                <div className="text-2xl font-semibold">9.2 mm</div>
+                <div className="text-2xl font-semibold">غير متوفر</div>
               </div>
               <div>
                 <div className="text-xs font-medium text-blue-200">
                   سعة التصريف
                 </div>
-                <div className="text-2xl font-semibold">عالية</div>
+                <div className="text-2xl font-semibold">غير متوفر</div>
               </div>
             </div>
           </div>
