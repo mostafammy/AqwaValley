@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "~/server/db";
 import { well, district, sensors, sensorData } from "~/server/db/schema";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { WaterDropGauge } from "./_components/water-drop-gauge";
 import { ReadingsChart }  from "./_components/readings-chart";
 import { WellAlerts }     from "./_components/well-alerts";
