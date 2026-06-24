@@ -12,7 +12,19 @@ async function fetchMetrics(
   wellId: string,
   rangeHours: number,
   bucketMinutes: number,
+  sensorType?: string,
+  previousPeriod: boolean = false,
+  anchorDate: Date = new Date(),
 ) {
+  const timeFilter = previousPeriod
+    ? sql`sd.timestamp >= ${anchorDate.toISOString()}::timestamp with time zone - (${(rangeHours * 2).toString()} || ' hours')::interval AND sd.timestamp < ${anchorDate.toISOString()}::timestamp with time zone - (${rangeHours.toString()} || ' hours')::interval`
+    : sql`sd.timestamp >= ${anchorDate.toISOString()}::timestamp with time zone - (${rangeHours.toString()} || ' hours')::interval AND sd.timestamp <= ${anchorDate.toISOString()}::timestamp with time zone`;
+
+  let typeFilter = sql`1=1`;
+  if (sensorType) {
+    typeFilter = sql`s.type = ${sensorType}::sensor_type`;
+  }
+
   const result = await db.execute(sql`
     SELECT
       time_bucket(${bucketMinutes.toString() + " minutes"}::interval, sd.timestamp) AS bucket,
@@ -25,7 +37,8 @@ async function fetchMetrics(
     FROM sensor_data sd
     JOIN sensors s ON s.id = sd.sensor_id
     WHERE s.well_id = ${wellId}::uuid
-      AND sd.timestamp >= NOW() - (${rangeHours.toString()} || ' hours')::interval
+      AND ${timeFilter}
+      AND ${typeFilter}
     GROUP BY bucket, s.type, s.unit
     ORDER BY bucket ASC
   `);
@@ -77,6 +90,8 @@ const querySchema = z.object({
         .max(24 * 60),
     ),
   format: z.enum(["json", "csv"]).optional().default("json"),
+  sensorType: z.string().optional(),
+  compare: z.string().transform(v => v === 'true').optional().default('false'),
 });
 
 const paramsSchema = z.object({
@@ -159,7 +174,7 @@ export async function GET(
       );
     }
 
-    const { range, bucket, format } = parsedQuery.data;
+    const { range, bucket, format, sensorType, compare } = parsedQuery.data;
 
     const [existingWell] = await db
       .select({ id: well.id })
@@ -171,18 +186,42 @@ export async function GET(
       return errorResponse(404, "WELL_NOT_FOUND", "Well not found", { wellId });
     }
 
-    const rows = await fetchMetrics(wellId, range, bucket);
+    // Since the database contains historical demo data (e.g. from months ago), 
+    // using wall-clock NOW() means 1d/1w/1m views return empty.
+    // We anchor to the most recent data point for this well, falling back to NOW().
+    const result = await db.execute(sql`
+      SELECT MAX(last_updated_at) as max_ts 
+      FROM latest_sensor_state 
+      WHERE well_id = ${wellId}::uuid
+    `);
+    const maxTsStr = (result[0] as any)?.max_ts;
+    const anchorDate = maxTsStr ? new Date(maxTsStr) : new Date();
+
+    const currentRows = await fetchMetrics(wellId, range, bucket, sensorType, false, anchorDate);
+    let comparisonRows: typeof currentRows = [];
+
+    if (compare) {
+      comparisonRows = await fetchMetrics(wellId, range, bucket, sensorType, true, anchorDate);
+    }
 
     if (format === "csv") {
-      return new NextResponse(toCsv(rows), {
+      return new NextResponse(toCsv(currentRows), {
         headers: {
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="well-${wellId}-metrics.csv"`,
+          "Cache-Control": "public, s-maxage=25, stale-while-revalidate=15"
         },
       });
     }
 
-    return NextResponse.json({ wellId, range, bucket, rows });
+    return NextResponse.json(
+      { wellId, range, bucket, rows: currentRows, comparisonRows },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=25, stale-while-revalidate=15"
+        }
+      }
+    );
   } catch (error) {
     console.error("[metrics_route_error]", error);
     return errorResponse(500, "INTERNAL_ERROR", "Failed to fetch well metrics");
