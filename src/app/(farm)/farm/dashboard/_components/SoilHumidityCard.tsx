@@ -1,10 +1,10 @@
 "use client";
 
 import { ThermometerSun } from "lucide-react";
-import type { SoilReading } from "../page";
+import type { SoilSensorReading } from "~/server/repositories/soil-data.repository";
 
 type SoilHumidityCardProps = {
-  soilReadings: SoilReading[];
+  soilReadings: SoilSensorReading[];
 };
 
 export function SoilHumidityCard({ soilReadings }: SoilHumidityCardProps) {
@@ -24,7 +24,7 @@ export function SoilHumidityCard({ soilReadings }: SoilHumidityCardProps) {
         ) : (
           <div className="space-y-2">
             {soilReadings.map((reading) => (
-              <div key={reading.sensorId} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <div key={reading.wellId} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-lg border border-transparent hover:border-gray-100">
                 <div className="flex items-center gap-3">
                   <div
                     style={{
@@ -34,12 +34,12 @@ export function SoilHumidityCard({ soilReadings }: SoilHumidityCardProps) {
                       backgroundColor: reading.value < 30 ? "var(--color-danger)" : "var(--color-teal)",
                     }}
                   />
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-navy)" }}>
-                    بئر {reading.wellId?.slice(0, 6) ?? ""}
+                  <div className="text-[13px] font-semibold text-navy">
+                    {reading.wellName}
                   </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--color-text)" }}>
-                  {reading.value}%
+                <div className="text-[14px] font-bold text-gray-800">
+                  {Math.round(reading.value)}%
                 </div>
               </div>
             ))}
