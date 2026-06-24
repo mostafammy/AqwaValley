@@ -484,15 +484,15 @@ function ReportDetailModal({
     },
   });
 
-  useEffect(() => {
-    if (!downloadingId || !data) return;
-    const artifact = data.artifacts.find((a) => a.id === downloadingId);
-    if (artifact) window.open(`/api/reports/download/${artifact.id}`, "_blank");
-    setDownloadingId(null);
-  }, [downloadingId, data]);
-
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
+  };
+
+  const handleDownload = (artifactId: string) => {
+    if (downloadingId !== null) return;
+    setDownloadingId(artifactId);
+    window.open(`/api/reports/download/${artifactId}`, "_blank");
+    setTimeout(() => setDownloadingId(null), 1000);
   };
 
   const handleDelete = () => {
@@ -645,12 +645,16 @@ function ReportDetailModal({
                         {artifact.status === "ready" ? (
                           <motion.button
                             whileTap={tapFeedback}
-                            onClick={() => setDownloadingId(artifact.id)}
-                            disabled={downloadingId !== null}
+                            onClick={() => handleDownload(artifact.id)}
+                            disabled={downloadingId === artifact.id}
                             className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold text-white transition-all disabled:opacity-50"
                           >
-                            <Download className="h-3.5 w-3.5" />
-                            تحميل
+                            {downloadingId === artifact.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Download className="h-3.5 w-3.5" />
+                            )}
+                            {downloadingId === artifact.id ? "جاري التحميل..." : "تحميل"}
                           </motion.button>
                         ) : (
                           <Badge variant="warn" dot>
