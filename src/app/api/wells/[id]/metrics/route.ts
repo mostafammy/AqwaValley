@@ -13,7 +13,7 @@ async function fetchMetrics(
   rangeHours: number,
   bucketMinutes: number,
   sensorType?: string,
-  previousPeriod: boolean = false,
+  previousPeriod = false,
   anchorDate: Date = new Date(),
 ) {
   const timeFilter = previousPeriod
@@ -194,7 +194,8 @@ export async function GET(
       FROM latest_sensor_state 
       WHERE well_id = ${wellId}::uuid
     `);
-    const maxTsStr = (result[0] as any)?.max_ts;
+    const record = result[0] as { max_ts?: string | Date | null } | undefined;
+    const maxTsStr = record?.max_ts;
     const anchorDate = maxTsStr ? new Date(maxTsStr) : new Date();
 
     const currentRows = await fetchMetrics(wellId, range, bucket, sensorType, false, anchorDate);
