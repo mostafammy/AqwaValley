@@ -9,7 +9,13 @@ import {
   latestSensorState,
   userRoleAssignment,
   role,
+  well,
+  userProfile,
+  cropProfile,
+  cropTypeLookup,
+  growthStageLookup,
 } from "~/server/db/schema";
+import { SoilDataRepository } from "~/server/repositories/soil-data.repository";
 import { api } from "~/trpc/server";
 
 import { SignOutButton } from "~/app/_components/auth/SignOutButton";
@@ -25,14 +31,6 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type SoilReading = {
-  sensorId: string;
-  wellId: string;
-  value: number;
-  unit: string;
-  type: string;
-  lastUpdatedAt: Date;
-};
 
 // ─── Helper: Check if user has admin/manager role ──────────────────────────
 
@@ -155,18 +153,8 @@ export default async function FarmDashboardPage() {
   // ── Step 3: Soil humidity from latestSensorState ──────────────────────────
   const wellIds = farmWellRows.map((fw) => fw.wellId);
 
-  const soilReadings: SoilReading[] =
-    wellIds.length > 0
-      ? await db
-          .select()
-          .from(latestSensorState)
-          .where(
-            and(
-              inArray(latestSensorState.wellId, wellIds),
-              eq(latestSensorState.type, "humidity"),
-            ),
-          )
-      : [];
+  const repo = new SoilDataRepository();
+  const soilReadings = await repo.getLatestHumidityByWells(wellIds);
 
   const avgSoilHumidity =
     soilReadings.length > 0
