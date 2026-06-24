@@ -558,6 +558,20 @@ const SENSOR_SPECS = [
     mean: 2.1,
     stddev: 0.15,
   },
+  {
+    type: "humidity" as const,
+    unit: "percent" as const,
+    name: "Soil Moisture Sensor",
+    mean: 55.0,
+    stddev: 8.0,
+  },
+  {
+    type: "temperature" as const,
+    unit: "celsius" as const,
+    name: "Soil Temperature Sensor",
+    mean: 26.5,
+    stddev: 3.5,
+  },
 ];
 
 const wellStatusValues = [
