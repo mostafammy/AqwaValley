@@ -11,16 +11,30 @@ import {
   Legend,
 } from "recharts";
 
+export type SoilChartSeries = {
+  wellId: string;
+  wellName: string;
+  color: string;
+};
+
+export type SoilChartPoint = {
+  label: string;
+} & Record<string, number>; // wellId -> value
+
 interface SoilMoistureChartProps {
-  data: {
-    name: string;
-    wheat: number;
-    beet: number;
-    palms: number;
-  }[];
+  data: SoilChartPoint[];
+  series: SoilChartSeries[];
 }
 
-export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
+export function SoilMoistureChart({ data, series }: SoilMoistureChartProps) {
+  if (data.length === 0 || series.length === 0) {
+    return (
+      <div className="flex h-[320px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-400">
+        لا توجد بيانات رطوبة كافية للعرض
+      </div>
+    );
+  }
+
   return (
     <div className="h-[320px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -34,7 +48,7 @@ export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
             stroke="#f1f5f9"
           />
           <XAxis
-            dataKey="name"
+            dataKey="label"
             stroke="#94a3b8"
             fontSize={13}
             tickLine={false}
@@ -55,11 +69,13 @@ export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
               borderRadius: "16px",
               border: "1px solid #e2e8f0",
               boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+              direction: "rtl",
             }}
-            formatter={(value) => {
+            formatter={(value, name) => {
               if (value === undefined || value === null)
-                return ["—", undefined];
-              return [`${Number(value)}%`, undefined];
+                return ["—", name];
+              // map wellId back to wellName for tooltip if needed, but Recharts handles `name` via dataKey or name prop on Line.
+              return [`${Number(value).toFixed(1)}%`, name];
             }}
           />
           <Legend
@@ -68,36 +84,20 @@ export function SoilMoistureChart({ data }: SoilMoistureChartProps) {
             iconType="circle"
             wrapperStyle={{ paddingBottom: 20, fontSize: 13 }}
           />
-          <Line
-            type="monotone"
-            dataKey="wheat"
-            name="قمح (منطقة أ)"
-            stroke="#D97706"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            animationDuration={1500}
-            animationBegin={0}
-          />
-          <Line
-            type="monotone"
-            dataKey="beet"
-            name="بنجر (منطقة ب)"
-            stroke="#0D9E7E"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            animationDuration={1500}
-            animationBegin={300}
-          />
-          <Line
-            type="monotone"
-            dataKey="palms"
-            name="نخيل (منطقة ج)"
-            stroke="#1D6FA8"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            animationDuration={1500}
-            animationBegin={600}
-          />
+          
+          {series.map((s, idx) => (
+            <Line
+              key={s.wellId}
+              type="monotone"
+              dataKey={s.wellId}
+              name={s.wellName}
+              stroke={s.color}
+              strokeWidth={3}
+              dot={{ r: 4 }}
+              animationDuration={1500}
+              animationBegin={idx * 300}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>
