@@ -74,7 +74,7 @@ function getR2Client() {
   const cfg = requireR2Config();
   r2ClientSingleton = new S3Client({
     region: "auto",
-    endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
+    endpoint: process.env.R2_ENDPOINT,
     credentials: {
       accessKeyId: cfg.accessKeyId,
       secretAccessKey: cfg.secretAccessKey,
