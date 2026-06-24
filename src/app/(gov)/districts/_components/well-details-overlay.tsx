@@ -124,7 +124,11 @@ export function WellDetailsOverlay({ well, onClose }: WellDetailsOverlayProps) {
                 transition={{ delay: 0.3, duration: 0.3 }}
                 className="mt-8"
               >
-                <ReadingsChart wellId={well.id} />
+                <ReadingsChart 
+                  wellId={well.id} 
+                  depthM={null} 
+                  currentValue={well.levelPct} 
+                />
               </motion.div>            </motion.div>
           </motion.div>
         </div>
