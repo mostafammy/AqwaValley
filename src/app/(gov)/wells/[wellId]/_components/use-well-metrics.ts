@@ -26,7 +26,7 @@ export const RANGES = [
 ] as const;
 
 export type RangeKey = (typeof RANGES)[number]["key"];
-export type SensorType = "water_level" | "pressure" | "flow_rate";
+export type SensorType = "water_level" | "pressure" | "flow_rate" | "humidity" | "temperature";
 
 async function fetchMetrics(
   wellId: string,
