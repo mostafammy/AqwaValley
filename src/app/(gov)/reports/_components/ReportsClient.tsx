@@ -488,11 +488,29 @@ function ReportDetailModal({
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleDownload = (artifactId: string) => {
+  const handleDownload = async (artifactId: string, format: string) => {
     if (downloadingId !== null) return;
     setDownloadingId(artifactId);
-    window.open(`/api/reports/download/${artifactId}`, "_blank");
-    setTimeout(() => setDownloadingId(null), 1000);
+    try {
+      const result = await utils.reports.getDownloadLink.fetch({
+        reportArtifactId: artifactId,
+      });
+      const url = (result as { signedUrl?: string }).signedUrl;
+      if (!url) throw new Error("No signed URL returned");
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.download = `report-${artifactId.slice(0, 8)}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Download failed", err);
+      alert("فشل تحميل التقرير: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setTimeout(() => setDownloadingId(null), 1000);
+    }
   };
 
   const handleDelete = () => {
@@ -645,7 +663,7 @@ function ReportDetailModal({
                         {artifact.status === "ready" ? (
                           <motion.button
                             whileTap={tapFeedback}
-                            onClick={() => handleDownload(artifact.id)}
+                            onClick={() => handleDownload(artifact.id, artifact.format)}
                             disabled={downloadingId === artifact.id}
                             className="bg-blue-600 hover:bg-blue-700 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold text-white transition-all disabled:opacity-50"
                           >
