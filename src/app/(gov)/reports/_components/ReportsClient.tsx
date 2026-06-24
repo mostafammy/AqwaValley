@@ -28,6 +28,7 @@ import {
   FileSpreadsheet,
   Calendar,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { springs, variants, tapFeedback } from "~/lib/motion";
@@ -463,7 +464,7 @@ function ReportDetailModal({
   onClose: () => void;
   onDeleted?: () => void;
 }) {
-  const { data, isLoading, error } = api.reports.getJob.useQuery({
+  const { data, isLoading, isFetching, error } = api.reports.getJob.useQuery({
     reportJobId: jobId,
   });
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -509,7 +510,7 @@ function ReportDetailModal({
         animate="show"
         exit="exit"
         variants={variants.modal}
-        className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-[24px] bg-white shadow-2xl sm:max-w-lg sm:rounded-[24px]"
+        className="flex max-h-[90vh] w-full flex-col overflow-hidden bg-white shadow-2xl sm:max-w-lg sm:rounded-[24px]"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
@@ -518,6 +519,9 @@ function ReportDetailModal({
               <FileText className="h-4 w-4 text-blue-600" />
             </div>
             <span className="text-slate-800 font-bold">تفاصيل التقرير</span>
+            {(isLoading || isFetching) && (
+              <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+            )}
           </div>
           <button
             onClick={onClose}
@@ -726,6 +730,7 @@ function ReportsTable({
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
   const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+  const [openingJobId, setOpeningJobId] = useState<string | null>(null);
   const pageSize = 10;
   const utils = api.useUtils();
 
@@ -747,6 +752,11 @@ function ReportsTable({
 
   const handleDelete = (jobId: string) => {
     deleteMutation.mutate({ reportJobId: jobId });
+  };
+
+  const handleView = (jobId: string) => {
+    setOpeningJobId(jobId);
+    onViewReport(jobId);
   };
 
   const jobs = data?.items ?? [];
@@ -816,13 +826,18 @@ function ReportsTable({
                 whileTap={{ scale: 0.99 }}
                 className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm hover:border-slate-200 transition-all flex flex-col gap-3.5 relative overflow-hidden"
               >
-                <div 
-                  className="flex items-start justify-between cursor-pointer"
-                  onClick={() => onViewReport(job.id)}
+                <div
+                  className={`flex items-start justify-between cursor-pointer ${openingJobId === job.id ? "pointer-events-none opacity-60" : ""}`}
+                  onClick={() => handleView(job.id)}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="text-slate-800 text-sm font-bold truncate">
-                      {REPORT_TYPE_LABELS[job.reportType] ?? job.reportType}
+                    <div className="flex items-center gap-2 text-slate-800 text-sm font-bold truncate">
+                      {openingJobId === job.id && (
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500 shrink-0" />
+                      )}
+                      <span className="truncate">
+                        {REPORT_TYPE_LABELS[job.reportType] ?? job.reportType}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
                       <Calendar className="h-3.5 w-3.5 shrink-0" />
@@ -873,9 +888,13 @@ function ReportsTable({
                         className="flex items-center gap-2"
                       >
                         <button
-                          onClick={() => onViewReport(job.id)}
-                          className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors"
+                          onClick={() => handleView(job.id)}
+                          disabled={openingJobId !== null}
+                          className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors disabled:opacity-60 flex items-center gap-1.5"
                         >
+                          {openingJobId === job.id && (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          )}
                           عرض الملف
                         </button>
                         <button
@@ -942,11 +961,16 @@ function ReportsTable({
                 <motion.tr
                   key={job.id}
                   whileHover={{ backgroundColor: "rgba(248, 250, 252, 0.5)" }}
-                  className="cursor-pointer transition-colors duration-150"
-                  onClick={() => onViewReport(job.id)}
+                  className={`transition-colors duration-150 ${openingJobId === job.id ? "cursor-wait" : "cursor-pointer"}`}
+                  onClick={() => handleView(job.id)}
                 >
                   <td className="px-6 py-4 font-mono text-xs text-slate-400">
-                    {job.id.slice(0, 8)}...
+                    <div className="flex items-center gap-2">
+                      {openingJobId === job.id && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500" />
+                      )}
+                      {job.id.slice(0, 8)}...
+                    </div>
                   </td>
                   <td className="text-slate-800 px-6 py-4 font-bold">
                     {REPORT_TYPE_LABELS[job.reportType] ?? job.reportType}
@@ -998,9 +1022,13 @@ function ReportsTable({
                             className="flex items-center gap-2"
                           >
                             <button
-                              onClick={() => onViewReport(job.id)}
-                              className="text-xs font-bold text-blue-600 hover:underline px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                              onClick={() => handleView(job.id)}
+                              disabled={openingJobId !== null}
+                              className="text-xs font-bold text-blue-600 hover:underline px-2.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-60 flex items-center gap-1.5"
                             >
+                              {openingJobId === job.id && (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              )}
                               عرض
                             </button>
                             <button
@@ -1059,7 +1087,7 @@ function ReportsTable({
 
 export function ReportsClient() {
   const [viewingReportId, setViewingReportId] = useState<string | null>(null);
-
+  const [openingJobId, setOpeningJobId] = useState<string | null>(null);
   return (
     <motion.div
       initial="hidden"
@@ -1083,7 +1111,12 @@ export function ReportsClient() {
         </motion.div>
         
         <motion.div variants={variants.fadeSlideUp}>
-          <ReportsTable onViewReport={setViewingReportId} />
+          <ReportsTable
+            onViewReport={(jobId) => {
+              setOpeningJobId(jobId);
+              setViewingReportId(jobId);
+            }}
+          />
         </motion.div>
       </div>
 
@@ -1091,8 +1124,14 @@ export function ReportsClient() {
         {viewingReportId && (
           <ReportDetailModal
             jobId={viewingReportId}
-            onClose={() => setViewingReportId(null)}
-            onDeleted={() => setViewingReportId(null)}
+            onClose={() => {
+              setOpeningJobId(null);
+              setViewingReportId(null);
+            }}
+            onDeleted={() => {
+              setOpeningJobId(null);
+              setViewingReportId(null);
+            }}
           />
         )}
       </AnimatePresence>
