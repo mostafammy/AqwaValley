@@ -54,9 +54,9 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
     compare
   );
 
-  const rows = data?.rows || [];
-  const comparisonRows = data?.comparisonRows || [];
-  const unit = rows[0]?.unit || (activeSensor === "water_level" ? "متر" : "");
+  const rows = data?.rows ?? [];
+  const comparisonRows = data?.comparisonRows ?? [];
+  const unit = rows[0]?.unit ?? (activeSensor === "water_level" ? "متر" : "");
 
   // Merge current and comparison data for Recharts if comparing
   const mergedData = rows.map((r, i) => {
@@ -218,11 +218,11 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
                   direction: "rtl",
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
-                labelFormatter={(label: any) => {
+                labelFormatter={(label: unknown) => {
                   if (!label) return "";
                   return new Date(label as string).toLocaleString("ar-EG");
                 }}
-                formatter={(value: any, name: any) => {
+                formatter={(value: unknown, name: unknown) => {
                   const valNum = Number(value);
                   const nameStr = String(name);
                   if (nameStr === "avg_value") return [`${valNum.toFixed(2)} ${unit}`, "المتوسط"];
