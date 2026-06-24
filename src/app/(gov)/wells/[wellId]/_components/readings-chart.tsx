@@ -23,7 +23,7 @@ import {
   ReferenceArea,
   ReferenceLine,
 } from "recharts";
-import { Download, Activity, Droplets, Gauge } from "lucide-react";
+import { Download, Activity, Droplets, Gauge, Thermometer, ThermometerSun } from "lucide-react";
 
 interface ReadingsChartProps {
   wellId: string;
@@ -39,6 +39,8 @@ const SENSOR_TYPES: { key: SensorType; label: string; icon: React.ReactNode }[] 
   { key: "water_level", label: "المنسوب", icon: <Droplets size={14} /> },
   { key: "pressure", label: "الضغط", icon: <Gauge size={14} /> },
   { key: "flow_rate", label: "التدفق", icon: <Activity size={14} /> },
+  { key: "humidity", label: "الرطوبة", icon: <ThermometerSun size={14} /> },
+  { key: "temperature", label: "الحرارة", icon: <Thermometer size={14} /> },
 ];
 
 export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: ReadingsChartProps) {
