@@ -39,8 +39,8 @@ export function SoilCompositionCard({ clay, sand, silt }: SoilCompositionProps) 
           ))}
         </div>
 
-        <div className="mt-8 p-5 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
-          النسب أعلاه تمثل التحليل الفيزيائي لطبقات التربة. تساعد هذه البيانات النظام في حساب معامل نفاذية المياه.
+        <div className="mt-8 p-5 bg-amber-50 rounded-2xl border border-amber-100 text-xs text-amber-700 leading-relaxed font-semibold">
+          ملاحظة: البيانات المعروضة أعلاه استرشادية. جاري العمل على ربط بيانات تحليل التربة الحقيقية بقاعدة البيانات.
         </div>
       </div>
     </div>
