@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "~/server/db";
 import { well, district, sensors, sensorData } from "~/server/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { WaterDropGauge } from "./_components/water-drop-gauge";
 import { ReadingsChart }  from "./_components/readings-chart";
 import { WellAlerts }     from "./_components/well-alerts";
@@ -63,7 +63,21 @@ async function getWellDetail(wellId: string) {
     })).reverse();
   }
 
-  return { ...row, readings };
+  // Fetch thresholds
+  const alertRules = await db.query.alertRule.findMany({
+    where: (rules, { and, eq }) => and(eq(rules.wellId, wellId), eq(rules.sensorType, "water_level"))
+  });
+
+  const thresholds: { min?: number, max?: number } = {};
+  for (const rule of alertRules) {
+    if (rule.operator === "lt" || rule.operator === "lte") {
+      thresholds.min = rule.threshold;
+    } else if (rule.operator === "gt" || rule.operator === "gte") {
+      thresholds.max = rule.threshold;
+    }
+  }
+
+  return { ...row, readings, thresholds };
 }
 
 export default async function WellDetailPage({
@@ -140,7 +154,12 @@ export default async function WellDetailPage({
       </div>
 
       {/* Readings Chart */}
-      <ReadingsChart wellId={data.id} />
+      <ReadingsChart 
+        wellId={data.id} 
+        depthM={data.depthM ? Number(data.depthM) : null}
+        currentValue={levelPct}
+        thresholds={data.thresholds}
+      />
 
       {/* Alerts */}
       <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
