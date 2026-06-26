@@ -570,7 +570,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
       void utils.irrigation.getLatestPlan.invalidate({ farmId });
       void utils.irrigation.listPlans.invalidate({ farmId });
       // Redirect to irrigate page and auto-start
-      router.push("/farm/irrigate?auto=1");
+      router.push("/farm/irrigate?auto=0");
     },
   });
   const plan = latestPlanRecord?.plan as PlanView | undefined;
@@ -597,7 +597,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
   }
 
   return (
-    <div className="w-sm space-y-6 md:w-full md:space-y-10" dir="rtl">
+    <div className="w-full space-y-6 md:space-y-10" dir="rtl">
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center md:gap-10">
         <div>
@@ -844,7 +844,7 @@ export function AiPlanClient({ farmId, farmName }: AiPlanClientProps) {
         )}
       </AnimatePresence>
 
-      <div className="border-t pt-8">
+      <div className="w-full overflow-hidden border-t pt-8">
         <PlanHistorySection
           farmId={farmId}
           onActivate={(planId) => activatePlan.mutate({ planId })}

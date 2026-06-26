@@ -54,10 +54,12 @@ export function PlanHistorySection({
 
   if (plans?.length === 0 && !isLoading) return null;
 
-  return (
-    <div className="border-t border-gray-100 pt-12" id="history-section">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
+  return (<>
+  <div className="w-full max-w-full overflow-hidden">
+    <div className=" mb-8 grid grid-cols-2  ">
+
+        <div className="flex items-start flex-col w-full ">
+
           <h2 className="text-navy flex items-center gap-3 text-2xl font-black">
             <History className="h-6 w-6 text-blue-500" />
             سجل التوصيات السابقة
@@ -65,38 +67,44 @@ export function PlanHistorySection({
           <p className="mt-1 text-sm font-medium text-gray-400">
             مراجعة والاعتماد السريع للخطط السابقة
           </p>
+
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex justify-end gap-2">
+
           <motion.button
             whileTap={tapFeedback}
             onClick={() => scroll("right")}
             aria-label="التحريك لليمين"
-            className="hover:bg-white-light text-muted rounded-xl border border-gray-200 bg-white p-2 transition-colors"
+            className="hover:bg-white-light text-black rounded-xl border border-gray-200 bg-white p-2 transition-colors"
           >
             <ChevronRight className="h-5 w-5" />
           </motion.button>
+
           <motion.button
             whileTap={tapFeedback}
             onClick={() => scroll("left")}
             aria-label="التحريك لليسار"
-            className="hover:bg-white-light text-muted rounded-xl border border-gray-200 bg-white p-2 transition-colors"
+            className="hover:bg-white-light text-black rounded-xl border border-gray-200 bg-white p-2 transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </motion.button>
+
         </div>
       </div>
 
+<div className="border-t border-gray-100 pt-12 w-full max-w-full overflow-hidden" id="history-section">
+
       <div
         ref={scrollRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-8"
+        className="no-scrollbar flex max-w-full snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden scroll-smooth pb-8"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-64 min-w-[320px] animate-pulse rounded-3xl bg-gray-100"
+                className="h-64 w-72 shrink-0 animate-pulse rounded-3xl bg-gray-100"
               />
             ))
           : plans?.map((plan) => {
@@ -110,7 +118,7 @@ export function PlanHistorySection({
                 <Card
                   key={plan.id}
                   accent={isActivated ? "teal" : undefined}
-                  className={`min-w-[320px] snap-start border md:min-w-95 ${
+                  className={`w-80 shrink-0 snap-start border md:w-95 ${
                     isActivated
                       ? "ring-teal/5 shadow-ok/5 ring-4"
                       : "border-gray-100"
@@ -179,5 +187,7 @@ export function PlanHistorySection({
             })}
       </div>
     </div>
+  </div>
+    </>
   );
 }
