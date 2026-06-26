@@ -19,7 +19,8 @@ export type SoilChartSeries = {
 
 export type SoilChartPoint = {
   label: string;
-} & Record<string, number>; // wellId -> value
+  [wellId: string]: string | number;
+};
 
 interface SoilMoistureChartProps {
   data: SoilChartPoint[];

@@ -7,16 +7,21 @@ import {
   farm,
   cropTypeLookup,
   growthStageLookup,
+  farmWell,
   userRoleAssignment,
   role,
 } from "~/server/db/schema";
 import { eq, or } from "drizzle-orm";
-import { CropProfileForm } from "./_components/crop-profile-form";
+import {
+  CropProfileForm,
+  type LiveSoilSnapshot,
+} from "./_components/crop-profile-form";
 import { CropHistoryTable } from "./_components/crop-history-table";
 import { WaterReqCard } from "./_components/water-req-card";
 import { Skeleton } from "~/app/_components/UI/Skeleton";
 import { updateCropProfile } from "~/app/_actions/crops";
 import { SignOutButton } from "~/app/_components/auth/SignOutButton";
+import { SoilDataRepository } from "~/server/repositories/soil-data.repository";
 
 export const metadata = { title: "بروفايل المحاصيل | AquaValley" };
 
@@ -31,39 +36,81 @@ async function hasAdminOrManagerRole(userId: string): Promise<boolean> {
   return roleTypes.includes("admin") || roleTypes.includes("district_manager");
 }
 
+async function loadFarmAndLookups(userId: string) {
+  const farmQuery = db
+    .select({ id: farm.id, name: farm.name, districtId: farm.districtId })
+    .from(farm)
+    .where(
+      or(eq(farm.farmerUserId, userId), eq(farm.ownerId, userId)),
+    )
+    .limit(1);
+
+  const [[farmerFarm], cropTypes, growthStages] = await Promise.all([
+    farmQuery,
+    db.select().from(cropTypeLookup),
+    db.select().from(growthStageLookup),
+  ]);
+
+  let currentFarm: { id: string; name: string; districtId: string } | null =
+    farmerFarm ?? null;
+
+  if (!currentFarm && process.env.NODE_ENV === "development") {
+    const isAdminOrManager = await hasAdminOrManagerRole(userId);
+    if (isAdminOrManager && process.env.DEV_ALLOW_FALLBACK === "true") {
+      const [fallbackFarm] = await db
+        .select({ id: farm.id, name: farm.name, districtId: farm.districtId })
+        .from(farm)
+        .limit(1);
+      currentFarm = fallbackFarm ?? null;
+    }
+  }
+
+  return { currentFarm, cropTypes, growthStages };
+}
+
+async function loadLiveSoilSnapshot(farmId: string): Promise<LiveSoilSnapshot> {
+  const wellIds = await db
+    .select({ wellId: farmWell.wellId })
+    .from(farmWell)
+    .where(eq(farmWell.farmId, farmId))
+    .then((rows) => rows.map((r) => r.wellId));
+
+  if (wellIds.length === 0) {
+    return { currentMoisturePct: null, wellCount: 0, lastUpdatedAt: null };
+  }
+
+  const repo = new SoilDataRepository();
+  const readings = await repo.getLatestHumidityByWells(wellIds);
+  if (readings.length === 0) {
+    return { currentMoisturePct: null, wellCount: 0, lastUpdatedAt: null };
+  }
+
+  const avg =
+    readings.reduce((sum, r) => sum + Number(r.value), 0) / readings.length;
+  const lastUpdatedAt = readings
+    .map((r) => new Date(r.lastUpdatedAt).getTime())
+    .reduce((max, t) => (t > max ? t : max), 0);
+
+  return {
+    currentMoisturePct: Math.round(avg),
+    wellCount: readings.length,
+    lastUpdatedAt: new Date(lastUpdatedAt),
+  };
+}
+
 export default async function CropsPage() {
   const session = await getSession();
   if (!session?.user) redirect("/");
 
-  const [farmerFarm] = await db
-    .select({ id: farm.id })
-    .from(farm)
-    .where(
-      or(
-        eq(farm.farmerUserId, session.user.id),
-        eq(farm.ownerId, session.user.id),
-      ),
-    )
-    .limit(1);
-
-  let currentFarm = farmerFarm;
-
-  if (!currentFarm && process.env.NODE_ENV === "development") {
-    const isAdminOrManager = await hasAdminOrManagerRole(session.user.id);
-    if (isAdminOrManager && process.env.DEV_ALLOW_FALLBACK === "true") {
-      const [fallbackFarm] = await db
-        .select({ id: farm.id })
-        .from(farm)
-        .limit(1);
-      currentFarm = fallbackFarm;
-    }
-  }
+  const { currentFarm, cropTypes, growthStages } = await loadFarmAndLookups(
+    session.user.id,
+  );
 
   if (!currentFarm) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-4">
         <div className="max-w-md text-center">
-          <div className="mb-4 text-6xl">🚫</div>
+
           <h2 className="mb-2 text-xl font-bold text-gray-800">
             لا توجد مزرعة مرتبطة بحسابك
           </h2>
@@ -79,14 +126,15 @@ export default async function CropsPage() {
     );
   }
 
-  const [profile] = await db
-    .select()
-    .from(cropProfile)
-    .where(eq(cropProfile.farmId, currentFarm.id))
-    .limit(1);
-
-  const cropTypes = await db.select().from(cropTypeLookup);
-  const growthStages = await db.select().from(growthStageLookup);
+  const [profile, liveSoil] = await Promise.all([
+    db
+      .select()
+      .from(cropProfile)
+      .where(eq(cropProfile.farmId, currentFarm.id))
+      .limit(1)
+      .then((rows) => rows[0] ?? null),
+    loadLiveSoilSnapshot(currentFarm.id),
+  ]);
 
   return (
     <div
@@ -107,11 +155,12 @@ export default async function CropsPage() {
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-12">
         <div className="lg:col-span-8">
           <CropProfileForm
-            profile={profile ?? null}
+            profile={profile}
             farmId={currentFarm.id}
             updateAction={updateCropProfile}
             cropTypes={cropTypes}
             growthStages={growthStages}
+            liveSoil={liveSoil}
           />
         </div>
         <div className="lg:col-span-4">
@@ -119,7 +168,7 @@ export default async function CropsPage() {
             activeCropType={profile?.cropType ?? cropTypes[0]?.type ?? "wheat"}
             cropTypes={cropTypes}
           />
-        </div>{" "}
+        </div>
       </div>
 
       {/* History Table */}
