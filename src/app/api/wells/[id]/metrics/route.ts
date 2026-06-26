@@ -14,11 +14,10 @@ async function fetchMetrics(
   bucketMinutes: number,
   sensorType?: string,
   previousPeriod = false,
-  anchorDate: Date = new Date(),
 ) {
   const timeFilter = previousPeriod
-    ? sql`sd.timestamp >= ${anchorDate.toISOString()}::timestamp with time zone - (${(rangeHours * 2).toString()} || ' hours')::interval AND sd.timestamp < ${anchorDate.toISOString()}::timestamp with time zone - (${rangeHours.toString()} || ' hours')::interval`
-    : sql`sd.timestamp >= ${anchorDate.toISOString()}::timestamp with time zone - (${rangeHours.toString()} || ' hours')::interval AND sd.timestamp <= ${anchorDate.toISOString()}::timestamp with time zone`;
+    ? sql`sd.timestamp >= NOW() - (${(rangeHours * 2).toString()} || ' hours')::interval AND sd.timestamp < NOW() - (${rangeHours.toString()} || ' hours')::interval`
+    : sql`sd.timestamp >= NOW() - (${rangeHours.toString()} || ' hours')::interval AND sd.timestamp <= NOW()`;
 
   let typeFilter = sql`1=1`;
   if (sensorType) {
@@ -186,23 +185,11 @@ export async function GET(
       return errorResponse(404, "WELL_NOT_FOUND", "Well not found", { wellId });
     }
 
-    // Since the database contains historical demo data (e.g. from months ago), 
-    // using wall-clock NOW() means 1d/1w/1m views return empty.
-    // We anchor to the most recent data point for this well, falling back to NOW().
-    const result = await db.execute(sql`
-      SELECT MAX(last_updated_at) as max_ts 
-      FROM latest_sensor_state 
-      WHERE well_id = ${wellId}::uuid
-    `);
-    const record = result[0] as { max_ts?: string | Date | null } | undefined;
-    const maxTsStr = record?.max_ts;
-    const anchorDate = maxTsStr ? new Date(maxTsStr) : new Date();
-
-    const currentRows = await fetchMetrics(wellId, range, bucket, sensorType, false, anchorDate);
+    const currentRows = await fetchMetrics(wellId, range, bucket, sensorType);
     let comparisonRows: typeof currentRows = [];
 
     if (compare) {
-      comparisonRows = await fetchMetrics(wellId, range, bucket, sensorType, true, anchorDate);
+      comparisonRows = await fetchMetrics(wellId, range, bucket, sensorType, true);
     }
 
     if (format === "csv") {
