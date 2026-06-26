@@ -38,6 +38,8 @@ export function PlanHistorySection({
 
   if (plans?.length === 0 && !isLoading) return null;
 
+  const currentPlanId = plans?.find((p) => p.status === "ACTIVATED")?.id;
+
   return (
     <div className="w-full max-w-full" id="history-section">
       <div className="mb-8 flex items-start justify-between gap-4">
@@ -66,6 +68,7 @@ export function PlanHistorySection({
                 zones: [],
               };
               const isActivated = plan.status === "ACTIVATED";
+              const isCurrentPlan = plan.id === currentPlanId;
 
               return (
                 <Card
@@ -126,7 +129,7 @@ export function PlanHistorySection({
                         {isActivated ? "مُفعَّلة" : "مسودة"}
                       </span>
 
-                      {!isActivated ? (
+                      {!isCurrentPlan && (
                         <motion.button
                           whileTap={tapFeedback}
                           onClick={() => onActivate(plan.id)}
@@ -135,7 +138,9 @@ export function PlanHistorySection({
                           تطبيق الآن
                           <ArrowLeft className="h-3.5 w-3.5" />
                         </motion.button>
-                      ) : (
+                      )}
+
+                      {isCurrentPlan && (
                         <div className="text-teal bg-teal-light/30 border-teal/10 hidden shrink-0 items-center gap-1.5 rounded-xl border px-3.5 py-2 text-[11px] font-bold md:flex">
                           <CheckCircle className="h-4 w-4" />
                           الخطة الحالية
