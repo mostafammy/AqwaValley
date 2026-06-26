@@ -50,22 +50,27 @@ const DEFAULT_STAGE_DAYS: Record<GrowthStage, number> = {
   harvest: 0,
 };
 
+export const parseLocalDate = (value: string | Date): Date => {
+  if (value instanceof Date) return new Date(value.getTime());
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (match) {
+    const [, y, m, d] = match;
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+  return new Date(value);
+};
+
 export const computeExpectedHarvest = (
   plantedDate: string | Date | null | undefined,
-  currentStage: GrowthStage,
+  _currentStage: GrowthStage,
   stageDurations?: Partial<Record<GrowthStage, number>>,
 ): Date | null => {
   if (!plantedDate) return null;
-  const planted = plantedDate instanceof Date
-    ? plantedDate
-    : new Date(plantedDate);
+  const planted = parseLocalDate(plantedDate);
   if (Number.isNaN(planted.getTime())) return null;
 
-  const currentIdx = GROWTH_STAGE_ORDER.indexOf(currentStage);
-  if (currentIdx === -1) return null;
-
   let remainingDays = 0;
-  for (let i = currentIdx; i < GROWTH_STAGE_ORDER.length; i++) {
+  for (let i = 0; i < GROWTH_STAGE_ORDER.length; i++) {
     const stage = GROWTH_STAGE_ORDER[i]!;
     remainingDays +=
       stageDurations?.[stage] ?? DEFAULT_STAGE_DAYS[stage] ?? FALLBACK_STAGE_DAYS;

@@ -15,7 +15,9 @@ import { z } from "zod";
 import {
   computeExpectedHarvest,
   CROP_TARGET_MOISTURE,
+  parseLocalDate,
 } from "~/lib/crop-profile";
+import { growthStageLookup } from "~/server/db/schema";
 
 const UpdateCropSchema = z.object({
   farmId: z.string().uuid(),
@@ -58,9 +60,23 @@ export async function updateCropProfile(
     }
 
     const targetMoisture = CROP_TARGET_MOISTURE[cropType]?.target ?? 55;
+
+    const stageRows = await db
+      .select({
+        stage: growthStageLookup.stage,
+        estDurationDays: growthStageLookup.estDurationDays,
+      })
+      .from(growthStageLookup);
+    const stageDurations: Record<string, number> = {};
+    for (const row of stageRows) {
+      if (row.estDurationDays != null) stageDurations[row.stage] = row.estDurationDays;
+    }
+
+    const planted = parseLocalDate(plantedDate);
     const expectedHarvest = computeExpectedHarvest(
-      plantedDate,
+      planted,
       growthStage,
+      stageDurations,
     );
 
     await db.transaction(async (tx) => {
@@ -70,7 +86,7 @@ export async function updateCropProfile(
           cropType,
           growthStage,
           targetSoilMoisturePct: String(targetMoisture),
-          plantedDate: new Date(plantedDate),
+          plantedDate: planted,
           expectedHarvestDate: expectedHarvest,
           updatedAt: new Date(),
         })
@@ -86,7 +102,7 @@ export async function updateCropProfile(
         cropType,
         growthStage,
         targetSoilMoisturePct: String(targetMoisture),
-        plantedDate: new Date(plantedDate),
+        plantedDate: planted,
         expectedHarvestDate: expectedHarvest,
         harvestedDate: growthStage === "harvest" ? new Date() : null,
         recordedAt: new Date(),

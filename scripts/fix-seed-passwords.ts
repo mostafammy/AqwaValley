@@ -9,7 +9,7 @@
  */
 
 import { existsSync, readFileSync } from "fs";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { hashPassword } from "better-auth/crypto";
@@ -65,7 +65,12 @@ async function main() {
     const result = await db
       .update(schema.account)
       .set({ password: hashedPassword, updatedAt: new Date() })
-      .where(eq(schema.account.userId, u.id));
+      .where(
+        and(
+          eq(schema.account.userId, u.id),
+          eq(schema.account.providerId, "credential"),
+        ),
+      );
     if (result.count > 0) updatedAccounts += 1;
   }
 
