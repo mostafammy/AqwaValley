@@ -14,7 +14,7 @@ import { createHash, randomBytes, randomUUID } from "crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import bcryptjs from "bcryptjs";
+import { hashPassword } from "better-auth/crypto";
 
 import * as schema from "../src/server/db/schema";
 // auth import moved to dynamic imports inside functions to avoid early env validation
@@ -1039,8 +1039,8 @@ async function createRegionalUser(args: {
     });
 
     if (!existing) {
-      // Hash the password using bcryptjs
-      const hashedPassword = await bcryptjs.hash("password123", 10);
+      // Hash the password using Better Auth's internal hashing (scrypt)
+      const hashedPassword = await hashPassword("password123");
 
       // Create user directly in database
       const userId = randomUUID();
