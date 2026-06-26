@@ -20,7 +20,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceArea,
   ReferenceLine,
 } from "recharts";
 import { Download, Activity, Droplets, Gauge, Thermometer, ThermometerSun } from "lucide-react";

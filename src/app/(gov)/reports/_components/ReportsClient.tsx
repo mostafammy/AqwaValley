@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { api } from "~/trpc/react";
 import {
   Card,
@@ -123,7 +123,7 @@ function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex w-full items-center justify-between rounded-[10px] border px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
+        className={`flex w-full items-center justify-between rounded-chip border px-4 py-2.5 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
           isOpen
             ? "border-blue-400 bg-white text-blue-900 shadow-sm"
             : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/50"
@@ -400,7 +400,7 @@ function ReportGenerator() {
                   value={districtId}
                   onChange={(e) => setDistrictId(e.target.value)}
                   placeholder="أدخل معرّف المركز هنا (مثال: d6c873a7-...)"
-                  className="w-full rounded-[10px] border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:outline-none transition-all"
+                  className="w-full rounded-chip border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 focus:outline-none transition-all"
                 />
               </motion.div>
             )}
@@ -528,7 +528,7 @@ function ReportDetailModal({
         animate="show"
         exit="exit"
         variants={variants.modal}
-        className="flex max-h-[90vh] w-full flex-col overflow-hidden bg-white shadow-2xl sm:max-w-lg sm:rounded-[24px]"
+        className="flex max-h-[90vh] w-full flex-col overflow-hidden bg-white shadow-2xl sm:max-w-lg sm:rounded-panal"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">

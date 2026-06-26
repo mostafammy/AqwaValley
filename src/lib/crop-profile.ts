@@ -70,8 +70,7 @@ export const computeExpectedHarvest = (
   if (Number.isNaN(planted.getTime())) return null;
 
   let remainingDays = 0;
-  for (let i = 0; i < GROWTH_STAGE_ORDER.length; i++) {
-    const stage = GROWTH_STAGE_ORDER[i]!;
+  for (const stage of GROWTH_STAGE_ORDER) {
     remainingDays +=
       stageDurations?.[stage] ?? DEFAULT_STAGE_DAYS[stage] ?? FALLBACK_STAGE_DAYS;
   }

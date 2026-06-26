@@ -1,4 +1,4 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import { getSession } from "~/server/better-auth/server";
@@ -6,14 +6,8 @@ import { db } from "~/server/db";
 import {
   farm,
   farmWell,
-  latestSensorState,
   userRoleAssignment,
   role,
-  well,
-  userProfile,
-  cropProfile,
-  cropTypeLookup,
-  growthStageLookup,
 } from "~/server/db/schema";
 import { SoilDataRepository } from "~/server/repositories/soil-data.repository";
 import { api } from "~/trpc/server";

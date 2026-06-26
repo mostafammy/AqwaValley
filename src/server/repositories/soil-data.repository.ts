@@ -1,6 +1,6 @@
 import { db } from "../db/index";
 import { sql, inArray, eq, and } from "drizzle-orm";
-import { latestSensorState, well, sensors } from "../db/schema";
+import { latestSensorState, well } from "../db/schema";
 
 export type SoilSensorReading = {
   wellId: string;

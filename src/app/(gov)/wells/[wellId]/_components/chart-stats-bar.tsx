@@ -1,6 +1,4 @@
-import { motion } from "framer-motion";
 import { type MetricRow } from "./use-well-metrics";
-import { type sensorUnitEnum } from "~/server/db/schema";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 
 interface ChartStatsBarProps {
@@ -27,8 +25,7 @@ export function ChartStatsBar({ currentValue, unit, rows }: ChartStatsBarProps) 
   const minVal = Math.min(...rows.map(r => r.min_value ?? r.avg_value));
   const maxVal = Math.max(...rows.map(r => r.max_value ?? r.avg_value));
 
-  // Count coverage (assume 100% for now unless we calculate expected buckets vs actual)
-  const coverage = "100%"; // Simplified for now
+
 
   return (
     <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 border-t border-gray-100 pt-4">
