@@ -2,7 +2,7 @@
 
 import { type Dispatch, type SetStateAction } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, MapPin, AlertTriangle, Droplets, Activity, TrendingDown } from "lucide-react";
+import { ChevronDown, MapPin, AlertTriangle, Droplets, Activity } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { type DistrictWithWells } from "./districts-client";
 
