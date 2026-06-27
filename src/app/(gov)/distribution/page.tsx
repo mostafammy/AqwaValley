@@ -132,12 +132,12 @@ export default async function DistributionPage() {
   const totalWells = districts.reduce((sum, d) => sum + d.wellCount, 0);
 
   return (
-    <div className="space-y-4 p-4 md:p-6" dir="rtl">
+    <div className="space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5 md:space-y-6 md:p-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold md:text-3xl">توزيع المياه</h1>
-          <p className="mt-1 text-sm text-gray-500">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold sm:text-2xl md:text-3xl">توزيع المياه</h1>
+          <p className="mt-1 text-xs text-gray-500 sm:text-sm">
             متابعة الاستهلاك والحصص المائية
           </p>
         </div>
