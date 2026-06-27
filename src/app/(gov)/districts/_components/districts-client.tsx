@@ -5,6 +5,7 @@ import { LayoutGroup } from "framer-motion";
 import { CenterList } from "./center-list";
 import { WellsCanvas } from "./wells-canvas";
 import { WellDetailsOverlay } from "./well-details-overlay";
+import { MobileDistrictAccordion } from "./mobile-district-accordion";
 
 export type WellWithAlerts = {
   id: string;
@@ -46,7 +47,7 @@ export function DistrictsClient({ districts }: DistrictsClientProps) {
   let expandedWell = null;
   if (expandedWellId) {
     for (const d of districts) {
-      const found = d.wells.find(w => w.id === expandedWellId);
+      const found = d.wells.find((w) => w.id === expandedWellId);
       if (found) {
         expandedWell = found;
         break;
@@ -56,7 +57,18 @@ export function DistrictsClient({ districts }: DistrictsClientProps) {
 
   return (
     <LayoutGroup>
-      <div className="flex flex-col md:flex-row gap-6 relative">
+      {/* Mobile view: stacked accordion — each district expands to show its wells */}
+      <div className="block md:hidden">
+        <MobileDistrictAccordion
+          districts={districts}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onExpandWell={setExpandedWellId}
+        />
+      </div>
+
+      {/* Desktop view: side-by-side */}
+      <div className="hidden flex-col gap-6 md:flex md:flex-row">
         {/* Right Column: Center List (Nav) - 30% */}
         <div className="w-full md:w-[30%] flex-shrink-0">
           <CenterList
@@ -68,18 +80,18 @@ export function DistrictsClient({ districts }: DistrictsClientProps) {
 
         {/* Left Column: Wells Canvas - 70% */}
         {selectedDistrict && (
-          <WellsCanvas 
-            district={selectedDistrict} 
-            onExpandWell={setExpandedWellId} 
+          <WellsCanvas
+            district={selectedDistrict}
+            onExpandWell={setExpandedWellId}
           />
         )}
-
-        {/* Full Screen Overlay for Expanded Well */}
-        <WellDetailsOverlay 
-          well={expandedWell} 
-          onClose={() => setExpandedWellId(null)} 
-        />
       </div>
+
+      {/* Full Screen Overlay for Expanded Well */}
+      <WellDetailsOverlay
+        well={expandedWell}
+        onClose={() => setExpandedWellId(null)}
+      />
     </LayoutGroup>
   );
 }

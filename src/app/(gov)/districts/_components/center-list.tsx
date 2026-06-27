@@ -94,7 +94,7 @@ function CenterCard({
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
         className={cn(
-          "w-full text-right p-5 rounded-[16px] flex flex-col gap-4 relative z-10 overflow-hidden outline-none",
+          "w-full text-right p-3 rounded-[16px] flex flex-col gap-3 relative z-10 overflow-hidden outline-none sm:p-5 sm:gap-4",
           !isActive && "bg-[rgba(255,255,255,0.4)] border border-[rgba(0,0,0,0.06)] hover:bg-[rgba(255,255,255,0.8)] transition-colors duration-300"
         )}
       >

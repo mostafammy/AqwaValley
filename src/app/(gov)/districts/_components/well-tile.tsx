@@ -151,7 +151,7 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
             scale: { duration: 0.2 }
           }}
           className={cn(
-            "group relative flex flex-col justify-between overflow-hidden rounded-[20px] border p-6 h-full bg-white",
+            "group relative flex flex-col justify-between overflow-hidden rounded-[16px] border p-3 h-full bg-white min-w-0 sm:rounded-[20px] sm:p-5 md:p-6",
              isCritical && "bg-red-50/10"
           )}
         >
@@ -170,21 +170,21 @@ export function WellTile({ well, variants, dimmed = false, onHoverStart, onHover
           />
 
           {/* Header */}
-          <div className="relative z-10 flex items-start justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span 
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ 
-                  backgroundColor: baseColor, 
-                  boxShadow: baseColor !== "#8E8E93" ? `0 0 6px ${baseColor}` : "none" 
+          <div className="relative z-10 flex items-start justify-between gap-1 mb-3 sm:mb-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="w-1.5 h-1.5 rounded-full shrink-0"
+                style={{
+                  backgroundColor: baseColor,
+                  boxShadow: baseColor !== "#8E8E93" ? `0 0 6px ${baseColor}` : "none"
                 }}
               />
-              <span className="text-[32px] font-[800] tracking-[-0.05em] text-[#1C1C1E] leading-none mb-1">
+              <span className="text-2xl font-[800] tracking-[-0.05em] text-[#1C1C1E] leading-none mb-0.5 truncate sm:text-[32px]">
                 {wellLabel}
               </span>
             </div>
             {well.alertCount > 0 && (
-              <span className="bg-red-50 text-red-600 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border border-red-200">
+              <span className="bg-red-50 text-red-600 text-[10px] font-bold w-5 h-5 flex shrink-0 items-center justify-center rounded-full border border-red-200">
                 {well.alertCount}
               </span>
             )}

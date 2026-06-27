@@ -38,31 +38,31 @@ export function WellsCanvas({ district, onExpandWell }: WellsCanvasProps) {
   if (!district) return null;
 
   return (
-    <div className="flex-1 bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] min-h-[500px]">
-      <div className="flex flex-col gap-6">
-        
+    <div className="flex-1 bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] min-h-[400px] sm:p-6 md:p-8 md:min-h-[500px]">
+      <div className="flex flex-col gap-4 sm:gap-6">
+
         {/* District Summary Header */}
-        <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.06)] pb-6 mb-2">
-          <div>
-            <h2 className="text-[22px] font-bold text-[#1C1C1E] tracking-tight">{district.name}</h2>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[12px] text-[#475569] font-medium">إجمالي الآبار: {district.totalWells}</span>
-              <span className="w-1 h-1 rounded-full bg-gray-300" />
-              <span className="text-[12px] text-[#475569] font-medium">التنبيهات النشطة: {district.alertCount}</span>
+        <div className="flex flex-col gap-3 border-b border-[rgba(0,0,0,0.06)] pb-4 mb-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pb-6">
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-[#1C1C1E] tracking-tight sm:text-[22px]">{district.name}</h2>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+              <span className="text-[11px] text-[#475569] font-medium sm:text-xs">إجمالي الآبار: {district.totalWells}</span>
+              <span className="hidden w-1 h-1 rounded-full bg-gray-300 sm:inline-block" />
+              <span className="text-[11px] text-[#475569] font-medium sm:text-xs">التنبيهات النشطة: {district.alertCount}</span>
             </div>
           </div>
-          
-          <div className="flex gap-8 text-right">
+
+          <div className="flex gap-4 text-right sm:gap-8">
             <div className="flex flex-col">
               <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-widest mb-1">متوسط المنسوب</span>
-              <span className="text-[20px] font-bold text-[#1C1C1E]">{Math.round(district.avgLevelPct)}%</span>
+              <span className="text-lg font-bold text-[#1C1C1E] sm:text-[20px]">{Math.round(district.avgLevelPct)}%</span>
             </div>
-            <div className="w-px bg-[rgba(0,0,0,0.08)] my-1" />
+            <div className="hidden w-px bg-[rgba(0,0,0,0.08)] my-1 sm:block" />
             <div className="flex flex-col">
               <span className="text-[10px] text-[#64748b] font-bold uppercase tracking-widest mb-1">معدل الانخفاض</span>
-              <span className="text-[20px] font-bold text-[#1C1C1E]">
-                {district.depletionRate} 
-                <span className="text-[12px] font-medium text-[#64748b] mr-1">م/سنة</span>
+              <span className="text-lg font-bold text-[#1C1C1E] sm:text-[20px]">
+                {district.depletionRate}
+                <span className="text-[10px] font-medium text-[#64748b] mr-1 sm:text-xs">م/سنة</span>
               </span>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function WellsCanvas({ district, onExpandWell }: WellsCanvasProps) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+            className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
           >
             {district.wells.map((well) => (
               <WellTile 

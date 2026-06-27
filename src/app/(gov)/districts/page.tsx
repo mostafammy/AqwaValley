@@ -86,7 +86,7 @@ export default async function DistrictsPage() {
 
   return (
     <div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5 px-3 py-4 sm:space-y-6 sm:px-5 sm:py-5 md:p-6"
       dir="rtl"
       style={{ animation: "fadeSlideUp 0.4s ease-out both" }}
     >
@@ -94,17 +94,17 @@ export default async function DistrictsPage() {
         <ScrollToHash />
       </Suspense>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold md:text-3xl">المراكز والآبار</h1>
-          <p className="mt-1 text-sm text-gray-500">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold sm:text-2xl md:text-3xl">المراكز والآبار</h1>
+          <p className="mt-1 text-xs text-gray-500 sm:text-sm">
             {districts.length} مراكز ·{" "}
             {districts.reduce((s, d) => s + d.totalWells, 0)} بئر إجمالي
           </p>
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <DistrictsClient districts={districts} />
       </div>
     </div>

@@ -20,7 +20,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
+  ReferenceLine
 } from "recharts";
 import { Download, Activity, Droplets, Gauge, Thermometer, ThermometerSun } from "lucide-react";
 
@@ -78,35 +78,37 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
   return (
     <div
       ref={targetRef}
-      className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+      className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4 md:p-5"
     >
       {/* Header + Actions */}
-      <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        {/* Sensor Type Selector */}
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1 self-start">
-          {SENSOR_TYPES.map((s) => (
-            <motion.button
-              whileTap={tapFeedback}
-              key={s.key}
-              onClick={() => setActiveSensor(s.key)}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
-                activeSensor === s.key
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {s.icon}
-              {s.label}
-            </motion.button>
-          ))}
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+
+        {/* Sensor Type Selector - horizontally scrollable on mobile */}
+        <div className="max-w-full overflow-hidden rounded-lg bg-gray-100 p-1">
+          <div className="flex w-max max-w-full gap-1 overflow-x-auto scrollbar-thin">
+            {SENSOR_TYPES.map((s) => (
+              <motion.button
+                whileTap={tapFeedback}
+                key={s.key}
+                onClick={() => setActiveSensor(s.key)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all sm:px-3 sm:text-xs ${
+                  activeSensor === s.key
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {s.icon}
+                {s.label}
+              </motion.button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 self-end md:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto md:gap-3">
           {/* Comparison Toggle */}
-          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-            <input 
-              type="checkbox" 
+          <label className="flex items-center gap-1.5 text-[11px] text-gray-600 cursor-pointer sm:gap-2 sm:text-xs">
+            <input
+              type="checkbox"
               checked={compare}
               onChange={(e) => setCompare(e.target.checked)}
               className="rounded text-blue-600 focus:ring-blue-500"
@@ -115,9 +117,9 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
           </label>
 
           {/* Export Button */}
-          <button 
+          <button
             onClick={handleExport}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-blue-600 transition-colors sm:text-xs"
           >
             <Download size={14} />
             <span className="hidden sm:inline">تصدير CSV</span>
@@ -126,25 +128,25 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
       </div>
 
       {/* Range Tabs */}
-      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold">
-            {activeSensor === "water_level" ? "قراءات منسوب المياه" : 
+      <div className="mb-4 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-xs font-semibold sm:text-sm">
+            {activeSensor === "water_level" ? "قراءات منسوب المياه" :
              activeSensor === "pressure" ? "قراءات الضغط" : "معدل التدفق"}
           </h3>
           {isLoading && (
-            <span className="animate-pulse text-xs text-gray-400">
+            <span className="animate-pulse text-[10px] text-gray-400 sm:text-xs">
               جاري التحديث...
             </span>
           )}
         </div>
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+        <div className="-mx-1 flex gap-1 overflow-x-auto rounded-lg bg-gray-100 p-1 scrollbar-thin">
           {RANGES.map((r) => (
             <motion.button
               whileTap={tapFeedback}
               key={r.key}
               onClick={() => setActiveRange(r.key)}
-              className={`rounded-md px-3 py-1 text-xs font-semibold transition-all ${
+              className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all sm:px-3 sm:text-xs ${
                 activeRange === r.key
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -158,7 +160,7 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
 
       {/* Chart Area */}
       {isError ? (
-        <div className="flex h-64 items-center justify-center text-sm text-red-400">
+        <div className="flex h-64 items-center justify-center text-xs text-red-400 sm:text-sm">
           فشل تحميل البيانات
         </div>
       ) : isLoading && rows.length === 0 ? (
@@ -166,16 +168,16 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
         </div>
       ) : rows.length === 0 ? (
-        <div className="flex h-64 flex-col items-center justify-center text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+        <div className="flex h-64 flex-col items-center justify-center text-xs text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200 sm:text-sm">
           <Activity className="mb-2 text-gray-300" size={24} />
           لا توجد بيانات لهذه الفترة
         </div>
       ) : (
         <div className="relative">
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={240} minHeight={240}>
             <ComposedChart
               data={isVisible ? mergedData : []}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              margin={{ top: 10, right: 5, left: -5, bottom: 0 }}
             >
               <defs>
                 <linearGradient id="levelGrad" x1="0" y1="0" x2="0" y2="1">
@@ -190,10 +192,10 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
               />
               <XAxis
                 dataKey="bucket"
-                tick={{ fontSize: 10, fontFamily: "Cairo" }}
+                tick={{ fontSize: 9, fontFamily: "Cairo" }}
                 axisLine={false}
                 tickLine={false}
-                minTickGap={40}
+                minTickGap={32}
                 tickFormatter={(val: string) => {
                   const d = new Date(val);
                   if (activeRange === "1d") return d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
@@ -203,10 +205,10 @@ export function ReadingsChart({ wellId, depthM, currentValue, thresholds }: Read
                 }}
               />
               <YAxis
-                tick={{ fontSize: 11, fontFamily: "Cairo" }}
+                tick={{ fontSize: 10, fontFamily: "Cairo" }}
                 axisLine={false}
                 tickLine={false}
-                width={45}
+                width={40}
                 domain={activeSensor === "water_level" && depthM ? [0, depthM] : ["auto", "auto"]}
                 tickFormatter={(v: number) => `${v.toFixed(1)}`}
               />
