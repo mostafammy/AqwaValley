@@ -741,21 +741,31 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
   }
 
   .layout-content-row {
     display: flex;
     flex: 1;
+    min-width: 0;
     padding-top: var(--topbar-height);
   }
 
   .layout-main {
     flex: 1;
-    padding: 22px 26px;
+    min-width: 0;
+    padding: 14px 12px;
+  }
+
+  @media (min-width: 640px) {
+    .layout-main {
+      padding: 18px 18px;
+    }
   }
 
   @media (min-width: 1024px) {
     .layout-main {
+      padding: 22px 26px;
       padding-right: calc(26px + 260px);
     }
   }

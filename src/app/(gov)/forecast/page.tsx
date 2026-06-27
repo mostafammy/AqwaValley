@@ -11,10 +11,12 @@ export default async function ForecastPage() {
   });
 
   return (
-    <div className="p-4 md:p-6 space-y-4" dir="rtl">
+    <div className="min-w-0 space-y-3 overflow-x-hidden md:space-y-6" dir="rtl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">التوقعات المائية</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-xl leading-tight font-bold break-words sm:text-2xl md:text-3xl">
+          التوقعات المائية
+        </h1>
+        <p className="mt-1 text-xs leading-relaxed text-gray-500 sm:text-sm">
           النماذج التنبؤية لاستدامة الخزان الجوفي
         </p>
       </div>
