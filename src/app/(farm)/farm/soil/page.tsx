@@ -148,38 +148,40 @@ export default async function SoilPage() {
   const refreshKey = Date.now();
 
   return (
-    <div className="mx-auto max-w-screen-2xl space-y-10 p-6 md:p-8" dir="rtl">
+    <div className="mx-auto w-full max-w-screen-2xl space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-6 md:space-y-10 md:p-8" dir="rtl">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-        <div>
-          <div className="flex items-center gap-3 text-sm font-medium text-slate-500">
-            <MapPin className="h-4 w-4" />
-            <span>{currentFarm.name}</span>
+      <div className="flex flex-col justify-between gap-4 sm:gap-6 md:flex-row md:items-end">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 sm:gap-3 sm:text-sm">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">{currentFarm.name}</span>
             <span className="text-slate-300">•</span>
             <span className="text-teal">قراءات التربة</span>
           </div>
-          <h1 className="text-navy mt-1 text-4xl font-semibold tracking-tight">
+          <h1 className="text-navy mt-1 text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
             قراءات التربة
           </h1>
-          <p className="mt-2 max-w-md text-slate-500">
+          <p className="mt-2 max-w-md text-sm text-slate-500 sm:text-base">
             بيانات حية من أجهزة الاستشعار للمناطق الزراعية وتحليل مكونات التربة
           </p>
         </div>
 
-        <RefreshButton />
+        <div className="w-full md:w-auto">
+          <RefreshButton />
+        </div>
       </div>
 
       {/* Soil Gauges */}
       {zones.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center text-slate-500">
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500 sm:rounded-3xl sm:p-12">
           لا توجد مستشعرات رطوبة مسجلة لهذه المزرعة حالياً.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
           {zones.map((zone) => (
             <div
               key={`${zone.id}-${refreshKey}`}
-              className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 md:p-8"
             >
               <SoilGauge
                 percentage={zone.pct}
@@ -194,17 +196,17 @@ export default async function SoilPage() {
       )}
 
       {/* Chart + Composition */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm lg:col-span-8">
-          <div className="mb-8 flex items-center justify-between">
-            <h3 className="text-navy text-base font-semibold">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 md:p-8 lg:col-span-8">
+          <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between md:mb-8">
+            <h3 className="text-navy text-sm font-semibold sm:text-base">
               رطوبة التربة — آخر 7 أيام
             </h3>
-            <div className="flex items-center gap-6 text-xs font-medium">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium sm:gap-x-6 sm:text-xs">
               {chartSeries.map((s) => (
-                <div key={s.wellId} className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: s.color }} />
-                  <span className="text-slate-600 truncate max-w-[150px]">{s.wellName}</span>
+                <div key={s.wellId} className="flex min-w-0 items-center gap-2">
+                  <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="text-slate-600 truncate max-w-[120px] sm:max-w-[150px]">{s.wellName}</span>
                 </div>
               ))}
             </div>
@@ -212,32 +214,32 @@ export default async function SoilPage() {
           <SoilMoistureChart key={refreshKey} data={chartData} series={chartSeries} />
         </div>
 
-        <div className="space-y-6 lg:col-span-4">
+        <div className="space-y-4 sm:space-y-6 lg:col-span-4">
           <SoilCompositionCard clay={32} sand={48} silt={20} />
 
-          <div className="bg-navy rounded-3xl p-8 text-white">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/10">
+          <div className="bg-navy rounded-2xl p-5 text-white sm:rounded-3xl sm:p-6 md:p-8">
+            <div className="mb-4 flex items-center gap-3 sm:mb-6">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/10">
                 <Thermometer className="h-5 w-5 text-blue-300" />
               </div>
-              <div className="text-base font-semibold">حرارة التربة</div>
+              <div className="text-sm font-semibold sm:text-base">حرارة التربة</div>
             </div>
-            
-            <div className="mb-8 text-5xl font-semibold tabular-nums">
+
+            <div className="mb-6 text-3xl font-semibold tabular-nums sm:mb-8 sm:text-4xl md:text-5xl">
               {soilTempC !== undefined ? `${soilTempC.toFixed(1)}°م` : "—"}
             </div>
-            <div className="grid grid-cols-2 gap-6 border-t border-white/10 pt-6">
-              <div>
-                <div className="text-xs font-medium text-blue-200">
+            <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 sm:gap-6 sm:pt-6">
+              <div className="min-w-0">
+                <div className="text-[11px] font-medium text-blue-200 sm:text-xs">
                   التبخر اليومي
                 </div>
-                <div className="text-2xl font-semibold">غير متوفر</div>
+                <div className="text-lg font-semibold sm:text-2xl">غير متوفر</div>
               </div>
-              <div>
-                <div className="text-xs font-medium text-blue-200">
+              <div className="min-w-0">
+                <div className="text-[11px] font-medium text-blue-200 sm:text-xs">
                   سعة التصريف
                 </div>
-                <div className="text-2xl font-semibold">غير متوفر</div>
+                <div className="text-lg font-semibold sm:text-2xl">غير متوفر</div>
               </div>
             </div>
           </div>
