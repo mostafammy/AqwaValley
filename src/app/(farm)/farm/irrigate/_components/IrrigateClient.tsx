@@ -179,22 +179,22 @@ function AnimatedStatBox({
   const display = useCountUp(value, 600);
 
   return (
-    <motion.div 
-      animate={{ 
+    <motion.div
+      animate={{
         boxShadow: color.includes("emerald") ? "0 4px 14px -5px rgba(16,185,129,0)" :
-                    color.includes("blue") ? "0 4px 14px -5px rgba(37,99,235,0.2)" : 
-                    "0 4px 14px -5px rgba(0,0,0,0.05)" 
+                    color.includes("blue") ? "0 4px 14px -5px rgba(37,99,235,0.2)" :
+                    "0 4px 14px -5px rgba(0,0,0,0.05)"
       }}
-      className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all"
+      className="flex min-w-0 flex-col gap-2 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm transition-all sm:p-4 md:p-5"
     >
-      <Icon className={`h-5 w-5 ${color.includes("emerald") ? "text-emerald-400" : "text-slate-400"}`} />
+      <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${color.includes("emerald") ? "text-emerald-400" : "text-slate-400"}`} />
       <div>
-        <div className={`text-2xl font-bold tabular-nums ${color}`}>
+        <div className={`text-xl font-bold tabular-nums sm:text-2xl ${color}`}>
           {display.toLocaleString("ar-EG")}
         </div>
-        <div className="text-xs text-slate-400">{unit}</div>
+        <div className="text-[11px] text-slate-400 sm:text-xs">{unit}</div>
       </div>
-      <div className="text-xs font-medium tracking-wider text-slate-500 uppercase">
+      <div className="text-[11px] font-medium tracking-wider text-slate-500 uppercase sm:text-xs">
         {label}
       </div>
     </motion.div>
@@ -211,19 +211,19 @@ function TimerBox({ seconds }: { seconds: number }) {
     .padStart(2, "0");
 
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-5">
+    <div className="flex min-w-0 flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:p-4 md:p-5">
       <motion.div
-        
+
       >
-        <Timer className="h-5 w-5 text-slate-400" />
+        <Timer className="h-4 w-4 text-slate-400 sm:h-5 sm:w-5" />
       </motion.div>
       <div>
-        <div className="text-navy font-mono text-2xl font-bold tabular-nums">
+        <div className="text-navy font-mono text-xl font-bold tabular-nums sm:text-2xl">
           {m}:{s}
         </div>
-        <div className="text-xs text-slate-400">دقيقة:ثانية</div>
+        <div className="text-[11px] text-slate-400 sm:text-xs">دقيقة:ثانية</div>
       </div>
-      <div className="text-xs font-medium tracking-wider text-slate-500 uppercase">
+      <div className="text-[11px] font-medium tracking-wider text-slate-500 uppercase sm:text-xs">
         الوقت المنقضي
       </div>
     </div>
@@ -268,7 +268,7 @@ function ZoneStatusCard({
         boxShadow: running && !isDone ? "0 10px 25px -5px rgba(59, 130, 246, 0.15)" : "0 1px 3px rgba(0,0,0,0.05)"
       }}
       transition={springs.floaty}
-      className={`relative flex flex-col gap-4 rounded-2xl border p-5 ${
+      className={`relative flex flex-col gap-3 rounded-2xl border p-4 sm:gap-4 sm:p-5 ${
         inactive
           ? "border-gray-100 bg-gray-50 opacity-50"
           : isDone
@@ -279,44 +279,44 @@ function ZoneStatusCard({
       } `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-2xl"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl"
             style={{ backgroundColor: `${color}15` }}
           >
             <Leaf className="h-5 w-5" style={{ color }} />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">
               منطقة {zone.zoneId ?? idx + 1}
             </div>
-            <div className="text-navy font-semibold">{zone.cropType}</div>
+            <div className="text-navy truncate text-sm font-semibold sm:text-base">{zone.cropType}</div>
           </div>
         </div>
 
         {!inactive &&
           (isDone ? (
-            <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" />
           ) : running ? (
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-blue-600 sm:text-xs">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
               يعمل
             </span>
           ) : (
-            <span className="text-xs text-slate-400">جاهز</span>
+            <span className="shrink-0 text-[11px] text-slate-400 sm:text-xs">جاهز</span>
           ))}
       </div>
 
       {inactive ? (
-        <div className="rounded-xl border border-dashed border-slate-200 py-3 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-slate-200 py-3 text-center text-xs text-slate-400 sm:text-sm">
           لا يحتاج ري
         </div>
       ) : (
         <>
           {/* Progress bar */}
           <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-slate-500">
+            <div className="flex justify-between text-[11px] text-slate-500 sm:text-xs">
               <span>{animatedPumped.toLocaleString("ar-EG")} ل</span>
               <span>{zone.recommendedLitres.toLocaleString("ar-EG")} ل</span>
             </div>
@@ -334,10 +334,10 @@ function ZoneStatusCard({
 
           {/* Volume */}
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold tabular-nums" style={{ color }}>
+            <span className="text-xl font-bold tabular-nums sm:text-2xl" style={{ color }}>
               {(zone.recommendedLitres / 1000).toFixed(1)}
             </span>
-            <span className="text-sm text-slate-400">م³ مخطط</span>
+            <span className="text-[11px] text-slate-400 sm:text-sm">م³ مخطط</span>
           </div>
         </>
       )}
@@ -360,20 +360,20 @@ function WellInfoRow({
   };
 }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4">
+    <div className="rounded-2xl border border-slate-100 bg-white p-3 sm:p-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-navy text-sm font-semibold">{well.wellName}</div>
-          <div className="mt-1 text-xs text-slate-500">
+        <div className="min-w-0 flex-1">
+          <div className="text-navy truncate text-sm font-semibold">{well.wellName}</div>
+          <div className="mt-1 text-[11px] text-slate-500 sm:text-xs">
             الحالة: {well.status} · الصمام: {well.valveState}
           </div>
           {well.targetFlowRateM3Hr != null ? (
-            <div className="mt-1 text-xs text-blue-600">
+            <div className="mt-1 text-[11px] text-blue-600 sm:text-xs">
               التدفق المستهدف: {well.targetFlowRateM3Hr.toFixed(2)} م³/ساعة
             </div>
           ) : null}
           {well.maxFlowRateM3Hr != null ? (
-            <div className="mt-0.5 text-xs text-slate-400">
+            <div className="mt-0.5 text-[11px] text-slate-400 sm:text-xs">
               الحد الأقصى: {well.maxFlowRateM3Hr.toFixed(2)} م³/ساعة
             </div>
           ) : null}
@@ -534,26 +534,26 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
   // ── No plan state ────────────────────────────────────────────────────────
   if (!plan) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="space-y-5 px-3 sm:px-5 md:space-y-6 md:px-6" dir="rtl">
         <div>
-          <h1 className="text-navy text-3xl font-bold">تشغيل الري</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-navy text-2xl font-bold sm:text-3xl">تشغيل الري</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
             مراقبة مباشرة للأنابيب والصمامات في {farmName}
           </p>
         </div>
-        <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-12 text-center">
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100">
+        <div className="flex min-h-80 flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white p-6 text-center sm:p-10 md:p-12">
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 sm:mb-6">
             <Droplets className="h-9 w-9 text-slate-400" />
           </div>
-          <h3 className="text-navy mb-3 text-xl font-semibold">
+          <h3 className="text-navy mb-3 text-lg font-semibold sm:text-xl">
             لا توجد خطة ري معتمدة
           </h3>
-          <p className="mb-8 max-w-sm text-slate-500">
+          <p className="mb-7 max-w-sm text-sm text-slate-500 sm:mb-8 sm:text-base">
             يجب توليد واعتماد خطة ري من صفحة الذكاء الاصطناعي أولاً
           </p>
           <Link
             href="/farm/ai-plan"
-            className="btn btn-primary flex items-center gap-2 rounded-3xl px-8 py-3 font-semibold"
+            className="btn btn-primary flex items-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold sm:px-8 sm:text-base"
           >
             <Zap className="h-4 w-4" />
             توليد خطة ري
@@ -565,13 +565,13 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
 
   // ── Main UI ──────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 md:space-y-8" dir="rtl">
+    <div className="space-y-5 px-3 sm:space-y-6 sm:px-5 md:space-y-8 md:px-6" dir="rtl">
       {/* Header */}
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <div className="mb-2 flex items-center gap-2">
+      <div className="flex flex-col justify-between gap-3 sm:gap-4 md:flex-row md:items-center">
+        <div className="min-w-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-3xl bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-              <motion.div 
+              <motion.div
                 animate={{ scale: running ? [1, 1.25, 1] : 1 }}
                 transition={{ duration: 1.5, repeat: running ? Infinity : 0, ease: "easeInOut" }}
               >
@@ -579,12 +579,12 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               </motion.div>
               تشغيل الري
             </span>
-            <span className="text-sm text-slate-500">• {farmName}</span>
+            <span className="text-xs text-slate-500 sm:text-sm">• {farmName}</span>
           </div>
           <AnimatePresence mode="wait" initial={false}>
             <motion.h1
               key={titleText}
-              className="text-navy text-3xl font-bold md:text-4xl"
+              className="text-navy text-2xl font-bold sm:text-3xl md:text-4xl"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -593,7 +593,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
               {titleText}
             </motion.h1>
           </AnimatePresence>
-          <p className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+          <p className="mt-2 flex items-center gap-2 text-xs text-slate-500 sm:text-sm">
             <span
               className={`h-2 w-2 rounded-full ${
                 running
@@ -611,11 +611,12 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={tapFeedback}
             transition={springs.snappy}
+            className="flex-1 sm:flex-none"
           >
             <Button
               onClick={(e) => {
@@ -634,7 +635,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                 setRunning(true);
               }}
               disabled={running || done || totalLiters <= 0}
-              className="btn btn-primary relative flex items-center gap-2 overflow-hidden rounded-2xl px-6 py-3"
+              className="btn btn-primary relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 py-3 text-sm sm:w-auto sm:px-6 sm:text-base"
             >
               {ripples.map((ripple) => (
                 <motion.span
@@ -665,12 +666,13 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={tapFeedback}
             transition={springs.snappy}
+            className="flex-1 sm:flex-none"
           >
             <Button
               variant="secondary"
               onClick={() => setRunning(false)}
               disabled={!running}
-              className="flex items-center gap-2 rounded-2xl px-6 py-3"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm sm:w-auto sm:px-6 sm:text-base"
             >
               <Square className="h-4 w-4" />
               إيقاف
@@ -680,28 +682,28 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-5 sm:gap-6 xl:grid-cols-12">
         {/* Left — Progress + Stats */}
-        <div className="space-y-6 xl:col-span-5">
+        <div className="space-y-5 sm:space-y-6 xl:col-span-5">
           {/* Overall Progress */}
           <Card>
-            <CardBody className="p-6 md:p-8">
-              <div className="mb-6 text-xs font-semibold tracking-widest text-slate-400 uppercase">
+            <CardBody className="p-4 sm:p-6 md:p-8">
+              <div className="mb-4 text-[11px] font-semibold tracking-widest text-slate-400 uppercase sm:mb-6 sm:text-xs">
                 التقدم الكلي
               </div>
 
-              <div className="mb-8 flex items-center gap-6">
+              <div className="mb-6 flex flex-col items-center gap-4 sm:mb-8 sm:flex-row sm:items-center sm:gap-6">
                 <CircularProgress
                   pct={overallPct}
                   color={done ? "#10b981" : "#0ea5e9"}
                   size={120}
                 />
-                <div>
-                  <div className="text-navy text-4xl font-bold tabular-nums">
+                <div className="min-w-0 text-center sm:text-right">
+                  <div className="text-navy text-3xl font-bold tabular-nums sm:text-4xl">
                     {(litersPumped / 1000).toFixed(2)}
                   </div>
-                  <div className="text-sm text-slate-400">م³ مضخوخ</div>
-                  <div className="mt-1 text-xs text-slate-400">
+                  <div className="text-xs text-slate-400 sm:text-sm">م³ مضخوخ</div>
+                  <div className="mt-1 text-[11px] text-slate-400 sm:text-xs">
                     من أصل {(totalLiters / 1000).toFixed(1)} م³
                   </div>
                 </div>
@@ -709,7 +711,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
 
               {/* Progress bar */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-slate-500">
+                <div className="flex justify-between text-[11px] text-slate-500 sm:text-xs">
                   <span>{litersPumped.toLocaleString("ar-EG")} لتر</span>
                   <span>{totalLiters.toLocaleString("ar-EG")} لتر</span>
                 </div>
@@ -734,10 +736,10 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -6 }}
                     transition={springs.floaty}
-                    className="mt-6 flex items-center gap-3 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-700"
+                    className="mt-5 flex items-start gap-3 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700 sm:mt-6 sm:gap-3 sm:px-5 sm:py-4 sm:text-sm"
                   >
-                    <CheckCircle className="h-5 w-5 shrink-0" />
-                    تم ضخ {totalLiters.toLocaleString("ar-EG")} لتر بنجاح
+                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 sm:mt-0" />
+                    <span className="leading-relaxed">تم ضخ {totalLiters.toLocaleString("ar-EG")} لتر بنجاح</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -749,10 +751,10 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -6 }}
                     transition={springs.floaty}
-                    className="mt-4 flex items-center gap-3 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700"
+                    className="mt-3 flex items-start gap-3 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700 sm:mt-4 sm:gap-3 sm:px-5 sm:py-4 sm:text-sm"
                   >
-                    <AlertCircle className="h-5 w-5 shrink-0" />
-                    تم تقليص الكمية لتناسب الحصة المتبقية
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 sm:mt-0" />
+                    <span className="leading-relaxed">تم تقليص الكمية لتناسب الحصة المتبقية</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -760,7 +762,7 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
           </Card>
 
           {/* Live Stats */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <AnimatedStatBox
               icon={Droplets}
               label="اللتر المضخ"
@@ -782,15 +784,15 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
         </div>
 
         {/* Right — Zones */}
-        <div className="space-y-5 xl:col-span-7">
-          <div className="flex items-center justify-between">
-            <h2 className="text-navy text-xl font-semibold">حالة المناطق</h2>
+        <div className="space-y-4 sm:space-y-5 xl:col-span-7">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-navy text-lg font-semibold sm:text-xl">حالة المناطق</h2>
             <Badge variant={running ? "warn" : done ? "ok" : "info"}>
               {running ? "تشغيل" : done ? "مكتمل" : "جاهز"}
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
             {plan.zones?.map((zone, i) => (
               <ZoneStatusCard
                 key={zone.zoneId ?? i}
@@ -805,13 +807,13 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
 
           {farmWellControls && farmWellControls.length > 0 && (
             <Card>
-              <CardBody className="space-y-4 p-5 md:p-6">
+              <CardBody className="space-y-4 p-4 sm:p-5 md:p-6">
                 <div>
-                  <h3 className="text-navy flex items-center gap-2 text-base font-semibold">
+                  <h3 className="text-navy flex items-center gap-2 text-sm font-semibold sm:text-base">
                     <SlidersHorizontal className="h-4 w-4 text-blue-600" />
                     معرفة الآبار المُزودة للماء
                   </h3>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
                     عرض الآبار التي تمد مزرعتك بالماء وتدفقاتها المستهدفة (للاطلاع فقط).
                   </p>
                 </div>
@@ -829,15 +831,15 @@ export function IrrigateClient({ farmId, farmName }: IrrigateClientProps) {
           )}
 
           {/* Plan summary */}
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-              <Activity className="h-5 w-5 text-blue-500" />
+          <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:items-center sm:gap-4 sm:p-4 md:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white sm:h-10 sm:w-10">
+              <Activity className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <div className="text-navy text-sm font-semibold">
                 خطة الري المعتمدة
               </div>
-              <div className="mt-0.5 text-xs text-slate-500">
+              <div className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
                 {plan.zones?.length ?? 0} مناطق ·{" "}
                 {(totalLiters / 1000).toFixed(1)} م³ إجمالي ·{" "}
                 {plan.zones?.[0]?.confidence === "HIGH"
