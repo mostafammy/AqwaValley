@@ -28,6 +28,7 @@ interface TopbarProps {
   userInitials?: string;
   portalLabel?: string;
   weatherChip?: string; // للـ farm portal فقط
+  showNotifications?: boolean;
 }
 
 /**
@@ -46,6 +47,7 @@ export function Topbar({
   userInitials = "م.أ",
   portalLabel = "نظام إدارة الموارد المائية",
   weatherChip,
+  showNotifications = true,
 }: TopbarProps) {
   const { toggleMobile } = useSidebar();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -101,7 +103,7 @@ export function Topbar({
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-1300 flex h-18 w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
+    <header className="fixed top-0 right-0 left-0 z-2000 flex h-18 w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
       {/* ── Right side: Logo, Title & Mobile Menu ── */}
       <div className="flex items-center gap-4">
         <motion.button
@@ -133,26 +135,28 @@ export function Topbar({
           </div>
         )}
 
-        <div className="relative flex items-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            ref={bellRef}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-100/50 text-slate-600 transition-all hover:bg-slate-200"
-            aria-label="عرض الإشعارات"
-            onClick={() => setIsNotifOpen(!isNotifOpen)}
-          >
-            <Bell className="h-4.5 w-4.5" strokeWidth={2.5} />
-            {notifCount > 0 && (
-              <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50"></span>
-            )}
-          </motion.button>
-          <NotificationDropdown
-            isOpen={isNotifOpen}
-            onClose={() => setIsNotifOpen(false)}
-            anchorRef={bellRef}
-          />
-        </div>
+        {showNotifications && (
+          <div className="relative flex items-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              ref={bellRef}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-100/50 text-slate-600 transition-all hover:bg-slate-200"
+              aria-label="عرض الإشعارات"
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+            >
+              <Bell className="h-4.5 w-4.5" strokeWidth={2.5} />
+              {notifCount > 0 && (
+                <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50"></span>
+              )}
+            </motion.button>
+            <NotificationDropdown
+              isOpen={isNotifOpen}
+              onClose={() => setIsNotifOpen(false)}
+              anchorRef={bellRef}
+            />
+          </div>
+        )}
 
         {/* Divider */}
         <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block"></div>

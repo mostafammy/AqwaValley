@@ -110,9 +110,8 @@ export default async function QuotaPage() {
 
   return (
     <div
-      className="space-y-6 p-4 md:space-y-8 md:p-6"
+      className="mx-auto w-full max-w-screen-2xl space-y-6 overflow-x-hidden p-4 md:space-y-8 md:p-6"
       dir="rtl"
-      style={{ animation: "fadeSlideUp 0.7s ease-out both" }}
     >
       {/* Header */}
       <div className="flex flex-col gap-1">

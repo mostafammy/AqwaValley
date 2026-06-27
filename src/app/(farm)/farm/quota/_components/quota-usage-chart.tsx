@@ -58,9 +58,9 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
       className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-5"
       ref={targetRef}
     >
-      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
-        <div className="flex items-center gap-2 text-base font-bold text-gray-800">
-          <BarChartIcon className="h-5 w-5 text-blue-500" />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
+        <div className="flex min-w-0 items-center gap-2 text-base font-bold break-words text-gray-800">
+          <BarChartIcon className="h-5 w-5 shrink-0 text-blue-500" />
           استهلاك الأشهر الماضية (م³)
         </div>
         {isQuotaExtreme && (
@@ -69,7 +69,10 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
           </div>
         )}
       </div>
-      <div className="flex-1" style={{ width: "100%", minHeight: 450 }}>
+      <div
+        className="flex-1"
+        style={{ width: "100%", minHeight: 280 }}
+      >
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-gray-400">
             لا تتوافر بيانات استهلاك
@@ -78,7 +81,7 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={isVisible ? data : []}
-              margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+              margin={{ top: 16, right: 8, left: 0, bottom: 8 }}
               barCategoryGap="20%"
             >
               <CartesianGrid
@@ -88,14 +91,15 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
               />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 12, fill: "#8AA0B8", fontWeight: 500 }}
+                tick={{ fontSize: 11, fill: "#8AA0B8", fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
-                dy={10}
+                dy={8}
+                interval="preserveStartEnd"
               />
               <YAxis
                 domain={yDomain}
-                tick={{ fontSize: 11, fill: "#8AA0B8" }}
+                tick={{ fontSize: 10, fill: "#8AA0B8" }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(val) => {
@@ -104,7 +108,7 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
                     ? Math.round(numeric).toLocaleString("ar-EG")
                     : "0";
                 }}
-                width={50}
+                width={42}
               />
               <Tooltip
                 contentStyle={{
@@ -123,7 +127,7 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
                 dataKey="consumption"
                 name="الاستهلاك الفعلي"
                 radius={[6, 6, 0, 0]}
-                barSize={48}
+                barSize={28}
               >
                 {data.map((entry, index) => (
                   <Cell
@@ -152,7 +156,7 @@ export function QuotaUsageChart({ trend }: QuotaUsageChartProps) {
           </ResponsiveContainer>
         )}
       </div>
-      <div className="mt-4 flex items-center justify-end gap-6 text-xs text-gray-400">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 text-xs text-gray-400 sm:gap-6">
         <div className="flex items-center gap-1.5">
           <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />
           <span>الاستهلاك الطبيعي</span>
