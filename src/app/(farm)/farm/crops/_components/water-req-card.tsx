@@ -51,12 +51,12 @@ export function WaterReqCard({
   cropTypes: CropType[]
 }) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 md:p-8 h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 bg-teal-50 rounded-2xl flex items-center justify-center">
-          <Droplets className="w-5 h-5 text-teal-600" />
+    <div className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-8">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-teal-50">
+          <Droplets className="h-5 w-5 text-teal-600" />
         </div>
-        <h3 className="text-base font-semibold text-navy">الاحتياجات المائية للمحاصيل</h3>
+        <h3 className="text-navy text-base font-semibold break-words">الاحتياجات المائية للمحاصيل</h3>
       </div>
 
       <div className="flex-1 space-y-3">
@@ -67,20 +67,20 @@ export function WaterReqCard({
             <div
               key={crop.type}
               className={`
-                rounded-2xl border p-4 transition-all
-                ${isActive 
-                  ? "border-teal-200 bg-teal-50" 
+                rounded-2xl border p-3 transition-all sm:p-4
+                ${isActive
+                  ? "border-teal-200 bg-teal-50"
                   : "border-slate-100 bg-white"
                 }
               `}
             >
-              <div className="flex items-center justify-between">
-                <span className={`font-medium ${isActive ? "text-teal-700" : "text-slate-700"}`}>
+              <div className="flex items-center justify-between gap-2">
+                <span className={`min-w-0 break-words font-medium ${isActive ? "text-teal-700" : "text-slate-700"}`}>
                   {dbCrop?.displayName ?? crop.nameAr}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">{crop.season}</span>
+                <span className="shrink-0 text-xs font-medium text-slate-400">{crop.season}</span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-sm">
+              <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
                 <span className="text-slate-500">{crop.waterMm} مم/موسم</span>
                 <span className="font-medium text-slate-500">Kc = {crop.kc}</span>
               </div>
@@ -89,7 +89,7 @@ export function WaterReqCard({
         })}
       </div>
 
-      <div className="mt-8 p-4 bg-slate-50 rounded-2xl text-xs text-slate-600 leading-relaxed border border-slate-100">
+      <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs leading-relaxed text-slate-600 sm:mt-8">
         قيم مرجعية لمناخ صحراوي — الوادي الجديد<br />
         ET₀ صيفي ≈ 8–12 مم/يوم
       </div>

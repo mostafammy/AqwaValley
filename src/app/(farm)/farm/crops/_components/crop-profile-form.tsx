@@ -168,20 +168,20 @@ function CropProfileFormImpl({
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
           {/* Crop Type */}
           <fieldset>
             <legend className="mb-3 block text-xs font-semibold text-slate-500">
               نوع المحصول
             </legend>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2 md:grid-cols-4">
               {cropTypes.map((opt) => (
                 <motion.button
                   whileTap={tapFeedback}
                   key={opt.type}
                   type="button"
                   onClick={() => setCropType(opt.type as CropType)}
-                  className={`rounded-2xl border px-4 py-3 text-sm font-medium transition-all ${
+                  className={`min-w-0 rounded-2xl border px-3 py-3 text-sm font-medium break-words transition-all sm:px-4 ${
                     cropType === opt.type
                       ? "border-teal-600 bg-teal-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
@@ -205,7 +205,7 @@ function CropProfileFormImpl({
                   key={opt.stage}
                   type="button"
                   onClick={() => setGrowthStage(opt.stage as GrowthStage)}
-                  className={`rounded-2xl border px-4 py-3 text-right text-sm font-medium transition-all ${
+                  className={`min-w-0 rounded-2xl border px-3 py-3 text-right text-sm font-medium break-words transition-all sm:px-4 ${
                     growthStage === opt.stage
                       ? "border-blue-600 bg-blue-600 text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
@@ -214,7 +214,7 @@ function CropProfileFormImpl({
                   <div className="font-medium">{opt.displayName}</div>
                   {opt.description && (
                     <div
-                      className={`mt-0.5 text-xs ${growthStage === opt.stage ? "text-blue-100" : "text-slate-400"}`}
+                      className={`mt-0.5 text-[11px] leading-snug sm:text-xs ${growthStage === opt.stage ? "text-blue-100" : "text-slate-400"}`}
                     >
                       {opt.description}
                     </div>
@@ -229,13 +229,13 @@ function CropProfileFormImpl({
             <label className="mb-2 block text-xs font-semibold text-slate-500">
               تاريخ الزراعة
             </label>
-            <div className="relative max-w-sm">
+            <div className="relative w-full sm:max-w-sm">
               <Calendar className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="date"
                 value={plantedDate}
                 onChange={(e) => setPlantedDate(e.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white py-3 pr-4 pl-10 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                className="w-full min-w-0 rounded-2xl border border-slate-200 bg-white py-3 pr-4 pl-10 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
               />
             </div>
           </div>
@@ -393,14 +393,14 @@ function SystemInfoCard({
         tone ? toneRing[tone] : "ring-transparent"
       }`}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${iconBg}`}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
             {icon}
           </div>
-          <span className="text-xs font-semibold text-slate-500">{label}</span>
+          <span className="text-xs font-semibold break-words text-slate-500">{label}</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {statusBadge && tone && (
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${toneText[tone]} bg-slate-50`}>
               {statusBadge}

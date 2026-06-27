@@ -195,7 +195,7 @@ function SummaryAmbient({
   children: ReactNode;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-[24px]">
+    <div className="group relative overflow-hidden rounded-panal">
       <motion.div
         className="pointer-events-none absolute -top-16 -left-16 z-0 h-44 w-44 rounded-full blur-3xl opacity-50"
         animate={{

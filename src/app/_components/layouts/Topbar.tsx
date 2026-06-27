@@ -101,7 +101,7 @@ export function Topbar({
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-[1300] flex h-[72px] w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
+    <header className="fixed top-0 right-0 left-0 z-1300 flex h-18 w-full items-center justify-between border-b border-black/5 bg-white/70 px-4 backdrop-blur-2xl transition-all duration-300 sm:px-6">
       {/* ── Right side: Logo, Title & Mobile Menu ── */}
       <div className="flex items-center gap-4">
         <motion.button
@@ -112,7 +112,7 @@ export function Topbar({
           <Menu className="h-5 w-5" />
         </motion.button>
 
-        <div className="from-navy to-navy-3 ring-navy/10 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-md ring-1 lg:hidden">
+        <div className="from-navy to-navy-3 ring-navy/10 flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br shadow-md ring-1 lg:hidden">
           <Droplets className="h-5 w-5 text-sky-300" strokeWidth={2} />
         </div>
         <div className="hidden flex-col pr-2 lg:flex">
@@ -142,7 +142,7 @@ export function Topbar({
             aria-label="عرض الإشعارات"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
           >
-            <Bell className="h-[1.125rem] w-[1.125rem]" strokeWidth={2.5} />
+            <Bell className="h-4.5 w-4.5" strokeWidth={2.5} />
             {notifCount > 0 && (
               <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50"></span>
             )}
@@ -155,7 +155,7 @@ export function Topbar({
         </div>
 
         {/* Divider */}
-        <div className="mx-1 hidden h-6 w-[1px] bg-slate-200 sm:block"></div>
+        <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block"></div>
 
         {/* Profile */}
         <div className="relative" ref={dropdownRef}>
@@ -174,7 +174,7 @@ export function Topbar({
                 {roleLabel}
               </span>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-sky-100 to-sky-50 text-sm font-bold text-sky-700 shadow-sm ring-1 ring-sky-200/50 transition-shadow group-hover:shadow-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-tr from-sky-100 to-sky-50 text-sm font-bold text-sky-700 shadow-sm ring-1 ring-sky-200/50 transition-shadow group-hover:shadow-md">
               {userInitials}
             </div>
             <ChevronDown
@@ -203,7 +203,7 @@ export function Topbar({
                       className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition-colors outline-none hover:bg-slate-100"
                       onClick={handleSettingsClick}
                     >
-                      <Settings className="h-[1.125rem] w-[1.125rem] text-slate-400" />
+                      <Settings className="h-4.5 w-4.5 text-slate-400" />
                       <span>إعدادات الحساب</span>
                     </button>
                   )}
@@ -211,7 +211,7 @@ export function Topbar({
                     className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors outline-none hover:bg-red-50"
                     onClick={handleSignOut}
                   >
-                    <LogOut className="h-[1.125rem] w-[1.125rem] text-red-400 group-hover:text-red-500" />
+                    <LogOut className="h-4.5 w-4.5 text-red-400 group-hover:text-red-500" />
                     <span>تسجيل الخروج</span>
                   </button>
                 </div>

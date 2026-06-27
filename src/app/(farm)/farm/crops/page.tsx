@@ -138,7 +138,7 @@ export default async function CropsPage() {
 
   return (
     <div
-      className="mx-auto max-w-screen-2xl space-y-6 p-4 md:space-y-10 md:p-8"
+      className="mx-auto w-full max-w-screen-2xl space-y-6 overflow-x-hidden p-4 md:space-y-10 md:p-8"
       dir="rtl"
     >
       {/* Header */}
