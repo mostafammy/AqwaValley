@@ -25,48 +25,48 @@ export function AiNeuralPulse() {
   const ActiveIcon = STAGES[currentStage]?.icon ?? Sparkles;
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-700">
+    <div className="flex flex-col items-center justify-center px-3 py-12 animate-in fade-in duration-700 sm:py-16 md:py-20">
       {/* Neural Core */}
-      <div className="relative mb-12 flex items-center justify-center">
+      <div className="relative mb-10 flex items-center justify-center sm:mb-12">
         {/* liquid concentric rings */}
-        <div className="absolute w-64 h-64 border-2 border-teal/20 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '0s' }} />
-        <div className="absolute w-48 h-48 border-2 border-teal/40 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '0.6s' }} />
-        <div className="absolute w-32 h-32 border-2 border-teal/60 rounded-full animate-[ping_3s_ease-in-out_infinite]" style={{ animationDelay: '1.2s' }} />
-        
+        <div className="absolute h-44 w-44 border-2 border-teal/20 rounded-full animate-[ping_3s_ease-in-out_infinite] sm:h-64 sm:w-64" style={{ animationDelay: '0s' }} />
+        <div className="absolute h-32 w-32 border-2 border-teal/40 rounded-full animate-[ping_3s_ease-in-out_infinite] sm:h-48 sm:w-48" style={{ animationDelay: '0.6s' }} />
+        <div className="absolute h-20 w-20 border-2 border-teal/60 rounded-full animate-[ping_3s_ease-in-out_infinite] sm:h-32 sm:w-32" style={{ animationDelay: '1.2s' }} />
+
         {/* inner core glow */}
         <div className="absolute inset-0 bg-teal/20 blur-3xl rounded-full animate-pulse" />
-        
+
         {/* center icon container */}
-        <div className="relative z-10 w-24 h-24 bg-white rounded-3xl shadow-[0_0_40px_rgba(13,158,126,0.3)] border border-teal-100 flex items-center justify-center overflow-hidden">
+        <div className="relative z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-[0_0_40px_rgba(13,158,126,0.3)] sm:h-24 sm:w-24">
           <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-white" />
-          <ActiveIcon className="w-10 h-10 text-teal relative z-10 animate-bounce transition-all duration-500" />
+          <ActiveIcon className="relative z-10 h-9 w-9 animate-bounce text-teal transition-all duration-500 sm:h-10 sm:w-10" />
         </div>
       </div>
 
       {/* stage indicators */}
-      <div className="space-y-6 text-center max-w-sm w-full">
-        <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden mb-8">
-           <div 
+      <div className="w-full max-w-sm space-y-6 text-center">
+        <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-gray-100 sm:mb-8">
+           <div
              className="h-full bg-blue-600 transition-all duration-[4500ms] ease-linear"
              style={{ width: `${((currentStage + 1) / STAGES.length) * 100}%` }}
            />
         </div>
 
-        <div className="relative overflow-hidden h-6">
+        <div className="relative h-6 overflow-hidden">
           {STAGES.map((stage, i) => (
             <div
               key={stage.id}
-              className={`absolute inset-0 flex items-center justify-center gap-2 text-sm md:text-base font-bold text-gray-800 transition-all duration-500 transform ${
+              className={`absolute inset-0 flex items-center justify-center gap-2 text-xs font-bold text-gray-800 transition-all duration-500 transform sm:text-sm md:text-base ${
                 i === currentStage ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
               }`}
             >
-              <stage.icon className="w-4 h-4 text-blue-500" />
-              {stage.label}
+              <stage.icon className="h-4 w-4 shrink-0 text-blue-500" />
+              <span className="px-1">{stage.label}</span>
             </div>
           ))}
         </div>
-        
-        <p className="text-gray-500 text-xs md:text-sm px-6 leading-relaxed">
+
+        <p className="px-2 text-xs leading-relaxed text-gray-500 sm:px-6 sm:text-sm md:text-sm">
            يتم الآن دمج بيانات التربة والطقس عبر نموذج Groq الفائق لبناء خطة ري دقيقة تضمن أعلى جودة للمحصول مع أقل استهلاك للمياه.
         </p>
       </div>

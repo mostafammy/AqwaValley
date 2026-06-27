@@ -42,19 +42,19 @@ export function PlanHistorySection({
 
   return (
     <div className="w-full max-w-full" id="history-section">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div className="flex flex-col items-start">
-          <h2 className="text-navy flex items-center gap-3 text-2xl font-black">
-            <History className="h-6 w-6 text-blue-500" />
+      <div className="mb-5 flex items-start justify-between gap-4 sm:mb-8">
+        <div className="flex flex-col items-start min-w-0">
+          <h2 className="text-navy flex items-center gap-2 text-lg font-black sm:gap-3 sm:text-2xl">
+            <History className="h-5 w-5 shrink-0 text-blue-500 sm:h-6 sm:w-6" />
             سجل التوصيات السابقة
           </h2>
-          <p className="mt-1 text-sm font-medium text-gray-400">
+          <p className="mt-1 text-xs font-medium text-gray-400 sm:text-sm">
             مراجعة والاعتماد السريع للخطط السابقة
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -69,6 +69,11 @@ export function PlanHistorySection({
               };
               const isActivated = plan.status === "ACTIVATED";
               const isCurrentPlan = plan.id === currentPlanId;
+              const formattedDate = new Intl.DateTimeFormat("ar-EG", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              }).format(new Date(plan.createdAt));
 
               return (
                 <Card
@@ -78,34 +83,36 @@ export function PlanHistorySection({
                     isActivated
                       ? "ring-teal/5 shadow-ok/5 ring-4"
                       : "border-gray-100"
-                  } group flex cursor-default flex-row`}
+                  } group flex cursor-default flex-col sm:flex-row`}
                 >
-                  <CardBody className="flex w-full flex-row items-center gap-4 p-4 md:p-6">
+                  <CardBody className="flex w-full flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4 md:p-6">
                     <div className="flex shrink-0 items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 sm:h-11 sm:w-11">
                         <Calendar className="text-blue h-5 w-5" />
                       </div>
-                      <div className="hidden flex-col sm:flex">
+                      <div className="flex min-w-0 flex-col">
                         <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                           التاريخ
                         </span>
-                        <span className="text-navy text-sm font-bold">
-                          {new Intl.DateTimeFormat("ar-EG", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          }).format(new Date(plan.createdAt))}
+                        <span className="text-navy truncate text-xs font-bold sm:text-sm">
+                          {formattedDate}
                         </span>
                       </div>
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="line-clamp-2 text-sm leading-relaxed font-medium text-slate-600 italic opacity-90 transition-opacity group-hover:opacity-100">
+                      <div className="line-clamp-2 text-xs leading-relaxed font-medium text-slate-600 italic opacity-90 transition-opacity group-hover:opacity-100 sm:text-sm">
                         &quot;{planData.reasoning}&quot;
+                      </div>
+                      <div className="mt-2 flex items-center gap-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase sm:hidden">
+                        <Droplets className="h-3 w-3" /> الكمية
+                        <span className="text-navy text-xs font-black tabular-nums">
+                          {(plan.totalLitres / 1000).toFixed(1)} م³
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-3">
+                    <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
                       <div className="hidden flex-col items-end sm:flex">
                         <div className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                           <Droplets className="h-3 w-3" /> الكمية
@@ -133,7 +140,7 @@ export function PlanHistorySection({
                         <motion.button
                           whileTap={tapFeedback}
                           onClick={() => onActivate(plan.id)}
-                          className="btn btn-ghost bg-blue-light text-blue shrink-0 gap-2 rounded-xl px-4 py-2 text-[11px] shadow-sm transition-all"
+                          className="btn btn-ghost bg-blue-light text-blue shrink-0 gap-2 rounded-xl px-3 py-2 text-[11px] shadow-sm transition-all sm:px-4"
                         >
                           تطبيق الآن
                           <ArrowLeft className="h-3.5 w-3.5" />

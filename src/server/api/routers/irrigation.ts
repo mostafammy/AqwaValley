@@ -249,7 +249,19 @@ export const irrigationRouter = createTRPCRouter({
       // 2. Verify access
       await ensureUserCanAccessFarm(ctx, planRecord.farmId);
 
-      // 3. Update status
+      // 3. Demote any previously activated plan for this farm to COMPLETED
+      // so only one plan carries the ACTIVATED status at a time.
+      await ctx.db
+        .update(irrigationRecommendation)
+        .set({ status: "COMPLETED" })
+        .where(
+          and(
+            eq(irrigationRecommendation.farmId, planRecord.farmId),
+            eq(irrigationRecommendation.status, "ACTIVATED"),
+          ),
+        );
+
+      // 4. Update status
       const [updated] = await ctx.db
         .update(irrigationRecommendation)
         .set({
