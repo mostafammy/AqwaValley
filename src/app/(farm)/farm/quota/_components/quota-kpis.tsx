@@ -23,6 +23,7 @@ export function QuotaKpis({
   const isExceeded = state === "exceeded" || state === "critical";
   const cards: KpiCardProps[] = [
     {
+      id: "monthly-limit",
       label: "الحصة الشهرية",
       value: (
         <>
@@ -39,6 +40,7 @@ export function QuotaKpis({
       ),
     },
     {
+      id: "used-this-month",
       label: "المستهلك هذا الشهر",
       value: (
         <>
@@ -81,6 +83,7 @@ export function QuotaKpis({
       ),
     },
     {
+      id: "remaining",
       label: "المتبقي من الحصة",
       value: (
         <>

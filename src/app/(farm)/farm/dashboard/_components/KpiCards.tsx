@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { api } from "~/trpc/react";
 import type { QuotaState } from "~/server/services/quotaDecisionService";
 import {
@@ -17,6 +18,24 @@ type FarmKpiCardsProps = {
   avgSoilHumidity: number | null;
   soilReadingCount: number;
 };
+
+function dailyStateBadge(state: QuotaState): { className: string; label: string } {
+  if (state === "critical" || state === "exceeded")
+    return { className: "badge-danger", label: "مفرط" };
+  if (state === "warning") return { className: "badge-warn", label: "تحذير" };
+  return { className: "badge-ok", label: "طبيعي" };
+}
+
+function monthlyStateBadge(state: QuotaState): {
+  className: string;
+  label: string;
+} {
+  if (state === "critical" || state === "exceeded")
+    return { className: "badge-danger", label: "تجاوز الحصة" };
+  if (state === "warning")
+    return { className: "badge-warn", label: "قريب من الحد" };
+  return { className: "badge-ok", label: "ضمن المعدل" };
+}
 
 export function KpiCards({
   farmId,
@@ -46,9 +65,12 @@ export function KpiCards({
 
   const dailyM3 = dailyStatus?.consumptionM3 ?? initialDailyConsumptionM3;
   const dailyState = dailyStatus?.effectiveState ?? initialDailyState;
+  const dailyBadge = dailyStateBadge(dailyState);
+  const monthlyBadge = monthlyStateBadge(monthlyState);
 
-  const cards: KpiCardProps[] = [
+  const cards: KpiCardProps[] = useMemo(() => [
     {
+      id: "daily-consumption",
       label: "الاستهلاك اليومي",
       value: (
         <>
@@ -76,25 +98,14 @@ export function KpiCards({
             ? "text-amber-500"
             : "text-blue-500",
       extra: (
-        <span
-          className={`badge ${
-            dailyState === "critical" || dailyState === "exceeded"
-              ? "badge-danger"
-              : dailyState === "warning"
-                ? "badge-warn"
-                : "badge-ok"
-          }`}
-        >
+        <span className={`badge ${dailyBadge.className}`}>
           <span className="badge-dot" />
-          {dailyState === "ok"
-            ? "طبيعي"
-            : dailyState === "warning"
-              ? "تحذير"
-              : "مفرط"}
+          {dailyBadge.label}
         </span>
       ),
     },
     {
+      id: "monthly-consumption",
       label: "استهلاك الحصة الشهرية",
       value: (
         <>
@@ -122,25 +133,14 @@ export function KpiCards({
             ? "text-amber-500"
             : "text-teal-500",
       extra: (
-        <span
-          className={`badge ${
-            monthlyState === "critical" || monthlyState === "exceeded"
-              ? "badge-danger"
-              : monthlyState === "warning"
-                ? "badge-warn"
-                : "badge-ok"
-          }`}
-        >
+        <span className={`badge ${monthlyBadge.className}`}>
           <span className="badge-dot" />
-          {monthlyState === "ok"
-            ? "ضمن المعدل"
-            : monthlyState === "warning"
-              ? "قريب من الحد"
-              : "تجاوز الحصة"}
+          {monthlyBadge.label}
         </span>
       ),
     },
     {
+      id: "soil-humidity",
       label: "متوسط رطوبة التربة",
       value:
         avgSoilHumidity !== null ? (
@@ -162,6 +162,7 @@ export function KpiCards({
       ),
     },
     {
+      id: "weather",
       label: "حالة الطقس",
       value: weather ? (
         <>
@@ -185,7 +186,7 @@ export function KpiCards({
         </div>
       ),
     },
-  ];
+  ], [dailyM3, dailyState, dailyBadge.className, dailyBadge.label, monthlyUtilizationPct, monthlyState, monthlyBadge.className, monthlyBadge.label, avgSoilHumidity, soilReadingCount, weather]);
 
   // The dashboard shows 4 key metric cards: daily, monthly, humidity, and weather.
   // Wrap it in a div that gives some bottom margin

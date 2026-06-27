@@ -9,7 +9,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useSidebar } from "./SidebarProvider";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, memo } from "react";
 import { authClient } from "~/server/better-auth/client";
 import { useRouter } from "next/navigation";
 import { NotificationDropdown } from "./NotificationDropdown";
@@ -42,7 +42,7 @@ interface TopbarProps {
  * @param weatherChip - Optional small badge (e.g., current weather) rendered next to icons when provided
  * @returns The top-level JSX element for the portal topbar UI
  */
-export function Topbar({
+function TopbarBase({
   userName = "محمد أحمد",
   userRole = "GOV_ADMIN",
   userInitials = "م.أ",
@@ -97,9 +97,20 @@ export function Topbar({
 
   const handleSettingsClick = () => {
     setIsProfileOpen(false);
-    // TODO: Implement actual settings navigation or modal
     router.push("/settings");
   };
+
+  const toggleNotif = useCallback(() => {
+    setIsNotifOpen((v) => !v);
+  }, []);
+
+  const closeNotif = useCallback(() => {
+    setIsNotifOpen(false);
+  }, []);
+
+  const toggleProfile = useCallback(() => {
+    setIsProfileOpen((v) => !v);
+  }, []);
 
   const roleLabel = ROLE_LABELS[userRole] ?? userRole;
 
@@ -145,7 +156,7 @@ export function Topbar({
               className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-200"
               aria-label="عرض الإشعارات"
               aria-expanded={isNotifOpen}
-              onClick={() => setIsNotifOpen((v) => !v)}
+              onClick={toggleNotif}
             >
               <AnimatePresence initial={false} mode="wait">
                 <motion.span
@@ -226,7 +237,7 @@ export function Topbar({
 
             <NotificationDropdown
               isOpen={isNotifOpen}
-              onClose={() => setIsNotifOpen(false)}
+              onClose={closeNotif}
               anchorRef={bellRef}
             />
           </div>
@@ -240,7 +251,7 @@ export function Topbar({
           <motion.button
             whileTap={{ scale: 0.98 }}
             className="group flex cursor-pointer items-center gap-3 rounded-full bg-transparent p-1 pr-1 pl-2 transition-colors outline-none hover:bg-slate-100"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            onClick={toggleProfile}
             aria-haspopup="true"
             aria-expanded={isProfileOpen}
           >
@@ -301,3 +312,5 @@ export function Topbar({
     </header>
   );
 }
+
+export const Topbar = memo(TopbarBase);

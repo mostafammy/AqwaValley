@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, memo } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -54,6 +54,7 @@ const KPI_ICONS = {
 export type KpiIconName = keyof typeof KPI_ICONS;
 
 export type KpiCardProps = {
+  id: string;
   label: string;
   value: ReactNode;
   icon: KpiIconName;
@@ -63,14 +64,14 @@ export type KpiCardProps = {
   extra?: ReactNode;
 };
 
-export function KpiCardGrid({ cards }: { cards: KpiCardProps[] }) {
+function KpiCardGridBase({ cards }: { cards: KpiCardProps[] }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-6">
       {cards.map((card, i) => {
         const Icon = KPI_ICONS[card.icon];
         return (
           <motion.div
-            key={i}
+            key={card.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: i * 0.05 }}
@@ -110,3 +111,5 @@ export function KpiCardGrid({ cards }: { cards: KpiCardProps[] }) {
     </div>
   );
 }
+
+export const KpiCardGrid = memo(KpiCardGridBase);

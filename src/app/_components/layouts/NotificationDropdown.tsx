@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Check, AlertTriangle, Info, ChevronLeft, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
@@ -13,11 +13,13 @@ interface NotificationDropdownProps {
   anchorRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-const SEVERITY_ICONS = {
+const SEVERITY_ICONS: Record<string, React.ReactNode> = {
   critical: <AlertTriangle className="h-4 w-4 text-red-500" />,
   warning: <AlertTriangle className="h-4 w-4 text-yellow-500" />,
   info: <Info className="h-4 w-4 text-blue-500" />,
 };
+
+const SEVERITY_ICON_DEFAULT = SEVERITY_ICONS.info;
 
 const SEVERITY_COLORS = {
   critical: "bg-red-50 border-red-100",
@@ -25,7 +27,7 @@ const SEVERITY_COLORS = {
   info: "bg-blue-50 border-blue-100",
 };
 
-export function NotificationDropdown({
+function NotificationDropdownBase({
   isOpen,
   onClose,
   anchorRef,
@@ -37,6 +39,8 @@ export function NotificationDropdown({
     right?: number;
     left?: number;
   } | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   // Fetch recent alerts
   const { data, isLoading } = api.alerts.list.useQuery({
@@ -93,7 +97,7 @@ export function NotificationDropdown({
         anchorRef.current &&
         !anchorRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -104,7 +108,7 @@ export function NotificationDropdown({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose, anchorRef]);
+  }, [isOpen, anchorRef]);
 
   if (!isOpen && !position) return null;
 
@@ -188,7 +192,7 @@ export function NotificationDropdown({
               >
                 <div className="flex gap-3">
                   <div className="shrink-0 mt-0.5">
-                    {SEVERITY_ICONS[alert.severity] ?? SEVERITY_ICONS.info}
+                    {SEVERITY_ICONS[alert.severity] ?? SEVERITY_ICON_DEFAULT}
                   </div>
                 <a href="/alerts" className="flex-1 min-w-0">
                   <p className="text-sm text-gray-800 line-clamp-2">
@@ -233,3 +237,5 @@ export function NotificationDropdown({
     </>
   );
 }
+
+export const NotificationDropdown = memo(NotificationDropdownBase);

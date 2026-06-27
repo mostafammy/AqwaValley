@@ -167,9 +167,10 @@ export function SoilMoistureChart({
               stroke={s.color}
               strokeWidth={2}
               dot={{ r: 3 }}
-              animationDuration={1500}
-              animationBegin={idx * 300}
+              animationDuration={600}
+              animationBegin={Math.min(idx, 3) * 120}
               connectNulls
+              isAnimationActive
             />
           ))}
         </LineChart>

@@ -66,6 +66,7 @@ async function getKpiData() {
 
 const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
   {
+    id: "total-wells",
     label: "إجمالي الآبار النشطة",
     value: <AnimatedNumber value={kpi.totalWells} />,
     icon: "droplets",
@@ -74,6 +75,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
     iconColor: "text-blue-500",
   },
   {
+    id: "critical-alerts",
     label: "تنبيهات حرجة",
     value: <AnimatedNumber value={kpi.criticalAlerts} />,
     icon: "alertTriangle",
@@ -82,6 +84,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
     iconColor: "text-red-500",
   },
   {
+    id: "today-consumption",
     label: "استهلاك اليوم (م³)",
     value: kpi.todayConsumption,
     icon: "activity",
@@ -90,6 +93,7 @@ const cards = (kpi: Awaited<ReturnType<typeof getKpiData>>): KpiCardProps[] => [
     iconColor: "text-teal-500",
   },
   {
+    id: "avg-level",
     label: "متوسط منسوب المياه",
     value: kpi.avgLevel,
     icon: "trendingDown",

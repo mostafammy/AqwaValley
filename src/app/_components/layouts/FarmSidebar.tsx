@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { NavItem, NavSectionTitle, NavDivider } from "../layouts/Navitem";
 import { useSidebar } from "./SidebarProvider";
 import {
@@ -13,52 +13,28 @@ import {
   History,
   Scale,
 } from "lucide-react";
-import { motion, type Variants } from "framer-motion";
 
 export function FarmSidebar() {
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-    const syncDesktopState = () => setIsDesktop(mediaQuery.matches);
-
-    syncDesktopState();
-    mediaQuery.addEventListener("change", syncDesktopState);
-
-    return () => {
-      mediaQuery.removeEventListener("change", syncDesktopState);
-    };
-  }, []);
-
   const pathname = usePathname();
-  const is = (path: string) =>
-    path === "/"
-      ? pathname === path
-      : pathname === path || pathname.startsWith(`${path}/`);
+  const is = useMemo(
+    () => (path: string) =>
+      path === "/"
+        ? pathname === path
+        : pathname === path || pathname.startsWith(`${path}/`),
+    [pathname],
+  );
   const { isMobileOpen, closeMobile } = useSidebar();
-
-  const sidebarVariants: Variants = {
-    closed: { x: "100%", opacity: 0 },
-    open: {
-      x: 0,
-      opacity: 1,
-      transition: { type: "spring" as const, stiffness: 350, damping: 35 },
-    },
-  };
 
   return (
     <>
       <div
-        className={`fixed inset-0 top-[var(--topbar-height)] z-[1100] bg-black/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 top-[var(--topbar-height)] z-[1100] bg-black/30 transition-opacity duration-200 will-change-[opacity] lg:hidden ${isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={closeMobile}
         aria-hidden="true"
       />
 
-      <motion.aside
-        initial={false}
-        animate={isDesktop || isMobileOpen ? "open" : "closed"}
-        variants={sidebarVariants}
-        className={`fixed top-[var(--topbar-height)] right-0 z-[1200] flex h-[calc(100dvh-var(--topbar-height))] w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl backdrop-blur-2xl lg:shrink-0 lg:translate-x-0 lg:opacity-100 lg:shadow-none ${!isMobileOpen && "hidden lg:flex"}`}
+      <aside
+        className={`fixed top-[var(--topbar-height)] right-0 z-[1200] flex h-[calc(100dvh-var(--topbar-height))] w-[260px] flex-col border-l border-white/5 bg-[#0A1628]/95 shadow-2xl lg:shrink-0 ${isMobileOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"} transition-[transform,opacity] duration-200 ease-out will-change-transform lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:transition-none`}
       >
         <div className="flex h-20 items-center justify-center border-b border-white/5 px-6 pt-4 pb-2">
           <div className="flex items-center gap-3 text-xl font-extrabold tracking-tight text-white">
@@ -123,7 +99,7 @@ export function FarmSidebar() {
 
         {/* Subtle decorative glow at the bottom */}
         <div className="pointer-events-none absolute right-0 bottom-0 h-32 w-full bg-gradient-to-t from-blue-900/20 to-transparent" />
-      </motion.aside>
+      </aside>
     </>
   );
 }
