@@ -29,32 +29,32 @@ export default async function AlertsPage() {
 
   return (
     <div
-      className="flex max-w-sm flex-col gap-2 space-y-6 md:max-w-full md:p-6"
+      className="flex w-full flex-col gap-2 space-y-5 px-3 py-4 sm:px-5 sm:py-5 md:space-y-6 md:p-6"
       dir="rtl"
       style={{ animation: "fadeSlideUp 0.4s ease-out both" }}
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold md:text-3xl">التنبيهات</h1>
-          <p className="mt-1 text-sm text-gray-500">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold sm:text-2xl md:text-3xl">التنبيهات</h1>
+          <p className="mt-1 text-xs text-gray-500 sm:text-sm">
             إدارة ومتابعة جميع التنبيهات
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="flex gap-3">
-          <div className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-center">
-            <div className="text-2xl font-bold text-orange-500">
+        <div className="flex gap-2 sm:gap-3">
+          <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-center sm:px-4">
+            <div className="text-xl font-bold text-orange-500 sm:text-2xl">
               {stats.open}
             </div>
-            <div className="text-xs text-gray-500">تنبيه مفتوح</div>
+            <div className="text-[10px] text-gray-500 sm:text-xs">تنبيه مفتوح</div>
           </div>
-          <div className="rounded-lg border border-red-200 bg-white px-4 py-2 text-center">
-            <div className="text-2xl font-bold text-red-500">
+          <div className="rounded-lg border border-red-200 bg-white px-3 py-2 text-center sm:px-4">
+            <div className="text-xl font-bold text-red-500 sm:text-2xl">
               {stats.critical}
             </div>
-            <div className="text-xs text-gray-500">حرج</div>
+            <div className="text-[10px] text-gray-500 sm:text-xs">حرج</div>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default async function AlertsPage() {
       {/* Alerts Table with Filters */}
       <Suspense
         fallback={
-          <div className="rounded-xl border border-gray-200 bg-white p-8">
+          <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-8">
             <Skeleton className="h-64 w-full" />
           </div>
         }

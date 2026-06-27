@@ -61,55 +61,154 @@ export function AlertsTable() {
   const totalPages = data ? Math.ceil(data.total / pageSize) : 1;
 
   return (
-    <div className="min-w-md overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className="w-full min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white">
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-gray-100 p-4">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Filter className="h-4 w-4" />
+      <div className="flex flex-col gap-2 border-b border-gray-100 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:p-4">
+        <div className="flex items-center gap-2 text-xs text-gray-600 sm:text-sm">
+          <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span>تصفية:</span>
         </div>
 
-        {/* Severity Filter */}
-        <select
-          value={severity ?? ""}
-          onChange={(e) => {
-            setSeverity(
-              e.target.value ? (e.target.value as Severity) : undefined,
-            );
-            setPage(1);
-          }}
-          className="focus:border-blue focus:ring-blue h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-1"
-        >
-          <option value="">كل الدرجات</option>
-          <option value="critical">حرج</option>
-          <option value="warning">تحذير</option>
-          <option value="info">تنبيه</option>
-        </select>
+        <div className="flex flex-1 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+          {/* Severity Filter */}
+          <select
+            value={severity ?? ""}
+            onChange={(e) => {
+              setSeverity(
+                e.target.value ? (e.target.value as Severity) : undefined,
+              );
+              setPage(1);
+            }}
+            className="focus:border-blue focus:ring-blue h-9 min-w-0 flex-1 rounded-md border border-gray-200 bg-white px-2.5 text-xs text-gray-700 outline-none focus:ring-1 sm:flex-none sm:px-3 sm:text-sm"
+          >
+            <option value="">كل الدرجات</option>
+            <option value="critical">حرج</option>
+            <option value="warning">تحذير</option>
+            <option value="info">تنبيه</option>
+          </select>
 
-        {/* Status Filter */}
-        <select
-          value={ackStatus}
-          onChange={(e) => {
-            setAckStatus(e.target.value as AckStatus);
-            setPage(1);
-          }}
-          className="focus:border-blue focus:ring-blue h-9 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-1"
-        >
-          <option value="all">الكل</option>
-          <option value="open">مفتوحة</option>
-          <option value="acknowledged">تم الاستلام</option>
-        </select>
+          {/* Status Filter */}
+          <select
+            value={ackStatus}
+            onChange={(e) => {
+              setAckStatus(e.target.value as AckStatus);
+              setPage(1);
+            }}
+            className="focus:border-blue focus:ring-blue h-9 min-w-0 flex-1 rounded-md border border-gray-200 bg-white px-2.5 text-xs text-gray-700 outline-none focus:ring-1 sm:flex-none sm:px-3 sm:text-sm"
+          >
+            <option value="all">الكل</option>
+            <option value="open">مفتوحة</option>
+            <option value="acknowledged">تم الاستلام</option>
+          </select>
 
-        {/* Results count */}
-        {data && (
-          <span className="mr-auto text-sm text-gray-400">
-            {data.total} تنبيه
-          </span>
+          {/* Results count */}
+          {data && (
+            <span className="text-xs text-gray-400 sm:mr-auto sm:text-sm">
+              {data.total} تنبيه
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="block divide-y divide-gray-100 md:hidden">
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="space-y-2 p-3 animate-pulse">
+              <div className="h-4 w-3/4 rounded bg-gray-200" />
+              <div className="h-3 w-1/2 rounded bg-gray-200" />
+              <div className="flex gap-2">
+                <div className="h-5 w-16 rounded-full bg-gray-200" />
+                <div className="h-5 w-12 rounded bg-gray-200" />
+              </div>
+            </div>
+          ))
+        ) : data?.items.length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <div className="flex flex-col items-center text-gray-400">
+              <CheckCircle className="mb-3 h-10 w-10 text-gray-300" />
+              <p className="text-sm">لا توجد تنبيهات</p>
+            </div>
+          </div>
+        ) : (
+          data?.items.map((alert) => (
+            <div
+              key={alert.id}
+              className={`flex flex-col gap-2 p-3 ${
+                !alert.acknowledgedAt ? "bg-red-50/30" : ""
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 flex-1 items-start gap-2">
+                  <div className="mt-1 shrink-0">
+                    {!alert.acknowledgedAt ? (
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                      </span>
+                    ) : (
+                      <span className="text-sm text-green-500">✓</span>
+                    )}
+                  </div>
+                  <p className="min-w-0 flex-1 text-sm font-medium leading-relaxed text-gray-800">
+                    {formatAlertMessage(alert.message)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Badge
+                  variant={alertSeverityVariant(alert.severity)}
+                  dot
+                  className="text-[10px]"
+                >
+                  {alertSeverityLabel(alert.severity)}
+                </Badge>
+                <span className="text-[10px] text-gray-500">
+                  {alertTypeLabel(alert.type)}
+                </span>
+                <span className="text-[10px] text-gray-400">
+                  {new Date(alert.createdAt).toLocaleDateString("ar-EG")}{" "}
+                  {new Date(alert.createdAt).toLocaleTimeString("ar-EG", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <a
+                  href={`/wells/${alert.wellId}`}
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                >
+                  عرض البئر
+                  <ChevronRight className="h-3 w-3" />
+                </a>
+
+                {!alert.acknowledgedAt ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleAcknowledge(alert.id)}
+                    loading={
+                      pendingAckId === alert.id &&
+                      acknowledgeMutation.isPending
+                    }
+                    icon={<Check className="h-3 w-3" />}
+                  >
+                    استلام
+                  </Button>
+                ) : (
+                  <span className="text-[10px] text-gray-400">تم الاستلام</span>
+                )}
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full">
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
@@ -271,8 +370,8 @@ export function AlertsTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 p-4">
-          <span className="text-sm text-gray-500">
+        <div className="flex flex-col gap-2 border-t border-gray-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+          <span className="text-xs text-gray-500 sm:text-sm">
             صفحة {page} من {totalPages}
           </span>
           <div className="flex gap-2">
@@ -281,6 +380,7 @@ export function AlertsTable() {
               variant="ghost"
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
+              className="flex-1 sm:flex-none"
             >
               السابق
             </Button>
@@ -289,6 +389,7 @@ export function AlertsTable() {
               variant="ghost"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => p + 1)}
+              className="flex-1 sm:flex-none"
             >
               التالي
             </Button>

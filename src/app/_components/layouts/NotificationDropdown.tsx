@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Bell, Check, AlertTriangle, Info, ChevronLeft, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { formatAlertMessage } from "~/lib/utils";
@@ -30,6 +30,11 @@ export function NotificationDropdown({
 }: NotificationDropdownProps) {
   const utils = api.useContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{
+    top: number;
+    right?: number;
+    left?: number;
+  } | null>(null);
 
   // Fetch recent alerts
   const { data, isLoading } = api.alerts.list.useQuery({
@@ -45,6 +50,37 @@ export function NotificationDropdown({
       void utils.alerts.count.invalidate();
     },
   });
+
+  // Compute dropdown position from anchor's viewport coordinates
+  useEffect(() => {
+    if (!isOpen) return;
+    const compute = () => {
+      if (!anchorRef.current) return;
+      const rect = anchorRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      // Mobile (<768px): center dropdown with side margins
+      if (viewportWidth < 768) {
+        setPosition({ top: 72, left: 12, right: 12 });
+        return;
+      }
+
+      // Desktop: anchor to bell, clamp to viewport
+      const dropdownWidth = 320; // w-80
+      const gap = 8;
+      const desiredRight = viewportWidth - rect.right;
+      const maxRight = viewportWidth - dropdownWidth - 12;
+      const right = Math.max(12, Math.min(desiredRight, maxRight));
+      setPosition({ top: rect.bottom + gap, right, left: undefined });
+    };
+    compute();
+    window.addEventListener("resize", compute);
+    window.addEventListener("scroll", compute, true);
+    return () => {
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("scroll", compute, true);
+    };
+  }, [isOpen, anchorRef]);
 
   // Close on click outside
   useEffect(() => {
@@ -70,18 +106,27 @@ export function NotificationDropdown({
 
   if (!isOpen) return null;
 
+  const style: React.CSSProperties = position
+    ? {
+        top: position.top,
+        ...(position.left !== undefined ? { left: position.left } : {}),
+        ...(position.right !== undefined ? { right: position.right } : {}),
+      }
+    : { top: 72, left: 12, right: 12 };
+
   return (
     <>
       {/* Backdrop for mobile */}
-      <div 
+      <div
         className="fixed inset-0 z-40 md:hidden"
         onClick={onClose}
       />
-      
+
       {/* Dropdown */}
       <div
         ref={dropdownRef}
-        className="absolute left-4 top-full mt-2 z-50 w-80 bg-white rounded-xl border border-gray-200 shadow-xl overflow-hidden"
+        style={style}
+        className="fixed z-50 max-h-[calc(100vh-5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:w-80"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50">
