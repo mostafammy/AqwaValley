@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Check, AlertTriangle, Info, ChevronLeft, CheckCircle } from "lucide-react";
 import { api } from "~/trpc/react";
 import { formatAlertMessage } from "~/lib/utils";
+import { springs } from "~/lib/motion";
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -104,7 +106,7 @@ export function NotificationDropdown({
     };
   }, [isOpen, onClose, anchorRef]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !position) return null;
 
   const style: React.CSSProperties = position
     ? {
@@ -117,17 +119,33 @@ export function NotificationDropdown({
   return (
     <>
       {/* Backdrop for mobile */}
-      <div
-        className="fixed inset-0 z-40 md:hidden"
-        onClick={onClose}
-      />
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="notif-backdrop"
+            className="fixed inset-0 z-40 md:hidden"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Dropdown */}
-      <div
-        ref={dropdownRef}
-        style={style}
-        className="fixed z-50 max-h-[calc(100vh-5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:w-80"
-      >
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="notif-panel"
+            ref={dropdownRef}
+            style={style}
+            initial={{ opacity: 0, scale: 0.95, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -6 }}
+            transition={springs.floaty}
+            className="fixed z-50 max-h-[calc(100vh-5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:w-80"
+          >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50">
           <div className="flex items-center gap-2">
@@ -209,7 +227,9 @@ export function NotificationDropdown({
             </a>
           </div>
         )}
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

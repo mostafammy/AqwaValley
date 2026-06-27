@@ -11,7 +11,7 @@ import {
 } from "~/server/db/schema";
 import { eq, or } from "drizzle-orm";
 import { SoilGauge } from "./_components/soil-gauge";
-import { SoilMoistureChart, type SoilChartSeries, type SoilChartPoint } from "./_components/soil-moisture-chart";
+import { SoilMoistureChart, type SoilChartSeries } from "./_components/soil-moisture-chart";
 import { SoilCompositionCard } from "./_components/soil-composition-card";
 import { RefreshButton } from "./_components/refresh-button";
 import { MapPin, Thermometer } from "lucide-react";
@@ -123,25 +123,25 @@ export default async function SoilPage() {
     };
   });
 
-  // Prepare generic chart series
-  const chartSeries: SoilChartSeries[] = humidityReadings.map((r, i) => ({
-    wellId: r.wellId,
-    wellName: r.wellName,
-    color: ZONE_COLORS[i % ZONE_COLORS.length]!,
+  // Build SoilSensorReading[] payload for the chart from the 7-day history
+  const moistureReadings = humidityHistory.map((point) => ({
+    wellId: point.wellId,
+    wellName: point.wellName,
+    value: point.avgValue,
+    unit: "%",
+    lastUpdatedAt: point.bucket,
   }));
 
-  // Pivot historical data by time bucket
-  const pointsByDate = new Map<string, SoilChartPoint>();
-  for (const point of humidityHistory) {
-    // Label by short weekday
-    const dateLabel = new Date(point.bucket).toLocaleDateString("ar-EG", { weekday: "short" });
-    if (!pointsByDate.has(dateLabel)) {
-      pointsByDate.set(dateLabel, { label: dateLabel });
-    }
-    const currentPoint = pointsByDate.get(dateLabel)!;
-    currentPoint[point.wellId] = point.avgValue;
-  }
-  const chartData = Array.from(pointsByDate.values());
+  // Derive chart series from the same wells present in history so every line
+  // rendered by SoilMoistureChart has a matching series entry.
+  const chartSeries: SoilChartSeries[] = Array.from(
+    new Map(
+      moistureReadings.map((r) => [r.wellId, { wellId: r.wellId, wellName: r.wellName }]),
+    ).values(),
+  ).map((s, i) => ({
+    ...s,
+    color: ZONE_COLORS[i % ZONE_COLORS.length]!,
+  }));
 
   const soilTempC = temperatureReadings[0]?.value;
 
@@ -211,7 +211,11 @@ export default async function SoilPage() {
               ))}
             </div>
           </div>
-          <SoilMoistureChart key={refreshKey} data={chartData} series={chartSeries} />
+          <SoilMoistureChart
+            key={refreshKey}
+            readings={moistureReadings}
+            series={chartSeries}
+          />
         </div>
 
         <div className="space-y-4 sm:space-y-6 lg:col-span-4">

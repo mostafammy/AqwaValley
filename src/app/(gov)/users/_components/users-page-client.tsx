@@ -9,12 +9,11 @@ import { Button } from "~/app/_components/UI/Button";
 import { tapFeedback } from "~/lib/motion";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardBody,
   CardFooter,
 } from "~/app/_components/UI/Card";
 import { Badge } from "~/app/_components/UI/Badge";
+import { X, FileText } from "lucide-react";
 import {
   AnimatedUserRow,
   SpringButton,
@@ -730,115 +729,114 @@ function UserListDirectory() {
         size="lg"
       >
         {selectedUser ? (
-          <div className="bg-bg relative w-full rounded-xl shadow-2xl">
-            <Card className="border-0 shadow-none">
-              <CardHeader className="border-border flex flex-row items-center justify-between border-b bg-(--color-bg-subtle) px-6 pt-4 pb-4">
-                <CardTitle>بيانات المستخدم التفصيلية</CardTitle>
-                <SpringButton
-                  onClick={() => setSelectedUser(null)}
-                  className="rounded-full p-1 text-(--color-text-muted) hover:bg-(--color-bg-hover)"
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </SpringButton>
-              </CardHeader>
-
-              <CardBody className="space-y-6 p-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
-                      الاسم الكامل
-                    </div>
-                    <div className="text-text mt-1 font-semibold">
-                      {selectedUser.fullName}
-                    </div>
-                  </div>
-                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
-                      الرقم القومي
-                    </div>
-                    <div className="text-text mt-1 font-medium">
-                      {selectedUser.nationalId}
-                    </div>
-                  </div>
-                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
-                      البريد الإلكتروني
-                    </div>
-                    <div className="text-text mt-1 font-medium break-all">
-                      {selectedUser.email ?? "غير متوفر"}
-                    </div>
-                  </div>
-                  <div className="border-border rounded-lg border bg-(--color-bg-subtle) p-3">
-                    <div className="text-[11px] font-bold tracking-wider text-(--color-text-muted)">
-                      رقم الهاتف
-                    </div>
-                    <div className="text-text mt-1 font-medium">
-                      {selectedUser.phoneNumber ?? "غير متوفر"}
-                    </div>
-                  </div>
+          <div className="flex max-h-[90dvh] w-full flex-col overflow-hidden bg-white sm:rounded-panal">
+            {/* Header — matches report detail */}
+            <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-6">
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="rounded-lg bg-blue-50 p-1">
+                  <FileText className="h-4 w-4 text-blue-600" />
                 </div>
+                <span className="truncate text-sm font-bold text-slate-800 sm:text-base">
+                  بيانات المستخدم التفصيلية
+                </span>
+                <Badge
+                  variant={selectedUser.isActive ? "ok" : "danger"}
+                  dot
+                  className="hidden sm:inline-flex"
+                >
+                  {selectedUser.isActive ? "نشط" : "معطل"}
+                </Badge>
+              </div>
+              <button
+                onClick={() => setSelectedUser(null)}
+                aria-label="إغلاق"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 active:bg-slate-300 sm:h-8 sm:w-8"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-                {(selectedUser.roleType === "farmer" ||
-                  selectedUser.roleType === "farm_owner") &&
-                  selectedUser.farmId && (
-                    <Card
-                      accent="blue"
-                      className="border-border border shadow-none!"
-                    >
-                      <CardHeader className="px-4 pt-4 pb-2">
-                        <CardTitle>بيانات المزرعة المرتبطة</CardTitle>
-                      </CardHeader>
-                      <CardBody size="sm">
-                        <div className="flex flex-col gap-3 px-2">
-                          <div className="border-border flex items-center justify-between border-b pb-2">
-                            <span className="text-sm font-semibold text-(--color-text-muted)">
-                              اسم المزرعة
-                            </span>
-                            <span className="text-text font-bold">
-                              {selectedUser.farmName}
-                            </span>
-                          </div>
-                          <div className="border-border flex items-center justify-between border-b pb-2">
-                            <span className="text-sm font-semibold text-(--color-text-muted)">
-                              المساحة
-                            </span>
-                            <span className="text-text font-bold">
-                              {selectedUser.farmArea} فدان
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-(--color-text-muted)">
-                              الحصة السنوية
-                            </span>
-                            <span className="font-bold text-(--color-primary-600)">
-                              {selectedUser.farmQuota &&
-                                Number(
-                                  selectedUser.farmQuota,
-                                ).toLocaleString()}{" "}
-                              م³
-                            </span>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  )}
-              </CardBody>
-            </Card>
+            {/* Body — scrollable */}
+            <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[
+                  { label: "الاسم الكامل", value: selectedUser.fullName },
+                  { label: "الرقم القومي", value: selectedUser.nationalId },
+                  {
+                    label: "البريد الإلكتروني",
+                    value: selectedUser.email ?? "غير متوفر",
+                  },
+                  {
+                    label: "رقم الهاتف",
+                    value: selectedUser.phoneNumber ?? "غير متوفر",
+                  },
+                  {
+                    label: "الصلاحية",
+                    value: selectedUser.roleDisplayName ?? selectedUser.roleType ?? "—",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl border border-slate-100 bg-slate-50/50 p-3.5"
+                  >
+                    <div className="mb-1 text-[10px] font-extrabold tracking-wider text-slate-400 uppercase">
+                      {item.label}
+                    </div>
+                    <div className="break-words text-sm font-bold text-slate-800">
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            <CardFooter className="border-border flex items-center justify-between rounded-b-xl border-t bg-(--color-bg-subtle) p-4">
-              <Button variant="secondary" onClick={() => setSelectedUser(null)}>
+              {(selectedUser.roleType === "farmer" ||
+                selectedUser.roleType === "farm_owner") &&
+                selectedUser.farmId && (
+                  <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+                    <div className="border-b border-slate-100 px-4 py-3">
+                      <span className="text-sm font-bold text-slate-800">
+                        بيانات المزرعة المرتبطة
+                      </span>
+                    </div>
+                    <div className="space-y-3 p-4">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <span className="text-sm font-semibold text-slate-500">
+                          اسم المزرعة
+                        </span>
+                        <span className="text-sm font-bold text-slate-800">
+                          {selectedUser.farmName}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <span className="text-sm font-semibold text-slate-500">
+                          المساحة
+                        </span>
+                        <span className="text-sm font-bold text-slate-800">
+                          {selectedUser.farmArea} فدان
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-slate-500">
+                          الحصة السنوية
+                        </span>
+                        <span className="text-sm font-bold text-blue-600">
+                          {selectedUser.farmQuota != null
+                            ? Number(selectedUser.farmQuota).toLocaleString()
+                            : "غير متوفر"}{" "}
+                          م³                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+            </div>
+
+            {/* Footer — sticky */}
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => setSelectedUser(null)}
+                className="w-full rounded-xl py-2.5 text-sm font-semibold sm:w-auto"
+              >
                 إغلاق
               </Button>
               {selectedUser.isActive ? (
@@ -852,6 +850,7 @@ function UserListDirectory() {
                     })
                   }
                   disabled={deactivateMut.isPending}
+                  className="w-full rounded-xl py-2.5 text-sm font-semibold sm:w-auto"
                 >
                   {deactivateMut.isPending ? "جاري..." : "تعطيل الحساب"}
                 </Button>
@@ -860,7 +859,7 @@ function UserListDirectory() {
                   الحساب معطل
                 </Badge>
               )}
-            </CardFooter>
+            </div>
           </div>
         ) : null}
       </SpringModal>

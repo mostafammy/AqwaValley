@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -10,6 +11,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import type { SoilSensorReading } from "~/server/repositories/soil-data.repository";
 
 export type SoilChartSeries = {
   wellId: string;
@@ -22,12 +24,79 @@ export type SoilChartPoint = {
   [wellId: string]: string | number;
 };
 
+const ZONE_COLORS = ["#D97706", "#0D9E7E", "#1D6FA8", "#9333EA", "#E11D48"];
+
 interface SoilMoistureChartProps {
-  data: SoilChartPoint[];
-  series: SoilChartSeries[];
+  readings: SoilSensorReading[];
+  series?: SoilChartSeries[];
 }
 
-export function SoilMoistureChart({ data, series }: SoilMoistureChartProps) {
+function formatLabel(value: Date | string | number): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("ar-EG", {
+    weekday: "short",
+    day: "2-digit",
+  });
+}
+
+function makeKey(value: Date | string | number): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString();
+}
+
+export function SoilMoistureChart({
+  readings,
+  series: providedSeries,
+}: SoilMoistureChartProps) {
+  const { data, series } = useMemo(() => {
+    const derivedSeries: SoilChartSeries[] =
+      providedSeries && providedSeries.length > 0
+        ? providedSeries
+        : Array.from(
+            readings
+              .reduce((acc, r) => {
+                if (!acc.has(r.wellId)) {
+                  acc.set(r.wellId, {
+                    wellId: r.wellId,
+                    wellName: r.wellName,
+                  });
+                }
+                return acc;
+              }, new Map<string, Omit<SoilChartSeries, "color">>())
+              .values(),
+          ).map((s, i) => ({
+            ...s,
+            color: ZONE_COLORS[i % ZONE_COLORS.length]!,
+          }));
+    const pointByKey = new Map<string, SoilChartPoint>();
+
+    for (const reading of readings) {
+      if (reading.value === null || reading.value === undefined) continue;
+      if (!reading.lastUpdatedAt) continue;
+
+      const key = makeKey(reading.lastUpdatedAt);
+      const label = formatLabel(reading.lastUpdatedAt);
+
+      let point = pointByKey.get(key);
+      if (!point) {
+        point = { label };
+        pointByKey.set(key, point);
+      }
+      point[reading.wellId] = reading.value;
+    }
+
+    const ordered = Array.from(pointByKey.entries())
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([, point]) => point);
+
+    return {
+      data: ordered,
+      series: derivedSeries,
+    };
+  }, [readings, providedSeries]);
+
   if (data.length === 0 || series.length === 0) {
     return (
       <div className="flex h-[260px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-400 sm:h-[320px]">
@@ -100,6 +169,7 @@ export function SoilMoistureChart({ data, series }: SoilMoistureChartProps) {
               dot={{ r: 3 }}
               animationDuration={1500}
               animationBegin={idx * 300}
+              connectNulls
             />
           ))}
         </LineChart>

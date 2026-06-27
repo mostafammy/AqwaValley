@@ -156,7 +156,7 @@ export function KpiCards({
       iconBg: "bg-teal-50",
       iconColor: "text-teal-500",
       extra: (
-        <div className="mt-1 text-xs" style={{ color: "var(--color-muted)" }}>
+        <div className="mt-1 text-xs" style={{ color: "black" }}>
           من {soilReadingCount} آبار نشطة
         </div>
       ),
@@ -178,7 +178,7 @@ export function KpiCards({
       extra: (
         <div
           className="mt-1 truncate text-xs font-medium"
-          style={{ color: "var(--color-muted)" }}
+          style={{ color: "black" }}
         >
           {weather?.description ?? "جاري التحميل..."}{" "}
           {weather ? `| رطوبة ${weather.humidity}%` : ""}

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { api } from "~/trpc/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { springs } from "~/lib/motion";
 
 const ROLE_LABELS: Record<string, string> = {
   GOV_ADMIN: "مسؤول حكومي",
@@ -138,18 +139,91 @@ export function Topbar({
         {showNotifications && (
           <div className="relative flex items-center">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.94 }}
               ref={bellRef}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-100/50 text-slate-600 transition-all hover:bg-slate-200"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-200"
               aria-label="عرض الإشعارات"
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              aria-expanded={isNotifOpen}
+              onClick={() => setIsNotifOpen((v) => !v)}
             >
-              <Bell className="h-4.5 w-4.5" strokeWidth={2.5} />
-              {notifCount > 0 && (
-                <span className="absolute top-2 right-2 flex h-2.5 w-2.5 animate-pulse rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50"></span>
-              )}
+              <AnimatePresence initial={false} mode="wait">
+                <motion.span
+                  key={isNotifOpen ? "open" : "closed"}
+                  initial={{ opacity: 0, scale: 0.6, rotate: isNotifOpen ? -20 : 0 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    rotate: 0,
+                    transition: springs.snappy,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.6,
+                    transition: { duration: 0.12 },
+                  }}
+                  className="flex items-center justify-center"
+                >
+                  <motion.span
+                    animate={
+                      notifCount > 0
+                        ? {
+                            rotate: [0, -14, 12, -10, 8, -4, 0],
+                            transition: {
+                              duration: 1.2,
+                              ease: "easeInOut",
+                              repeat: Infinity,
+                              repeatDelay: 4,
+                            },
+                          }
+                        : { rotate: 0 }
+                    }
+                    className="flex items-center justify-center"
+                  >
+                    <Bell
+                      className={`h-4.5 w-4.5 transition-colors ${
+                        isNotifOpen ? "text-blue-600" : "text-slate-600"
+                      }`}
+                      strokeWidth={2.5}
+                    />
+                  </motion.span>
+                </motion.span>
+              </AnimatePresence>
+
+              {/* Halo ring around the bell when open */}
+              <AnimatePresence>
+                {isNotifOpen && (
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={springs.snappy}
+                    className="absolute inset-0 rounded-full bg-blue-400/20 ring-1 ring-blue-400/40"
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Unread badge */}
+              <AnimatePresence>
+                {notifCount > 0 && (
+                  <motion.span
+                    key="badge"
+                    initial={{ opacity: 0, scale: 0.4, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.4, y: -4 }}
+                    transition={springs.bouncy}
+                    className="absolute top-1.5 right-1.5"
+                  >
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
+                      <span className="absolute inset-0 h-2.5 w-2.5 rounded-full bg-[#FF3B30] shadow-[0_0_0_2px_white] ring-1 ring-[#FF3B30]/50" />
+                    </span>
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </motion.button>
+
             <NotificationDropdown
               isOpen={isNotifOpen}
               onClose={() => setIsNotifOpen(false)}

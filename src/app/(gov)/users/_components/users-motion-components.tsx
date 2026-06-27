@@ -27,22 +27,15 @@ export function SpringModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-110 flex items-center justify-center p-4"
+          className="fixed inset-0 z-110 flex items-end justify-center bg-black/40 p-0 backdrop-blur-md sm:items-center sm:p-4"
+          onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={springs.floaty}
         >
           <motion.div
-            className="fixed inset-0 bg-black/35 backdrop-blur-md"
-            onClick={onClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
-          <motion.div
-            className={`relative w-full ${widthClass} ${ringClass}`}
-            variants={variants.modal}
+            className={`relative flex max-h-[90dvh] w-full flex-col overflow-hidden bg-white shadow-2xl sm:${widthClass} sm:rounded-panal ${ringClass}`}            variants={variants.modal}
             initial="hidden"
             animate="show"
             exit="exit"
